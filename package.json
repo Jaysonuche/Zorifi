@@ -1,0 +1,204 @@
+{
+  "name": "zorifi-video-editor",
+  "version": "3.37.0",
+  "description": "Zorifi cross-platform video editor",
+  "desktopName": "Zorifi",
+  "homepage": "https://zorifi.netlify.app",
+  "main": "electron-main.cjs",
+  "author": "Zorifi Studio",
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "build:web": "node scripts/build-web.cjs",
+    "android:sync": "npm run build:web && cap sync android",
+    "android:open": "cap open android",
+    "android:apk": "node scripts/build-android.cjs apk",
+    "android:bundle": "node scripts/build-android.cjs bundle",
+    "test:scenes": "node --test tests/zorifi-scenes.test.cjs tests/zorifi-scenes-integration.test.cjs",
+    "test:scenes-runtime": "node tests/zorifi-scenes-runtime.cjs",
+    "test:music-runtime": "node tests/zorifi-music-runtime.cjs",
+    "test:desktop-platforms": "node --test tests/zorifi-desktop-platforms.test.cjs tests/zorifi-cross-platform-beta.test.cjs",
+    "test:terms": "node --test tests/zorifi-terms.test.cjs tests/zorifi-controlled-beta.test.cjs",
+    "test:terms-runtime": "node tests/windows-terms-runtime.cjs",
+    "test:windows-runtime": "node tests/windows-runtime-smoke.cjs",
+    "start": "electron .",
+    "package:windows": "electron-packager . Zorifi --platform=win32 --arch=x64 --out=release --overwrite --icon=build/zorifi.ico --ignore=release --ignore=release-vanessa-local --ignore=Zorifi-video-editor-current.zip",
+    "package:macos": "electron-builder --mac dmg zip --x64 --arm64",
+    "package:linux": "electron-builder --linux AppImage deb --x64",
+    "package:linux:portable": "electron-builder --linux AppImage --x64",
+    "package:current": "node scripts/package-current.cjs",
+    "package:vanessa-local": "electron-packager . Zorifi --platform=win32 --arch=x64 --out=release-vanessa-local --icon=icons/icon-512.png --ignore=release --ignore=release-vanessa-local --ignore=installer-dist --ignore=Zorifi-video-editor-current.zip",
+    "installer:windows": "electron-builder --win nsis --x64"
+  },
+  "build": {
+    "appId": "com.zorifi.editor",
+    "productName": "Zorifi",
+    "asar": true,
+    "directories": {
+      "output": "installer-dist"
+    },
+    "files": [
+      "app.js",
+      "zorifi-theme.js",
+      "zorifi-support.js",
+      "zorifi-beta-program.js",
+      "zorifi-terms.js",
+      "zorifi-billing.js",
+      "zorifi-firebase.js",
+      "zorifi-stickers.js",
+      "zorifi-vanessa-identity.js",
+      "zorifi-vanessa-memory.js",
+      "zorifi-vanessa-memory-manager.js",
+      "zorifi-vanessa-memory-context.js",
+      "zorifi-vanessa-conversation-continuity.js",
+      "zorifi-vanessa-personalization.js",
+      "zorifi-vanessa-intent.js",
+      "zorifi-vanessa-response-planner.js",
+      "zorifi-vanessa-workflow.js",
+      "zorifi-vanessa-reference-analysis.js",
+      "zorifi-vanessa-visual-analysis.js",
+      "zorifi-vanessa-reference-execution.js",
+      "zorifi-vanessa-style-intelligence.js",
+      "zorifi-vanessa-content-matching.js",
+      "zorifi-vanessa-edit-planner.js",
+      "zorifi-vanessa-execution-feedback.js",
+      "zorifi-vanessa-edit-adaptation.js",
+      "zorifi-vanessa-task-orchestration.js",
+      "zorifi-vanessa-task-continuity.js",
+      "zorifi-vanessa-goal-understanding.js",
+      "zorifi-vanessa-creative-intent.js",
+      "zorifi-vanessa-capability-planner.js",
+      "zorifi-vanessa-creative-plan.js",
+      "zorifi-vanessa-creative-conversation.js",
+      "zorifi-vanessa-creative-verification.js",
+      "zorifi-vanessa-creative-pipeline.js",
+      "zorifi-vanessa-router.js",
+      "zorifi-vanessa-core.js",
+      "zorifi-project-model.js",
+      "zorifi-advanced-editing.js",
+      "zorifi-visual-tools.js",
+      "zorifi-motion-effects.js",
+      "zorifi-compute-engine.js",
+      "zorifi-ai-provider.js",
+      "zorifi-ai-platform.js",
+      "zorifi-audio-engine.js",
+      "zorifi-music-studio.js",
+      "zorifi-vanessa-actions.js",
+      "zorifi-scenes.js",
+      "zorifi-creator-platform.js",
+      "zorifi-phase8.js",
+      "zorifi-phase9.js",
+      "zorifi-phase10.js",
+      "zorifi-phase11.js",
+      "zorifi-editor-overhaul.js",
+      "styles.css",
+      "index.html",
+      "manifest.webmanifest",
+      "sw.js",
+      "electron-main.cjs",
+      "assets/**/*",
+      "icons/**/*",
+      "netlify/functions/**/*",
+      "vanessa-gpu/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/zorifi.ico",
+      "artifactName": "Zorifi-Setup-${version}.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.video",
+      "icon": "icons/icon-512.png",
+      "artifactName": "Zorifi-${version}-${arch}.${ext}",
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Zorifi uses the microphone only when you choose voice recording, voiceover, or Vanessa voice interaction.",
+        "NSCameraUsageDescription": "Zorifi uses the camera only when you choose to record or import from your camera.",
+        "NSDocumentsFolderUsageDescription": "Zorifi accesses only media and project files that you select."
+      }
+    },
+    "dmg": {
+      "title": "Zorifi ${version}",
+      "artifactName": "Zorifi-${version}-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "AudioVideo;AudioVideoEditing",
+      "icon": "icons/icon-512.png",
+      "executableName": "zorifi",
+      "syncDesktopName": true,
+      "synopsis": "AI-powered video creation and editing workspace",
+      "description": "Zorifi is a professional video editor with timeline editing, effects, audio, captions, export and the Vanessa creative assistant.",
+      "maintainer": "Zorifi Studio <zorifvideoeditor@gmail.com>",
+      "vendor": "Zorifi Studio",
+      "artifactName": "Zorifi-${version}-${arch}.${ext}"
+    },
+    "deb": {
+      "depends": [
+        "libgtk-3-0",
+        "libnotify4",
+        "libnss3",
+        "libxss1",
+        "libxtst6",
+        "xdg-utils",
+        "libatspi2.0-0",
+        "libuuid1",
+        "libsecret-1-0"
+      ],
+      "priority": "optional"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Zorifi",
+      "runAfterFinish": true
+    }
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.2",
+    "@electron/asar": "^3.4.1",
+    "@electron/packager": "^18.4.0",
+    "electron": "^37.2.6",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
+  }
+}

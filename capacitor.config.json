@@ -1,0 +1,14 @@
+{
+  "appId": "com.zorifi.editor",
+  "appName": "Zorifi",
+  "webDir": "web-dist",
+  "backgroundColor": "#090b10",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

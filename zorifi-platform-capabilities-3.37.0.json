@@ -1,0 +1,96 @@
+{
+  "version": "3.37.0",
+  "assessmentDate": "2026-09-29",
+  "statusDefinitions": {
+    "GREEN": "Verified through meaningful automated or real runtime evidence on this platform.",
+    "YELLOW": "Implemented or available, but still needs platform-specific beta validation or an external dependency.",
+    "RED": "Broken or a blocker for the stated platform beta track.",
+    "GRAY": "Not implemented for this distribution target or not sufficiently tested to claim support."
+  },
+  "platforms": [
+    {
+      "id": "windows",
+      "label": "Windows desktop",
+      "overallStatus": "GREEN",
+      "architecture": "Electron 37 x64 desktop package using the shared browser editor and a localhost provider bridge.",
+      "runtimeRequirements": ["Windows x64", "WebView capabilities bundled by Electron", "User storage for localStorage and IndexedDB"],
+      "capabilities": {"uiSupport":"GREEN","editorSupport":"GREEN","timelineSupport":"GREEN","mediaImport":"GREEN","mediaPersistence":"GREEN","projectPersistence":"GREEN","sessionPersistence":"GREEN","projectReopenContinuity":"GREEN","previewPlayback":"GREEN","effects":"GREEN","transitions":"GREEN","text":"GREEN","audio":"GREEN","undoRedo":"GREEN","export":"GREEN","vanessaConversation":"GREEN","vanessaEditing":"GREEN","vanessaReferenceWorkflow":"GREEN","support":"GREEN","permissions":"YELLOW","responsiveBehavior":"GREEN","keyboard":"GREEN","touch":"YELLOW","packagingInstallation":"GREEN","platformLimitations":"YELLOW"},
+      "evidence": ["tests/windows-beta-readiness.cjs: clean installed-app journey with real WebM, PNG and WAV", "tests/windows-runtime-smoke.cjs: packaged runtime, playback, Vanessa Steps 7-25 and valid WebM export", "installer-dist/Zorifi-Setup-3.37.0.exe and release/Zorifi-win32-x64/Zorifi.exe", "ZORIFI-BETA-READINESS-3.37.0.md"],
+      "knownLimitations": ["Provider-backed AI generation needs separately configured credentials/services.", "Physical microphone, touchscreen and OS fullscreen remain manual checks.", "MP4/4K availability depends on runtime codec and hardware support."],
+      "automatedTests": ["npm test", "npm run test:windows-runtime", "node tests/windows-beta-readiness.cjs"],
+      "manualTests": ["Native file picker and drag/drop", "Physical microphone/wake word", "Touchscreen and high-DPI", "Long-duration high-resolution soak"]
+    },
+    {
+      "id": "macos",
+      "label": "macOS desktop",
+      "overallStatus": "YELLOW",
+      "architecture": "Shared Electron 37 desktop runtime with Intel and Apple-silicon DMG/ZIP targets, macOS lifecycle handling, Keychain-backed safeStorage and signed-build entitlements.",
+      "runtimeRequirements": ["macOS build runner for DMG creation, signing and notarization", "Supported Intel or Apple-silicon Mac", "Browser media codecs bundled with Electron"],
+      "capabilities": {"uiSupport":"YELLOW","editorSupport":"YELLOW","timelineSupport":"YELLOW","mediaImport":"YELLOW","mediaPersistence":"YELLOW","projectPersistence":"YELLOW","sessionPersistence":"YELLOW","projectReopenContinuity":"YELLOW","previewPlayback":"YELLOW","effects":"YELLOW","transitions":"YELLOW","text":"YELLOW","audio":"YELLOW","undoRedo":"YELLOW","export":"YELLOW","vanessaConversation":"YELLOW","vanessaEditing":"YELLOW","vanessaReferenceWorkflow":"YELLOW","support":"YELLOW","permissions":"YELLOW","responsiveBehavior":"YELLOW","keyboard":"YELLOW","touch":"YELLOW","packagingInstallation":"YELLOW","platformLimitations":"YELLOW"},
+      "evidence": ["package.json defines x64/arm64 DMG and ZIP targets", "electron-main.cjs preserves the Darwin activate/window lifecycle and uses operating-system safeStorage", "build/entitlements.mac.plist declares camera, microphone and local-provider network entitlements", "Cross-platform packaging configuration tests pass"],
+      "knownLimitations": ["No macOS hardware/runtime session was available in the Windows development environment.", "Apple signing credentials and notarization are not configured in source code and must be supplied securely on the macOS release runner.", "Final import/playback/export, permission and keyboard validation is required on both Intel and Apple-silicon hardware."],
+      "automatedTests": ["npm test", "npm run test:desktop-platforms", "npm run package:macos on a macOS runner"],
+      "manualTests": ["Sign/notarize/install DMG", "Intel and Apple-silicon startup", "Import/playback/export codec matrix", "Keychain, camera, microphone and keyboard shortcuts"]
+    },
+    {
+      "id": "web",
+      "label": "Web/PWA",
+      "overallStatus": "YELLOW",
+      "architecture": "Static PWA build with service worker, manifest, Netlify functions and browser-local storage.",
+      "runtimeRequirements": ["HTTPS for install, microphone, camera and service worker", "Modern browser with IndexedDB, Web Audio, Canvas captureStream and MediaRecorder"],
+      "capabilities": {"uiSupport":"YELLOW","editorSupport":"YELLOW","timelineSupport":"YELLOW","mediaImport":"YELLOW","mediaPersistence":"YELLOW","projectPersistence":"YELLOW","sessionPersistence":"YELLOW","projectReopenContinuity":"YELLOW","previewPlayback":"YELLOW","effects":"YELLOW","transitions":"YELLOW","text":"YELLOW","audio":"YELLOW","undoRedo":"YELLOW","export":"YELLOW","vanessaConversation":"YELLOW","vanessaEditing":"YELLOW","vanessaReferenceWorkflow":"YELLOW","support":"YELLOW","permissions":"YELLOW","responsiveBehavior":"YELLOW","keyboard":"YELLOW","touch":"YELLOW","packagingInstallation":"YELLOW","platformLimitations":"YELLOW"},
+      "evidence": ["npm run build:web creates web-dist from the production allowlist", "manifest.webmanifest, sw.js, netlify.toml and _redirects are present", "Responsive and platform-neutral suites pass"],
+      "knownLimitations": ["No current Chrome/Edge/Safari/Firefox runtime matrix was executed.", "Storage is browser/device-local and subject to quota/eviction.", "Export formats and resolution depend on MediaRecorder codecs.", "Install UI depends on browser PWA support."],
+      "automatedTests": ["npm test", "npm run build:web"],
+      "manualTests": ["Chrome/Edge/Safari/Firefox current and previous", "PWA install/update/offline", "Quota exhaustion", "Provider and support functions on deployed HTTPS origin"]
+    },
+    {
+      "id": "iphone",
+      "label": "iPhone web/PWA",
+      "overallStatus": "YELLOW",
+      "architecture": "Purpose-built responsive mobile web UI selected by iPhone/mobile detection; no native iOS binary.",
+      "runtimeRequirements": ["Current iOS Safari or installed web app", "HTTPS", "Available browser storage and media APIs"],
+      "capabilities": {"uiSupport":"YELLOW","editorSupport":"YELLOW","timelineSupport":"YELLOW","mediaImport":"YELLOW","mediaPersistence":"YELLOW","projectPersistence":"YELLOW","sessionPersistence":"YELLOW","projectReopenContinuity":"YELLOW","previewPlayback":"YELLOW","effects":"YELLOW","transitions":"YELLOW","text":"YELLOW","audio":"YELLOW","undoRedo":"YELLOW","export":"YELLOW","vanessaConversation":"YELLOW","vanessaEditing":"YELLOW","vanessaReferenceWorkflow":"YELLOW","support":"YELLOW","permissions":"YELLOW","responsiveBehavior":"YELLOW","keyboard":"GRAY","touch":"YELLOW","packagingInstallation":"YELLOW","platformLimitations":"YELLOW"},
+      "evidence": ["app.js detects iPhone/mobile and selects mobile editor", "styles.css has safe-area, touch-first dock, tool sheets and portrait/landscape rules", "tests/zorifi-responsive-redesign.test.cjs validates mobile wiring"],
+      "knownLimitations": ["No real iPhone runtime session was executed.", "No App Store/native package.", "iOS storage eviction, backgrounding and MediaRecorder/export limitations need device validation.", "Wake-word behavior depends on browser speech/microphone policy."],
+      "automatedTests": ["Responsive source/wiring tests"],
+      "manualTests": ["Notch/Dynamic Island devices", "Portrait/landscape rotation", "Photos import", "Background/resume", "PWA install", "Export/open/share"]
+    },
+    {
+      "id": "ipad",
+      "label": "iPad web/PWA",
+      "overallStatus": "YELLOW",
+      "architecture": "Dedicated tablet mode selected by iPad/desktop-touch detection; no native iPadOS binary.",
+      "runtimeRequirements": ["Current iPadOS Safari or installed web app", "HTTPS", "Available browser storage and media APIs"],
+      "capabilities": {"uiSupport":"YELLOW","editorSupport":"YELLOW","timelineSupport":"YELLOW","mediaImport":"YELLOW","mediaPersistence":"YELLOW","projectPersistence":"YELLOW","sessionPersistence":"YELLOW","projectReopenContinuity":"YELLOW","previewPlayback":"YELLOW","effects":"YELLOW","transitions":"YELLOW","text":"YELLOW","audio":"YELLOW","undoRedo":"YELLOW","export":"YELLOW","vanessaConversation":"YELLOW","vanessaEditing":"YELLOW","vanessaReferenceWorkflow":"YELLOW","support":"YELLOW","permissions":"YELLOW","responsiveBehavior":"YELLOW","keyboard":"YELLOW","touch":"YELLOW","packagingInstallation":"YELLOW","platformLimitations":"YELLOW"},
+      "evidence": ["app.js detects iPad including MacIntel with multiple touch points", "styles.css includes tablet workspace rules", "Phase 9 and responsive suites validate tablet selectors"],
+      "knownLimitations": ["No real iPad runtime or Apple Pencil test.", "No App Store/native package.", "Hardware keyboard and drag/drop need manual verification.", "Browser storage and export have Safari-specific constraints."],
+      "automatedTests": ["Responsive source/wiring tests"],
+      "manualTests": ["Multiple iPad sizes", "Stage Manager/split view", "Apple Pencil", "Hardware keyboard", "Files/Photos import", "Export and reload"]
+    },
+    {
+      "id": "android",
+      "label": "Android web/PWA",
+      "overallStatus": "YELLOW",
+      "architecture": "Purpose-built responsive mobile web UI with PWA installation; no APK/AAB or Play Store package.",
+      "runtimeRequirements": ["Current Chrome/Edge Android", "HTTPS", "Available browser storage and media APIs"],
+      "capabilities": {"uiSupport":"YELLOW","editorSupport":"YELLOW","timelineSupport":"YELLOW","mediaImport":"YELLOW","mediaPersistence":"YELLOW","projectPersistence":"YELLOW","sessionPersistence":"YELLOW","projectReopenContinuity":"YELLOW","previewPlayback":"YELLOW","effects":"YELLOW","transitions":"YELLOW","text":"YELLOW","audio":"YELLOW","undoRedo":"YELLOW","export":"YELLOW","vanessaConversation":"YELLOW","vanessaEditing":"YELLOW","vanessaReferenceWorkflow":"YELLOW","support":"YELLOW","permissions":"YELLOW","responsiveBehavior":"YELLOW","keyboard":"GRAY","touch":"YELLOW","packagingInstallation":"YELLOW","platformLimitations":"YELLOW"},
+      "evidence": ["app.js detects Android Mobile", "styles.css has safe-area/cutout-friendly mobile rules and touch controls", "Manifest and service worker provide the PWA path", "Export fallback explicitly targets recent Chrome/Edge on Android/Windows"],
+      "knownLimitations": ["No real Android device runtime was executed.", "No native APK/AAB.", "OEM codec, memory pressure and file-picker behavior vary.", "Wake word and background processing are constrained by browser policy."],
+      "automatedTests": ["Responsive source/wiring tests", "Web build"],
+      "manualTests": ["Low/mid/high-tier devices", "Camera cutouts", "PWA install/update", "Gallery/files import", "Memory pressure", "Export/open/share"]
+    },
+    {
+      "id": "linux",
+      "label": "Linux desktop/web",
+      "overallStatus": "YELLOW",
+      "architecture": "Shared Electron 37 desktop runtime with x64 AppImage and Debian targets, browser editor, localhost provider bridge and Linux keyring-aware safeStorage.",
+      "runtimeRequirements": ["64-bit Linux with GTK 3 and Electron runtime dependencies", "GNOME Keyring/libsecret or KWallet for provider credential storage", "FUSE support for direct AppImage launch or AppImage extraction fallback"],
+      "capabilities": {"uiSupport":"YELLOW","editorSupport":"YELLOW","timelineSupport":"YELLOW","mediaImport":"YELLOW","mediaPersistence":"YELLOW","projectPersistence":"YELLOW","sessionPersistence":"YELLOW","projectReopenContinuity":"YELLOW","previewPlayback":"YELLOW","effects":"YELLOW","transitions":"YELLOW","text":"YELLOW","audio":"YELLOW","undoRedo":"YELLOW","export":"YELLOW","vanessaConversation":"YELLOW","vanessaEditing":"YELLOW","vanessaReferenceWorkflow":"YELLOW","support":"YELLOW","permissions":"YELLOW","responsiveBehavior":"YELLOW","keyboard":"YELLOW","touch":"YELLOW","packagingInstallation":"YELLOW","platformLimitations":"YELLOW"},
+      "evidence": ["package.json defines x64 AppImage and deb targets", "electron-main.cjs rejects Electron basic_text credential storage and accepts supported Linux keyrings", "Linux target declares GTK, NSS, X11 helper, accessibility, UUID and libsecret dependencies", "Cross-platform packaging configuration tests pass"],
+      "knownLimitations": ["No Linux desktop session was available in the Windows development environment, so Wayland/X11 runtime behavior remains unverified.", "The Debian package targets Debian/Ubuntu-compatible distributions; other distributions should use AppImage.", "Final codec, sandbox, keyring, file picker, playback and export validation is required on real Linux systems."],
+      "automatedTests": ["npm test", "npm run test:desktop-platforms", "npm run package:linux"],
+      "manualTests": ["AppImage and deb install/launch", "GNOME and KDE keyrings", "Wayland and X11", "Import/playback/export", "Keyboard and permissions"]
+    }
+  ]
+}

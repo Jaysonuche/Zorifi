@@ -1,0 +1,5 @@
+# Local Netlify folder
+.netlify
+.android-tools/
+android/local.properties
+android-dist/
