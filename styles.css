@@ -1743,3 +1743,22 @@ main.app-shell[data-view="editor"] { height:100vh;height:100dvh;width:100%;min-w
     position:absolute;inset:0;width:auto;height:auto;max-height:none;border-radius:0;
   }
 }
+
+/* Separate edit and music project pages in the home library. */
+.project-workspace-tabs{display:flex;gap:6px;width:max-content;max-width:100%;padding:5px;margin:1px 0 12px;border:1px solid rgba(156,135,199,.22);border-radius:14px;background:rgba(16,18,31,.8)}
+.project-workspace-tabs button{display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 17px;border:0;border-radius:10px;background:transparent;color:#aab0c2;font:inherit;font-size:11px;font-weight:750;white-space:nowrap;cursor:pointer;transition:background .18s,color .18s,box-shadow .18s}
+.project-workspace-tabs button:hover,.project-workspace-tabs button:focus-visible{color:#fff;background:rgba(139,92,246,.18)}
+.project-workspace-tabs button.active{color:#fff;background:linear-gradient(110deg,#7148da,#b536aa);box-shadow:0 6px 18px rgba(99,57,177,.3)}
+.project-workspace-tabs button span{display:grid;place-items:center;min-width:21px;height:21px;padding:0 6px;border-radius:7px;background:rgba(255,255,255,.12);font-size:10px}
+.project-thumb.music{background:radial-gradient(circle at 72% 36%,rgba(255,126,198,.32),transparent 31%),repeating-linear-gradient(90deg,transparent 0 22px,rgba(232,167,255,.15) 23px 29px,transparent 30px 38px),linear-gradient(140deg,#231a50,#673186 65%,#a73b77)}
+.project-thumb.music::before{content:'♫';position:absolute;z-index:1;left:50%;top:50%;display:grid;place-items:center;width:74px;height:74px;border:1px solid rgba(255,255,255,.25);border-radius:22px;background:rgba(20,13,46,.54);color:#fff;font-size:42px;box-shadow:0 15px 35px rgba(14,8,39,.3);transform:translate(-50%,-50%)}
+.project-thumb.music::after{z-index:0}
+.project-grid>.library-empty{grid-column:1/-1}
+.library-create-btn{min-height:40px;margin-top:9px;padding:0 16px;border:1px solid #a383fa;border-radius:10px;background:#6e46ce;color:#fff;font:inherit;font-size:11px;font-weight:750;cursor:pointer}
+.library-create-btn:hover,.library-create-btn:focus-visible{background:#875ced}
+:root[data-theme="light"] .project-workspace-tabs{border-color:#dcd3ea;background:#fff}
+:root[data-theme="light"] .project-workspace-tabs button{color:#5e5473}
+:root[data-theme="light"] .project-workspace-tabs button:hover,:root[data-theme="light"] .project-workspace-tabs button:focus-visible{color:#5933ab;background:#eee7fb}
+:root[data-theme="light"] .project-workspace-tabs button.active{color:#fff}
+:root[data-theme="light"] .project-workspace-tabs button.active:hover,:root[data-theme="light"] .project-workspace-tabs button.active:focus-visible{color:#fff;background:linear-gradient(110deg,#7148da,#b536aa)}
+@media(max-width:760px){.project-workspace-tabs{width:100%}.project-workspace-tabs button{flex:1;min-width:0;padding:0 10px;font-size:10px}}
