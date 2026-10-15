@@ -1,8 +1,10 @@
-# Zorifi Phase 7 — Final Live-AI Verification
+# Zorifi Phase 7 — Historical Live-AI Verification
 
 Verified on 12 September 2026 against Zorifi 2.7.0.
 
-## Final live-AI status
+> **Archived test record:** The `BLOCKED` labels below describe this specific 2.7.0 Windows-package test, when no provider credentials were available. They are **not** the status of the current Zorifi app or its Vercel deployment. Current builds may use different providers, including Gemini for chat, images and music. Check the current deployment's `/api/ai-settings` endpoint for configuration, then run a real request to verify each capability; `configured: true` alone does not prove generation works.
+
+## Status in the 12 September 2026 test
 
 `LIVE` is used only after a real provider returns genuinely generated media. No provider credentials were available during this verification, so no capability is marked live.
 
@@ -14,7 +16,7 @@ Verified on 12 September 2026 against Zorifi 2.7.0.
 | Voice | BLOCKED | ElevenLabs | `eleven_multilingual_v2` | NO |
 | Language AI | BLOCKED | OpenAI Responses | `gpt-5-nano` | NO |
 
-## Why the providers are blocked
+## Why providers were blocked in that test
 
 - Image needs an OpenAI image API key.
 - Video needs either a Vanessa GPU URL and access key, or an xAI API key.
@@ -22,7 +24,7 @@ Verified on 12 September 2026 against Zorifi 2.7.0.
 - Voice needs an ElevenLabs API key and voice ID.
 - Language AI needs an OpenAI language API key.
 
-Configure these inside the installed app at **AI Video Creation → Settings → AI providers**. Save each provider and select **Test connection**. Credentials are encrypted using Electron/Windows `safeStorage`; the settings API returns only public configuration state and never returns saved secrets.
+For that version of the installed app, providers were configured at **AI Video Creation → Settings → AI providers**. Credentials were encrypted using Electron/Windows `safeStorage`; the settings API returned only public configuration state and never returned saved secrets. Current web deployments use server environment variables instead of that Windows-app settings screen.
 
 ## Verified results
 
