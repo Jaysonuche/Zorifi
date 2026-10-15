@@ -1,4 +1,4 @@
-(function(global,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else global.ZorifiPhase8=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
+(function(global,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else {global.ZorifiPhase8=api;global.ZorifiAutoCaptionsEngine=api.ZorifiAutoCaptionsEngine;global.ZorifiCaptionEditorBridge=api.ZorifiCaptionEditorBridge;}})(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const PHOTO_PRESETS=Object.freeze([1,2,3,5,8,10,15,30]);
   const AUDIO_EXTENSIONS=new Set(['mp3','wav','m4a','aac','ogg','oga','opus','webm','flac','mp4']);
@@ -39,5 +39,125 @@
     for(let startSample=0;startSample<total;startSample+=perChunk){const endSample=Math.min(total,startSample+perChunk);chunks.push({index:chunks.length,startSample,endSample,offset:startSample/rate,duration:(endSample-startSample)/rate});}
     return chunks;
   }
-  return {PHOTO_PRESETS,AUDIO_EXTENSIONS,VISUAL_EXTENSIONS,frameTime,snapTimelineTime,mediaKind,trimClip,setPhotoDuration,validateImport,normalizeCaption,normalizeCaptions,editCaption,splitCaption,mergeCaptions,effectCover,animationCover,virtualWindow,captionChunkPlan};
+  class ZorifiAutoCaptionsEngine{
+    constructor({transcribe=null}={}){
+      this.transcribe=transcribe;this.captions=[];this.requestId=0;
+      this.settings={source:'playing',language:'en',animationStyle:'kinetic-pop',maxCharsPerLine:42,fontName:'Inter',fontSize:24,fontColor:'#FFFFFF',backgroundColor:'rgba(0, 0, 0, 0.6)'};
+    }
+    normalizeSegments(segments){
+      if(!Array.isArray(segments))throw new TypeError('Transcription must contain caption segments.');
+      const ids=new Set();return segments.map((segment,index)=>{
+        const start=Number(segment?.start),end=Number(segment?.end),text=String(segment?.text||'').replace(/\s+/g,' ').trim();
+        if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start||!text)throw new Error(`Caption ${index+1} has invalid text or timing.`);
+        let id=String(segment.id||`caption-${index}`);while(ids.has(id))id+='-copy';ids.add(id);
+        const words=(Array.isArray(segment.words)?segment.words:[]).filter(word=>Number.isFinite(Number(word.start))&&Number.isFinite(Number(word.end))&&Number(word.end)>Number(word.start)&&Number(word.end)>start&&Number(word.start)<end&&String(word.text||'').trim()).map(word=>({text:String(word.text).trim(),start:Math.max(start,Number(word.start)),end:Math.min(end,Number(word.end))}));
+        return {id,start,end,text,words};
+      }).sort((a,b)=>a.start-b.start||a.end-b.end);
+    }
+    async generateCaptions(audio,options={}){
+      if(typeof this.transcribe!=='function')throw new Error('Configure a real speech transcription transport first.');
+      if(!audio||!(audio.size>0||audio.length>0&&typeof audio.getChannelData==='function'))throw new TypeError('Provide actual audio media, not only its duration.');
+      const {signal,...settings}=options,requestId=++this.requestId;
+      if(signal?.aborted)throw signal.reason||new Error('Transcription cancelled.');
+      const nextSettings={...this.settings,...settings};
+      const data=await this.transcribe(audio,{...nextSettings,signal});
+      if(signal?.aborted)throw signal.reason||new Error('Transcription cancelled.');
+      if(requestId!==this.requestId)throw new Error('A newer transcription request replaced this one.');
+      const captions=this.normalizeSegments(data?.captions);
+      if(!captions.length)throw new Error('No speech captions were returned.');
+      this.settings=nextSettings;this.captions=captions;return captions;
+    }
+    updateCaptionText(id,newText){
+      const target=this.captions.find(c=>c.id===id);if(!target)return false;
+      const text=String(newText||'').replace(/\s+/g,' ').trim();if(!text)throw new Error('Caption text cannot be empty.');
+      target.text=text;target.words=[];return true;
+    }
+    updateCaptionTiming(id,start,end){
+      const target=this.captions.find(c=>c.id===id);if(!target)return false;
+      start=Number(start);end=Number(end);
+      if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start)throw new Error('Caption end must be later than its nonnegative start.');
+      const oldStart=target.start,scale=(end-start)/(target.end-oldStart);
+      target.words=(target.words||[]).map(word=>({...word,start:start+(word.start-oldStart)*scale,end:start+(word.end-oldStart)*scale}));
+      target.start=start;target.end=end;this.captions.sort((a,b)=>a.start-b.start);return true;
+    }
+    _formatTimestampSRT(seconds){
+      if(!Number.isFinite(Number(seconds))||Number(seconds)<0)throw new Error('Invalid subtitle timestamp.');
+      const ms=Math.round(Number(seconds)*1000),pad=(value,width=2)=>String(value).padStart(width,'0');
+      return `${pad(Math.floor(ms/3600000))}:${pad(Math.floor(ms/60000)%60)}:${pad(Math.floor(ms/1000)%60)},${pad(ms%1000,3)}`;
+    }
+    wrapText(text){
+      const width=Math.round(Number(this.settings.maxCharsPerLine));if(!Number.isFinite(width)||width<1||width>200)throw new Error('Caption line length must be between 1 and 200.');
+      const lines=[];let line='';for(const word of String(text).split(/\s+/)){
+        if(line&&Array.from(line+' '+word).length>width){lines.push(line);line='';}
+        const chars=Array.from(word);while(chars.length>width){if(line){lines.push(line);line='';}lines.push(chars.splice(0,width).join(''));}
+        if(chars.length)line+=(line?' ':'')+chars.join('');
+      }if(line)lines.push(line);return lines.join('\n');
+    }
+    exportToSRT(){
+      return this.normalizeSegments(this.captions).map((cap,index)=>{
+        const start=Math.round(cap.start*1000)/1000,end=Math.max(Math.round(cap.end*1000),Math.round(cap.start*1000)+1)/1000;
+        return `${index+1}\n${this._formatTimestampSRT(start)} --> ${this._formatTimestampSRT(end)}\n${this.wrapText(cap.text)}`;
+      }).join('\n\n');
+    }
+    applyToTimeline(editorState){
+      if(!Array.isArray(editorState?.clips))throw new TypeError('An editor with clips is required.');
+      const captions=this.normalizeSegments(this.captions);if(!captions.length)return editorState;
+      const textTracks=editorState.clips.filter(c=>c.type==='text').map(c=>Number(c.track)),track=textTracks.length?Math.max(199,...textTracks)+1:2;
+      if(track>=300)throw new Error('No text track is available.');
+      const style={'kinetic-pop':'word-caption',fade:'shadow',highlight:'karaoke'}[this.settings.animationStyle];if(!style)throw new Error('Unsupported caption animation.');
+      const stamp=`${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const clips=captions.map((cap,index)=>({id:`caption-clip-${stamp}-${index}`,name:this.wrapText(cap.text),start:cap.start,duration:cap.end-cap.start,type:'text',track,opacity:100,volume:100,playbackRate:1,fontId:'modern',fontFamily:this.settings.fontName,fontSize:clamp(this.settings.fontSize,8,180),fontWeight:700,color:this.settings.fontColor,background:this.settings.backgroundColor,align:'center',bottom:10,style,autoCaption:true,captionLanguage:this.settings.language,captionWords:cap.words,keyframes:this.settings.animationStyle==='fade'?{opacity:[{time:cap.start,value:0,easing:'linear'},{time:cap.start+Math.min(.2,(cap.end-cap.start)/4),value:100,easing:'linear'},{time:cap.end-Math.min(.2,(cap.end-cap.start)/4),value:100,easing:'linear'},{time:cap.end,value:0,easing:'linear'}]}:{}}));
+      editorState.clips=[...editorState.clips,...clips];editorState.duration=Math.max(Number(editorState.duration)||0,...clips.map(c=>c.start+c.duration));return editorState;
+    }
+  }
+  class ZorifiCaptionEditorBridge{
+    constructor(editorState,captionEngine,{fetchMedia=(url,options)=>fetch(url,options),beforeApply=()=>{}}={}){
+      this.state=editorState;this.captionEngine=captionEngine;this.fetchMedia=fetchMedia;this.beforeApply=beforeApply;this.source=null;this.requestId=0;
+    }
+    sourceSnapshot(clip){return JSON.stringify([this.state.projectId,clip.id,clip.mediaId,clip.type,clip.start,clip.duration,clip.sourceStart||0,clip.playbackRate||1]);}
+    assertSource(){
+      const clip=this.state.clips.find(c=>c.id===this.source?.clipId),asset=this.state.mediaAssets.find(a=>a.id===clip?.mediaId);
+      if(!clip||!asset||this.sourceSnapshot(clip)!==this.source.snapshot||asset.url!==this.source.url||asset.file!==this.source.file)throw new Error('The source clip or project changed. Generate captions again.');
+      return clip;
+    }
+    async generateForSelectedClip(selectedClipId,{signal}={}){
+      const clip=this.state.clips.find(c=>c.id===selectedClipId);
+      if(!clip||!['audio','video'].includes(clip.type))throw new Error('Select an audio or video clip for captions.');
+      const asset=this.state.mediaAssets.find(a=>a.id===clip.mediaId);if(!asset)throw new Error('Associated media asset was not found.');
+      const requestId=++this.requestId;this.source=null;
+      const source={clipId:clip.id,snapshot:this.sourceSnapshot(clip),url:asset.url,file:asset.file};
+      let audio=asset.file;
+      if(!audio?.size){if(!asset.url)throw new Error('Restore the source audio before transcribing.');const response=await this.fetchMedia(asset.url,{signal});if(!response.ok)throw new Error('The source media could not be read.');audio=await response.blob();}
+      if(!audio?.size)throw new Error('The source media is empty.');
+      const captions=await this.captionEngine.generateCaptions(audio,{language:this.state.captionSettings?.language||'en',signal});
+      if(requestId!==this.requestId)throw new Error('A newer caption request replaced this one.');
+      this.source=source;this.assertSource();return captions;
+    }
+    applyCaptionsToEditingTimeline(captionsList,styleTemplate='kinetic-pop'){
+      if(!Array.isArray(captionsList))throw new TypeError('Captions must be an array.');if(!captionsList.length)return this.state;
+      const clip=this.assertSource(),start=Number(clip.start),duration=Number(clip.duration),sourceStart=Number(clip.sourceStart||0),rate=Number(clip.playbackRate||1);
+      if(![start,duration,sourceStart,rate].every(Number.isFinite)||start<0||sourceStart<0||duration<=0||rate<=0)throw new Error('The source clip has invalid timing.');
+      const end=sourceStart+duration*rate,removeFillers=Boolean(this.state.captionSettings?.removeFillers),filler=/\b(?:um+|uh+|erm+|hmm+)\b[,.]?\s*/gi;
+      const segments=this.captionEngine.normalizeSegments(captionsList).filter(cap=>cap.end>sourceStart&&cap.start<end).map(cap=>{
+        const from=Math.max(sourceStart,cap.start),to=Math.min(end,cap.end),text=removeFillers?cap.text.replace(filler,'').trim():cap.text;
+        return {...cap,text,start:start+(from-sourceStart)/rate,end:start+(to-sourceStart)/rate,words:cap.words.filter(word=>word.end>from&&word.start<to&&(!removeFillers||word.text.replace(filler,'').trim())).map(word=>({...word,start:start+(Math.max(from,word.start)-sourceStart)/rate,end:start+(Math.min(to,word.end)-sourceStart)/rate}))};
+      }).filter(cap=>cap.text);
+      if(!segments.length)throw new Error('No speech captions remain in this clip after trimming and text cleanup.');
+      const engine=new ZorifiAutoCaptionsEngine();engine.settings={...this.captionEngine.settings};
+      const styles={clean:'fade',bold:'kinetic-pop',minimal:'fade',karaoke:'highlight','kinetic-pop':'kinetic-pop',fade:'fade',highlight:'highlight'};
+      if(!styles[styleTemplate])throw new Error('Unsupported caption template.');engine.settings.animationStyle=styles[styleTemplate];
+      if(['clean','bold','minimal','karaoke'].includes(styleTemplate))Object.assign(engine.settings,{fontName:'Arial, sans-serif',fontSize:styleTemplate==='bold'?34:styleTemplate==='minimal'?22:28,backgroundColor:styleTemplate==='minimal'?'rgba(0,0,0,.56)':'transparent'});
+      engine.captions=segments;
+      const kept=this.state.clips.filter(c=>!((c.autoCaption||c.isAutoCaption)&&c.autoCaptionSourceId===clip.id&&!c.translatedFromId)),draft={clips:[...kept],duration:this.state.duration};engine.applyToTimeline(draft);
+      const additions=draft.clips.slice(kept.length);for(const caption of additions){caption.autoCaptionSourceId=clip.id;caption.fontWeight=['bold','karaoke'].includes(styleTemplate)?900:700;if(['clean','minimal'].includes(styleTemplate))caption.keyframes={};if(styleTemplate==='bold')caption.style='social';}
+      this.beforeApply();this.state.clips=draft.clips;this.state.duration=draft.duration;this.state.selected=additions.at(-1).id;this.state.hasCaptions=false;return this.state;
+    }
+    exportTimelineCaptionsToSRT({track,originalsOnly=false}={}){
+      const engine=new ZorifiAutoCaptionsEngine();engine.settings={...this.captionEngine.settings};
+      engine.captions=this.state.clips.filter(c=>c.type==='text'&&(c.autoCaption||c.isAutoCaption)&&(track===undefined||c.track===track)&&(!originalsOnly||!c.translatedFromId)).map(c=>({id:c.id,start:c.start,end:Number(c.start)+Number(c.duration),text:c.autoCaption?c.name:c.textStyle?.content||c.name}));
+      return engine.exportToSRT();
+    }
+    _toSrtTime(seconds){return this.captionEngine._formatTimestampSRT(seconds);}
+  }
+  return {ZorifiCaptionEditorBridge,ZorifiAutoCaptionsEngine,PHOTO_PRESETS,AUDIO_EXTENSIONS,VISUAL_EXTENSIONS,frameTime,snapTimelineTime,mediaKind,trimClip,setPhotoDuration,validateImport,normalizeCaption,normalizeCaptions,editCaption,splitCaption,mergeCaptions,effectCover,animationCover,virtualWindow,captionChunkPlan};
 });

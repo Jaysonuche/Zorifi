@@ -9,30 +9,65 @@
   };
 
   const clamp=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
-  function cubicBezierProgress(progress,curve=[.42,0,.58,1]){
-    const p=clamp(progress,0,1),[x1,y1,x2,y2]=curve.map(value=>clamp(value,0,1));let low=0,high=1,t=p;
-    const sample=(a,b,t)=>3*(1-t)*(1-t)*t*a+3*(1-t)*t*t*b+t*t*t;
-    for(let index=0;index<12;index++){t=(low+high)/2;if(sample(x1,x2,t)<p)low=t;else high=t;}
-    return sample(y1,y2,t);
+  class ZorifiEasingCurves{
+    static evaluate(progress,easingType='easeInOutCubic',customParams={}){
+      if(!Number.isFinite(Number(progress)))throw new TypeError('Progress must be finite.');
+      const p=Math.max(0,Math.min(1,Number(progress)));
+      switch(easingType){
+        case 'hold':return p===1?1:0;
+        case 'ease-in':case 'easeInQuad':return p*p;
+        case 'ease-out':case 'easeOutQuad':return p*(2-p);
+        case 'ease-in-out':case 'easeInOutQuad':return p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+        case 'easeInOutCubic':return p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+        case 'easeOutBounce':case 'bounce':return this.bounce(p);
+        case 'easeInBounce':return 1-this.bounce(1-p);
+        case 'easeInOutBounce':return p<.5?(1-this.bounce(1-2*p))/2:(1+this.bounce(2*p-1))/2;
+        case 'bezier':case 'custom':{
+          const values=Array.isArray(customParams)?customParams:[customParams?.x1,customParams?.y1,customParams?.x2,customParams?.y2];
+          return this._cubicBezier(p,...[.42,0,.58,1].map((value,index)=>values[index]??value));
+        }
+        default:return p;
+      }
+    }
+    static bounce(p){
+      const n=7.5625,d=2.75;
+      if(p<1/d)return n*p*p;
+      if(p<2/d){p-=1.5/d;return n*p*p+.75;}
+      if(p<2.5/d){p-=2.25/d;return n*p*p+.9375;}
+      p-=2.625/d;return n*p*p+.984375;
+    }
+    static _cubicBezier(progress,x1,y1,x2,y2){
+      if(![progress,x1,y1,x2,y2].every(value=>Number.isFinite(Number(value))))throw new TypeError('Bezier controls must be finite.');
+      x1=Number(x1);x2=Number(x2);y1=Number(y1);y2=Number(y2);
+      if(x1<0||x1>1||x2<0||x2>1)throw new RangeError('Bezier X controls must be between 0 and 1.');
+      const p=Math.max(0,Math.min(1,Number(progress)));if(p===0||p===1)return p;
+      const sample=(a,b,t)=>3*(1-t)*(1-t)*t*a+3*(1-t)*t*t*b+t*t*t;
+      // Invert x(t) before sampling y(t); control-point X values change timing.
+      let low=0,high=1,t=p;for(let i=0;i<40;i++){t=(low+high)/2;if(sample(x1,x2,t)<p)low=t;else high=t;}
+      return sample(y1,y2,t);
+    }
+    static interpolateKeyframes(keyframes,currentTime,defaultEasing='easeInOutCubic'){
+      if(!Number.isFinite(Number(currentTime)))throw new TypeError('Keyframe time must be finite.');
+      if(!keyframes?.length)return 0;
+      if(!Array.isArray(keyframes))throw new TypeError('Keyframes must be an array.');
+      const unique=new Map();for(const frame of keyframes){
+        if(!frame||!Number.isFinite(Number(frame.time))||!Number.isFinite(Number(frame.value)))throw new TypeError('Keyframe times and values must be finite.');
+        unique.set(Number(frame.time),{...frame,time:Number(frame.time),value:Number(frame.value)});
+      }
+      const frames=[...unique.values()].sort((a,b)=>a.time-b.time),time=Number(currentTime);
+      if(time<=frames[0].time)return frames[0].value;if(time>=frames.at(-1).time)return frames.at(-1).value;
+      const index=frames.findIndex(frame=>frame.time>=time),before=frames[index-1],after=frames[index];
+      if(time===after.time)return after.value;
+      const p=this.evaluate((time-before.time)/(after.time-before.time),before.easing||defaultEasing,before.bezier);
+      return before.value+(after.value-before.value)*p;
+    }
   }
-  function easedProgress(progress,easing='ease-in-out',bezier){
-    const p=clamp(progress,0,1);
-    if(easing==='bezier'||easing==='custom')return cubicBezierProgress(p,bezier);
-    if(easing==='hold')return 0;
-    if(easing==='linear')return p;
-    if(easing==='ease-in')return p*p;
-    if(easing==='ease-out')return 1-(1-p)*(1-p);
-    return p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
-  }
-
+  function cubicBezierProgress(progress,curve){return ZorifiEasingCurves.evaluate(progress,'bezier',curve);}
+  function easedProgress(progress,easing='ease-in-out',bezier){return ZorifiEasingCurves.evaluate(progress,easing,bezier);}
   function keyframedValue(clip,property,time,fallback=0){
-    const frames=[...(clip?.keyframes?.[property]||[])].sort((a,b)=>a.time-b.time);
+    const frames=clip?.keyframes?.[property]||[];
     if(!frames.length)return basePropertyValue(clip,property,fallback);
-    if(time<=frames[0].time)return Number(frames[0].value);
-    if(time>=frames.at(-1).time)return Number(frames.at(-1).value);
-    const afterIndex=frames.findIndex(frame=>frame.time>=time),before=frames[afterIndex-1],after=frames[afterIndex];
-    const progress=easedProgress((time-before.time)/Math.max(.001,after.time-before.time),before.easing||clip.keyframeEasing||'ease-in-out',before.bezier);
-    return Number(before.value)+(Number(after.value)-Number(before.value))*progress;
+    return ZorifiEasingCurves.interpolateKeyframes(frames,time,clip.keyframeEasing||'ease-in-out');
   }
 
   function basePropertyValue(clip,property,fallback=0){
@@ -172,5 +207,6 @@
     };
   }
 
-  global.ZorifiAdvancedEditing={RAMP_PRESETS,easedProgress,cubicBezierProgress,basePropertyValue,keyframedValue,upsertKeyframe,removeKeyframeAt,keyframeAt,keyframeTimes,adjacentKeyframeTime,moveKeyframesAt,snapTime,copyKeyframes,pasteKeyframes,deleteSelectedKeyframes,moveSelectedKeyframes,sourceTiming,transitionState,chromaPixel,applyChromaToImageData,estimateFrameTranslation,trackingKeyframes};
+  global.ZorifiEasingCurves=ZorifiEasingCurves;
+  global.ZorifiAdvancedEditing={ZorifiEasingCurves,RAMP_PRESETS,easedProgress,cubicBezierProgress,basePropertyValue,keyframedValue,upsertKeyframe,removeKeyframeAt,keyframeAt,keyframeTimes,adjacentKeyframeTime,moveKeyframesAt,snapTime,copyKeyframes,pasteKeyframes,deleteSelectedKeyframes,moveSelectedKeyframes,sourceTiming,transitionState,chromaPixel,applyChromaToImageData,estimateFrameTranslation,trackingKeyframes};
 })(typeof window!=='undefined'?window:globalThis);

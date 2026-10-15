@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Zorifi</string>
+    <string name="title_activity_main">Zorifi</string>
+    <string name="package_name">com.zorifi.editor</string>
+    <string name="custom_url_scheme">com.zorifi.editor</string>
+</resources>

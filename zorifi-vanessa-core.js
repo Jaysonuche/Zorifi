@@ -9,8 +9,8 @@
 
   function text(value,max=4000){return String(value||'').trim().slice(0,max);}
   function cleanResult(value,fallback='I’m listening.'){
-    if(typeof value==='string')return {text:text(value)||fallback};
-    if(value&&typeof value==='object')return {...value,text:text(value.text)||fallback};
+    if(typeof value==='string')return {text:text(value,100000)||fallback};
+    if(value&&typeof value==='object')return {...value,text:text(value.text,100000)||fallback};
     return {text:fallback};
   }
 
@@ -80,10 +80,15 @@
       const contextHistory=this.context.prepare(message,request.history),contextRequest={...request,history:contextHistory,contextHistory};
       const payload=this.router.conversationPayload(message,contextRequest);
       if(this.isOnline()&&typeof this.transport==='function'){
+        let failure,status=0;
         try{
           const remote=await this.transport(payload,request);
+          if(remote?.error?.kind==='cancelled')return {status:STATUS.FAILED,text:'Request cancelled.',provider:'cancelled'};
           if(remote?.ok&&text(remote.data?.text)){const result=cleanResult(remote.data);this.context.commit(message,result.text);return {...result,status:STATUS.SUCCESS,provider:remote.data?.metadata?.provider||'configured',contextTurns:contextHistory.length};}
-        }catch(error){this.onInternalError(error);}
+          failure=remote?.error||{kind:'service',code:'INVALID_PROVIDER_RESPONSE',message:'No complete answer was returned.'};status=remote?.status||0;
+        }catch(error){this.onInternalError(error);failure=this.router.internalError(error);}
+        if(failure?.kind==='cancelled')return {status:STATUS.FAILED,text:'Request cancelled.',provider:'cancelled'};
+        return {status:STATUS.FAILED,text:this.router.conversationErrorMessage(failure,status),provider:'unavailable',error:{...failure,status},contextTurns:contextHistory.length};
       }
       const local=cleanResult(await this.fallback(message,contextRequest));this.context.commit(message,local.text);
       return {...local,status:STATUS.FALLBACK,provider:'offline',contextTurns:contextHistory.length};

@@ -1,0 +1,11 @@
+{
+  "buildCommand": "node scripts/build-web.cjs",
+  "outputDirectory": "web-dist",
+  "functions": {"api/vanessa-provider.js": {"includeFiles": "{netlify/functions/**,zorifi-vanessa-identity.js}", "maxDuration": 120}, "api/ai-settings.js": {"includeFiles": "{netlify/functions/**,zorifi-vanessa-identity.js}"}},
+  "routes": [
+    {"src": "/.netlify/functions/([a-z-]+)", "dest": "/api/vanessa-provider?service=$1"},
+    {"handle": "filesystem"},
+    {"src": "/api/.*", "status": 404},
+    {"src": "/.*", "dest": "/index.html"}
+  ]
+}

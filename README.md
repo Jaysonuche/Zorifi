@@ -1,5 +1,36 @@
 # Zorifi
 
+## Project entry points
+
+```text
+Zorifi/
+├── index.html                    # Loads the editor and its engines in order
+├── styles.css                    # Desktop, tablet and mobile layouts
+├── app.js                        # Existing editor UI and project state
+├── zorifi-master-app.js           # Single window.ZorifiMasterApp facade
+├── ZorifiVanessaStudioCore.js     # Public gateway, director and planner exports
+├── ZorifiVanessaTrueAudioAI.js    # Compatibility export for local audio DSP
+├── ZorifiAutoCaptions.js          # Caption engine and timeline bridge exports
+├── ZorifiMulticamSyncEngine.js    # Worker-backed alignment export
+├── api/vanessa-provider.js       # Vercel server-side gateway
+├── netlify/functions/            # Shared backend service implementations
+├── tests/                       # Unit and browser integration checks
+└── flutter_mobile/              # Separate Flutter companion
+```
+
+Keep `app.js` lowercase: `App.js` would collide with it on Windows. The four
+capitalized module files are public ES-module adapters to the implementations
+already loaded by `index.html`; they do not boot a second editor. Import them
+after the editor scripts have loaded. Call `window.ZorifiMasterApp` for operations
+on the current project, including cleanup, captions, multicam and Vanessa chat.
+The existing lowercase engine files remain the implementation sources.
+
+The audio compatibility name does not imply AI isolation or reverb removal:
+it provides local filtering and WAV encoding. Caption generation needs a real
+transcription provider; keys stay in private server-side environment variables.
+
+See [CHANGELOG.md](CHANGELOG.md) for the recovered project changes, Flutter additions, privacy controls, verification results and deployment status.
+
 A polished, dependency-free browser video editor with on-device project rendering.
 
 Zorifi is an Electron desktop application for Windows, macOS and Linux, a native Android package, and an installable Progressive Web App for Android, iOS/iPadOS and modern desktop browsers. It includes a responsive touch layout and offline app-shell startup.
@@ -8,15 +39,18 @@ The installed app detects its platform automatically. Mobile installations use t
 
 ## Run locally
 
-Serve this directory with any static file server, for example:
+Install Node.js and pnpm, then use the restored development server:
 
 ```powershell
-python -m http.server 4173
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-Then open `http://localhost:4173`.
+Then open `http://127.0.0.1:4173`. Run `pnpm start` for the desktop app. See [REBUILD.md](REBUILD.md) for the recovery status, provider configuration, and checks that were actually run. Historical release and test claims elsewhere in this repository are not verification of this rebuilt copy.
 
 ## Install on devices
+
+The new [Flutter mobile companion](flutter_mobile/README.md) lives alongside the existing editor. It supports local imports, selected-media preview, saved trim/volume edits, backups and optional Vanessa chat. Its native video rendering and desktop project synchronization are not yet implemented. Both apps now provide privacy choices, metadata export and local erasure; see [PRIVACY.md](PRIVACY.md) for implementation details and operational requirements.
 
 - **Android APK:** Install `android-dist/Zorifi-debug.apk` for device testing. Android may ask you to allow installation from the app that opens the file.
 - **Android PWA:** Open the hosted app in Chrome and choose **Install app** or **Add to Home screen**.
@@ -228,3 +262,66 @@ Version 3.29.0 uses asset cache v161. The phone editor now has a dedicated touch
 ## Vanessa Phase 2 — Step 15
 
 Version 3.30.0 uses asset cache v162. Vanessa now records structured edit outcomes, verifies approved Step 14 actions against safe before/after editor state, identifies partial completion, blocks duplicate successful operations, classifies failures and offers confirmation-gated recovery through existing editor adapters. Normal conversation remains independent of project state. See [VANESSA-PHASE-2-STEP-15-REPORT.md](VANESSA-PHASE-2-STEP-15-REPORT.md) for the implementation and verification report.
+
+## Local customer dashboard (CRM v1)
+
+Run `npm run dev`, then open [Customers](http://127.0.0.1:4173/crm.html). Unlock with `CRM_ADMIN_KEY` from the private local `.env` file. This workspace has a generated key; on another machine, set a new random key of at least 32 characters. Restart the server after changing it. The dashboard forgets the key on reload, lock, or 15 minutes of inactivity.
+
+Includes customer search, reported subscription labels, internal notes, dated follow-ups, support case status and deletion-request tracking. Import copies only profile names/emails and case summaries from this browser's Zorifi storage on the same origin; repeated imports do not duplicate cases or overwrite their CRM status. It does not discover all cloud customers.
+
+Records persist in `.zorifi-private/customers.json`, excluded from Git and public static serving. Keep private backups of that folder. This is local file storage, not encrypted storage or a multi-server database. Run only one development server against a given record folder. Writes use revision checks and atomic file replacement. The audit records operations, but a shared administrator key cannot identify individual administrators.
+
+Subscription labels do not change billing or grant access. Deletion statuses are tracking only: actually erasing customer data in other systems requires a separate process. CRM case changes are independent of the editor's support records. This version runs on the local development server; it is not deployed to Vercel, available in the packaged desktop app, or connected to cloud billing/customer records.
+
+Verify with `node --test tests/crm.test.cjs` and `node tests/crm-browser.cjs`.
+
+### Gemini language gateway
+
+Set server-only `GEMINI_API_KEY` and optional `GEMINI_MODEL` (default `gemini-3.8-flash`). Set `GEMINI_FALLBACK_MODEL=gemini-3.5-flash-lite` to retry a transient primary-model service failure on another Gemini model before showing an error. Fallback happens only before any visible response text; interrupted responses are never joined to a second model's output. A configured Gemini key takes precedence over OpenRouter/OpenAI for language requests. The shared backend uses the official @google/genai SDK for streaming chat and structured planning. Text chat and JSON scene/editor planning are supported; Gemini image analysis, web research and audio transcription are not enabled by this adapter.
+
+`POST /api/vanessa-provider` accepts `{prompt, editorContext}` and returns `{text, reply}`. Existing `?service=...` routes keep their response formats and hosted Firebase authentication. Provider errors are sanitized. Configure the same variables in Vercel and redeploy to enable hosted use; local `.env` changes alone do not deploy anything. Restart `npm run dev` after changing credentials.
+
+The Windows desktop app uses the signed-in account to send Vanessa language requests through Zorifi's fixed Vercel gateway when no local language provider is configured. It loads only the public Firebase web configuration from the site; the Gemini key stays on the server. After upgrading an older desktop or installed web app that had only a local session, log out and sign back in once to establish a Firebase session. If the online request fails, Vanessa now shows the connection or sign-in problem instead of presenting a canned reply as an AI answer.
+
+### Gemini image and music generation
+
+The existing AI Image and AI Music prompt screens, Vanessa chat actions, and Music Studio now call Gemini through the server-side gateway when `GEMINI_API_KEY` is set. Image creation and reference variation use `GEMINI_IMAGE_MODEL` (default `gemini-nano-banana-2.1`) and return a real 1K image. Music uses `GEMINI_MUSIC_MODEL` (currently `lyria-3-clip-preview`) to return one 30-second MP3. Completed files can be saved into Project Media and placed on the editable timeline. Provider tests check that the key can list the model; they do not prove generation or billing access.
+
+Google offers no API free tier for these image and music generation models. Each generation can incur a charge, and the Google project must have paid-tier access. Hosted Gemini media generation is limited to verified UIDs in `ZORIFI_ADMIN_UIDS` until per-user billing limits are in place. Zorifi keeps the key on the server, never sends it to browser code, and reports access, quota, or missing-media failures without fabricating results. The current Lyria route does not produce separated stems, a WAV file, or an exact user-selected duration. The Vercel function payload limit also bounds media returned directly to the browser; files larger than 3 MB are rejected with a clear error. Configure `GEMINI_API_KEY` in local `.env` and Vercel Production separately, then redeploy for hosted use. See Google's [image generation](https://ai.google.dev/gemini-api/docs/image-generation), [music generation](https://ai.google.dev/gemini-api/docs/music-generation), and [pricing](https://ai.google.dev/gemini-api/docs/pricing) documentation.
+
+### Vanessa streaming
+
+Text chat and writing requests opt into SSE with `stream: true` or `Accept: text/event-stream` on the conversation gateway. Gemini uses `generateContentStream`; each `data: {"text":"..."}` event is a text delta, followed by `data: [DONE]` only after a complete provider result. Stream failures emit a sanitized error event without a completion marker. Other providers retain JSON chat through the unsupported-stream fallback. Structured timeline/action plans remain JSON and execute only after existing validation.
+
+The browser shows an escaped temporary response while receiving, saves the completed answer once, and supports Stop. A truncated response is marked interrupted rather than saved as completed. Local, Electron source and Vercel adapters relay chunks without buffering. Hosted requests require Firebase authentication; the loopback development preview uses its same-origin local gateway and does not require a Firebase cloud token. Optional-AI consent remains required.
+
+### Replicate Wan video tool
+
+Vanessa exposes the native Gemini function declaration `generate_ai_video` through `vanessa-video-tool`. Explicit chat requests such as “Generate a 5-second video of ocean waves” propose validated parameters, then start a job through `vanessa-motion`. Scripts, advice and existing-clip edits stay on their existing routes. The chat displays the finished video only after Replicate reports success.
+
+Set `REPLICATE_API_TOKEN` in the server environment (local .env and Vercel Production), then redeploy. Keep it out of browser configuration. A Gemini key is also required for tool planning. No Replicate credential is bundled. The hosted identifier is `wan-video/wan-2.1-1.3b`, corresponding to the Wan 2.1 T2V 1.3B family; `Wan-AI/Wan2.1-T2V-1.3B-Diffusers` is the Hugging Face identifier, not a Replicate API endpoint.
+
+Supported inputs: text prompt, integer duration 1–5 seconds, 16:9 or 9:16, silent 480p output. Frames are duration × 16 + 1. Unsupported sizes, audio and image inputs are rejected. Replicate is a paid service requiring account credit. Provider output links are temporary; save completed videos promptly. The chat preview does not automatically import footage into a project. Jobs are not resumed automatically after page reload.
+
+All hosted calls require Firebase authentication. Poll/cancel requests carry a signed, expiring job ticket tied to the verified Firebase UID. Neither arbitrary prediction IDs nor client-supplied callback URLs are accepted. Token rotation invalidates outstanding job tickets. Tests use mocked provider calls; no paid render is part of the test suite.
+
+References: https://replicate.com/wan-video/wan-2.1-1.3b/api/schema and https://replicate.com/docs/topics/predictions/create-a-prediction
+
+### Firebase token refresh
+
+The REST-based FirebaseGateway refreshes through Google's Secure Token endpoint one minute before expiry, coalesces concurrent refresh requests, and retries authenticated requests at most once after HTTP 401. Streaming response bodies remain untouched on success. The app initializes the manager at startup and rechecks tokens when the tab becomes visible or the browser comes online.
+
+Hosted Firebase credentials are kept in memory and localStorage scoped by project, so the cloud session survives browser restarts and can refresh across tabs. Existing sessionStorage credentials are migrated once. Logout removes the cloud session; revoked refresh credentials return the user to the sign-in screen, while transient network errors retain the session for a later retry. Do not put provider API keys in browser storage.
+
+The hosted site treats the Firebase UID as the online identity. A remembered device profile without a matching cloud session now shows a reconnect screen before Vanessa can be used. Email/password sign-in can create the local profile on a new browser; projects and media still remain on the device where they were made. A legacy email or phone-only profile can be linked when the user creates an online account with the same local password. Hosted sign-in requires email because Firebase phone authentication is not configured.
+
+After a successful refresh, the console prints `[Zorifi Auth] Firebase ID token refreshed successfully.` It does not print tokens, and an unsigned-in startup does not falsely report a refresh.
+
+This project uses `scripts/build-web.cjs`, not Vite or Next.js. The four public `FIREBASE_*` values are explicitly injected into hosted builds through `window.__ZORIFI_FIREBASE_CONFIG__`. The local preview serves its own same-origin API without that hosted Firebase configuration. Keep those existing names; `import.meta.env` and framework prefixes are not used. Gemini, Replicate and administrator settings remain server-only.
+
+### Local video execution fallback
+The video handler returns HTTP 200 with status `local_required` when the Replicate token is missing or a new render receives HTTP 402 (insufficient credit). Set server-only `VANESSA_VIDEO_EXECUTION_MODE=local` to request this mode explicitly. Existing configured GPU/xAI routing remains available unless local mode is selected. Authentication and video parameter validation still apply.
+
+The `localExecution` JSON contains the Wan Diffusers model ID, prompt, frame count, dimensions and frame rate. Vanessa displays this payload without polling or claiming a completed render. This is a handoff only: no local runner is installed or launched, and Vercel cannot execute a GPU job on your laptop. A compatible local GPU, model weights and Python/PyTorch/Diffusers setup are required. Provider authentication errors, rate limits and ambiguous network failures do not trigger fallback, to avoid hiding errors or duplicating a potentially running job.
+
+`ZORIFI_LOCAL_VIDEO_FALLBACK=true` also forces the local execution handoff, even when a cloud token is present. This flag is server-only.

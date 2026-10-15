@@ -1,0 +1,11 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+test('Gemini supports chat/context, JSON planning, metadata and sanitized failures',async()=>{
+ const old=global.fetch,oldEnv=global.Netlify;global.Netlify={env:{get:k=>({GEMINI_API_KEY:'private-gemini-test',GEMINI_MODEL:'gemini-2.5-flash',AI_PROVIDER_KEY:'other-provider'}[k]||'')}};let payload;
+ try{const p=await import('../netlify/functions/_shared/provider.mjs'),s=await import('../netlify/functions/_shared/services.mjs');assert.equal(p.configuration().language.provider,'Gemini');
+ global.fetch=async(url,options)=>{assert.equal(url,'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent');assert.equal(new Headers(options.headers).get('x-goog-api-key'),'private-gemini-test');payload=JSON.parse(options.body);return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{thought:true,text:'Hidden reasoning'},{text:payload.generationConfig.responseMimeType?'{"actions":[],"reply":"Ready"}':'Hello'}]}}]});};
+ const r=await s.conversation(new Request('http://localhost/api/test',{method:'POST',body:JSON.stringify({prompt:'Hello',editorContext:{clips:[]}})}));assert.deepEqual(await r.json(),{reply:'Hello',text:'Hello'});assert.deepEqual(JSON.parse(payload.contents[0].parts[0].text).context,{clips:[]});assert(payload.systemInstruction.parts[0].text.includes('Vanessa'));
+ assert.deepEqual(await p.language('Plan',{jsonMode:true}),{actions:[],reply:'Ready'});assert.equal(payload.generationConfig.responseMimeType,'application/json');
+ for(const data of [{candidates:[{finishReason:'MAX_TOKENS',content:{parts:[{text:'partial'}]}}]},{promptFeedback:{blockReason:'SAFETY'}},{candidates:[{finishReason:'STOP',content:{parts:[{text:'not JSON'}]}}]}]){global.fetch=async()=>Response.json(data);await assert.rejects(p.language('Test',{jsonMode:true}),e=>e.status===502);}
+ global.fetch=async()=>Response.json({error:{message:'private-gemini-test'}},{status:403});await assert.rejects(p.language('Test'),e=>e.status===502&&!e.message.includes('private-gemini-test'));await assert.rejects(p.language('Test',{webSearch:true}),e=>e.code==='UNSUPPORTED_CAPABILITY');
+ }finally{global.fetch=old;global.Netlify=oldEnv;}
+});

@@ -3,3 +3,24 @@
 .android-tools/
 android/local.properties
 android-dist/
+
+# Dependencies, generated builds, local credentials, and test artifacts
+node_modules/
+web-dist/
+release/
+release-vanessa-local/
+installer-dist/
+artifacts/
+.env
+.env.*
+!.env.example
+*.log
+.flutter-tools/
+
+# Private local customer records
+.zorifi-private/
+
+.vercel/
+
+.vercel
+.env*.local

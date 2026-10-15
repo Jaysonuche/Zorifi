@@ -1,7 +1,7 @@
 (function(global){
   'use strict';
 
-  const DIRECTIONS=['cinematic','energetic','creative'];
+  const DIRECTIONS=['cinematic','energetic','creative','commercial'];
   const PACING=['slow','medium','fast','dynamic','experimental'];
   const OPERATION_TYPES=['set_scene_duration','move_scene','remove_scene','set_direction','set_scene_pacing','open_captions'];
   const clamp=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||min));
@@ -24,13 +24,14 @@
   }
 
   function sceneBlueprint(direction,count){
+    if(direction==='commercial')return ['Problem Setup','Product Reveal','Key Benefits','Call to Action'].map(purpose=>({purpose,pacing:'medium'}));
     if(direction==='energetic')return Array.from({length:Math.max(4,count+2)},(_,index)=>({purpose:index===0?'Immediate hook':index===Math.max(4,count+2)-1?'Final hit':index%3===0?'Peak moment':'Rapid highlight',pacing:'fast'}));
     if(direction==='creative')return Array.from({length:Math.max(4,count+1)},(_,index)=>({purpose:index===0?'Unexpected opening':index===Math.max(4,count+1)-1?'Alternative ending':index%2?'Visual contrast':'Creative reveal',pacing:index%2?'experimental':'dynamic'}));
     return [{purpose:'Introduction',pacing:'slow'},{purpose:'Story development',pacing:'medium'},{purpose:'Main memories',pacing:'medium'},{purpose:'Emotional highlight',pacing:'medium'},{purpose:'Ending',pacing:'slow'}].slice(0,Math.max(3,Math.min(5,count+1)));
   }
 
   function createScenePlan(input){
-    const prompt=clean(input?.prompt,800),direction=DIRECTIONS.includes(input?.direction)?input.direction:'cinematic',media=analyseMedia(input?.media);
+    const prompt=clean(input?.prompt,800),direction=DIRECTIONS.includes(input?.direction)?input.direction:'cinematic',media=analyseMedia(input?.media||input?.mediaItems);
     if(!prompt)throw new Error('Describe what you want Vanessa to create.');if(!media.length)throw new Error('Select at least one supported image or video file.');
     const visuals=media.filter(item=>item.type!=='audio'),audio=media.filter(item=>item.type==='audio');if(!visuals.length)throw new Error('Add a photo or video for the visual scenes. Audio can be added as the soundtrack.');const brief=inferBrief(prompt,direction),blueprint=sceneBlueprint(direction,visuals.length),availableDuration=visuals.reduce((sum,item)=>sum+(item.type==='image'?5:item.duration),0)||20;
     const base=direction==='energetic'?Math.max(.65,Math.min(2.2,availableDuration/blueprint.length)):direction==='creative'?Math.max(1.2,Math.min(4,availableDuration/blueprint.length)):Math.max(1.8,Math.min(5.5,availableDuration/blueprint.length));
@@ -47,15 +48,15 @@
     if(!plan||typeof plan!=='object'||!Array.isArray(plan.scenes))throw new Error('Vanessa returned an invalid Scene Plan.');
     const mediaIds=new Set(capabilities.mediaIds||plan.mediaIds||[]),transitions=new Set(['none',...(capabilities.transitions||[])]),effects=new Set(capabilities.effects||[]);
     const scenes=plan.scenes.slice(0,40).map((scene,index)=>{
-      if(!scene||typeof scene!=='object')throw new Error(`Scene ${index+1} is invalid.`);const sceneMedia=unique((scene.mediaIds||[]).map(value=>clean(value,100))).filter(value=>mediaIds.has(value));if(!sceneMedia.length)throw new Error(`Scene ${index+1} does not reference available media.`);
+      if(!scene||typeof scene!=='object')throw new Error(`Scene ${index+1} is invalid.`);const sceneMedia=unique((scene.mediaIds||[scene.mediaId]).map(value=>clean(value,100))).filter(value=>mediaIds.has(value));if(!sceneMedia.length)throw new Error(`Scene ${index+1} does not reference available media.`);
       const transition=clean(scene.transition||'none',80),sceneEffects=unique((scene.effects||[]).map(value=>clean(value,80))).filter(value=>!effects.size||effects.has(value));
-      return {id:clean(scene.id,100)||id('scene'),purpose:clean(scene.purpose||`Scene ${index+1}`,100),mediaIds:sceneMedia,duration:clamp(scene.duration,.25,120),pacing:PACING.includes(scene.pacing)?scene.pacing:'medium',transition:transitions.has(transition)?transition:'none',text:clean(scene.text,180),effects:sceneEffects,audio:{mediaId:mediaIds.has(scene.audio?.mediaId)?scene.audio.mediaId:null,placement:['start','continue','none'].includes(scene.audio?.placement)?scene.audio.placement:'none',level:clamp(scene.audio?.level||42,0,200)},notes:clean(scene.notes,300)};
+      return {id:clean(scene.id,100)||id('scene'),purpose:clean(scene.purpose||scene.title||`Scene ${index+1}`,100),mediaIds:sceneMedia,duration:clamp(scene.duration,.25,120),pacing:PACING.includes(scene.pacing)?scene.pacing:'medium',transition:transitions.has(transition)?transition:'none',text:clean(scene.text,180),effects:sceneEffects,audio:{mediaId:mediaIds.has(scene.audio?.mediaId)?scene.audio.mediaId:null,placement:['start','continue','none'].includes(scene.audio?.placement)?scene.audio.placement:'none',level:clamp(scene.audio?.level||42,0,200)},notes:clean(scene.notes||scene.description,300)};
     });
     if(!scenes.length)throw new Error('The Scene Plan must contain at least one scene.');
     const briefSource=plan.brief&&typeof plan.brief==='object'?plan.brief:{};
     const brief={videoType:clean(briefSource.videoType,80),mood:clean(briefSource.mood,120),style:clean(briefSource.style,80),pacing:clean(briefSource.pacing,80),story:clean(briefSource.story,220)};
     const referenced=unique(scenes.flatMap(scene=>scene.mediaIds).concat(scenes.map(scene=>scene.audio?.mediaId))).filter(value=>mediaIds.has(value));
-    return {version:1,id:clean(plan.id,100)||id('plan'),title:clean(plan.title||'Zorifi Scenes project',70),description:clean(plan.description,240),prompt:clean(plan.prompt,800),direction:DIRECTIONS.includes(plan.direction)?plan.direction:'cinematic',brief,mediaIds:referenced,createdAt:/^\d{4}-\d{2}-\d{2}T/.test(String(plan.createdAt||''))?String(plan.createdAt):new Date().toISOString(),scenes};
+    return {version:1,id:clean(plan.id,100)||id('plan'),title:clean(plan.title||'Zorifi Scenes project',70),description:clean(plan.description,240),prompt:clean(plan.prompt,800),direction:DIRECTIONS.includes(plan.direction)?plan.direction:'cinematic',brief,mediaIds:referenced,totalDuration:scenes.reduce((sum,scene)=>sum+scene.duration,0),status:'ready',createdAt:/^\d{4}-\d{2}-\d{2}T/.test(String(plan.createdAt||''))?String(plan.createdAt):new Date().toISOString(),scenes};
   }
 
   function remixPlan(plan,direction,capabilities){return createScenePlan({prompt:plan.prompt,direction:DIRECTIONS.includes(direction)?direction:'cinematic',media:(capabilities.media||[]).filter(item=>plan.mediaIds.includes(item.id)),transitions:capabilities.transitions,effects:capabilities.effects});}
@@ -91,5 +92,34 @@
     return validateScenePlan(copy,capabilities);
   }
 
-  global.ZorifiScenes=Object.freeze({directions:[...DIRECTIONS],analyseMedia,createScenePlan,validateScenePlan,remixPlan,planToOperations,validateEditingOperations,commandToOperation,applyPlanOperation});
+  class ZorifiScenePlanner{
+    constructor(){this.currentPlan=null;}
+    createScenePlan(input){this.currentPlan=createScenePlan(input);return this.currentPlan;}
+    validateScenePlan(plan,capabilities={}){return validateScenePlan(plan,capabilities);}
+    applyToTimeline(state,plan){
+      if(!state||!Array.isArray(state.clips)||!Array.isArray(state.mediaAssets))throw new Error('A project with clips and media assets is required.');
+      const assets=new Map(state.mediaAssets.map(asset=>[asset.id,asset]));
+      if(!plan?.scenes?.every(scene=>Number.isFinite(Number(scene.duration))&&Number(scene.duration)>0))throw new Error('Every scene needs a positive finite duration.');
+      const valid=validateScenePlan(plan,{mediaIds:[...assets.keys()]});
+      // Prepare everything before changing state. Never replace missing media with unrelated footage.
+      const additions=[];let cursor=state.clips.reduce((end,clip)=>Math.max(end,(Number(clip.start)||0)+(Number(clip.duration)||0)),0);
+      const offset=cursor;
+      for(const scene of valid.scenes){
+        for(const [layer,mediaId] of scene.mediaIds.entries()){
+          const asset=assets.get(mediaId);if(!['video','image'].includes(asset.type))throw new Error('Visual scenes require image or video media.');
+          if(asset.type==='video'&&(!Number.isFinite(Number(asset.duration))||Number(asset.duration)<=0))throw new Error('Video duration metadata is required.');
+          if(asset.type==='video'&&scene.duration>Number(asset.duration))throw new Error('Trim the scene duration to fit its source video.');
+          additions.push({id:id('scene-clip'),mediaId,type:asset.type,name:scene.purpose,start:cursor,duration:scene.duration,sourceStart:0,track:layer?layer+3:0,opacity:100,volume:asset.type==='video'?100:0,playbackRate:1,scale:100,positionX:0,positionY:0,rotation:0,fit:'cover',sceneGenerated:true,sceneId:scene.id,transition:scene.transition==='none'?null:scene.transition});
+        }
+        if(scene.text)additions.push({id:id('scene-text'),type:'text',name:scene.text,start:cursor,duration:scene.duration,track:2,opacity:100,fontFamily:'Arial, sans-serif',fontSize:30,fontWeight:700,color:'#ffffff',align:'center',bottom:12,sceneGenerated:true,sceneId:scene.id});
+        scene.effects.forEach((effectId,index)=>additions.push({id:id('scene-effect'),type:'effect',effectId,name:effectId,start:cursor,duration:scene.duration,track:index?299+index:3,strength:48,opacity:100,sceneGenerated:true,sceneId:scene.id}));
+        cursor+=scene.duration;
+      }
+      const audioId=valid.scenes.map(scene=>scene.audio.mediaId).find(Boolean);
+      if(audioId){const asset=assets.get(audioId);if(asset.type!=='audio'||!Number.isFinite(Number(asset.duration))||Number(asset.duration)<=0)throw new Error('Soundtrack needs valid audio duration metadata.');additions.push({id:id('scene-audio'),type:'audio',mediaId:audioId,name:asset.name||'Scene audio',start:offset,duration:Math.min(valid.totalDuration,Number(asset.duration)),sourceStart:0,track:1,volume:valid.scenes[0].audio.level,opacity:100,playbackRate:1,sceneGenerated:true,sceneId:'scene-audio'});}
+      state.clips=[...state.clips,...additions];state.scenePlan=valid;state.duration=Math.max(Number(state.duration)||0,cursor);this.currentPlan=valid;return state;
+    }
+  }
+  global.ZorifiScenePlanner=ZorifiScenePlanner;
+  global.ZorifiScenes=Object.freeze({ZorifiScenePlanner,directions:[...DIRECTIONS],analyseMedia,createScenePlan,validateScenePlan,remixPlan,planToOperations,validateEditingOperations,commandToOperation,applyPlanOperation});
 })(window);

@@ -1,0 +1,9 @@
+const {chromium}=require('playwright');const assert=require('node:assert/strict');const path=require('node:path');
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});try{const page=await browser.newPage();await page.addScriptTag({path:path.resolve(__dirname,'../zorifi-audio-engine.js')});const result=await page.evaluate(async()=>{
+ const engine=new ZorifiAudioCleanupEngine(),ctx=new OfflineAudioContext(2,48000,48000),buffer=ctx.createBuffer(2,48000,48000);
+ for(let i=0;i<48000;i++){buffer.getChannelData(0)[i]=.03*Math.sin(2*Math.PI*30*i/48000);buffer.getChannelData(1)[i]=.03*Math.sin(2*Math.PI*1000*i/48000);}
+ const before=buffer.getChannelData(0).slice(),out=await engine.enhanceDialogueTrack(buffer),rms=(b,c)=>{let n=0;for(let i=12000;i<40000;i++)n+=b.getChannelData(c)[i]**2;return Math.sqrt(n/28000);};
+ const failures=[];for(const [b,options] of [[null,{}],[buffer,{strength:'fake'}]]){try{await engine.enhanceDialogueTrack(b,options);}catch(e){failures.push(e.message);}}
+ const clip={};ZorifiAudioEngine.applyPreset(clip,'studioDialogue');
+ return {rumble:rms(out,0)/rms(buffer,0),voice:rms(out,1)/rms(buffer,1),channels:out.numberOfChannels,length:out.length,rate:out.sampleRate,unchanged:before.every((v,i)=>v===buffer.getChannelData(0)[i]),failures,preset:clip.audioEffects.compressor.ratio};
+});assert(result.rumble<.2,JSON.stringify(result));assert(result.voice>.8);assert.equal(result.channels,2);assert.equal(result.length,48000);assert.equal(result.rate,48000);assert(result.unchanged);assert.equal(result.failures.length,2);assert.equal(result.preset,8);console.log('Dialogue cleanup passed: actual offline stereo rendering, rumble attenuation, speech-band retention, unchanged source, input validation and preset.');}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1});

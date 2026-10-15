@@ -32,9 +32,13 @@
     return 'LOW';
   }
   function supportIntent(text=''){
-    const value=clean(text,1000).toLowerCase();
-    if(/^(?:how do i|can you|please)\s+(?:edit|add|remove|make|split|trim|export)\b/.test(value))return false;
-    return /\b(?:help|support|report|complaint|problem|issue|bug|human|person|agent|keeps? (?:freezing|crashing)|not working|failed to export|charged)\b/.test(value);
+    const value=clean(text,3000).toLowerCase();
+    // General requests for help, writing, people or problem-solving belong in chat.
+    const explicit=/\b(?:contact support|(?:need|want|get) (?:customer|technical|human) support|human help|(?:contact|reach) (?:a )?support agent|talk to (?:a )?(?:person|human)|speak to (?:a )?(?:person|human)|file (?:a )?(?:bug|report|complaint)|report (?:a |an |this )?(?:bug|issue|problem)|escalate (?:this|my|the)|request (?:a )?refund)\b/;
+    if(explicit.test(value)||/^(?:customer|technical|human) support[.!?]?$/.test(value))return true;
+    const appContext=/\b(?:zorifi|vanessa|editor|timeline|playback|preview|export|import|upload|account|login|sign[ -]?in|subscription|payment|billing|project|captions?|audio)\b/;
+    const failure=/\b(?:not working|doesn.t work|won.t|can.t|cannot|unable to|failed|fails|error|broken|crash(?:es|ing)?|freez(?:es|ing)|frozen|missing|charged|refund|bug)\b/;
+    return appContext.test(value)&&failure.test(value);
   }
   function supportGuidance(category,text=''){
     const value=clean(text,1200).toLowerCase();
