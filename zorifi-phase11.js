@@ -19,8 +19,33 @@
     triptych:[{x:-33.33,y:0,w:33.34,h:100},{x:0,y:0,w:33.34,h:100},{x:33.33,y:0,w:33.34,h:100}],
     grid:[{x:-25,y:-25,w:50,h:50},{x:25,y:-25,w:50,h:50},{x:-25,y:25,w:50,h:50},{x:25,y:25,w:50,h:50}]
   };
-  function collageLayout(id,count){const source=COLLAGE_LAYOUTS[id]||COLLAGE_LAYOUTS.grid;if(count<2||count>4)throw new Error('A collage needs between two and four media items.');if(source.length<count)return collageLayout('grid',count);return source.slice(0,count).map((cell,index)=>({...cell,index}));}
-  function collageClips(assets,{layout='grid',start=0,duration=5,firstTrack=0,spacing=1,rounding=0,background='#080910'}={}){if(!Array.isArray(assets))throw new Error('Choose collage media.');const cells=collageLayout(layout,assets.length),gap=clamp(spacing,0,12);return cells.map((cell,index)=>({id:`collage-${Date.now()}-${index}`,mediaId:assets[index].id,type:'video',name:`Collage · ${assets[index].name}`,start:Math.max(0,Number(start)||0),duration:Math.max(.1,Number(duration)||5),track:firstTrack+index,opacity:100,volume:0,playbackRate:1,fit:'cover',scale:Math.max(5,Math.min(cell.w,cell.h))-gap,scaleX:Math.max(5,cell.w-gap),scaleY:Math.max(5,cell.h-gap),positionX:cell.x,positionY:cell.y,rotation:0,cropTop:0,cropRight:0,cropBottom:0,cropLeft:0,cornerRadius:clamp(rounding,0,50),collage:{layout,index,spacing:gap,background}}));}
+  function collageAspectRatio(value){if(Number.isFinite(Number(value))&&Number(value)>0)return Number(value);const match=String(value||'16:9').match(/^\s*(\d+(?:\.\d+)?)\s*[:/]\s*(\d+(?:\.\d+)?)\s*$/);return match&&Number(match[2])>0?Number(match[1])/Number(match[2]):16/9;}
+  function collageLayout(id,count,{aspectRatio='16:9'}={}){
+    if(!Number.isInteger(count)||count<2||count>4)throw new Error('A collage needs between two and four media items.');
+    const portrait=collageAspectRatio(aspectRatio)<1;
+    let cells=COLLAGE_LAYOUTS[id]||COLLAGE_LAYOUTS.grid;
+    // A partial four-cell grid leaves a large blank area. Choose a full-frame
+    // composition for the actual number of imported photos or videos instead.
+    if(cells.length!==count){
+      if(count===2)cells=portrait?COLLAGE_LAYOUTS.stack:COLLAGE_LAYOUTS.split;
+      else if(count===3)cells=portrait?
+        [{x:0,y:-25,w:100,h:50},{x:-25,y:25,w:50,h:50},{x:25,y:25,w:50,h:50}]:
+        COLLAGE_LAYOUTS.focus;
+      else cells=COLLAGE_LAYOUTS.grid;
+    }
+    return cells.map((cell,index)=>({...cell,index}));
+  }
+  function collageClips(assets,{layout='grid',start=0,duration=5,firstTrack=0,spacing=1,rounding=0,background='#080910',aspectRatio='16:9'}={}){
+    if(!Array.isArray(assets))throw new Error('Choose collage media.');
+    const cells=collageLayout(layout,assets.length,{aspectRatio}),gap=clamp(spacing,0,12),radius=clamp(rounding,0,50),startTime=Math.max(0,Number(start)||0),length=Math.max(.1,Number(duration)||5);
+    const ids=new Set();
+    for(const asset of assets){if(!asset?.id||!['image','video'].includes(asset.type)||ids.has(asset.id))throw new Error('Choose two to four distinct photos or videos.');ids.add(asset.id);}
+    const groupId=`collage-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+    return cells.map((cell,index)=>{
+      const tile={left:50+cell.x-cell.w/2+gap/2,top:50+cell.y-cell.h/2+gap/2,width:cell.w-gap,height:cell.h-gap};
+      return {id:`${groupId}-${index}`,mediaId:assets[index].id,type:'video',name:`Collage · ${assets[index].name||`Tile ${index+1}`}`,start:startTime,duration:length,track:firstTrack+index,opacity:100,volume:0,playbackRate:1,fit:'cover',scale:100,scaleX:100,scaleY:100,positionX:0,positionY:0,rotation:0,cropTop:0,cropRight:0,cropBottom:0,cropLeft:0,cornerRadius:radius,collage:{id:groupId,layout,index,spacing:gap,background,cell:tile}};
+    });
+  }
   function borderColor(data,width,height){let r=0,g=0,b=0,count=0;const sample=(x,y)=>{const offset=(y*width+x)*4;r+=data[offset];g+=data[offset+1];b+=data[offset+2];count++;};for(let x=0;x<width;x+=Math.max(1,Math.floor(width/120))){sample(x,0);sample(x,height-1);}for(let y=1;y<height-1;y+=Math.max(1,Math.floor(height/120))){sample(0,y);sample(width-1,y);}return [r/count,g/count,b/count];}
   function removeImageBackground(imageData,{threshold=34,feather=28,backgroundColor}={}){if(!imageData?.data||!imageData.width||!imageData.height)throw new Error('Readable image pixels are required.');const output=new Uint8ClampedArray(imageData.data),bg=borderColor(output,imageData.width,imageData.height),cut=Math.max(1,Number(threshold)||34),soft=Math.max(1,Number(feather)||28),replacement=/^#[0-9a-f]{6}$/i.test(backgroundColor||'')?[parseInt(backgroundColor.slice(1,3),16),parseInt(backgroundColor.slice(3,5),16),parseInt(backgroundColor.slice(5,7),16)]:null;for(let index=0;index<output.length;index+=4){const distance=Math.sqrt((output[index]-bg[0])**2+(output[index+1]-bg[1])**2+(output[index+2]-bg[2])**2),alpha=clamp((distance-cut)/soft,0,1);if(replacement){output[index]=output[index]*alpha+replacement[0]*(1-alpha);output[index+1]=output[index+1]*alpha+replacement[1]*(1-alpha);output[index+2]=output[index+2]*alpha+replacement[2]*(1-alpha);output[index+3]=255;}else output[index+3]=Math.round(output[index+3]*alpha);}return {data:output,width:imageData.width,height:imageData.height,background:bg.map(Math.round)};}
   function kineticWords(text,{start=0,duration=3,mode='word',emphasis=[]}={}){const units=mode==='character'?[...String(text)]:String(text).trim().split(/\s+/),step=Math.max(.02,Number(duration)||3)/Math.max(1,units.length),important=new Set(emphasis.map(value=>String(value).toLowerCase()));return units.map((unit,index)=>({text:unit,index,start:Number(start)+index*step,end:Number(start)+(index+1)*step,emphasis:important.has(unit.toLowerCase().replace(/[^\p{L}\p{N}]/gu,'')),scale:important.has(unit.toLowerCase().replace(/[^\p{L}\p{N}]/gu,''))?125:100,effect:important.has(unit.toLowerCase().replace(/[^\p{L}\p{N}]/gu,''))?'glow':'none'}));}
