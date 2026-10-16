@@ -168,9 +168,14 @@
       const represented=new Set(chosen.map(item=>item.mediaId));
       options.sort((a,b)=>{
         const rank=item=>item.quality+.17*(represented.has(item.mediaId)?0:1)-.08*(chosen.at(-1)?.mediaId===item.mediaId?1:0)+.03*(item.sourceStart/Math.max(1,source[item.assetIndex].duration));
-        return rank(b)-rank(a)||a.assetIndex-b.assetIndex||a.sourceStart-b.sourceStart;
+        return Number(represented.has(a.mediaId))-Number(represented.has(b.mediaId))||rank(b)-rank(a)||a.assetIndex-b.assetIndex||a.sourceStart-b.sourceStart;
       });
-      const pick=options[0];used.add(pick);chosen.push({...pick,duration:round(Math.min(pick.duration,remaining))});remaining-=pick.duration;
+      // Reserve room for other selected sources before spending the duration
+      // budget on one still or long shot. A short montage should still be a montage.
+      const pick=options[0],unseen=new Set(options.filter(item=>item.mediaId!==pick.mediaId&&!represented.has(item.mediaId)).map(item=>item.mediaId));
+      const reserved=Math.min(unseen.size,Math.max(0,Math.floor(remaining/style.min)-1))*style.min;
+      const length=round(Math.min(pick.duration,remaining-reserved));
+      used.add(pick);chosen.push({...pick,duration:length});remaining-=length;
     }
     // Preserve temporal progression within each source while interleaving related media.
     chosen.sort((a,b)=>(a.sourceStart/source[a.assetIndex].duration)-(b.sourceStart/source[b.assetIndex].duration)||a.assetIndex-b.assetIndex);

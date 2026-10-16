@@ -100,6 +100,14 @@ test('Image-only edits use the full assigned still durations without duplicate s
   assert(!sequence.warnings.some(message=>message.includes('distinct source intervals')));
 });
 
+test('Short montages reserve time for each selected source instead of using only one photo',()=>{
+  const sources=Array.from({length:3},(_,index)=>({mediaId:`photo-${index}`,name:`Photo ${index}`,type:'image',duration:5,cuts:[],frameSamples:[{time:0,score:index===0?.95:.3,difference:0}]}));
+  const plan=AutoCut.planEdit(sources,{targetDuration:4});
+  assert.equal(plan.duration,4);
+  assert.equal(new Set(plan.clips.map(clip=>clip.mediaId)).size,3);
+  assert(plan.clips.every(clip=>clip.duration>=1&&clip.sourceStart===0));
+});
+
 test('Cancelling pending video metadata releases the decoder immediately',async()=>{
   const video={paused:0,unloaded:0,src:'',pause(){this.paused++;},removeAttribute(name){if(name==='src')this.src='';},load(){this.unloaded++;}};
   const sandbox={module:{exports:{}},document:{createElement(type){assert.equal(type,'video');return video;}},setTimeout,clearTimeout};

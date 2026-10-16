@@ -89,6 +89,8 @@
       "zorifi-phase10.js",
       "zorifi-phase11.js",
       "zorifi-autocut.js",
+      "zorifi-autocut-renderer.js",
+      "zorifi-autocut-studio.js",
       "zorifi-editor-overhaul.js",
       "styles.css",
       "index.html",
