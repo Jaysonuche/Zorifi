@@ -6,6 +6,7 @@
 node_modules/
 web-dist/
 artifacts/
+Audio File/
 installer-dist/
 release/
 release-vanessa-local/

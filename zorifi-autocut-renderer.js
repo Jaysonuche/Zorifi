@@ -7,7 +7,7 @@
 
   // A standalone renderer: it reads an AutoCut plan without opening or changing
   // the editor. Media stays on the device. Canvas recording runs in real time.
-  const LIMITS=Object.freeze({duration:180,clips:120,assets:17,maxDimension:1920,maxPixels:2073600});
+  const LIMITS=Object.freeze({duration:180,clips:192,assets:17,visualAssets:16,layers:4,maxDimension:1920,maxPixels:2073600});
   const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
   const number=(value,fallback=0)=>Number.isFinite(Number(value))?Number(value):fallback;
   const aborted=()=>{const error=new Error('AutoCut generation cancelled.');error.name='AbortError';return error;};
@@ -20,23 +20,52 @@
     const clips=plan.clips.map(clip=>{
       const asset=byId.get(String(clip.mediaId));
       if(!asset||!['image','video','audio'].includes(asset.type)||(!asset.url&&!asset.file))throw new Error(`The source for ${clip.name||'an AutoCut shot'} is unavailable. Select the original media again.`);
-      const start=number(clip.start,NaN),duration=number(clip.duration,NaN),sourceStart=number(clip.sourceStart,0),playbackRate=number(clip.playbackRate,1);
-      if(!Number.isFinite(start)||start<0||!Number.isFinite(duration)||duration<=0||sourceStart<0||playbackRate<=0||playbackRate>4)throw new Error('AutoCut contains invalid shot timing.');
+      const start=number(clip.start,NaN),duration=number(clip.duration,NaN),sourceStart=number(clip.sourceStart??0,NaN),playbackRate=number(clip.playbackRate??1,NaN),track=number(clip.track??0,NaN);
+      if(!Number.isFinite(start)||start<0||!Number.isFinite(duration)||duration<=0||!Number.isFinite(sourceStart)||sourceStart<0||!Number.isFinite(playbackRate)||playbackRate<=0||playbackRate>4||!Number.isInteger(track)||track<0)throw new Error('AutoCut contains invalid shot timing.');
       if(asset.type==='audio'&&clip.type!=='audio')throw new Error('An audio file cannot be used as an AutoCut picture.');
-      return {clip:{...clip,start,duration,sourceStart,playbackRate,volume:clamp(number(clip.volume,100),0,100)},asset};
+      if(asset.type==='image'&&clip.type==='audio')throw new Error('A photo cannot be used as an AutoCut soundtrack.');
+      if(asset.type!=='image'&&Number.isFinite(Number(asset.duration))&&Number(asset.duration)>0&&sourceStart+duration*playbackRate>Number(asset.duration)+.025)throw new Error(`${asset.name||'A source'} ends before the selected AutoCut shot. Generate the edit again.`);
+      let collage;
+      if(clip.collage){
+        const cell=clip.collage.cell;
+        if(!clip.collage.id||!cell||!['left','top','width','height'].every(key=>Number.isFinite(cell[key]))||cell.left<0||cell.top<0||cell.width<=0||cell.height<=0||cell.left+cell.width>100.001||cell.top+cell.height>100.001)throw new Error('AutoCut contains an invalid collage layout.');
+        collage={...clip.collage,cell:{...cell}};
+      }
+      return {clip:{...clip,start,duration,sourceStart,playbackRate,track,volume:collage&&track>0?0:clamp(number(clip.volume,100),0,100),...(collage?{collage}:{}),...(clip.autoCutStyle?{autoCutStyle:{...clip.autoCutStyle}}:{})},asset};
     });
-    const visuals=clips.filter(item=>item.clip.type!=='audio').sort((a,b)=>a.clip.start-b.clip.start);
+    const visuals=clips.filter(item=>item.clip.type!=='audio').sort((a,b)=>a.clip.start-b.clip.start||a.clip.track-b.clip.track);
     const audio=clips.filter(item=>item.clip.type==='audio');
     if(!visuals.length)throw new Error('Select a video or photo for AutoCut.');
-    let end=0;
+    if(visuals.length>LIMITS.clips)throw new Error('This AutoCut contains too many shots.');
+    const scenes=[];
     for(const item of visuals){
-      if(Math.abs(item.clip.start-end)>.025)throw new Error('AutoCut shots must form a continuous sequence. Generate the edit again.');
-      end=item.clip.start+item.clip.duration;
+      const last=scenes[scenes.length-1],clip=item.clip;
+      if(last&&Math.abs(last.start-clip.start)<.001){
+        if(!clip.collage?.id||clip.collage.id!==last.collageId||Math.abs(last.duration-clip.duration)>.001)throw new Error('AutoCut shots must form a continuous sequence. Only matching collage layers can overlap.');
+        last.items.push(item);
+      }else scenes.push({start:clip.start,duration:clip.duration,collageId:clip.collage?.id||null,items:[item]});
+    }
+    let end=0;
+    const collageIds=new Set();
+    for(const scene of scenes){
+      if(Math.abs(scene.start-end)>.025)throw new Error('AutoCut shots must form a continuous sequence. Generate the edit again.');
+      if(scene.collageId){
+        if(scene.items.length<2||scene.items.length>LIMITS.layers||collageIds.has(scene.collageId))throw new Error('An AutoCut collage needs two to four matching layers.');
+        collageIds.add(scene.collageId);
+        const ids=new Set(scene.items.map(item=>String(item.asset.id))),tracks=new Set(scene.items.map(item=>item.clip.track));
+        if(ids.size!==scene.items.length)throw new Error('Choose distinct sources for each AutoCut collage layer.');
+        if(tracks.size!==scene.items.length||!tracks.has(0))throw new Error('AutoCut collage layers need distinct tracks including the primary track.');
+      }else if(scene.items[0].clip.track!==0)throw new Error('AutoCut shots must use the primary track.');
+      end=scene.start+scene.duration;
     }
     if(end>LIMITS.duration+.025)throw new Error('AutoCut can render up to 3 minutes. Choose a shorter edit.');
     if(audio.length>1)throw new Error('AutoCut supports one soundtrack per generated edit.');
-    if(new Set(clips.map(item=>String(item.asset.id))).size>LIMITS.assets)throw new Error('Select up to 16 visual files and one soundtrack.');
-    return {visuals,audio,duration:end};
+    if(new Set(visuals.map(item=>String(item.asset.id))).size>LIMITS.visualAssets||new Set(clips.map(item=>String(item.asset.id))).size>LIMITS.assets)throw new Error('Select up to 16 visual files and one soundtrack.');
+    for(const soundtrack of audio){
+      if(soundtrack.clip.start+soundtrack.clip.duration>end+.025)throw new Error('The AutoCut soundtrack extends past the generated edit.');
+      if(visuals.some(item=>item.asset.id===soundtrack.asset.id&&item.clip.start<soundtrack.clip.start+soundtrack.clip.duration&&soundtrack.clip.start<item.clip.start+item.clip.duration))throw new Error('Choose a separate soundtrack source for this AutoCut.');
+    }
+    return {visuals,audio,scenes,duration:end};
   }
 
   function outputSize(width=1280,height=720){
@@ -91,12 +120,14 @@
   function drawFrame(context,media,asset,clip,time,width,height,totalDuration){
     const sourceWidth=media.videoWidth||media.naturalWidth,sourceHeight=media.videoHeight||media.naturalHeight;
     if(!sourceWidth||!sourceHeight)throw new Error(`A frame of ${asset.name||'your media'} could not be decoded.`);
-    const scale=Math.max(width/sourceWidth,height/sourceHeight);
+    if(root.ZorifiAutoCutCreative?.draw){root.ZorifiAutoCutCreative.draw(context,media,clip,time,width,height,{skipCaption:true});return;}
+    const cell=clip.collage?.cell,box=cell?{x:width*cell.left/100,y:height*cell.top/100,width:width*cell.width/100,height:height*cell.height/100}:{x:0,y:0,width,height};
+    const scale=(clip.fit==='contain'?Math.min:Math.max)(box.width/sourceWidth,box.height/sourceHeight);
     const w=sourceWidth*scale,h=sourceHeight*scale;
-    context.fillStyle='#000';context.fillRect(0,0,width,height);
     context.save();
+    context.beginPath();context.rect(box.x,box.y,box.width,box.height);context.clip();
     context.globalAlpha=clamp(number(clip.opacity,100)/100,0,1);
-    context.drawImage(media,(width-w)/2,(height-h)/2,w,h);context.restore();
+    context.drawImage(media,box.x+(box.width-w)/2,box.y+(box.height-h)/2,w,h);context.restore();
   }
 
   function recorderFor(stream,width,height){
@@ -125,6 +156,22 @@
       notify('preparing',0);
       const canvas=root.document.createElement('canvas');canvas.width=width;canvas.height=height;
       const context=canvas.getContext('2d',{alpha:false});if(!context)throw new Error('The video canvas could not start.');
+      const previousCanvas=root.document.createElement('canvas');previousCanvas.width=width;previousCanvas.height=height;
+      const previousContext=previousCanvas.getContext('2d',{alpha:false});let hasPreviousFrame=false;
+      if(!previousContext)throw new Error('The AutoCut transition canvas could not start.');
+      const drawScene=(scene,time)=>{
+        const background=scene.items[0].clip.collage?.background;
+        context.fillStyle=/^#[0-9a-f]{6}$/i.test(background||'')?background:'#000';context.fillRect(0,0,width,height);
+        for(const {clip,asset} of scene.items)drawFrame(context,sources.get(String(asset.id)).media,asset,clip,time,width,height,duration);
+        root.ZorifiAutoCutCreative?.drawCaption?.(context,scene.items[0].clip,time,width,height);
+        const transition=scene.items[0].clip.autoCutStyle?.transition;
+        const fadeDuration=Math.min(.22,scene.duration*.25),local=time-scene.start;
+        // Hold the outgoing frame while the incoming scene fades in. This keeps
+        // the source ranges and edit duration exact without decoding a source twice.
+        if(hasPreviousFrame&&transition==='dissolve'&&local<fadeDuration){
+          context.save();context.globalAlpha=clamp(1-local/fadeDuration,0,1);context.drawImage(previousCanvas,0,0);context.restore();
+        }
+      };
       const all=[...prepared.visuals,...prepared.audio],audible=all.some(item=>item.asset.type!=='image'&&item.clip.volume>0);
       const AudioClass=root.AudioContext||root.webkitAudioContext;
       let audioDestination,master;
@@ -159,42 +206,47 @@
       stream=canvas.captureStream(30);const videoTrack=stream.getVideoTracks()[0];if(!videoTrack)throw new Error('The video recorder could not capture frames.');
       audioDestination?.stream.getAudioTracks().forEach(track=>stream.addTrack(track));
       recorder=recorderFor(stream,width,height);recorder.ondataavailable=event=>{if(event.data?.size)chunks.push(event.data);};recorder.addEventListener('error',event=>{recordingError=event.error||new Error('AutoCut video recording failed.');});
-      for(const item of prepared.visuals){
+      for(const scene of prepared.scenes){
         checkAbort(signal);if(recordingError)throw recordingError;
         if(recorder.state==='recording'){const paused=waitFor(recorder,'pause',{signal,label:'The AutoCut recorder did not pause.'});recorder.pause();await paused;}
         pauseAll();
-        const {clip,asset}=item,source=sources.get(String(asset.id));
-        if(asset.type!=='image'){source.media.playbackRate=clip.playbackRate;await seek(source.media,clip.sourceStart,signal);}
         const playing=[];
-        if(asset.type!=='image')playing.push({source,clip});
+        const seeking=[];
+        for(const {clip,asset} of scene.items){
+          const source=sources.get(String(asset.id));
+          if(asset.type!=='image'){source.media.playbackRate=clip.playbackRate;seeking.push(seek(source.media,clip.sourceStart,signal));playing.push({source,clip});}
+        }
         for(const soundtrack of prepared.audio){
           const end=soundtrack.clip.start+soundtrack.clip.duration;
-          if(clip.start<end&&clip.start+clip.duration>soundtrack.clip.start){
+          if(scene.start<end&&scene.start+scene.duration>soundtrack.clip.start){
             const track=sources.get(String(soundtrack.asset.id));track.media.playbackRate=soundtrack.clip.playbackRate;
-            await seek(track.media,soundtrack.clip.sourceStart+Math.max(0,clip.start-soundtrack.clip.start)*soundtrack.clip.playbackRate,signal);playing.push({source:track,clip:soundtrack.clip});
+            seeking.push(seek(track.media,soundtrack.clip.sourceStart+Math.max(0,scene.start-soundtrack.clip.start)*soundtrack.clip.playbackRate,signal));playing.push({source:track,clip:soundtrack.clip});
           }
         }
-        drawFrame(context,source.media,asset,clip,clip.start,width,height,duration);videoTrack.requestFrame?.();
-        for(const entry of playing){
-          if(entry.clip.start<=clip.start){if(entry.source.gain)entry.source.gain.gain.value=audioLevel(entry.clip,clip.start);await abortable(entry.source.media.play(),signal,5000,'Media playback was blocked. Click Generate again.');}
-        }
+        await Promise.all(seeking);checkAbort(signal);
+        drawScene(scene,scene.start);videoTrack.requestFrame?.();
+        await Promise.all(playing.filter(entry=>entry.clip.start<=scene.start).map(entry=>{
+          if(entry.source.gain)entry.source.gain.gain.value=audioLevel(entry.clip,scene.start);
+          return abortable(entry.source.media.play(),signal,5000,'Media playback was blocked. Click Generate again.');
+        }));
         const event=recorder.state==='inactive'?'start':'resume',ready=waitFor(recorder,event,{signal,label:'The AutoCut recorder could not start.'});
         if(event==='start')recorder.start(500);else recorder.resume();videoTrack.requestFrame?.();await ready;
         const started=root.performance.now();
         while(true){
           checkAbort(signal);if(recordingError)throw recordingError;
-          const elapsed=Math.min(clip.duration,(root.performance.now()-started)/1000),time=clip.start+elapsed;
+          const elapsed=Math.min(scene.duration,(root.performance.now()-started)/1000),time=scene.start+elapsed;
           for(const entry of playing){
             const active=time>=entry.clip.start&&time<entry.clip.start+entry.clip.duration;
             if(entry.source.gain)entry.source.gain.gain.setValueAtTime(active?audioLevel(entry.clip,time):0,audioContext.currentTime);
             if(active&&entry.source.media.paused)await abortable(entry.source.media.play(),signal,5000);
             if(!active&&!entry.source.media.paused)entry.source.media.pause();
           }
-          drawFrame(context,source.media,asset,clip,time,width,height,duration);videoTrack.requestFrame?.();
+          drawScene(scene,time);videoTrack.requestFrame?.();
           notify('rendering',.12+.85*time/duration,time);
-          if(elapsed>=clip.duration)break;
-          await abortable(new Promise(resolve=>setTimeout(resolve,Math.min(1000/30,(clip.duration-elapsed)*1000))),signal);
+          if(elapsed>=scene.duration)break;
+          await abortable(new Promise(resolve=>setTimeout(resolve,Math.min(1000/30,(scene.duration-elapsed)*1000))),signal);
         }
+        previousContext.drawImage(canvas,0,0);hasPreviousFrame=true;
       }
       pauseAll();checkAbort(signal);notify('finalizing',.98,duration);
       const stopped=waitFor(recorder,'stop',{signal,label:'AutoCut could not finish the video file.'});recorder.stop();await stopped;

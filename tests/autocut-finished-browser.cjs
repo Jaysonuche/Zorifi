@@ -122,6 +122,7 @@ async function makePhotoFixtures(page) {
 async function chooseAutoCutMedia(page, media, duration = 3) {
   await page.locator('.quick-card[data-home-tool="autocut"]').click();
   await page.locator('.autocut-studio[data-autocut-phase="select"]').waitFor();
+  await page.locator('[data-autocut-method]').selectOption('local');
   await page.locator('[data-autocut-duration]').fill(String(duration));
   await page.locator('[data-autocut-files]').setInputFiles(media);
   await page.locator('.autocut-studio[data-autocut-phase="loading"]').waitFor();

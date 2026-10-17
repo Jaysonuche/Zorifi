@@ -21,6 +21,7 @@ const root = __dirname;
 // zorifi-vanessa-creative-conversation.js, zorifi-vanessa-creative-verification.js,
 // zorifi-vanessa-creative-pipeline.js. The server admits this bounded family below.
 const functionFiles = new Map([
+  ['vanessa-autocut', 'vanessa-autocut.mjs'],
   ['vanessa', 'vanessa.mjs'],
   ['vanessa-video', 'vanessa-video.mjs'],
   ['vanessa-video-tool','vanessa-motion', 'vanessa-motion.mjs'],

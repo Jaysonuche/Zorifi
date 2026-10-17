@@ -283,6 +283,18 @@ Set server-only `GEMINI_API_KEY` and optional `GEMINI_MODEL` (default `gemini-3.
 
 The Windows desktop app uses the signed-in account to send Vanessa language requests through Zorifi's fixed Vercel gateway when no local language provider is configured. It loads only the public Firebase web configuration from the site; the Gemini key stays on the server. After upgrading an older desktop or installed web app that had only a local session, log out and sign back in once to establish a Firebase session. If the online request fails, Vanessa now shows the connection or sign-in problem instead of presenting a canned reply as an AI answer.
 
+### Media-aware AutoCut
+
+Open **AutoCut** on Home, select **Vanessa · Gemini story planning**, choose a style and enter a creative brief. After optional AI consent, selecting media starts review → story planning → local rendering → a playable finished video. **Save video** downloads the actual recording; **Edit further** creates a separate editable project without replacing your existing work. **Basic local montage** remains an explicit offline option and does not claim to understand content or dialogue.
+
+The authenticated `vanessa-autocut` gateway sends real labelled image samples and optional short WAV excerpts through the native Gemini SDK. Configure server-only `GEMINI_API_KEY`, `GEMINI_MODEL` (AutoCut default `gemini-2.5-flash`) and optional `GEMINI_FALLBACK_MODEL`. Only temporary provider failures use the configured fallback; metadata names the model that actually answered. Provider errors remain visible and never become a fabricated Gemini plan.
+
+Limits: 16 sources, up to 8 frames per source, at most 64 frames server-side (the browser budgets 48), the first 12 seconds of audio per video and 48 seconds of audio total, a 4 MB request, and a 180-second finished edit. Large/long sources skip audio decoding and report that limitation. These are sampled content reviews, not full-video analysis or model training. Dialogue outside sampled audio still needs review.
+
+Validated plans support source trimming, constant playback speed, focal-point framing, push/pull zooms and pans, colour/monochrome grades, kinetic original titles, flash/dissolve transitions and two-to-four-video panels. The Anime impact and Motivational story styles are recipes inspired by the supplied reference techniques. The same compositor supports editor preview/export, with editable treatment controls. Automatic video subject segmentation, true 3D perspective and speech-aligned word captions are not part of this AutoCut path; use existing chroma/transparent overlays or a verified transcription workflow where needed. The app does not claim every effect in a finished reference has been reproduced.
+
+Verify with `node --test tests/*.test.cjs`, `node tests/autocut-gemini-browser.cjs`, and `node tests/autocut-finished-browser.cjs`. Live model checks are separate from deterministic tests and require configured credentials.
+
 ### Gemini image and music generation
 
 The existing AI Image and AI Music prompt screens, Vanessa chat actions, and Music Studio now call Gemini through the server-side gateway when `GEMINI_API_KEY` is set. Image creation and reference variation use `GEMINI_IMAGE_MODEL` (default `gemini-nano-banana-2.1`) and return a real 1K image. Music uses `GEMINI_MUSIC_MODEL` (currently `lyria-3-clip-preview`) to return one 30-second MP3. Completed files can be saved into Project Media and placed on the editable timeline. Provider tests check that the key can list the model; they do not prove generation or billing access.
