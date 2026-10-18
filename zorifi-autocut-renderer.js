@@ -108,6 +108,7 @@
   }
 
   async function seek(media,time,signal){
+    if(root.ZorifiAutoCutMedia?.seek)return root.ZorifiAutoCutMedia.seek(media,time,{signal,timeout:45000});
     checkAbort(signal);
     const target=Math.max(0,Math.min(time,Number.isFinite(media.duration)?Math.max(0,media.duration-.002):time));
     if(Math.abs(media.currentTime-target)<.015&&media.readyState>=2&&!media.seeking)return;
@@ -118,7 +119,7 @@
   }
 
   function drawFrame(context,media,asset,clip,time,width,height,totalDuration){
-    const sourceWidth=media.videoWidth||media.naturalWidth,sourceHeight=media.videoHeight||media.naturalHeight;
+    const sourceWidth=media.videoWidth||media.naturalWidth||media.width,sourceHeight=media.videoHeight||media.naturalHeight||media.height;
     if(!sourceWidth||!sourceHeight)throw new Error(`A frame of ${asset.name||'your media'} could not be decoded.`);
     if(root.ZorifiAutoCutCreative?.draw){root.ZorifiAutoCutCreative.draw(context,media,clip,time,width,height,{skipCaption:true});return;}
     const cell=clip.collage?.cell,box=cell?{x:width*cell.left/100,y:height*cell.top/100,width:width*cell.width/100,height:height*cell.height/100}:{x:0,y:0,width,height};
@@ -149,9 +150,15 @@
     const prepared=preparePlan(plan,assets),size=outputSize(width,height),duration=prepared.duration;
     width=size.width;height=size.height;
     if(!root.document||!root.MediaRecorder||!root.HTMLCanvasElement?.prototype.captureStream)throw new Error('AutoCut video generation needs a current browser with video recording support.');
-    const sources=new Map(),ownedUrls=[],nodes=[],chunks=[];let audioContext,stream,recorder,recordingError;
+    const sources=new Map(),nodes=[],chunks=[];let audioContext,stream,recorder,recordingError;
     const notify=(phase,progress,currentTime=0)=>{if(typeof onProgress==='function')onProgress({phase,progress:clamp(progress,0,1),currentTime,duration});};
     const pauseAll=()=>{for(const source of sources.values()){source.media.pause?.();if(source.gain)source.gain.gain.value=0;}};
+    const releaseSource=id=>{
+      const source=sources.get(id);if(!source)return;
+      sources.delete(id);source.media.pause?.();
+      for(const node of [source.input,source.gain])try{node?.disconnect();}catch{}
+      try{source.dispose();}catch{}
+    };
     try{
       notify('preparing',0);
       const canvas=root.document.createElement('canvas');canvas.width=width;canvas.height=height;
@@ -183,33 +190,61 @@
         await abortable(audioContext.resume(),signal,5000,'Audio could not start. Click Generate again to allow media playback.');
         if(audioContext.state!=='running')throw new Error('Audio could not start. Click Generate again to allow media playback.');
       }
-      const unique=[...new Map(all.map(item=>[String(item.asset.id),item])).values()];
-      for(const [index,item] of unique.entries()){
-        checkAbort(signal);const {asset}=item;
-        let url=asset.url;
-        if(asset.file instanceof root.Blob){url=root.URL.createObjectURL(asset.file);ownedUrls.push(url);}
-        if(typeof url!=='string'||!url)throw new Error(`${asset.name||'A media file'} is unavailable.`);
-        const image=asset.type==='image',media=root.document.createElement(image?'img':asset.type==='audio'?'audio':'video');
-        const source={media,asset,gain:null};sources.set(String(asset.id),source);
-        if(/^https?:/i.test(url)&&!url.startsWith(root.location?.origin+'/'))media.crossOrigin='anonymous';
-        if(!image){media.preload='auto';media.playsInline=true;media.muted=true;}
-        const ready=waitFor(media,image?'load':'loadeddata',{signal,label:`${asset.name||'A source'} could not be decoded. Re-import the original file.`});
-        media.src=url;await ready;
-        if(!image&&audioContext&&all.some(candidate=>candidate.asset.id===asset.id&&candidate.clip.volume>0)){
-          const input=audioContext.createMediaElementSource(media),gain=audioContext.createGain();gain.gain.value=0;input.connect(gain);gain.connect(master);nodes.push(input,gain);source.gain=gain;media.muted=false;
+      // Full-size camera originals can occupy hundreds of megabytes per decoded
+      // image. Retain only the current scene and soundtrack, never the library.
+      const prepareSource=async asset=>{
+        const id=String(asset.id);if(sources.has(id))return sources.get(id);
+        checkAbort(signal);
+        const image=asset.type==='image',helper=root.ZorifiAutoCutMedia;
+        let media,dispose;
+        if(image&&helper?.loadImage){
+          const resource=await helper.loadImage(asset,{signal,maxDimension:LIMITS.maxDimension,maxPixels:LIMITS.maxPixels});
+          media=resource.image;dispose=()=>resource.dispose?.();
+        }else if(asset.type==='video'&&helper?.openVideo){
+          const resource=await helper.openVideo(asset,{signal});
+          media=resource.media;dispose=()=>resource.dispose?.();
+        }else{
+          let url=asset.url,ownedUrl;
+          if(!url&&asset.file instanceof root.Blob){url=root.URL.createObjectURL(asset.file);ownedUrl=url;}
+          if(typeof url!=='string'||!url)throw new Error(`${asset.name||'A media file'} is unavailable.`);
+          media=root.document.createElement(image?'img':asset.type==='audio'?'audio':'video');
+          dispose=()=>{media.removeAttribute('src');media.load?.();if(ownedUrl)root.URL.revokeObjectURL(ownedUrl);};
+          // Register before loading so a decode failure or cancellation releases
+          // even a partially prepared element and its owned object URL.
+          sources.set(id,{media,asset,gain:null,dispose});
+          if(/^https?:/i.test(url)&&!url.startsWith(root.location?.origin+'/'))media.crossOrigin='anonymous';
+          if(!image){media.preload='auto';media.playsInline=true;media.muted=true;}
+          const ready=waitFor(media,image?'load':'loadeddata',{signal,timeout:45000,label:`${asset.name||'A source'} could not be decoded. Re-import the original file.`});
+          media.src=url;await ready;
         }
-        for(const candidate of all.filter(entry=>entry.asset.id===asset.id)){
+        const source={media,asset,gain:null,input:null,dispose};sources.set(id,source);
+        checkAbort(signal);
+        if(!image&&media.readyState<2)await waitFor(media,'loadeddata',{signal,timeout:45000,ready:()=>media.readyState>=2});
+        if(!image&&audioContext&&all.some(candidate=>String(candidate.asset.id)===id&&candidate.clip.volume>0)){
+          const input=audioContext.createMediaElementSource(media),gain=audioContext.createGain();gain.gain.value=0;input.connect(gain);gain.connect(master);source.input=input;source.gain=gain;media.muted=false;
+        }
+        for(const candidate of all.filter(entry=>String(entry.asset.id)===id)){
           if(!image&&Number.isFinite(media.duration)&&candidate.clip.sourceStart+candidate.clip.duration*candidate.clip.playbackRate>media.duration+.1)throw new Error(`${asset.name||'A source'} ends before the selected AutoCut shot. Generate the edit again.`);
         }
-        notify('preparing',.12*(index+1)/unique.length);
-      }
+        return source;
+      };
       stream=canvas.captureStream(30);const videoTrack=stream.getVideoTracks()[0];if(!videoTrack)throw new Error('The video recorder could not capture frames.');
       audioDestination?.stream.getAudioTracks().forEach(track=>stream.addTrack(track));
       recorder=recorderFor(stream,width,height);recorder.ondataavailable=event=>{if(event.data?.size)chunks.push(event.data);};recorder.addEventListener('error',event=>{recordingError=event.error||new Error('AutoCut video recording failed.');});
-      for(const scene of prepared.scenes){
+      for(const [sceneIndex,scene] of prepared.scenes.entries()){
         checkAbort(signal);if(recordingError)throw recordingError;
         if(recorder.state==='recording'){const paused=waitFor(recorder,'pause',{signal,label:'The AutoCut recorder did not pause.'});recorder.pause();await paused;}
         pauseAll();
+        const needed=new Map(scene.items.map(item=>[String(item.asset.id),item.asset]));
+        for(const soundtrack of prepared.audio){
+          if(scene.start<soundtrack.clip.start+soundtrack.clip.duration&&scene.start+scene.duration>soundtrack.clip.start)needed.set(String(soundtrack.asset.id),soundtrack.asset);
+        }
+        // Release outgoing decoders before opening the incoming scene. The
+        // transition uses the small output canvas already copied below.
+        for(const id of [...sources.keys()])if(!needed.has(id))releaseSource(id);
+        for(const asset of needed.values())await prepareSource(asset);
+        if(!sceneIndex)notify('preparing',.12);
+        checkAbort(signal);
         const playing=[];
         const seeking=[];
         for(const {clip,asset} of scene.items){
@@ -269,8 +304,7 @@
       stream?.getTracks().forEach(track=>track.stop());
       for(const node of nodes)try{node.disconnect();}catch{}
       if(audioContext&&audioContext.state!=='closed')await audioContext.close().catch(()=>{});
-      for(const {media} of sources.values()){media.removeAttribute('src');media.load?.();}
-      for(const url of ownedUrls)root.URL.revokeObjectURL(url);
+      for(const id of [...sources.keys()])releaseSource(id);
     }
   }
 

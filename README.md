@@ -349,3 +349,11 @@ The perspective stage rotates textured video planes with perspective division; i
 Templates open deliberately in the **Templates** video feed. Only the selected preview loops; switching, hiding or closing pauses playback. Sound requires a user gesture, and each preview identifies its soundtrack. The eight built-in previews are original animated sample shapes with original procedural scores, not finished reference footage or fabricated social statistics. Template scores are retained when creating and reopening an editable project.
 
 New checks: tool recipe bounds and targets, real perspective-rendered video, actual model foreground alpha and export, AutoCut recipe saving/catalog/rendering, template playback lifecycle, Pulse Desk actions, Futures project preservation, and responsive phone/tablet/iPad/desktop layouts. Live Gemini availability depends on the provider; a busy response remains visible rather than becoming a fake completed generation.
+
+### Large AutoCut originals
+
+AutoCut reads video metadata and seeks selected frames instead of copying full video files into JavaScript memory. A shared media loader reads bounded photo headers, respects JPEG orientation, and asks the native image decoder for resized thumbnails and render surfaces. Source dimensions and the original files are retained for Edit further. Preparation deadlines adapt to source size and remain cancellable.
+
+Analysis opens one source at a time. Rendering retains only the current one-to-four visual layers and an optional soundtrack, disposing outgoing decoders before the next scene. Long recordings are sampled across their full duration with a bounded candidate set; they are no longer truncated to the first 15 minutes. The AutoCut output limit remains 180 seconds and 16 visual files. Gemini receives compact previews; large/long-source audio sampling is skipped explicitly to avoid full-file audio decoding, while original audio is still rendered where supported.
+
+Regression checks cover a 48MP JPEG, a valid 288MiB MP4 byte-size fixture, fifteen 24MP photos, genuine 4K H.264 decoding, original-file persistence, cancellation and decoder lifecycle. This does not imply unlimited device memory or support for codecs absent from the browser; HEIC/HEVC and other unsupported formats may need conversion.

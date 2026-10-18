@@ -7,12 +7,12 @@
 
   // AutoCut works on media already imported into the current project. Analysis
   // happens in the browser; no frame pixels or audio samples leave the device.
-  const LIMITS=Object.freeze({assets:16,samplesPerVideo:36,videoSeconds:900,framesWide:48,framesHigh:27,clips:120});
+  const LIMITS=Object.freeze({assets:16,samplesPerVideo:36,candidatesPerVideo:150,framesWide:48,framesHigh:27,clips:120});
   const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
   const finite=value=>Number.isFinite(Number(value))?Number(value):null;
   const round=value=>Math.round(value*1000)/1000;
   const median=values=>{if(!values.length)return 0;const sorted=[...values].sort((a,b)=>a-b);return (sorted[(sorted.length-1)>>1]+sorted[sorted.length>>1])/2;};
-  const validDuration=asset=>{const value=finite(asset?.duration);return value!=null&&value>0?Math.min(value,LIMITS.videoSeconds):0;};
+  const validDuration=asset=>{const value=finite(asset?.duration);return value!=null&&value>0?value:0;};
   const disposableUrl=url=>typeof url==='string'&&(/^(blob:|data:)/.test(url)||/^https?:\/\//.test(url));
   const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   const cancelled=()=>{const error=new Error('AutoCut cancelled');error.name='AbortError';return error;};
@@ -56,54 +56,59 @@
   }
   async function loadVideo(asset,signal){
     checkAbort(signal);
+    if(root.ZorifiAutoCutMedia){const loaded=await root.ZorifiAutoCutMedia.openVideo(asset,{signal});return {...loaded,video:loaded.media};}
     if(!root.document||!disposableUrl(asset.url))throw new Error('Video preview is unavailable');
-    const video=root.document.createElement('video');video.preload='auto';video.muted=true;video.playsInline=true;
+    const video=root.document.createElement('video');video.preload='metadata';video.muted=true;video.playsInline=true;
     let duration;
     try{duration=await new Promise((resolve,reject)=>{
       let timer;const aborted=()=>done(reject,cancelled()),done=(fn,value)=>{clearTimeout(timer);signal?.removeEventListener('abort',aborted);video.onloadedmetadata=null;video.onerror=null;fn(value);};
-      timer=setTimeout(()=>done(reject,new Error('Video metadata timed out')),8000);
+      timer=setTimeout(()=>done(reject,new Error('Video metadata took too long to read. Check that this device supports its codec.')),90000);
       signal?.addEventListener('abort',aborted,{once:true});
-      video.onloadedmetadata=()=>done(resolve,Math.min(Number.isFinite(video.duration)?video.duration:validDuration(asset),LIMITS.videoSeconds));
+      video.onloadedmetadata=()=>done(resolve,Number.isFinite(video.duration)&&video.duration>0?video.duration:validDuration(asset));
       video.onerror=()=>done(reject,new Error('Video could not be decoded'));
       video.src=asset.url;
     });checkAbort(signal);}catch(error){video.pause();video.removeAttribute('src');video.load();throw error;}
-    return {video,duration};
+    return {video,duration,dispose(){video.pause();video.removeAttribute('src');video.load();}};
   }
   async function seekFrame(video,time,signal){
     checkAbort(signal);
+    if(root.ZorifiAutoCutMedia)return root.ZorifiAutoCutMedia.seek(video,time,{signal,timeout:60000});
     if(Math.abs(video.currentTime-time)<.025&&video.readyState>=2)return;
     await new Promise((resolve,reject)=>{
-      let timer;const done=(fn,value)=>{clearTimeout(timer);signal?.removeEventListener('abort',aborted);video.removeEventListener('seeked',seeked);video.removeEventListener('error',failed);fn(value);};
-      const seeked=()=>done(resolve),failed=()=>done(reject,new Error('Video seek failed')),aborted=()=>done(reject,cancelled());
-      timer=setTimeout(()=>done(reject,new Error('Video frame seek timed out')),3500);
+      let timer;const done=(fn,value)=>{clearTimeout(timer);signal?.removeEventListener('abort',aborted);video.removeEventListener('seeked',seeked);video.removeEventListener('loadeddata',seeked);video.removeEventListener('error',failed);fn(value);};
+      const seeked=()=>{if(video.readyState>=2)done(resolve);},failed=()=>done(reject,new Error('Video seek failed')),aborted=()=>done(reject,cancelled());
+      timer=setTimeout(()=>done(reject,new Error('Video frame seek timed out')),60000);
       signal?.addEventListener('abort',aborted,{once:true});
-      video.addEventListener('seeked',seeked,{once:true});video.addEventListener('error',failed,{once:true});
+      video.addEventListener('seeked',seeked);video.addEventListener('error',failed,{once:true});
+      video.addEventListener('loadeddata',seeked,{once:true});
       try{video.currentTime=time;}catch(error){done(reject,error);}
     });
   }
   async function sampleVideo(asset,times,{signal,onSample}={}){
-    let video;
+    let video,loaded,canvas;
     try{
-      const loaded=await loadVideo(asset,signal);video=loaded.video;
-      const canvas=root.document.createElement('canvas');canvas.width=LIMITS.framesWide;canvas.height=LIMITS.framesHigh;
+      loaded=await loadVideo(asset,signal);video=loaded.video;
+      canvas=root.document.createElement('canvas');canvas.width=LIMITS.framesWide;canvas.height=LIMITS.framesHigh;
       const context=canvas.getContext('2d',{willReadFrequently:true});if(!context)throw new Error('Frame analysis is unavailable');
-      const frames=[],positions=times.length?times:sampleTimes(loaded.duration,LIMITS.samplesPerVideo);
+      // Metadata may have changed since import. Always spread a bounded set of
+      // samples over the decoded duration, including the end of a long source.
+      const frames=[],positions=sampleTimes(loaded.duration,LIMITS.samplesPerVideo);let failures=0;
       for(const [index,requested] of positions.entries()){
         const time=Math.min(requested,Math.max(0,loaded.duration-.03));
         try{await seekFrame(video,time,signal);checkAbort(signal);context.drawImage(video,0,0,canvas.width,canvas.height);const image=context.getImageData(0,0,canvas.width,canvas.height);frames.push({time,width:canvas.width,height:canvas.height,data:image.data});}
-        catch(error){if(signal?.aborted)throw error;}
+        catch(error){if(signal?.aborted)throw error;failures++;}
         if(typeof onSample==='function')onSample({sample:index+1,totalSamples:positions.length});
         await sleep(0);
       }
-      return {frames,duration:loaded.duration,width:video.videoWidth||asset.width||0,height:video.videoHeight||asset.height||0};
-    }finally{if(video){video.pause();video.removeAttribute('src');video.load();}}
+      return {frames,duration:loaded.duration,width:loaded.width||video.videoWidth||asset.width||0,height:loaded.height||video.videoHeight||asset.height||0,warning:failures?`${failures} preview frame${failures===1?'':'s'} could not be decoded; AutoCut used ${frames.length} readable samples.`:null};
+    }finally{if(loaded?.dispose)loaded.dispose();else if(video){video.pause();video.removeAttribute('src');video.load();}if(canvas){canvas.width=1;canvas.height=1;}}
   }
   async function sampleImage(asset,{signal}={}){
     checkAbort(signal);
+    if(root.ZorifiAutoCutMedia){let loaded,canvas;try{loaded=await root.ZorifiAutoCutMedia.loadImage(asset,{signal,maxDimension:512,maxPixels:512*512});checkAbort(signal);canvas=root.document.createElement('canvas');canvas.width=LIMITS.framesWide;canvas.height=LIMITS.framesHigh;const context=canvas.getContext('2d',{willReadFrequently:true});if(!context)throw new Error('Image analysis is unavailable');context.drawImage(loaded.image,0,0,canvas.width,canvas.height);return {frames:[{time:0,width:canvas.width,height:canvas.height,data:context.getImageData(0,0,canvas.width,canvas.height).data}],duration:validDuration(asset)||4,width:loaded.width,height:loaded.height};}finally{loaded?.dispose();if(canvas){canvas.width=1;canvas.height=1;}}}
     if(!root.document||!root.Image||!disposableUrl(asset.url))throw new Error('Image preview is unavailable');
-    const image=await new Promise((resolve,reject)=>{const element=new root.Image();let timer;const aborted=()=>done(reject,cancelled()),done=(fn,value)=>{clearTimeout(timer);signal?.removeEventListener('abort',aborted);element.onload=null;element.onerror=null;if(fn===reject)element.src='';fn(value);};timer=setTimeout(()=>done(reject,new Error('Image loading timed out')),6000);signal?.addEventListener('abort',aborted,{once:true});element.onload=()=>done(resolve,element);element.onerror=()=>done(reject,new Error('Image could not be decoded'));element.src=asset.url;});
-    checkAbort(signal);
-    const canvas=root.document.createElement('canvas');canvas.width=LIMITS.framesWide;canvas.height=LIMITS.framesHigh;const context=canvas.getContext('2d',{willReadFrequently:true});if(!context)throw new Error('Image analysis is unavailable');context.drawImage(image,0,0,canvas.width,canvas.height);return {frames:[{time:0,width:canvas.width,height:canvas.height,data:context.getImageData(0,0,canvas.width,canvas.height).data}],duration:validDuration(asset)||4,width:image.naturalWidth,height:image.naturalHeight};
+    const image=await new Promise((resolve,reject)=>{const element=new root.Image();let timer;const aborted=()=>done(reject,cancelled()),done=(fn,value)=>{clearTimeout(timer);signal?.removeEventListener('abort',aborted);element.onload=null;element.onerror=null;if(fn===reject)element.src='';fn(value);};timer=setTimeout(()=>done(reject,new Error('Image loading timed out')),90000);signal?.addEventListener('abort',aborted,{once:true});element.onload=()=>done(resolve,element);element.onerror=()=>done(reject,new Error('Image could not be decoded'));element.src=asset.url;});
+    const canvas=root.document.createElement('canvas');try{checkAbort(signal);canvas.width=LIMITS.framesWide;canvas.height=LIMITS.framesHigh;const context=canvas.getContext('2d',{willReadFrequently:true});if(!context)throw new Error('Image analysis is unavailable');context.drawImage(image,0,0,canvas.width,canvas.height);return {frames:[{time:0,width:canvas.width,height:canvas.height,data:context.getImageData(0,0,canvas.width,canvas.height).data}],duration:validDuration(asset)||4,width:image.naturalWidth,height:image.naturalHeight};}finally{image.src='';canvas.width=1;canvas.height=1;}
   }
   async function analyzeMediaAssets(assets,{sampleVideoFrames=sampleVideo,sampleImageFrame=sampleImage,signal,onProgress}={}){
     const selected=(Array.isArray(assets)?assets:[]).filter(asset=>asset&&['video','image'].includes(asset.type)).slice(0,LIMITS.assets),analyses=[];
@@ -113,7 +118,7 @@
       let duration=asset.type==='image'?(validDuration(asset)||4):validDuration(asset),width=finite(asset.width)||0,height=finite(asset.height)||0,raw=[],warning=null;
       try{
         const result=asset.type==='video'?await sampleVideoFrames(asset,sampleTimes(duration,LIMITS.samplesPerVideo),{signal,onSample:progress=>{if(typeof onProgress==='function')onProgress({phase:'sampling',assetIndex:assetIndex+1,assetCount:selected.length,name:asset.name||'Media',...progress});}}):await sampleImageFrame(asset,{signal});
-        checkAbort(signal);raw=Array.isArray(result)?result:(result?.frames||[]);duration=finite(result?.duration)||duration;width=finite(result?.width)||width;height=finite(result?.height)||height;
+        checkAbort(signal);raw=Array.isArray(result)?result:(result?.frames||[]);duration=finite(result?.duration)||duration;width=finite(result?.width)||width;height=finite(result?.height)||height;warning=result?.warning||null;
       }catch(error){if(signal?.aborted)throw error;warning=error?.message||'Frame analysis unavailable';}
       if(!duration)continue;
       const frames=[],times=new Set();let previous=null;
@@ -134,26 +139,36 @@
   }
   function pacing(prompt){const text=String(prompt||'').toLowerCase();if(/\b(fast|energetic|punchy|hype|upbeat|quick)\b/.test(text))return {name:'energetic',shot:1.6,min:.75,max:3.2};if(/\b(slow|reflective|emotional|cinematic|calm)\b/.test(text))return {name:'cinematic',shot:3.8,min:1.5,max:6};return {name:'balanced',shot:2.7,min:1,max:4.5};}
   function candidatesFor(analysis,style){
-    const boundaries=[0,...analysis.cuts,analysis.duration],out=[];
+    const duration=Number(analysis.duration),boundaries=[0,...[...new Set((analysis.cuts||[]).filter(value=>Number.isFinite(value)&&value>0&&value<duration))].sort((a,b)=>a-b),duration],segments=[];let total=0;
+    // Count candidate windows first. A multi-hour source must never allocate an
+    // array or run a loop for every possible shot before applying the limit.
     for(let scene=0;scene<boundaries.length-1;scene++){
       const start=boundaries[scene],end=boundaries[scene+1],available=end-start;
       if(available<style.min*.8)continue;
-      const length=analysis.type==='image'?available:Math.min(style.max,Math.max(style.min,Math.min(style.shot,available)));
-      for(let at=start;at+style.min*.8<=end;){
-        // Adjacent candidates retain every usable source frame. A sliding,
-        // overlapping grid made the later duplicate rejection discard footage.
-        const remaining=end-at,duration=remaining>length&&remaining-length<style.min*.8?remaining:Math.min(length,remaining);if(duration<style.min*.8)break;
-        const observations=analysis.frameSamples.filter(frame=>frame.time>=at-.15&&frame.time<=at+duration+.15),quality=observations.length?observations.reduce((sum,frame)=>sum+frame.score,0)/observations.length:.42;
-        const changes=observations.slice(1).map(frame=>frame.difference),movement=changes.length?median(changes):0;
-        const score=round(clamp(quality-.15*Math.max(0,movement-.65),0,1));
-        out.push({mediaId:analysis.mediaId,name:analysis.name,type:analysis.type,sourceStart:round(at),duration:round(duration),quality:score,scene,confidence:observations.length?'measured':'metadata-only'});
-        if(analysis.type==='image'||at+duration>=end-.001)break;
-        at+=duration;
-      }
+      const length=analysis.type==='image'?available:Math.min(style.max,Math.max(style.min,Math.min(style.shot,available))),whole=Math.floor((available+1e-7)/length),remainder=Math.max(0,available-whole*length),count=analysis.type==='image'?1:Math.max(1,whole+(remainder+1e-7>=style.min*.8?1:0));
+      segments.push({start,end,length,count,scene,offset:total});total+=count;
     }
-    // Long recordings must still offer moments from their ending. Distribute
-    // the bounded candidate set across the full recording instead of truncating it.
-    return out.length<=150?out:Array.from({length:150},(_,index)=>out[Math.round(index*(out.length-1)/149)]);
+    const count=Math.min(total,LIMITS.candidatesPerVideo),out=[];let segmentIndex=0;
+    const evenly=(items,number)=>number>=items.length?items:Array.from({length:number},(_,index)=>items[number===1?Math.floor(items.length/2):Math.round(index*(items.length-1)/(number-1))]);
+    let slots=Array.from({length:count},(_,index)=>count===total?index:Math.round(index*(total-1)/(count-1)));
+    if(count<total&&Array.isArray(analysis.frameSamples)){
+      // Keep the windows we actually measured. A uniform candidate grid alone
+      // rarely intersects sparse samples from a multi-hour recording.
+      const measured=new Set([0,total-1]);
+      for(const frame of analysis.frameSamples){const segment=segments.find(item=>frame.time>=item.start&&frame.time<=item.end);if(segment)measured.add(segment.offset+Math.min(segment.count-1,Math.max(0,Math.floor((frame.time-segment.start)/segment.length))));}
+      const anchors=evenly([...measured].sort((a,b)=>a-b),count),reserved=new Set(anchors);
+      slots=[...anchors,...evenly(slots.filter(slot=>!reserved.has(slot)),count-anchors.length)].sort((a,b)=>a-b);
+    }
+    for(let index=0;index<count;index++){
+      const slot=slots[index];
+      while(segmentIndex<segments.length-1&&slot>=segments[segmentIndex].offset+segments[segmentIndex].count)segmentIndex++;
+      const segment=segments[segmentIndex],ordinal=slot-segment.offset,at=segment.start+ordinal*segment.length,length=ordinal===segment.count-1?segment.end-at:segment.length;
+      const observations=analysis.frameSamples.filter(frame=>frame.time>=at-.15&&frame.time<=at+length+.15),quality=observations.length?observations.reduce((sum,frame)=>sum+frame.score,0)/observations.length:.42;
+      const changes=observations.slice(1).map(frame=>frame.difference),movement=changes.length?median(changes):0;
+      const score=round(clamp(quality-.15*Math.max(0,movement-.65),0,1));
+      out.push({mediaId:analysis.mediaId,name:analysis.name,type:analysis.type,sourceStart:round(at),duration:round(length),quality:score,scene:segment.scene,confidence:observations.length?'measured':'metadata-only'});
+    }
+    return out;
   }
   function overlap(a,b){if(a.mediaId!==b.mediaId)return 0;return Math.max(0,Math.min(a.sourceStart+a.duration,b.sourceStart+b.duration)-Math.max(a.sourceStart,b.sourceStart));}
   function planEdit(analyses,{prompt='',targetDuration,beatTimes=[],soundtrack,idPrefix=`autocut-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`}={}){
