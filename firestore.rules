@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owner(uid) { return signedIn() && request.auth.uid == uid; }
+    function publicProfile(uid) { return get(/databases/$(database)/documents/socialProfiles/$(uid)).data.discoverable == true; }
+    function blocked(a, b) {
+      return exists(/databases/$(database)/documents/socialBlocks/$(a)/blocked/$(b)) ||
+        exists(/databases/$(database)/documents/socialBlocks/$(b)/blocked/$(a));
+    }
+    function rateValue(uid, field) {
+      return exists(/databases/$(database)/documents/socialRates/$(uid)) ?
+        get(/databases/$(database)/documents/socialRates/$(uid)).data.get(field, timestamp.date(1970, 1, 1)) : timestamp.date(1970, 1, 1);
+    }
+    function paced(field, seconds) {
+      return getAfter(/databases/$(database)/documents/socialRates/$(request.auth.uid)).data[field] == request.time &&
+        rateValue(request.auth.uid, field) <= request.time - duration.value(seconds, 's');
+    }
+    function connection(id) { return get(/databases/$(database)/documents/socialConnections/$(id)).data; }
+    function connectionMember(data) { return signedIn() && request.auth.uid in data.members; }
+    function activeConnection(id) {
+      let c = connection(id);
+      return connectionMember(c) && c.status == 'accepted' && !blocked(c.members[0], c.members[1]);
+    }
+    match /socialProfiles/{uid} {
+      allow get: if signedIn() && (owner(uid) || resource.data.discoverable == true);
+      allow list: if signedIn() && request.query.limit <= 50 && resource.data.discoverable == true;
+      function validProfile() {
+        let d = request.resource.data;
+        return owner(uid) && d.keys().hasOnly(['uid', 'name', 'bio', 'craft', 'discoverable', 'createdAt', 'updatedAt']) &&
+          d.keys().hasAll(['uid', 'name', 'bio', 'craft', 'discoverable', 'createdAt', 'updatedAt']) &&
+          d.uid == uid && d.name is string && d.name.size() >= 2 && d.name.size() <= 60 &&
+          d.bio is string && d.bio.size() <= 300 && d.craft in ['Video', 'Music', 'Photography', 'Motion', 'Mixed media'] &&
+          d.discoverable is bool && d.updatedAt == request.time;
+      }
+      allow create: if validProfile() && request.resource.data.createdAt == request.time;
+      allow update: if validProfile() && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if owner(uid);
+    }
+    match /socialRates/{uid} {
+      allow get: if owner(uid);
+      allow list, delete: if false;
+      function validRates() {
+        let d = request.resource.data;
+        return owner(uid) && d.keys().hasOnly(['lastRequestAt', 'lastMessageAt', 'lastReportAt']) && d.keys().size() > 0 &&
+          (!('lastRequestAt' in d) || (d.lastRequestAt is timestamp &&
+            (d.lastRequestAt == rateValue(uid, 'lastRequestAt') ||
+              (d.lastRequestAt == request.time && rateValue(uid, 'lastRequestAt') <= request.time - duration.value(10, 's'))))) &&
+          (!('lastMessageAt' in d) || (d.lastMessageAt is timestamp &&
+            (d.lastMessageAt == rateValue(uid, 'lastMessageAt') ||
+              (d.lastMessageAt == request.time && rateValue(uid, 'lastMessageAt') <= request.time - duration.value(1, 's'))))) &&
+          (!('lastReportAt' in d) || (d.lastReportAt is timestamp &&
+            (d.lastReportAt == rateValue(uid, 'lastReportAt') ||
+              (d.lastReportAt == request.time && rateValue(uid, 'lastReportAt') <= request.time - duration.value(30, 's')))));
+      }
+      allow create: if validRates();
+      allow update: if validRates() && request.resource.data.keys().hasAll(resource.data.keys());
+    }
+    match /socialConnections/{id} {
+      allow get: if connectionMember(resource.data);
+      allow list: if signedIn() && request.query.limit <= 50 && request.auth.uid in resource.data.members;
+      function validConnection() {
+        let d = request.resource.data;
+        return signedIn() && d.keys().hasOnly(['members', 'requester', 'recipient', 'status', 'createdAt', 'updatedAt']) &&
+          d.keys().hasAll(['members', 'requester', 'recipient', 'status', 'createdAt', 'updatedAt']) &&
+          d.members is list && d.members.size() == 2 && d.members[0] is string && d.members[1] is string &&
+          d.members[0] != d.members[1] && id == d.members[0] + '~' + d.members[1] &&
+          d.requester is string && d.recipient is string && d.requester != d.recipient &&
+          d.members.hasAll([d.requester, d.recipient]) && d.updatedAt == request.time;
+      }
+      allow create: if validConnection() && request.resource.data.requester == request.auth.uid &&
+        request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time &&
+        publicProfile(request.resource.data.requester) && publicProfile(request.resource.data.recipient) &&
+        !blocked(request.resource.data.requester, request.resource.data.recipient) && paced('lastRequestAt', 10);
+      allow update: if validConnection() && connectionMember(resource.data) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']) &&
+        resource.data.status == 'pending' &&
+        ((request.auth.uid == resource.data.recipient && request.resource.data.status in ['accepted', 'declined'] &&
+          !blocked(resource.data.requester, resource.data.recipient)) ||
+          (request.auth.uid == resource.data.requester && request.resource.data.status == 'cancelled'));
+      allow delete: if false;
+      match /messages/{messageId} {
+        allow get: if activeConnection(id);
+        allow list: if activeConnection(id) && request.query.limit <= 100;
+        allow create: if activeConnection(id) &&
+          request.resource.data.keys().hasOnly(['sender', 'text', 'createdAt']) &&
+          request.resource.data.keys().hasAll(['sender', 'text', 'createdAt']) &&
+          request.resource.data.sender == request.auth.uid && request.resource.data.text is string &&
+          request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 2000 &&
+          request.resource.data.createdAt == request.time && paced('lastMessageAt', 1);
+        allow update, delete: if false;
+      }
+    }
+    match /socialBlocks/{uid}/blocked/{otherUid} {
+      allow get, list: if owner(uid);
+      allow create: if owner(uid) && uid != otherUid &&
+        request.resource.data.keys().hasOnly(['owner', 'blockedUid', 'createdAt']) &&
+        request.resource.data.owner == uid && request.resource.data.blockedUid == otherUid &&
+        request.resource.data.createdAt == request.time;
+      allow delete: if owner(uid);
+      allow update: if false;
+    }
+    match /socialReports/{id} {
+      allow create: if signedIn() &&
+        request.resource.data.keys().hasOnly(['reporter', 'targetUid', 'reason', 'connectionId', 'createdAt']) &&
+        request.resource.data.keys().hasAll(['reporter', 'targetUid', 'reason', 'connectionId', 'createdAt']) &&
+        request.resource.data.reporter == request.auth.uid && request.resource.data.targetUid is string &&
+        request.resource.data.targetUid != request.auth.uid && request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 5 && request.resource.data.reason.size() <= 1000 &&
+        request.resource.data.connectionId is string && request.resource.data.connectionId.size() <= 260 &&
+        request.resource.data.createdAt == request.time && paced('lastReportAt', 30);
+      allow get: if signedIn() && resource.data.reporter == request.auth.uid;
+      allow list, update, delete: if false;
+    }
+    // Existing billing records remain owner-readable and server-written only.
+    match /users/{uid}/private/subscription { allow get: if owner(uid); allow list, write: if false; }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

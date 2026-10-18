@@ -19,6 +19,8 @@
 .vanessa-assistant .vanessa-session-controls{grid-row:3!important;display:flex;align-items:center;gap:5px;min-height:36px;padding:3px 10px;overflow-x:auto;scrollbar-width:none;border:0;background:var(--vc-bg)}
 .vanessa-assistant .vanessa-session-controls button{flex:none;min-height:30px;margin:0;padding:4px 8px;border:0;border-radius:7px;background:transparent;color:var(--vc-muted);font-size:10px;font-weight:550;box-shadow:none}
 .vanessa-assistant .vanessa-session-controls button:hover{background:var(--vc-surface);color:var(--vc-text)}
+.vanessa-assistant .vanessa-voice-options{display:flex;align-items:center;gap:4px;flex:none;margin-left:auto;font-size:9px;color:var(--vc-muted);white-space:nowrap}.vanessa-assistant .vanessa-voice-options select{min-height:30px;max-width:125px;border:1px solid var(--vc-line);border-radius:7px;background:var(--vc-surface);color:var(--vc-text);font:inherit;padding:3px 5px}
+.vanessa-assistant .vanessa-dictation-bar{flex-basis:100%;display:flex;align-items:center;gap:5px;min-width:0;padding:3px 5px;color:var(--vc-muted);font-size:10px;border-bottom:1px solid var(--vc-line)}.vanessa-assistant .vanessa-dictation-bar[hidden]{display:none!important}.vanessa-assistant .vanessa-dictation-bar>span{flex:1;min-width:0}.vanessa-assistant .vanessa-dictation-bar>button{flex:none;min-height:32px;padding:4px 8px;border:0;border-radius:6px;background:#9f79e51a;color:var(--vc-text);font:inherit;font-weight:650}
 .vanessa-assistant .vanessa-session-controls [hidden],.vanessa-assistant .vanessa-voice-playback[hidden]{display:none!important}
 .vanessa-assistant .vanessa-voice-playback{grid-row:4!important;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 12px 5px;padding:7px 9px;border:1px solid var(--vc-line);border-radius:9px;background:var(--vc-surface);font-size:10px;color:var(--vc-muted)}
 .vanessa-assistant .vanessa-voice-playback span{flex:1;min-width:0;overflow-wrap:anywhere}
@@ -63,6 +65,7 @@ body.touch-workspace .vanessa-assistant .vanessa-panel form>button{flex:0 0 44px
 body.touch-workspace .vanessa-assistant .vanessa-panel form>input[name="message"]{height:44px;font-size:16px!important;flex:1 1 40px!important;padding-inline:3px}
 body.touch-workspace .vanessa-assistant .vanessa-session-controls{min-height:40px;padding-block:0}
 body.touch-workspace .vanessa-assistant .vanessa-session-controls button{min-height:40px}
+body.touch-workspace .vanessa-assistant .vanessa-voice-options select{min-height:44px}
 body.touch-workspace .vanessa-assistant .vanessa-suggestions button{min-height:38px}
 body.touch-workspace .vanessa-assistant .vanessa-voice-playback button{min-height:40px}
 body.touch-workspace .vanessa-assistant .vanessa-panel>footer{padding-bottom:max(6px,env(safe-area-inset-bottom));font-size:8px;min-height:22px}

@@ -1,0 +1,21 @@
+// A deterministic REST fixture, not a Firestore Rules emulator. It verifies
+// client transport, explicit writes and the UI's handling of server denials.
+function installSocialFake({uid='alice',profiles={},connections={},disabled=false}={}){
+ const docs=new Map(),records=[],stats={commits:0,messages:0,profiles:0},configuration={disabled,failAfterCommit:false};
+ const encode=value=>Array.isArray(value)?{arrayValue:{values:value.map(encode)}}:typeof value==='boolean'?{booleanValue:value}:{stringValue:String(value)},decode=value=>'stringValue'in value?value.stringValue:'timestampValue'in value?value.timestampValue:'booleanValue'in value?value.booleanValue:'arrayValue'in value?(value.arrayValue.values||[]).map(decode):null;
+ const wrap=(key,data)=>({name:'projects/zorifi/databases/(default)/documents/'+key,fields:Object.fromEntries(Object.entries(data).map(([name,value])=>[name,/At$/.test(name)?{timestampValue:value}:encode(value)]))});
+ for(const [key,value]of Object.entries(profiles))docs.set('socialProfiles/'+key,{uid:key,name:key,craft:'Video',bio:'',discoverable:true,createdAt:'2026-10-18T10:00:00Z',updatedAt:'2026-10-18T10:00:00Z',...value});
+ for(const [key,value]of Object.entries(connections))docs.set('socialConnections/'+key,{createdAt:'2026-10-18T10:00:00Z',updatedAt:'2026-10-18T10:00:00Z',...value});
+ const transport=async(url,options={})=>{
+  const method=options.method||'GET',payload=options.body?JSON.parse(options.body):null,suffix=String(url).split('/documents')[1];records.push({url:String(url),method,payload,authorization:new Headers(options.headers||{}).get('authorization')});
+  if(configuration.disabled)return Response.json({error:{message:'Cloud Firestore API is disabled',details:[{reason:'SERVICE_DISABLED'}]}},{status:403});
+  if(suffix.endsWith(':runQuery')){const query=payload.structuredQuery,parent=suffix.slice(0,-9).replace(/^\//,''),prefix=(parent?parent+'/':'')+query.from[0].collectionId+'/',filter=query.where?.fieldFilter;const result=[...docs].filter(([path,data])=>path.startsWith(prefix)&&path.slice(prefix.length).indexOf('/')<0&&(!filter||(filter.op==='EQUAL'?data[filter.field.fieldPath]===decode(filter.value):(data[filter.field.fieldPath]||[]).includes(decode(filter.value))))).slice(0,query.limit).map(([path,data])=>({document:wrap(path,data)}));return Response.json(result);}
+  if(suffix===':commit'){
+   for(const write of payload.writes){const path=write.update.name.split('/documents/')[1];if(write.currentDocument?.exists===false&&docs.has(path))return Response.json({error:{message:'Already exists'}},{status:409});if(path.includes('/messages/')){const c=docs.get(path.split('/messages/')[0]);if(!c||c.status!=='accepted'||!c.members.includes(uid)||docs.has('socialBlocks/'+uid+'/blocked/'+c.members.find(x=>x!==uid))||docs.has('socialBlocks/'+c.members.find(x=>x!==uid)+'/blocked/'+uid))return Response.json({error:{message:'Denied'}},{status:403});}}
+   for(const write of payload.writes){const path=write.update.name.split('/documents/')[1],data=Object.fromEntries(Object.entries(write.update.fields||{}).map(([key,value])=>[key,decode(value)])),previous=docs.get(path)||{},next=write.updateMask?{...previous}:{};if(write.updateMask)for(const field of write.updateMask.fieldPaths||[])next[field]=data[field];else Object.assign(next,data);for(const transform of write.updateTransforms||[])next[transform.fieldPath]='2026-10-18T12:00:00.000Z';docs.set(path,next);if(path.includes('/messages/'))stats.messages++;if(path.startsWith('socialProfiles/'))stats.profiles++;}stats.commits++;if(configuration.failAfterCommit){configuration.failAfterCommit=false;throw new TypeError('Simulated lost acknowledgement');}return Response.json({commitTime:'2026-10-18T12:00:00.000Z'});
+  }
+  const path=suffix.replace(/^\//,'');if(method==='DELETE'){docs.delete(path);return Response.json({});}const data=docs.get(path);if(!data)return Response.json({error:{message:'Not found'}},{status:404});return Response.json(wrap(path,data));
+ };
+ const result={transport,docs,records,stats,configuration};globalThis.__socialFake=result;return result;
+}
+module.exports=installSocialFake;

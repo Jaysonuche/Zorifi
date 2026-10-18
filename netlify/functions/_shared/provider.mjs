@@ -106,14 +106,16 @@ export function handler(run,{multipart=false}={}){
 }
 export async function language(prompt,{instructions='',jsonMode=false,preferredLanguage,image,webSearch=false,signal}={}){
  if(usesGemini()){
-  if(image||webSearch)throw new ServiceError('This Gemini integration currently supports text and structured planning only.',400,'UNSUPPORTED_CAPABILITY');
+  if(webSearch)throw new ServiceError('This Gemini integration does not have web search enabled.',400,'UNSUPPORTED_CAPABILITY');
+  const parts=[{text:prompt}];
+  if(image){const match=typeof image==='string'&&image.match(/^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/]+={0,2})$/);if(!match||match[2].length%4!==0||Buffer.from(match[2],'base64').length>2_500_000)throw new ServiceError('Use a compact PNG, JPEG or WebP preview for Gemini vision.');parts.push({inlineData:{mimeType:match[1],data:match[2]}});}
   const models=geminiModels();
   const {GoogleGenAI}=await import('@google/genai');
   const ai=new GoogleGenAI({apiKey:needed('GEMINI_API_KEY'),vertexai:false,httpOptions:{apiVersion:'v1beta',timeout:120000,retryOptions:{attempts:1}}});
   let data;
   for(const [index,model] of models.entries()){
    try{
-    data=await ai.models.generateContent({model,contents:[{role:'user',parts:[{text:prompt}]}],config:{...(signal?{abortSignal:signal}:{}),systemInstruction:identity.providerInstructions({preferredLanguage})+'\n'+instructions,maxOutputTokens:8192,...(jsonMode?{responseMimeType:'application/json'}:{})}});
+    data=await ai.models.generateContent({model,contents:[{role:'user',parts}],config:{...(signal?{abortSignal:signal}:{}),systemInstruction:identity.providerInstructions({preferredLanguage})+'\n'+instructions,maxOutputTokens:8192,...(jsonMode?{responseMimeType:'application/json'}:{})}});
     break;
    }catch(error){
     if(signal?.aborted)throw new ServiceError('The creative request was cancelled or took too long. Please retry.',504,'PROVIDER_TIMEOUT');

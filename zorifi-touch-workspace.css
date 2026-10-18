@@ -178,3 +178,19 @@ body.touch-workspace main.touch-editor .preview-transform-box{border:1px solid #
 body.touch-workspace main.touch-editor :is(.preview-resize-handle,.preview-text-resize-handle){width:44px!important;height:44px!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important}
 body.touch-workspace main.touch-editor :is(.preview-resize-handle,.preview-text-resize-handle)::after{content:'';position:absolute;inset:17px;border:1.5px solid #f1e7ff;border-radius:2px;background:#9d6ddd;box-shadow:0 0 0 1px #080a15}
 body.touch-workspace main.touch-editor .preview-rotate-handle{display:none!important}
+/* Timeline labels travel with the sequence; one-finger panning stays native on iOS. */
+body.touch-workspace main.touch-editor :is(.timeline-area,.timeline-body,.timeline-scroll,.timeline-content,.track,.clip){touch-action:pan-x!important;-webkit-user-select:none;user-select:none}
+body.touch-workspace main.touch-editor .timeline-scroll{-webkit-overflow-scrolling:touch!important}
+body.touch-workspace main.touch-editor .track-heads{position:relative!important;left:auto!important}
+body.touch-workspace main.touch-editor :is(.scrub-zone,[data-trim],[data-clip-keyframe]){touch-action:none!important}
+body.touch-workspace .native-media-picker{position:relative!important;isolation:isolate}
+body.touch-workspace .native-media-picker>[data-native-media-input]{position:absolute!important;inset:0!important;z-index:4!important;display:block!important;width:100%!important;height:100%!important;opacity:0!important;cursor:pointer;touch-action:manipulation;font-size:16px}
+body.touch-workspace .native-media-picker:focus-within{outline:2px solid #bd8dff;outline-offset:3px}
+.touch-import-progress{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:9000;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 32px);padding:14px 18px;border:1px solid #c799ff5a;border-radius:15px;background:#191425f5;color:#f0e8fc;box-shadow:0 12px 30px #0004;font:500 13px/1.4 system-ui;pointer-events:none}.touch-import-progress>i{display:block;flex:none;width:17px;height:17px;border:2px solid #c69aff30;border-top-color:#d2aaff;border-radius:50%;animation:touchImportSpin .8s linear infinite}@keyframes touchImportSpin{to{transform:rotate(360deg)}}
+body.touch-workspace .touch-home .quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+body.touch-workspace .touch-home .quick-card{min-height:120px;align-items:flex-start;text-align:left;padding:14px}
+body.touch-workspace .touch-home .quick-card>small{display:block;font-size:10px;line-height:1.5}
+body.touch-workspace .touch-home .pocket-quick-card{border-color:#c18bf53b;background:linear-gradient(140deg,var(--touch-card),#9953da12)}
+body.touch-workspace .touch-home .pocket-quick-card>i{font-size:19px}
+@media(min-width:650px){body.touch-workspace .touch-home .quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.touch-import-progress>i{animation:none}}
