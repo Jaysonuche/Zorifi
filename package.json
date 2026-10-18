@@ -127,7 +127,12 @@
       "zorifi-device-lab.js",
       "zorifi-device-lab.css",
       "zorifi-device-integration.js",
-      "zorifi-touch-workspace.css"
+      "zorifi-touch-workspace.css",
+      "zorifi-sfx.js",
+      "zorifi-editor-workbench.js",
+      "zorifi-editor-workbench.css",
+      "zorifi-workbench-integration.js",
+      "zorifi-vanessa-chat.css"
     ],
     "win": {
       "target": "nsis",

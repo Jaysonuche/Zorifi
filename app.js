@@ -375,6 +375,9 @@ const soundEffects = [
   {id:'soft-tap',name:'Soft Tap',artist:'Zorifi SFX',category:'ASMR',mood:'Gentle texture',bpm:66,duration:2.6,key:56,color:'#bd78df',soundEffect:'asmr'},
   {id:'paper-brush',name:'Paper Brush',artist:'Zorifi SFX',category:'ASMR',mood:'Close texture',bpm:62,duration:3.1,key:50,color:'#b99170',soundEffect:'asmr'}
 ];
+// The sound-design bank is generated locally at stereo 32 kHz. Legacy cues
+// remain available so existing projects continue to reopen correctly.
+if(window.ZorifiSFX)soundEffects.unshift(...window.ZorifiSFX.CATALOG);
 const allAudioItems=[...audioTracks,...soundEffects];
 const demoClips = JSON.parse(JSON.stringify(state.clips));
 const demoMedia = JSON.parse(JSON.stringify(state.mediaAssets));
@@ -721,9 +724,24 @@ function scheduleProjectSave(delay=450){
   if(state.view!=='editor'||!state.projectId)return;writeRecoveryCheckpoint();clearTimeout(autosaveTimer);const indicator=document.querySelector('.save-state');if(indicator)indicator.textContent='Saving…';autosaveTimer=setTimeout(()=>{autosaveTimer=null;saveProject();},delay);
 }
 
-async function loadProject(project) {
+async function loadProject(project,{signal,guard,beforeCommit}={}) {
   project=ProjectModel.migrateProject(recoveredProject(project));
   if(!project)throw new Error('This project file is damaged or unsupported.');
+  const ownerId=currentUser?.id||'guest',requestId=loadProject.requestId=(loadProject.requestId||0)+1,guarded=Boolean(signal||guard||beforeCommit),stagedAssets=JSON.parse(JSON.stringify(project.mediaAssets||[])),stagedClips=JSON.parse(JSON.stringify(project.clips||[])),existingUrls=new Set(state.mediaAssets.map(asset=>asset.url));let committed=false;
+  const check=()=>{if(signal?.aborted||loadProject.requestId!==requestId||(currentUser?.id||'guest')!==ownerId||guard?.()===false)throw new DOMException('Project opening was cancelled or its workspace changed.','AbortError');};
+  try{
+  check();stagedClips.filter(clip=>clip.type==='video').forEach(clip=>VisualTools.ensure(clip));
+  if(guarded){
+    const db=await openMediaDatabase();check();
+    // Capture the owner in each key; another sign-in must never change a pending read.
+    await Promise.all(stagedAssets.filter(asset=>asset.localFile).map(async asset=>{try{check();const blob=await new Promise((resolve,reject)=>{const transaction=db.transaction(MEDIA_STORE_NAME,'readonly'),request=transaction.objectStore(MEDIA_STORE_NAME).get(`${ownerId}::${project.id}::${asset.id}`),abort=()=>{try{transaction.abort();}catch{}};signal?.addEventListener('abort',abort,{once:true});const finish=(callback,value)=>{signal?.removeEventListener('abort',abort);callback(value);};request.onsuccess=()=>finish(resolve,request.result?.blob||null);request.onerror=()=>finish(reject,request.error||new Error('Could not restore media'));transaction.onabort=()=>finish(reject,new DOMException('Media restore cancelled.','AbortError'));});check();if(blob){asset.url=editorResources.createManagedUrl(blob);asset.persisted=true;}}catch(error){if(error.name!=='AbortError')console.warn('Zorifi media restore failed',error);}}));
+  }else await restoreProjectMedia(project.id,stagedAssets);
+  check();
+  stagedAssets.filter(asset=>asset.builtin&&!asset.audioTrackId&&/^assets\/template-sounds\/[a-z0-9-]+\.wav$/.test(asset.src||'')).forEach(asset=>{asset.url=asset.src;});
+  stagedAssets.filter(asset=>asset.builtin&&asset.audioTrackId).forEach(asset=>{const track=allAudioItems.find(item=>item.id===asset.audioTrackId);if(track)asset.url=createOriginalTrackUrl(track);});
+  check();
+  if(beforeCommit){const result=beforeCommit(project);if(result&&typeof result.then==='function')throw new Error('Project commit must be synchronous.');}
+  check();
   releaseProjectMediaUrls();
   state.projectId=project.id; state.currentProject=project.name; state.duration=project.duration || 30;
   state.currentTime=project.currentTime || 0; state.ratio=project.ratio || '16 / 9';
@@ -731,17 +749,16 @@ async function loadProject(project) {
   state.frameWidth=project.frameWidth || null; state.frameHeight=project.frameHeight || null;
   state.frameSourceVideoId=project.frameSourceVideoId || ((project.mediaAssets || []).some(asset=>asset.type==='video')?'legacy':null);
   state.hasCaptions=Boolean(project.hasCaptions); state.zoom=project.zoom || 100;state.panelWidth=Math.max(340,Math.min(620,project.panelWidth||380));state.panelCollapsed=Boolean(project.panelCollapsed);state.inspectorWidth=Math.max(280,Math.min(520,project.inspectorWidth||300));state.inspectorCollapsed=Boolean(project.inspectorCollapsed);state.timelineHeight=Math.max(210,Math.min(600,project.timelineHeight||330));state.timelineCollapsed=Boolean(project.timelineCollapsed);
-  state.activePanel=project.activePanel || 'media';state.textSection=project.textSection||'templates';state.effectSection=project.effectSection||'effects';state.audioSection=project.audioSection||'sound-effects';state.soundCategory=project.soundCategory||'Trending'; state.clips=JSON.parse(JSON.stringify(project.clips || []));state.clips.filter(clip=>clip.type==='video').forEach(clip=>VisualTools.ensure(clip));
-  state.mediaAssets=JSON.parse(JSON.stringify(project.mediaAssets || []));
-  await restoreProjectMedia(project.id,state.mediaAssets);
-  state.mediaAssets.filter(asset=>asset.builtin&&!asset.audioTrackId&&/^assets\/template-sounds\/[a-z0-9-]+\.wav$/.test(asset.src||'')).forEach(asset=>{asset.url=asset.src;});
-  state.mediaAssets.filter(asset=>asset.builtin&&asset.audioTrackId).forEach(asset=>{const track=allAudioItems.find(item=>item.id===asset.audioTrackId);if(track)asset.url=createOriginalTrackUrl(track);});
+  state.activePanel=project.activePanel || 'media';state.textSection=project.textSection||'templates';state.effectSection=project.effectSection||'effects';state.audioSection=project.audioSection||'sound-effects';state.soundCategory=project.soundCategory||'Trending'; state.clips=stagedClips;
+  state.mediaAssets=stagedAssets;
   state.proSettings={...state.proSettings,...(project.proSettings||{})};state.smartSettings={...state.smartSettings,...(project.smartSettings||{})};state.captionSettings={...state.captionSettings,...(project.captionSettings||{})};state.scenePlan=project.scenePlan?JSON.parse(JSON.stringify(project.scenePlan)):null;state.markers=JSON.parse(JSON.stringify(project.markers||[]));
   state.trackStates=Object.fromEntries([...new Set([0,1,2,3,4,...state.clips.map(clip=>clip.track),...Object.keys(project.trackStates||{}).map(Number)])].map(track=>[track,{locked:false,hidden:false,muted:false,solo:false,...project.trackStates?.[track]}]));state.timelineTool='select';state.snapping=true;
   state.favorite=Boolean(project.favorite);state.folder=project.folder||'Unfiled';state.category=project.category||'Draft';state.status=project.status||'draft';state.lastOpenedAt=new Date().toISOString();state.creatorSettings={...state.creatorSettings,...(project.creatorSettings||{}),workspaceMode:CreatorPlatform.projectWorkspaceType(project)};state.previewQuality=state.creatorSettings.previewQuality||'auto';state.loopPlayback=Boolean(state.creatorSettings.loopPlayback);state.loopStart=Number(state.creatorSettings.loopStart)||0;state.loopEnd=Number(state.creatorSettings.loopEnd)||0;
   state.selected=null;state.mobileInspectorOpen=false;state.mobileToolSheetOpen=false;state.mobileTimelineExpanded=false;const restoredClip=state.clips.find(clip=>clip.type==='video'&&state.mediaAssets.some(asset=>asset.id===clip.mediaId&&asset.url)),restoredAsset=restoredClip&&state.mediaAssets.find(asset=>asset.id===restoredClip.mediaId);state.mediaUrl=restoredAsset?.url||null; state.mediaType=restoredAsset?.type||project.mediaType||null;
   state.missingMedia=state.mediaAssets.some(asset=>asset.localFile&&!asset.url)||state.clips.some(clip=>clip.localFile&&!state.mediaAssets.some(asset=>asset.id===clip.mediaId&&asset.url));
-  editorWorkspaceMode=state.creatorSettings?.workspaceMode==='music'?'music':'video';selectProjectLibraryWorkspace(editorWorkspaceMode,{refresh:false});
+  committed=true;editorWorkspaceMode=state.creatorSettings?.workspaceMode==='music'?'music':'video';selectProjectLibraryWorkspace(editorWorkspaceMode,{refresh:false});
+  return {committed:true,projectId:project.id};
+  }finally{if(!committed)stagedAssets.filter(asset=>typeof asset.url==='string'&&asset.url.startsWith('blob:')&&!existingUrls.has(asset.url)).forEach(asset=>{try{revokeManagedUrl(asset.url);}catch{}});}
 }
 
 function fmt(seconds) {
@@ -771,8 +788,9 @@ function render() {
   if (state.view === 'scenes') { renderZorifiScenes(); return; }
   if (state.view === 'editor' && editorWorkspaceMode==='music') { renderMusicEditor(); return; }
   const selected = state.clips.find(c => c.id === state.selected);
+  const ratioParts=String(state.ratio||'16 / 9').split('/').map(Number),previewRatio=ratioParts[0]/ratioParts[1]||16/9;
   app.innerHTML = `
-    <main data-view="editor" class="app-shell ${runtimeMode.touch?'touch-editor platform-mobile-editor':''} ${runtimeMode.platform}-editor platform-${runtimeMode.platform}-editor ${state.panelCollapsed?'panel-collapsed':''} ${state.inspectorCollapsed?'inspector-collapsed':''} ${state.timelineCollapsed?'timeline-collapsed':''} ${state.mobileTimelineExpanded?'mobile-timeline-expanded':''} ${runtimeMode.platform==='desktop'&&vanessaOpen?'vanessa-panel-open':''} ${runtimeMode.platform==='desktop'&&vanessaOpen&&vanessaPanelLayout.mode==='floating'?'vanessa-floating-open':'vanessa-docked'}" style="--panel-width:${state.panelCollapsed?54:state.panelWidth}px;--inspector-width:${state.inspectorCollapsed?42:state.inspectorWidth}px;--timeline-height:${state.timelineCollapsed?42:state.timelineHeight}px;--vanessa-width:${Math.max(280,Math.min(460,vanessaPanelLayout.expanded?Math.max(400,vanessaPanelLayout.width):vanessaPanelLayout.width))}px">
+    <main data-view="editor" class="app-shell ${runtimeMode.touch?'touch-editor platform-mobile-editor':''} ${runtimeMode.platform}-editor platform-${runtimeMode.platform}-editor ${state.panelCollapsed?'panel-collapsed':''} ${state.inspectorCollapsed?'inspector-collapsed':''} ${state.timelineCollapsed?'timeline-collapsed':''} ${state.mobileTimelineExpanded?'mobile-timeline-expanded':''} ${runtimeMode.platform==='desktop'&&vanessaOpen?'vanessa-panel-open':''} ${runtimeMode.platform==='desktop'&&vanessaOpen&&vanessaPanelLayout.mode==='floating'?'vanessa-floating-open':'vanessa-docked'}" style="--preview-ratio:${previewRatio};--panel-width:${state.panelCollapsed?54:state.panelWidth}px;--inspector-width:${state.inspectorCollapsed?42:state.inspectorWidth}px;--timeline-height:${state.timelineCollapsed?42:state.timelineHeight}px;--vanessa-width:${Math.max(280,Math.min(460,vanessaPanelLayout.expanded?Math.max(400,vanessaPanelLayout.width):vanessaPanelLayout.width))}px">
       <header class="topbar">
         <button class="brand brand-button" data-action="home" aria-label="Back to projects"><span class="mobile-editor-back">‹</span><span class="brand-mark">${icons.logo}</span><span>zorifi</span></button>
         <label class="studio-search" title="Search project media"><span>${icons.search}</span><input data-studio-search value="${esc(mediaLibraryQuery)}" placeholder="Search media, or ask Vanessa…" aria-label="Search project media or ask Vanessa"></label>
@@ -785,13 +803,13 @@ function render() {
         <button class="icon-btn" data-action="redo" ${state.redo.length ? '' : 'disabled'} title="Redo">${icons.redo}</button>
         <button class="responsive-tools-toggle" data-action="responsive-tools" aria-expanded="${state.responsivePanel==='tools'}">Tools</button>
         <button class="responsive-properties-toggle" data-action="responsive-properties" aria-expanded="${state.responsivePanel==='inspector'}">Properties</button>
-        <button class="touch-vanessa-control" data-action="vanessa" aria-label="Open Vanessa AI assistant"><span>✦</span><b>Vanessa</b></button><button class="export-btn" data-action="export">${runtimeMode.touch?'Export':'Export'}</button>
+        <button class="touch-vanessa-control" data-action="vanessa" aria-label="Open Vanessa AI assistant"><span class="vanessa-control-core">${vanessaEnergyCoreMarkup()}</span><b>Vanessa</b></button><button class="export-btn" data-action="export">${runtimeMode.touch?'Export':'Export'}</button>
         <button class="avatar avatar-button" data-action="account-settings" title="Account settings">${userAvatarMarkup()}</button>
       </header>
 
       <section class="workspace">
-        <aside class="left-panel ${runtimeMode.touch&&selected&&!['keyframes','beats','audio','animation','effects','filters','transitions','captions','text','color','speed'].includes(state.activePanel)?'mobile-clip-tools':''}">
-          <nav class="sidebar" data-scroll-memory="editor:${state.projectId}:tool-navigation">${runtimeMode.touch&&selected&&!['keyframes','beats','audio','animation','effects','filters','transitions','captions','text','color','speed'].includes(state.activePanel)?mobileClipToolbar(selected):`
+        <aside class="left-panel ${runtimeMode.touch&&selected&&state.activePanel==='clip'?'mobile-clip-tools':''}">
+          <nav class="sidebar" data-scroll-memory="editor:${state.projectId}:tool-navigation">${runtimeMode.touch&&selected&&state.activePanel==='clip'?mobileClipToolbar(selected):`
             ${runtimeMode.platform==='desktop'?`<div class="desktop-studio-nav"><button data-action="home">⌂<span>Home</span></button><button data-action="home-section" data-home-target="projects">▣<span>Projects</span></button><button class="${state.activePanel==='media'?'active':''}" data-action="panel" data-panel="media">${icons.media}<span>Media</span></button><button data-action="home-section" data-home-target="templates">◇<span>Templates</span></button><button data-action="ai-video">✦<span>AI Create</span></button><button data-action="vanessa">V<span>Vanessa</span></button><small>TOOLS</small></div>`:''}
             <button class="tool-btn ${state.activePanel==='media'?'active':''}" title="Edit" data-action="panel" data-panel="media">${icons.media}<span class="tool-label">Edit</span></button>
             <small class="tool-group-label">CREATE</small>
@@ -823,7 +841,7 @@ function render() {
             <div class="sidebar-flex-spacer"></div>
             <div class="desktop-sidebar-brand" aria-label="Zorifi — your ideas, our tools, limitless"><span>${icons.logo}</span><b>ZORIFI</b><small>Your ideas. Our tools. Limitless.</small></div>`}
           </nav>
-          <div class="media-panel" data-scroll-memory="editor:${state.projectId}:panel:${state.activePanel}">${runtimeMode.touch&&selected&&!['keyframes','beats','audio','animation','effects','filters','transitions','captions','text','color','speed'].includes(state.activePanel)?mobileClipQuickPanel(selected):panelContent()}</div>
+          <div class="media-panel" data-scroll-memory="editor:${state.projectId}:panel:${state.activePanel}">${runtimeMode.touch&&selected&&state.activePanel==='clip'?mobileClipQuickPanel(selected):panelContent()}</div>
           <button class="panel-collapse" data-action="toggle-panel" title="${state.panelCollapsed?'Expand':'Minimize'} tool panel" aria-label="${state.panelCollapsed?'Expand':'Minimize'} tool panel">${state.panelCollapsed?'›':'‹'}</button>
           <div class="panel-resize-handle" data-panel-resize title="Drag to resize · double-click to reset"></div>
         </aside>
@@ -876,7 +894,7 @@ function render() {
       ${timeline()}
       ${runtimeMode.touch&&selected&&state.mobileInspectorOpen?mobileClipInspector(selected):''}
       ${runtimeMode.touch&&state.mobileToolSheetOpen?mobileToolSheet():''}
-      ${runtimeMode.touch?`<nav class="mobile-editor-dock" aria-label="Editor tools"><button data-action="panel" data-panel="media" class="${state.activePanel==='media'&&!state.mobileToolSheetOpen?'active':''}" aria-label="Open editing media">${icons.media}<span>Edit</span></button><button data-action="panel" data-panel="text" class="${state.activePanel==='text'&&!state.mobileToolSheetOpen?'active':''}" aria-label="Open text tools">${icons.text}<span>Text</span></button><button data-action="panel" data-panel="audio" class="${state.activePanel==='audio'&&!state.mobileToolSheetOpen?'active':''}" aria-label="Open audio tools">${icons.audio}<span>Audio</span></button><button data-action="panel" data-panel="effects" class="${state.activePanel==='effects'&&!state.mobileToolSheetOpen?'active':''}" aria-label="Open effects"><b>FX</b><span>Effects</span></button><button data-action="mobile-tools" class="${state.mobileToolSheetOpen||mobileSecondaryPanelActive()?'active':''}" aria-haspopup="dialog" aria-expanded="${state.mobileToolSheetOpen}" aria-label="Open all mobile tools"><b>•••</b><span>More</span></button></nav>`:''}
+      ${runtimeMode.touch?mobileEditorDock():''}
     </main>
     <div class="toast" id="toast"></div>
   `;
@@ -891,6 +909,29 @@ function render() {
 }
 
 function mobileClipInspector(clip){return `<section class="mobile-clip-inspector" role="dialog" aria-label="Clip adjustments"><header><span></span><div><b>${esc(clip.name)}</b><small>${trackLabel(clip.track)} · ${capitalize(clip.type)} controls</small></div><button data-action="close-mobile-properties" aria-label="Close clip adjustments">×</button></header><div class="mobile-inspector-scroll">${inspector(clip)}</div></section>`;}
+
+function mobileEditorDock(){
+  const tools=[['media','Edit','▣'],['text','Text','T'],['audio','Audio','♪'],['effects','Effects','FX'],['animation','Animation','◇'],['filters','Filters','◐'],['transitions','Transitions','⇄'],['overlay','Overlay','▱'],['captions','Captions','CC'],['color','Adjust','☼'],['speed','Speed','1×'],['keyframes','Keyframes','◆'],['background','Remove BG','✂'],['mask','Mask','◒'],['chroma','Chroma key','CK'],['pro','Transform','↗'],['beats','Beat sync','BPM'],['collage','Collage','▦'],['transcribe','Transcribe','TXT']];
+  return `<nav class="mobile-editor-dock" aria-label="Editor tools" data-horizontal-tool-rail data-scroll-memory="editor:${state.projectId}:mobile-dock">${tools.map(([panel,label,glyph])=>`<button data-action="panel" data-panel="${panel}" class="${state.activePanel===panel&&state.responsivePanel==='tools'?'active':''}" aria-label="Open ${label.toLowerCase()} tools"><b>${glyph}</b><span>${label}</span></button>`).join('')}${[['select','Select','↖'],['razor','Razor','✂'],['slip','Slip','⇆']].map(([id,label,glyph])=>`<button data-timeline-tool="${id}" class="${state.timelineTool===id?'active':''}" aria-label="${label} tool"><b>${glyph}</b><span>${label}</span></button>`).join('')}<button data-action="toggle-snapping" aria-label="Toggle snapping"><b>⌁</b><span>Snap</span></button><button data-action="ripple-delete" aria-label="Ripple delete"><b>⇤</b><span>Ripple delete</span></button><button data-action="mobile-properties" ${state.selected?'':'disabled'} aria-label="Open selected clip controls"><b>☷</b><span>Clip controls</span></button><button data-zorifi-pocket aria-label="Open Pocket Select"><b>⌖</b><span>Pocket Select</span></button><button data-zorifi-pulse aria-label="Open Pulse Desk"><b>⌁</b><span>Pulse Desk</span></button><button data-action="mobile-templates" aria-label="Open templates"><b>▦</b><span>Templates</span></button><button data-action="fullscreen-preview" aria-label="Fullscreen preview"><b>⛶</b><span>Preview</span></button><button data-action="mobile-music-editor" aria-label="Open music editor"><b>♫</b><span>Music studio</span></button><button data-action="vanessa" aria-label="Open Vanessa"><b>✦</b><span>Vanessa</span></button></nav>`;
+}
+
+function mobileTimelineTracks(tracks){
+  if(!runtimeMode.touch||editorWorkspaceMode==='music')return tracks;
+  const count=innerHeight<540?1:innerHeight<780?2:3;
+  let start=Math.max(0,Math.min(tracks.length-1,Number(state.mobileTrackStart)||0));
+  const selectedTrack=state.clips.find(clip=>clip.id===state.selected)?.track,selectedIndex=tracks.indexOf(selectedTrack);
+  if(selectedIndex>=0&&(selectedIndex<start||selectedIndex>=start+count))start=Math.max(0,selectedIndex-count+1);
+  state.mobileTrackStart=start;
+  return tracks.slice(start,start+count);
+}
+
+function showMobileTrackControls(track){
+  if(!timelineTrackOrder().includes(track))return;
+  const current=trackState(track),label=current.name||trackLabel(track),audio=trackKind(track)==='audio';
+  const wrap=document.createElement('div');wrap.className='modal-backdrop mobile-layer-backdrop';
+  wrap.innerHTML=`<section class="modal mobile-layer-dialog" role="dialog" aria-modal="true" aria-label="${esc(label)} layer controls"><header><b>${esc(label)} layer</b><button data-layer-close aria-label="Close layer controls">×</button></header>${[['locked','Lock layer'],[audio?'muted':'hidden',audio?'Mute layer':'Hide layer'],['solo','Solo layer']].map(([key,text])=>`<button data-layer-toggle="${key}" aria-pressed="${Boolean(current[key])}">${text}<span>${current[key]?'On':'Off'}</span></button>`).join('')}</section>`;
+  const previousFocus=document.activeElement,lifecycle=new AbortController();const close=()=>{lifecycle.abort();wrap.remove();if(previousFocus?.isConnected)previousFocus.focus();};wrap.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close();}if(event.key==='Tab'){const controls=[...wrap.querySelectorAll('button')],first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}},{signal:lifecycle.signal});wrap.querySelector('[data-layer-close]').onclick=close;wrap.addEventListener('click',event=>{if(event.target===wrap)close();});wrap.querySelectorAll('[data-layer-toggle]').forEach(button=>button.onclick=()=>{toggleTrackState(track,button.dataset.layerToggle);close();});document.body.append(wrap);wrap.querySelector('button').focus();
+}
 
 function mobileSecondaryPanelActive(){return ['overlay','captions','transcribe','filters','animation','transitions','keyframes','color','speed','background','mask','chroma','pro','smart','beats','collage'].includes(state.activePanel)||state.mobileTimelineExpanded;}
 
@@ -1959,7 +2000,7 @@ function musicMasterMarkup(){
 
 function renderMusicEditor(){
   captureEditorScroll();const selected=selectedAudioClip()||state.clips.find(item=>item.type==='audio'&&state.currentTime>=item.start&&state.currentTime<item.start+item.duration)||null,studio=musicStudioSettings();
-  app.innerHTML=`<main data-view="music-editor" class="music-editor-screen hybrid-music-studio app-shell ${runtimeMode.touch?'touch-music-editor platform-mobile-music-editor':''} ${runtimeMode.platform}-music-editor" style="--timeline-height:${state.timelineCollapsed?42:state.timelineHeight}px"><header class="music-topbar"><button class="brand brand-button" data-action="home" aria-label="Back to projects"><span class="brand-mark">${icons.logo}</span><span>zorifi</span></button><span class="music-workspace-badge">AI MUSIC STUDIO</span><button class="project-name" data-action="switch-project"><span>${esc(state.currentProject)}</span>${icons.chevron}</button><div class="music-session-controls"><label><span>BPM</span><input type="number" min="40" max="220" value="${studio.bpm}" data-music-bpm aria-label="Project BPM"></label><label><span>KEY</span><select data-music-key aria-label="Project key">${['C','Cm','D','Dm','E','Em','F','F#m','G','Gm','A','Am','B','Bm'].map(value=>`<option ${studio.key===value?'selected':''}>${value}</option>`).join('')}</select></label></div><div class="top-spacer"></div>${musicPresenceMarkup()}<button class="music-mode-switch" data-music-video-editor>Video Editor</button><button class="save-state" data-action="save-now">Saved</button><button class="icon-btn" data-action="undo" ${state.undo.length?'':'disabled'} title="Undo">${icons.undo}</button><button class="icon-btn" data-action="redo" ${state.redo.length?'':'disabled'} title="Redo">${icons.redo}</button><button class="touch-vanessa-control music-vanessa-control" data-action="vanessa" aria-label="Open Vanessa AI assistant"><span>✦</span><b>Vanessa</b></button><button class="export-btn music-export-btn" data-music-export>Export mix</button><button class="avatar avatar-button" data-action="account-settings">${userAvatarMarkup()}</button></header>${musicPromptBar()}${runtimeMode.touch?`<nav class="music-mobile-nav" aria-label="Music editor areas"><button class="active" data-music-mobile-panel="library">Stems</button><button data-music-mobile-panel="monitor">Arrange</button><button data-music-mobile-panel="mixer">Mix</button></nav>`:''}<section class="music-workspace">${musicLibraryMarkup()}<section class="music-monitor"><header><div><small>ARRANGEMENT</small><h1>${selected?esc(selected.name):'Your composition'}</h1></div><div class="music-monitor-actions"><button data-import-audio>${icons.plus} Import audio</button><span>${selected?`${fmtShort(selected.start)} · ${fmtShort(selected.duration)}`:`${state.clips.filter(item=>item.type==='audio').length} timeline clips`}</span></div></header><div class="music-waveform-stage">${musicWaveformMarkup(selected)}</div><div class="music-transport"><span><b>${fmt(state.currentTime)}</b> / ${fmt(state.duration)}</span><div><button data-action="jump-back" title="Back 5 seconds">${icons.back}</button><button data-action="frame-back" title="Previous frame">|‹</button><button class="music-play" data-action="play">${state.playing?icons.pause:icons.play}</button><button data-action="frame-forward" title="Next frame">›|</button><button data-action="jump-forward" title="Forward 5 seconds">${icons.forward}</button></div><button class="${state.loopPlayback?'active':''}" data-action="loop-playback">↻ Loop</button></div><div class="music-quick-tools"><button data-action="split">✂ Split</button><button data-audio-command="duplicate">⧉ Duplicate</button><button data-action="ripple-delete">⇤ Ripple delete</button><button data-action="panel" data-panel="beats">BPM Detect beats</button><button data-audio-command="keyframes">◆ Volume keyframes</button></div></section>${musicMasterMarkup()}</section>${timeline()}<div class="toast" id="toast"></div></main>`;
+  app.innerHTML=`<main data-view="music-editor" class="music-editor-screen hybrid-music-studio app-shell ${runtimeMode.touch?'touch-music-editor platform-mobile-music-editor':''} ${runtimeMode.platform}-music-editor" style="--timeline-height:${state.timelineCollapsed?42:state.timelineHeight}px"><header class="music-topbar"><button class="brand brand-button" data-action="home" aria-label="Back to projects"><span class="brand-mark">${icons.logo}</span><span>zorifi</span></button><span class="music-workspace-badge">AI MUSIC STUDIO</span><button class="project-name" data-action="switch-project"><span>${esc(state.currentProject)}</span>${icons.chevron}</button><div class="music-session-controls"><label><span>BPM</span><input type="number" min="40" max="220" value="${studio.bpm}" data-music-bpm aria-label="Project BPM"></label><label><span>KEY</span><select data-music-key aria-label="Project key">${['C','Cm','D','Dm','E','Em','F','F#m','G','Gm','A','Am','B','Bm'].map(value=>`<option ${studio.key===value?'selected':''}>${value}</option>`).join('')}</select></label></div><div class="top-spacer"></div>${musicPresenceMarkup()}<button class="music-mode-switch" data-music-video-editor>Video Editor</button><button class="save-state" data-action="save-now">Saved</button><button class="icon-btn" data-action="undo" ${state.undo.length?'':'disabled'} title="Undo">${icons.undo}</button><button class="icon-btn" data-action="redo" ${state.redo.length?'':'disabled'} title="Redo">${icons.redo}</button><button class="touch-vanessa-control music-vanessa-control" data-action="vanessa" aria-label="Open Vanessa AI assistant"><span class="vanessa-control-core">${vanessaEnergyCoreMarkup()}</span><b>Vanessa</b></button><button class="export-btn music-export-btn" data-music-export>Export mix</button><button class="avatar avatar-button" data-action="account-settings">${userAvatarMarkup()}</button></header>${musicPromptBar()}${runtimeMode.touch?`<nav class="music-mobile-nav" aria-label="Music editor areas"><button class="active" data-music-mobile-panel="library">Stems</button><button data-music-mobile-panel="monitor">Arrange</button><button data-music-mobile-panel="mixer">Mix</button></nav>`:''}<section class="music-workspace">${musicLibraryMarkup()}<section class="music-monitor"><header><div><small>ARRANGEMENT</small><h1>${selected?esc(selected.name):'Your composition'}</h1></div><div class="music-monitor-actions"><button data-import-audio>${icons.plus} Import audio</button><span>${selected?`${fmtShort(selected.start)} · ${fmtShort(selected.duration)}`:`${state.clips.filter(item=>item.type==='audio').length} timeline clips`}</span></div></header><div class="music-waveform-stage">${musicWaveformMarkup(selected)}</div><div class="music-transport"><span><b>${fmt(state.currentTime)}</b> / ${fmt(state.duration)}</span><div><button data-action="jump-back" title="Back 5 seconds">${icons.back}</button><button data-action="frame-back" title="Previous frame">|‹</button><button class="music-play" data-action="play">${state.playing?icons.pause:icons.play}</button><button data-action="frame-forward" title="Next frame">›|</button><button data-action="jump-forward" title="Forward 5 seconds">${icons.forward}</button></div><button class="${state.loopPlayback?'active':''}" data-action="loop-playback">↻ Loop</button></div><div class="music-quick-tools"><button data-action="split">✂ Split</button><button data-audio-command="duplicate">⧉ Duplicate</button><button data-action="ripple-delete">⇤ Ripple delete</button><button data-action="panel" data-panel="beats">BPM Detect beats</button><button data-audio-command="keyframes">◆ Volume keyframes</button></div></section>${musicMasterMarkup()}</section>${timeline()}<div class="toast" id="toast"></div></main>`;
   app.querySelector('[data-view="music-editor"]')?.classList.toggle('timeline-collapsed',state.timelineCollapsed);
   bindEvents();bindMusicEditorEvents();refreshMusicProviderControls();restoreEditorScroll();syncVideo();mountVanessa();connectMusicCollaboration();scheduleProjectSave();
 }
@@ -2087,7 +2128,7 @@ function audioTrackCard(track){
   return `<article class="audio-track" draggable="true" data-audio-track="${track.id}" data-audio-genre="${track.category}">
     <button class="audio-play" data-audio-preview="${track.id}" style="--track-color:${track.color}" title="Preview ${track.name}">${icons.play}</button>
     <span class="audio-track-copy"><b>${track.name}</b><small>${track.artist} · ${track.mood}</small></span>
-    <span class="audio-bpm">${track.bpm}<small>BPM</small></span>
+    <span class="audio-bpm">${track.soundEffect?track.duration.toFixed(track.duration<1?2:1):track.bpm}<small>${track.soundEffect?'SEC':'BPM'}</small></span>
     <button class="audio-add" data-audio-add="${track.id}" title="Add ${track.name} to timeline">${icons.plus}</button>
   </article>`;
 }
@@ -2322,12 +2363,12 @@ function effectInspector(c) {
 }
 
 function timeline() {
-  const timelineTracks=timelineTrackOrder();
+  const allTimelineTracks=timelineTrackOrder(),timelineTracks=mobileTimelineTracks(allTimelineTracks);
   const timelineIsEmpty=timelineTracks.length===0;
-  const timelineWidth=Math.max(runtimeMode.touch?700:600,Math.round(Math.max(1,state.duration)*state.zoom*.45));
+  const timelineWidth=timelineWidthForZoom(state.zoom);
   return `<section class="timeline-area"><div class="timeline-resize-handle" data-timeline-resize role="separator" aria-orientation="horizontal" aria-label="Resize timeline height" aria-valuemin="210" aria-valuemax="600" aria-valuenow="${state.timelineHeight}" tabindex="${runtimeMode.platform==='desktop'?0:-1}" title="Drag to resize · Arrow keys adjust · double-click resets"><span>Resize timeline</span></div>
     <div class="timeline-toolbar">
-      ${runtimeMode.touch?`<div class="mobile-timeline-status"><small>${state.selected?'SELECTED':'PLAYHEAD'}</small><strong>${state.selected?esc(state.clips.find(clip=>clip.id===state.selected)?.name||'Clip'):fmtShort(state.currentTime)}</strong></div><button class="icon-btn" data-action="undo" ${state.undo.length?'':'disabled'} title="Undo" aria-label="Undo">${icons.undo}</button><button class="icon-btn" data-action="redo" ${state.redo.length?'':'disabled'} title="Redo" aria-label="Redo">${icons.redo}</button><button class="icon-btn" data-action="split" title="Split selected clip" aria-label="Split selected clip">${icons.split}</button><button class="icon-btn" data-action="mobile-duplicate" title="Duplicate selected clip" aria-label="Duplicate selected clip"><b>⧉</b></button><button class="icon-btn" data-action="delete" title="Delete selected clip" aria-label="Delete selected clip">${icons.trash}</button><div class="spacer"></div><button class="timeline-text-btn" data-action="zoom-fit" title="Fit sequence">Fit</button><button class="timeline-focus-button ${state.mobileTimelineExpanded?'active':''}" data-action="mobile-timeline" aria-pressed="${state.mobileTimelineExpanded}" title="${state.mobileTimelineExpanded?'Balanced workspace':'Focus timeline'}">${state.mobileTimelineExpanded?'▣':'▤'}</button>`:`
+      ${runtimeMode.touch?`<div class="mobile-timeline-status"><small>${state.selected?'SELECTED':'PLAYHEAD'}</small><strong>${state.selected?esc(state.clips.find(clip=>clip.id===state.selected)?.name||'Clip'):fmtShort(state.currentTime)}</strong></div><button class="icon-btn" data-action="undo" ${state.undo.length?'':'disabled'} title="Undo" aria-label="Undo">${icons.undo}</button><button class="icon-btn" data-action="redo" ${state.redo.length?'':'disabled'} title="Redo" aria-label="Redo">${icons.redo}</button><button class="icon-btn" data-action="split" title="Split selected clip" aria-label="Split selected clip">${icons.split}</button><button class="icon-btn" data-action="mobile-duplicate" title="Duplicate selected clip" aria-label="Duplicate selected clip"><b>⧉</b></button><button class="icon-btn" data-action="delete" title="Delete selected clip" aria-label="Delete selected clip">${icons.trash}</button><div class="spacer"></div><button class="timeline-text-btn" data-action="zoom-fit" title="Fit sequence">Fit</button>${editorWorkspaceMode!=='music'&&allTimelineTracks.length>timelineTracks.length?`<label class="mobile-layer-select"><span>Layers</span><select data-mobile-track-start aria-label="Show timeline layers">${allTimelineTracks.map((track,index)=>`<option value="${index}" ${index===state.mobileTrackStart?'selected':''}>${esc(trackState(track).name||trackLabel(track))}</option>`).join('')}</select></label>`:''}<button class="timeline-focus-button ${state.mobileTimelineExpanded?'active':''}" data-action="mobile-timeline" aria-pressed="${state.mobileTimelineExpanded}" title="${state.mobileTimelineExpanded?'Balanced workspace':'Focus timeline'}">${state.mobileTimelineExpanded?'▣':'▤'}</button>`:`
       <button class="timeline-collapse ${state.timelineCollapsed?'is-collapsed':''}" data-action="toggle-timeline" title="${state.timelineCollapsed?'Maximize':'Minimize'} timeline" aria-label="${state.timelineCollapsed?'Maximize':'Minimize'} timeline"><svg class="timeline-caret" viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 12.5 3.5-4 3.5 4"/></svg></button>
       <div class="timeline-title"><small>SEQUENCE</small><strong>${esc(state.currentProject)}</strong></div>
       <div class="timeline-height-controls" aria-label="Timeline height"><button data-action="timeline-height-down" title="Reduce timeline height" aria-label="Reduce timeline height">Height −</button><button data-action="timeline-height-up" title="Increase timeline height" aria-label="Increase timeline height">Height +</button></div>
@@ -2345,12 +2386,12 @@ function timeline() {
     <div class="timeline-body tool-${state.timelineTool}">
       ${timelineToolRail()}
     <div class="timeline-scroll ${timelineIsEmpty?'empty':''}" data-scroll-memory="editor:${state.projectId}:timeline">
-        <div class="track-heads">${timelineIsEmpty?'<div class="empty-track-head"><b>+</b><small>Tracks appear here</small></div>':timelineTracks.map(trackHeader).join('')}</div>
+        <div class="track-heads">${timelineIsEmpty?'':timelineTracks.map(trackHeader).join('')}</div>
         <div class="timeline-content ${timelineIsEmpty?'empty':''}" style="width:${timelineWidth}px;min-width:${timelineWidth}px">
-          <div class="ruler"><div class="ruler-labels"><span>00:00</span><span>00:05</span><span>00:10</span><span>00:15</span><span>00:20</span><span>00:25</span><span>00:30</span></div>${state.markers.map(marker=>`<button class="sequence-marker" style="left:${marker.time/Math.max(1,state.duration)*100}%" title="${esc(marker.label)} · ${fmtShort(marker.time)}" data-marker-id="${marker.id}"></button>`).join('')}</div>
+          <div class="ruler"><div class="ruler-labels">${Array.from({length:7},(_,index)=>`<span>${fmtShort(state.duration*index/6)}</span>`).join('')}</div>${state.markers.map(marker=>`<button class="sequence-marker" style="left:${marker.time/Math.max(1,state.duration)*100}%" title="${esc(marker.label)} · ${fmtShort(marker.time)}" data-marker-id="${marker.id}"></button>`).join('')}</div>
           <div class="scrub-zone"></div>
-          ${timelineIsEmpty?`<div class="timeline-empty-drop" data-adaptive-track-drop><span>${icons.plus}</span><b>${runtimeMode.touch?'Add media to begin':'Drop media to begin'}</b><small>${runtimeMode.touch?'Tap + on any media item · matching tracks appear automatically':'Video creates V1 · Audio creates A1 · images can create an overlay layer'}</small></div>`:''}
-          ${timelineTracks.map(track => `<div class="track ${trackEnabled(track,trackKind(track)==='audio'?'audio':'visual')?'':'disabled'} ${trackState(track).collapsed?'collapsed':''}" data-track-lane="${track}" style="height:${trackState(track).collapsed?25:trackHeight(track)}px">${state.clips.filter(c=>c.track===track).map(clipHtml).join('')}<div class="track-resize-handle" data-track-resize="${track}" title="Drag to adjust ${trackLabel(track)} layer height · double-click to reset"></div></div>`).join('')}
+          ${timelineIsEmpty?`<div class="timeline-empty-drop" data-adaptive-track-drop><span>${icons.plus}</span><b>${runtimeMode.touch?'Add media to begin':'Drop media to begin'}</b><small>${runtimeMode.touch?'Choose your clips or photos from Edit below':'Video creates V1 · Audio creates A1 · images can create an overlay layer'}</small></div>`:''}
+          ${timelineTracks.map(track => `<div class="track ${trackEnabled(track,trackKind(track)==='audio'?'audio':'visual')?'':'disabled'} ${trackState(track).collapsed?'collapsed':''}" data-track-lane="${track}" style="height:${runtimeMode.touch&&editorWorkspaceMode!=='music'?58:trackState(track).collapsed?25:trackHeight(track)}px">${state.clips.filter(c=>c.track===track).map(clipHtml).join('')}<div class="track-resize-handle" data-track-resize="${track}" title="Drag to adjust ${trackLabel(track)} layer height · double-click to reset"></div></div>`).join('')}
           ${timelineIsEmpty?'':`<div class="timeline-new-track-drop" data-adaptive-track-drop title="Drop library media or drag a timeline clip here"><span>+</span> Drop media or a timeline clip here to create a new track</div><div class="playhead" style="left:${(state.currentTime/state.duration)*100}%"></div>`}
           ${timelineIsEmpty?'':'<div class="track-create-guide" data-track-create-guide><span>Release to create a new track</span></div>'}
         </div>
@@ -2366,6 +2407,7 @@ function timelineToolRail(){
 
 function trackHeader(track){
   const current=trackState(track),label=current.name||trackLabel(track),isAudio=trackKind(track)==='audio',visibilityLabel=isAudio?'Mute':'Hide';
+  if(runtimeMode.touch&&editorWorkspaceMode!=='music')return `<div class="track-head mobile-track-head ${current.locked?'locked':''}" data-track-head="${track}" style="height:58px"><button data-action="mobile-track-controls" data-track="${track}" aria-label="${esc(label)} layer controls"><b>${esc(label)}</b><span>${current.locked?'⌑':isAudio?'♪':'▣'}</span></button></div>`;
   return `<div class="track-head ${trackEnabled(track,isAudio?'audio':'visual')?'':'disabled'} ${current.collapsed?'collapsed':''}" data-track-head="${track}" style="height:${current.collapsed?25:trackHeight(track)}px"><b>${label}</b><div class="track-switches"><button class="track-collapse ${current.collapsed?'active':''}" data-track-toggle="collapsed" data-track="${track}" title="${current.collapsed?'Expand':'Minimize'} ${label}" aria-label="${current.collapsed?'Expand':'Minimize'} ${label}">${current.collapsed?'+':'−'}</button><button class="${current.locked?'active':''}" data-track-toggle="locked" data-track="${track}" title="${current.locked?'Unlock':'Lock'} ${label}" aria-label="${current.locked?'Unlock':'Lock'} ${label}">L</button><button class="${(isAudio?current.muted:current.hidden)?'active':''}" data-track-toggle="${isAudio?'muted':'hidden'}" data-track="${track}" title="${visibilityLabel} ${label}" aria-label="${visibilityLabel} ${label}">${isAudio?'M':'V'}</button><button class="${current.solo?'active':''}" data-track-toggle="solo" data-track="${track}" title="Solo ${label}" aria-label="Solo ${label}">S</button></div><div class="track-resize-handle track-head-resize" data-track-resize="${track}" title="Drag to adjust ${label} layer height · double-click to reset"></div></div>`;
 }
 
@@ -2408,19 +2450,35 @@ let mobileTimelineLastTap={clipId:null,time:0};
 function bindMobileTimelineClipGestures(element){
   if(!runtimeMode.touch)return;
   let timer=null,start=null;
-  const cancel=()=>{clearTimeout(timer);timer=null;};
+  const cancel=()=>{clearTimeout(timer);timer=null;};element._cancelMobileLongPress=cancel;
   element.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse'||event.target.closest('[data-trim],[data-clip-keyframe]'))return;start={x:event.clientX,y:event.clientY,id:event.pointerId};timer=setTimeout(()=>{element.dataset.longPressed='true';mobileHaptic([18,35,18]);showTimelineContextMenu({preventDefault(){},stopPropagation(){},clientX:start.x,clientY:start.y},element.dataset.clip);},520);});
   element.addEventListener('pointermove',event=>{if(start&&event.pointerId===start.id&&Math.hypot(event.clientX-start.x,event.clientY-start.y)>8)cancel();});
   element.addEventListener('pointerup',cancel);element.addEventListener('pointercancel',cancel);
 }
 
 function bindMobileTimelineGestures(){
-  if(innerWidth>1023)return;
+  if(!runtimeMode.touch)return;
   const scroller=document.querySelector('.timeline-scroll');if(!scroller)return;
+  const horizontalOnly=editorWorkspaceMode!=='music';
+  if(horizontalOnly){
+    scroller.scrollTop=0;
+    scroller.addEventListener('scroll',()=>{if(scroller.scrollTop!==0)scroller.scrollTop=0;},{passive:true});
+    scroller.addEventListener('wheel',event=>{if(event.ctrlKey)return;event.preventDefault();scroller.scrollLeft+=Math.abs(event.deltaX)>Math.abs(event.deltaY)?event.deltaX:event.deltaY;},{passive:false});
+  }
   const pointers=new Map();let initialDistance=0,initialZoom=state.zoom;
-  scroller.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse'||event.target.closest('[data-clip],[data-trim],[data-clip-keyframe],button,input,.ruler,.scrub-zone'))return;pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});scroller.setPointerCapture(event.pointerId);if(pointers.size===2){const points=[...pointers.values()];initialDistance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);initialZoom=state.zoom;scroller.classList.add('pinching');}} ,{passive:true});
-  scroller.addEventListener('pointermove',event=>{if(!pointers.has(event.pointerId))return;const previous=pointers.get(event.pointerId);pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});event.preventDefault();if(pointers.size===1){scroller.scrollLeft+=previous.x-event.clientX;scroller.scrollTop+=previous.y-event.clientY;}if(pointers.size===2&&initialDistance>0){const points=[...pointers.values()],distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);applyTimelineZoom(initialZoom*(distance/initialDistance));}},{passive:false});
-  const end=event=>{pointers.delete(event.pointerId);if(pointers.size<2){initialDistance=0;scroller.classList.remove('pinching');saveProject();}};scroller.addEventListener('pointerup',end);scroller.addEventListener('pointercancel',end);
+  scroller.addEventListener('pointerdown',event=>{if(!pointers.size)delete scroller.dataset.touchPanned;if(event.pointerType==='mouse'||event.target.closest('[data-trim],[data-clip-keyframe],button,input,select,.ruler,.scrub-zone')||(['razor','slip'].includes(state.timelineTool)&&event.target.closest('[data-clip]')))return;pointers.set(event.pointerId,{x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY,clip:event.target.closest('[data-clip]')});if(pointers.size===2){const points=[...pointers.values()];initialDistance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);initialZoom=state.zoom;scroller.classList.add('pinching');}},{passive:true});
+  scroller.addEventListener('pointermove',event=>{if(!pointers.has(event.pointerId))return;const previous=pointers.get(event.pointerId);pointers.set(event.pointerId,{...previous,x:event.clientX,y:event.clientY});if(Math.hypot(event.clientX-previous.startX,event.clientY-previous.startY)>8){scroller.setPointerCapture(event.pointerId);previous.clip?._cancelMobileLongPress?.();scroller.dataset.touchPanned='true';}event.preventDefault();if(pointers.size===1){scroller.scrollLeft+=previous.x-event.clientX;if(!horizontalOnly)scroller.scrollTop+=previous.y-event.clientY;}if(pointers.size===2&&initialDistance>0){const points=[...pointers.values()],distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);applyTimelineZoom(initialZoom*(distance/initialDistance));}},{passive:false});
+  scroller.addEventListener('click',event=>{if(scroller.dataset.touchPanned==='true'){delete scroller.dataset.touchPanned;event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
+  const end=event=>{pointers.get(event.pointerId)?.clip?._cancelMobileLongPress?.();pointers.delete(event.pointerId);if(pointers.size<2){initialDistance=0;scroller.classList.remove('pinching');saveProject();}};scroller.addEventListener('pointerup',end);scroller.addEventListener('pointercancel',end);
+  document.querySelectorAll('[data-horizontal-tool-rail]').forEach(rail=>{
+    let drag=null,moved=false;
+    rail.addEventListener('pointerdown',event=>{if(event.pointerType!=='mouse'||event.button!==0)return;drag={x:event.clientX,left:rail.scrollLeft,id:event.pointerId};moved=false;});
+    rail.addEventListener('pointermove',event=>{if(!drag)return;const dx=event.clientX-drag.x;if(Math.abs(dx)>5){moved=true;rail.setPointerCapture(event.pointerId);rail.scrollLeft=drag.left-dx;event.preventDefault();}});
+    rail.addEventListener('pointerup',()=>{drag=null;});rail.addEventListener('pointercancel',()=>{drag=null;});
+    rail.addEventListener('click',event=>{if(moved){event.preventDefault();event.stopImmediatePropagation();moved=false;}},{capture:true});
+    rail.addEventListener('wheel',event=>{if(Math.abs(event.deltaY)>Math.abs(event.deltaX)){event.preventDefault();rail.scrollLeft+=event.deltaY;}},{passive:false});
+  });
+  document.querySelector('[data-mobile-track-start]')?.addEventListener('change',event=>{state.mobileTrackStart=Number(event.target.value);const track=timelineTrackOrder()[state.mobileTrackStart],clip=state.clips.find(item=>item.track===track);state.selected=clip?.id||null;render();});
 }
 
 function bindEvents() {
@@ -2604,7 +2662,7 @@ function bindEvents() {
   document.querySelector('[data-preview-quality]')?.addEventListener('change',event=>setPreviewQuality(event.target.value));
   document.querySelector('[data-zorifi-ending]')?.addEventListener('change',event=>toggleZorifiEnding(event.target.checked));
   document.querySelector('[data-zorifi-ending-style]')?.addEventListener('change',event=>changeZorifiEndingStyle(event.target.value));
-  const timelineScroll=document.querySelector('.timeline-scroll');if(timelineScroll&&state.timelineTool==='hand')timelineScroll.addEventListener('pointerdown',panTimeline);
+  const timelineScroll=document.querySelector('.timeline-scroll');if(timelineScroll&&state.timelineTool==='hand'&&!runtimeMode.touch)timelineScroll.addEventListener('pointerdown',panTimeline);
   bindMobileTimelineGestures();
   bindPreviewTransformControls();
   bindPreviewTextTransformControls();
@@ -2714,6 +2772,7 @@ function handle(action, el) {
     'toggle-panel': toggleToolPanel,
     'toggle-inspector': toggleInspector,
     'mobile-properties': () => {state.mobileInspectorOpen=true;render();},
+    'mobile-track-controls': () => showMobileTrackControls(Number(el.dataset.track)),
     'close-mobile-properties': () => {state.mobileInspectorOpen=false;render();},
     'mobile-tools': () => {state.mobileToolSheetOpen=!state.mobileToolSheetOpen;state.mobileInspectorOpen=false;render();},
     'close-mobile-tools': () => {state.mobileToolSheetOpen=false;render();},
@@ -2875,10 +2934,11 @@ function copySelectedClip(){const clip=state.clips.find(item=>item.id===state.se
 function pasteShortcutClip(){if(!shortcutClipboard)return toast('Copy a clip first');snapshot();const clip={...structuredClone(shortcutClipboard),id:`${shortcutClipboard.id}-copy-${Date.now()}`,start:Math.max(0,Math.min(state.currentTime,state.duration))};state.clips.push(clip);state.selected=clip.id;recalculateDuration();render();toast(`${clip.name} pasted at the playhead`);}
 function duplicateSelectedClip(){const clip=state.clips.find(item=>item.id===state.selected);if(!clip)return toast('Select a clip to duplicate');shortcutClipboard=structuredClone(clip);const nextStart=Math.min(state.duration,clip.start+clip.duration);snapshot();const copy={...structuredClone(clip),id:`${clip.id}-duplicate-${Date.now()}`,start:nextStart,name:`${clip.name} copy`};state.clips.push(copy);state.selected=copy.id;recalculateDuration();render();toast('Clip duplicated');}
 function setPlayhead(time){seekProject(Phase8.frameTime(Math.max(0,time),state.creatorSettings.customFrameRate||30));render();}
-function timelineWidthForZoom(zoom){return Math.max(runtimeMode.touch?700:600,Math.round(Math.max(1,state.duration)*zoom*.45));}
-function applyTimelineZoom(value){const scroller=document.querySelector('.timeline-scroll'),content=document.querySelector('.timeline-content'),headWidth=runtimeMode.touch?220:94,oldWidth=content?.getBoundingClientRect().width||timelineWidthForZoom(state.zoom),focus=scroller?Math.max(0,(scroller.scrollLeft+scroller.clientWidth*.5-headWidth)/oldWidth):state.currentTime/Math.max(1,state.duration);state.zoom=Math.max(30,Math.min(240,value));const newWidth=timelineWidthForZoom(state.zoom);if(content){content.style.width=`${newWidth}px`;content.style.minWidth=`${newWidth}px`;}document.querySelectorAll('[data-action="zoom"]').forEach(input=>input.value=state.zoom);document.querySelectorAll('.zoom output').forEach(output=>output.textContent=`${state.zoom}%`);if(scroller)scroller.scrollLeft=Math.max(0,focus*newWidth-scroller.clientWidth*.5+headWidth);}
+function timelineHeadWidth(){return runtimeMode.touch?(editorWorkspaceMode==='music'?220:52):94;}
+function timelineWidthForZoom(zoom){const minimum=runtimeMode.touch&&editorWorkspaceMode!=='music'?Math.max(180,Math.min(innerWidth,document.querySelector('.timeline-scroll')?.clientWidth||innerWidth)-timelineHeadWidth()-16):runtimeMode.touch?700:600;return Math.max(minimum,Math.round(Math.max(1,state.duration)*zoom*.45));}
+function applyTimelineZoom(value){const scroller=document.querySelector('.timeline-scroll'),content=document.querySelector('.timeline-content'),headWidth=timelineHeadWidth(),oldWidth=content?.getBoundingClientRect().width||timelineWidthForZoom(state.zoom),focus=scroller?Math.max(0,(scroller.scrollLeft+scroller.clientWidth*.5-headWidth)/oldWidth):state.currentTime/Math.max(1,state.duration);state.zoom=Math.max(runtimeMode.touch&&editorWorkspaceMode!=='music'?0.01:30,Math.min(240,value));const newWidth=timelineWidthForZoom(state.zoom);if(content){content.style.width=`${newWidth}px`;content.style.minWidth=`${newWidth}px`;}document.querySelectorAll('[data-action="zoom"]').forEach(input=>input.value=state.zoom);document.querySelectorAll('.zoom output').forEach(output=>output.textContent=`${state.zoom}%`);if(scroller)scroller.scrollLeft=Math.max(0,focus*newWidth-scroller.clientWidth*.5+headWidth);}
 function changeTimelineZoom(amount){applyTimelineZoom(state.zoom+amount);saveProject();toast(`Timeline zoom ${state.zoom}%`);}
-function fitTimelineZoom(){const scroller=document.querySelector('.timeline-scroll'),available=Math.max(320,(scroller?.clientWidth||900)-(runtimeMode.touch?220:94)-24),zoom=Math.max(30,Math.min(240,available/Math.max(1,state.duration)/.45));applyTimelineZoom(Math.round(zoom));if(scroller)scroller.scrollLeft=0;saveProject();toast('Timeline fitted to the sequence');}
+function fitTimelineZoom(){const scroller=document.querySelector('.timeline-scroll'),available=Math.max(160,(scroller?.clientWidth||900)-timelineHeadWidth()-24),zoom=Math.max(runtimeMode.touch&&editorWorkspaceMode!=='music'?0.01:30,Math.min(240,available/Math.max(1,state.duration)/.45));applyTimelineZoom(runtimeMode.touch&&editorWorkspaceMode!=='music'?Math.floor(zoom*100)/100:Math.round(zoom));if(scroller)scroller.scrollLeft=0;saveProject();toast('Timeline fitted to the sequence');}
 
 function audioRole(clip){return AudioEngineSettings(clip).role||trackState(clip.track).role||(clip.type==='video'?'dialogue':'music');}
 function dialogueActiveAt(time,exclude){return state.clips.some(clip=>clip.id!==exclude&&(clip.type==='audio'||clip.type==='video')&&['dialogue','voiceover'].includes(audioRole(clip))&&trackEnabled(clip.track,'audio')&&time>=clip.start&&time<clip.start+clip.duration);}
@@ -3031,6 +3091,7 @@ function dragTimelineKeyframe(event,marker){
 }
 
 function dragTimelineClip(event,element){
+  if(runtimeMode.touch&&event.pointerType!=='mouse'&&['select','hand'].includes(state.timelineTool))return;
   if(event.target.closest('[data-trim],[data-clip-keyframe]'))return;
   if(event.button!==0)return;
   const clip=state.clips.find(item=>item.id===element.dataset.clip);if(!clip)return;
@@ -3180,6 +3241,7 @@ function openAutoCutReview(options={}){
   if(activeAutoCutStudio)return 'AutoCut is open. Choose your media to generate a finished video.';
   if(state.playing)stopProjectPlayback();
   activeAutoCutStudio=ZorifiAutoCutStudio.open({
+    initialFiles:options.initialFiles||[],
     existingAssets:state.mediaAssets,
     initialPrompt:options.prompt||'',
     initialRhythm:options.pulseRhythm||null,
@@ -3290,6 +3352,7 @@ function selectedOverlay(){return state.clips.find(clip=>clip.id===state.selecte
 function applyOverlayPreset(preset){const clip=selectedOverlay();if(!clip)return toast('Select an overlay clip first');if(trackState(clip.track).locked)return toast(`Unlock ${trackLabel(clip.track)} first`);const settings={center:{scale:70,positionX:0,positionY:0,opacity:100,fit:'contain'},corner:{scale:35,positionX:58,positionY:52,opacity:100,fit:'contain'},watermark:{scale:25,positionX:62,positionY:60,opacity:55,fit:'contain'},fullscreen:{scale:100,positionX:0,positionY:0,opacity:100,fit:'cover'}};snapshot();Object.assign(clip,settings[preset]||settings.center);render();toast(`${capitalize(preset)} overlay layout applied`);}
 function applyOverlayBlend(mode){const clip=selectedOverlay();if(!clip)return toast('Select an overlay clip first');if(trackState(clip.track).locked)return toast(`Unlock ${trackLabel(clip.track)} first`);snapshot();clip.blendMode=['normal','screen','multiply','overlay'].includes(mode)?mode:'normal';render();toast(`${capitalize(clip.blendMode)} blend applied`);}
 function createSoundEffectUrl(track){
+  if(window.ZorifiSFX?.byId(track.id))return editorResources.createManagedUrl(window.ZorifiSFX.blob(track.id));
   const rate=11025,length=Math.floor(rate*track.duration),data=new Int16Array(length),kind=track.soundEffect;
   for(let i=0;i<length;i++){
     const time=i/rate,x=time/track.duration,random=((Math.sin(i*12.9898)*43758.5453)%1)*2-1;let sample=0;
@@ -3336,6 +3399,7 @@ function previewAudioTrack(trackId,button){
 function addAudioTrack(trackId){
   const track=allAudioItems.find(item=>item.id===trackId);if(!track)return;
   const asset=ensureAudioAsset(track);addMediaToTimeline(asset.id);
+  if(track.soundEffect){const clip=state.clips.find(item=>item.id===state.selected);if(clip){clip.volume=35;clip.audioFadeIn=Math.min(.01,clip.duration/4);clip.audioFadeOut=Math.min(.12,clip.duration/4);clip.soundEffect=true;clip.sfxId=track.id;clip.audioEffects={...clip.audioEffects,role:'sfx'};scheduleProjectSave(0);render();}}
 }
 function filterAudio(category,button){document.querySelectorAll('[data-audio-category]').forEach(item=>item.classList.toggle('active',item===button));document.querySelectorAll('[data-audio-track]').forEach(card=>card.hidden=category!=='All'&&card.dataset.audioGenre!==category);}
 function searchAudio(query){const value=query.trim().toLowerCase();document.querySelectorAll('[data-audio-track]').forEach(card=>{const track=allAudioItems.find(item=>item.id===card.dataset.audioTrack);card.hidden=value&&!`${track.name} ${track.artist} ${track.category} ${track.mood}`.toLowerCase().includes(value);});}
@@ -3829,6 +3893,11 @@ function vanessaStorageKey(){return `${VANESSA_HISTORY_KEY}:${currentUser?.id||'
 function loadVanessaHistory(){try{return JSON.parse(localStorage.getItem(vanessaStorageKey())||'[]').slice(-60);}catch{return [];}}
 function saveVanessaHistory(){localStorage.setItem(vanessaStorageKey(),JSON.stringify(vanessaHistory.slice(-60)));}
 function syncVanessaHistoryScope(){const scope=vanessaStorageKey();if(scope===vanessaHistoryScope)return;cancelVanessaStream();vanessaHistoryScope=scope;vanessaHistory=loadVanessaHistory();vanessaPendingPlan=null;vanessaActionState='idle';}
+function vanessaFormattedText(value){
+  // Escape before adding our small Markdown subset. Provider HTML is always text.
+  const inline=text=>esc(text).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*\n]+)\*/g,'<em>$1</em>');
+  return String(value||'').split(/\n{2,}/).map(block=>{const lines=block.trim().split('\n');if(lines.every(line=>/^\s*[-*]\s+/.test(line)))return `<ul>${lines.map(line=>`<li>${inline(line.replace(/^\s*[-*]\s+/,''))}</li>`).join('')}</ul>`;if(lines.every(line=>/^\s*\d+[.)]\s+/.test(line)))return `<ol>${lines.map(line=>`<li>${inline(line.replace(/^\s*\d+[.)]\s+/,''))}</li>`).join('')}</ol>`;return `<p>${lines.map(line=>inline(line.replace(/^#{1,6}\s+/,''))).join('<br>')}</p>`;}).join('');
+}
 function vanessaMessageMarkup(item){
   const status=item.actionStatus?`<small class="vanessa-action-status ${item.actionStatus.toLowerCase().replaceAll('_','-')}">${item.actionStatus==='SUCCESS'?'✓ Completed':item.actionStatus==='FAILED'?'✕ Failed':item.actionStatus==='REQUIRES_CONFIRMATION'?'! Confirmation required':item.actionStatus}</small>`:'';
   const actions=Array.isArray(item.items)&&item.items.length?`<ul class="vanessa-action-list">${item.items.map(action=>`<li class="${String(action.status||item.actionStatus||'').toLowerCase()}"><i>${action.status==='FAILED'?'✕':action.status==='REQUIRES_CONFIRMATION'?'!':'✓'}</i><span>${esc(action.message||action.command||'Editor action')}</span></li>`).join('')}</ul>`:'';
@@ -3838,7 +3907,7 @@ function vanessaMessageMarkup(item){
   const memoryPrompt=candidate?`<div class="vanessa-memory-prompt"><small>Vanessa wants to remember</small><b>${esc(candidate.value)}</b><span>${esc(candidate.categoryLabel)}</span><div><button data-chat-memory-approve="${esc(candidate.id)}" aria-label="Remember this preference">Remember</button><button data-chat-memory-reject="${esc(candidate.id)}" aria-label="Do not remember this preference">Don’t remember</button></div></div>`:'';
   const forget=item.memoryForgetId?vanessaMemory?.get(item.memoryForgetId):null;
   const forgetPrompt=forget?`<div class="vanessa-memory-prompt forget"><small>Confirm memory deletion</small><b>${esc(forget.value)}</b><div><button data-chat-memory-forget-confirm="${esc(forget.id)}" aria-label="Permanently forget this memory">Forget it</button><button data-chat-memory-forget-cancel="${esc(forget.id)}" aria-label="Keep this memory">Keep it</button></div></div>`:'';
-  return `<article class="${item.role} ${item.actionStatus?'action-result':''}"><span>${item.role==='assistant'?'V':userInitials()}</span><div class="vanessa-message-body"><p>${esc(item.text)}</p>${status}${actions}${diff}${confirmation}${memoryPrompt}${forgetPrompt}${vanessaVideoMarkup(item)}</div></article>`;
+  return `<article class="${item.role} ${item.actionStatus?'action-result':''}" aria-label="${item.role==='assistant'?'Vanessa':'You'}"><span aria-hidden="true">${item.role==='assistant'?'✦':userInitials()}</span><div class="vanessa-message-body"><div class="vanessa-message-text">${vanessaFormattedText(item.text)}</div>${status}${actions}${diff}${confirmation}${memoryPrompt}${forgetPrompt}${vanessaVideoMarkup(item)}</div></article>`;
 }
 function vanessaSuggestions(){
   if(state.view==='home')return ['Create a vibrant travel video','Open AI Video Creation','Show my account settings'];
@@ -3875,6 +3944,8 @@ function mountVanessa(){
   const workspaceHeader=document.querySelector('.ai-create-topbar,.scenes-topbar');if(workspaceHeader&&!workspaceHeader.querySelector('[data-workspace-vanessa]')){const button=document.createElement('button');button.type='button';button.className='workspace-vanessa';button.dataset.workspaceVanessa='';button.textContent='✦ Vanessa';button.setAttribute('aria-label','Open Vanessa');button.onclick=()=>{vanessaOpen=true;mountVanessa();};workspaceHeader.appendChild(button);}
   const existing=document.querySelector('.vanessa-assistant'),latest=vanessaHistory.at(-1),signature=[currentUser.id,state.view,state.projectId||'',state.currentProject,vanessaOpen,vanessaPanelLayout.mode,vanessaPanelLayout.width,vanessaPanelLayout.expanded,vanessaBusy,vanessaListening,vanessaWakeEnabled,vanessaVoiceEnabled,vanessaActionState,vanessaHistory.length,latest?.role||'',latest?.text||'',latest?.actionStatus||'',vanessaAttachments.map(item=>`${item.name}:${item.status}`).join(',')].join('|');
   if(existing&&signature===vanessaMountSignature)return;
+  const previousInput=existing?.querySelector('[name="message"]'),draft=previousInput?.value||'',restoreFocus=previousInput===document.activeElement,draftSelection=previousInput?.selectionStart;
+  const previousLog=existing?.querySelector('[data-vanessa-messages]'),wasAtEnd=!previousLog||previousLog.scrollHeight-previousLog.scrollTop-previousLog.clientHeight<80,previousScroll=previousLog?.scrollTop||0;
   existing?.remove();vanessaMountSignature=signature;
   const mobileVanessa=Boolean(runtimeMode.touch)||runtimeMode.platform==='mobile';
   const shell=document.createElement('section');shell.className=`vanessa-assistant ${state.view}-context ${vanessaOpen?'open':''} mode-${vanessaPanelLayout.mode} ${vanessaPanelLayout.expanded?'expanded':''} ${mobileVanessa?'mobile-vanessa':''}`;shell.setAttribute('aria-label','Vanessa, Zorifi AI assistant');
@@ -3883,20 +3954,22 @@ function mountVanessa(){
   if(mobileVanessa){shell.querySelectorAll('[data-vanessa-resize],[data-vanessa-minimize],[data-vanessa-wake]').forEach(node=>node.remove());const upload=shell.querySelector('[data-vanessa-upload]');if(upload)upload.accept='image/*,video/*,audio/*';const footer=shell.querySelector('.vanessa-panel>footer');if(footer)footer.textContent=vanessaListening?'Listening — tap the microphone to stop.':'Mobile Vanessa uses push-to-talk to protect battery and privacy.';}
   const commandCenterButton=document.createElement('button');commandCenterButton.type='button';commandCenterButton.className='vanessa-command-center-button';commandCenterButton.dataset.vanessaCommandCenter='';commandCenterButton.title=globalI18n.t('commandCenter');commandCenterButton.setAttribute('aria-label',globalI18n.t('commandCenter'));commandCenterButton.textContent='Tools';
   const sessionControls=document.createElement('div'),clearButton=document.createElement('button'),stopButton=document.createElement('button'),regenerateButton=document.createElement('button');sessionControls.className='vanessa-session-controls';sessionControls.setAttribute('aria-label','Conversation controls');clearButton.type='button';clearButton.dataset.vanessaClear='';clearButton.textContent='Clear chat';clearButton.title='Clear this Vanessa conversation';stopButton.type='button';stopButton.dataset.vanessaStop='';stopButton.textContent='Stop';stopButton.title='Stop the current Vanessa request';stopButton.hidden=!vanessaBusy;regenerateButton.type='button';regenerateButton.dataset.vanessaRegenerate='';regenerateButton.textContent='Retry response';regenerateButton.title='Regenerate the last response';regenerateButton.hidden=vanessaBusy||!vanessaHistory.some(item=>item.role==='user');sessionControls.append(...(mobileVanessa?[]:[commandCenterButton]),clearButton,regenerateButton,stopButton);shell.querySelector('.vanessa-context')?.after(sessionControls);
+  const voicePlayback=document.createElement('div');voicePlayback.className='vanessa-voice-playback';voicePlayback.dataset.vanessaPlayback='';voicePlayback.innerHTML='<span data-vanessa-playback-status role="status"></span><button type="button" data-vanessa-play-reply>Play voice</button>';sessionControls.after(voicePlayback);
   const vanessaForm=shell.querySelector('[data-vanessa-form]'),cameraButton=document.createElement('button'),cameraInput=document.createElement('input');cameraButton.type='button';cameraButton.className='vanessa-camera';cameraButton.dataset.vanessaCameraButton='';cameraButton.textContent='📷';cameraButton.title='Take a photo or video';cameraButton.setAttribute('aria-label','Take a photo or video for Vanessa');cameraInput.type='file';cameraInput.accept='image/*,video/*';cameraInput.capture='environment';cameraInput.hidden=true;cameraInput.dataset.vanessaCamera='';vanessaForm?.insertBefore(cameraButton,vanessaForm.querySelector('[data-vanessa-mic]'));vanessaForm?.appendChild(cameraInput);
   const desktopEditor=state.view==='editor'&&runtimeMode.platform==='desktop',dockTarget=desktopEditor&&vanessaOpen?document.querySelector('.workspace'):null,minimizedTarget=desktopEditor&&!vanessaOpen?document.querySelector('.topbar'):null;(dockTarget||minimizedTarget||document.body).appendChild(shell);
   bindVanessaPanelWindow(shell);
   shell.querySelectorAll('[data-vanessa-toggle]').forEach(button=>button.onclick=()=>{vanessaOpen=!vanessaOpen;if(!vanessaOpen)stopVanessaVoice();if(state.view==='editor'&&runtimeMode.platform==='desktop')render();else mountVanessa();if(vanessaOpen)setTimeout(()=>document.querySelector('[data-vanessa-form] input')?.focus({preventScroll:true}),30);});
-  shell.querySelectorAll('[data-vanessa-suggestion]').forEach(button=>button.onclick=()=>sendToVanessa(button.dataset.vanessaSuggestion));
+  shell.querySelectorAll('[data-vanessa-suggestion]').forEach(button=>button.onclick=()=>{unlockVanessaAudio();sendToVanessa(button.dataset.vanessaSuggestion);});
   const chatForm=shell.querySelector('[data-vanessa-form]');chatForm.elements.message.id='vanessa-chat-input';chatForm.querySelector('[type="submit"]').id='vanessa-chat-submit';
   const chatLog=shell.querySelector('.vanessa-messages');if(chatLog){chatLog.id='vanessa-messages';chatLog.setAttribute('role','log');chatLog.setAttribute('aria-live','polite');}renderVanessaStream();
-  chatForm.onsubmit=async event=>{event.preventDefault();if(vanessaBusy||window.ZorifiMasterApp?.chatSubmitting)return;const input=event.currentTarget.elements.message,message=input.value.trim()||(vanessaAttachments.length?'Analyze these attachments and explain what you can do with them.':'');if(!message)return;input.value='';try{await window.ZorifiMasterApp.consultVanessa(message);}catch{finishVanessaTurn('Vanessa could not complete this request. Please try again.',{actionStatus:'FAILED'});}};
+  chatForm.onsubmit=async event=>{event.preventDefault();if(vanessaBusy||window.ZorifiMasterApp?.chatSubmitting)return;const input=event.currentTarget.elements.message,message=input.value.trim()||(vanessaAttachments.length?'Analyze these attachments and explain what you can do with them.':'');if(!message)return;unlockVanessaAudio();input.value='';try{await window.ZorifiMasterApp.consultVanessa(message);}catch{finishVanessaTurn('Vanessa could not complete this request. Please try again.',{actionStatus:'FAILED'});}};
   shell.querySelector('[data-vanessa-mic]').onclick=startVanessaVoice;
   shell.querySelector('[data-vanessa-upload-button]').onclick=()=>shell.querySelector('[data-vanessa-upload]').click();
   shell.querySelector('[data-vanessa-upload]').onchange=event=>addVanessaAttachments(event.target.files);
   shell.querySelector('[data-vanessa-camera-button]').onclick=()=>shell.querySelector('[data-vanessa-camera]').click();shell.querySelector('[data-vanessa-camera]').onchange=event=>addVanessaAttachments(event.target.files);
   shell.querySelectorAll('[data-vanessa-attachment-remove]').forEach(button=>button.onclick=()=>removeVanessaAttachment(Number(button.dataset.vanessaAttachmentRemove)));
   shell.querySelector('[data-vanessa-sound]')?.addEventListener('click',toggleVanessaSpeech);
+  shell.querySelector('[data-vanessa-play-reply]')?.addEventListener('click',()=>{unlockVanessaAudio();if(vanessaVoicePlaybackState==='blocked')playPendingVanessaAudio();else{const text=[...vanessaHistory].reverse().find(item=>item.role==='assistant')?.text;if(text){if(!vanessaVoiceEnabled){vanessaVoiceEnabled=true;localStorage.setItem(VANESSA_VOICE_KEY,'on');}speakAsVanessa(text);}}});
   shell.querySelector('[data-vanessa-wake]')?.addEventListener('click',toggleVanessaWakeWord);
   shell.querySelector('[data-vanessa-command-center]')?.addEventListener('click',()=>showVanessaCommandCenter());
   shell.querySelector('[data-vanessa-clear]').onclick=()=>{if(vanessaHistory.length&&confirm('Clear this Vanessa conversation?')){cancelVanessaStream();vanessaHistory=[];vanessaConversationContinuity.clearSessionContinuity();saveVanessaHistory();mountVanessa();}};
@@ -3907,11 +3980,14 @@ function mountVanessa(){
   shell.querySelectorAll('[data-chat-memory-reject]').forEach(button=>button.onclick=()=>{vanessaMemoryManager.reject(button.dataset.chatMemoryReject);mountVanessa();toast('Memory request rejected');});
   shell.querySelectorAll('[data-chat-memory-forget-confirm]').forEach(button=>button.onclick=()=>resolveVanessaMemoryForget(button.dataset.chatMemoryForgetConfirm,true));
   shell.querySelectorAll('[data-chat-memory-forget-cancel]').forEach(button=>button.onclick=()=>resolveVanessaMemoryForget(button.dataset.chatMemoryForgetCancel,false));
-  const messages=shell.querySelector('[data-vanessa-messages]');if(messages)messages.scrollTop=messages.scrollHeight;
+  const messages=shell.querySelector('[data-vanessa-messages]');if(messages)messages.scrollTop=wasAtEnd?messages.scrollHeight:previousScroll;
+  if(draft){chatForm.elements.message.value=draft;if(restoreFocus&&!vanessaBusy){chatForm.elements.message.focus({preventScroll:true});chatForm.elements.message.setSelectionRange(draftSelection,draftSelection);}}
+  updateVanessaPlaybackControls();
   mountVanessaVoiceOrb();
   if(!mobileVanessa)queueMicrotask(autoStartVanessaWakeWord);
 }
 async function startVanessaVoice(){
+  unlockVanessaAudio();
   if(vanessaListening){stopVanessaVoice();mountVanessa();return;}
   if(vanessaWakeRecognition)stopVanessaWakeRecognition();
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -3984,7 +4060,7 @@ function startVanessaWakeRecognition(){
   recognition.onend=()=>{if(vanessaWakeRecognition===recognition){vanessaWakeRecognition=null;if(vanessaWakeEnabled)setTimeout(startVanessaWakeRecognition,450);}};
   try{recognition.start();}catch{vanessaWakeRecognition=null;if(vanessaWakeEnabled)setTimeout(startVanessaWakeRecognition,700);}
 }
-function toggleVanessaSpeech(){vanessaSpeechRequest++;vanessaVoiceEnabled=!vanessaVoiceEnabled;localStorage.setItem(VANESSA_VOICE_KEY,vanessaVoiceEnabled?'on':'off');if(!vanessaVoiceEnabled){window.speechSynthesis?.cancel?.();if(vanessaCloudAudio){vanessaCloudAudio.pause();vanessaCloudAudio=null;}if(vanessaCloudAudioUrl){revokeManagedUrl(vanessaCloudAudioUrl);vanessaCloudAudioUrl=null;}if(vanessaWakeEnabled)setTimeout(startVanessaWakeRecognition,350);}mountVanessa();toast(vanessaVoiceEnabled?'Vanessa voice is on':'Vanessa voice is muted');}
+function toggleVanessaSpeech(){vanessaSpeechRequest++;vanessaVoiceEnabled=!vanessaVoiceEnabled;localStorage.setItem(VANESSA_VOICE_KEY,vanessaVoiceEnabled?'on':'off');if(!vanessaVoiceEnabled){window.speechSynthesis?.cancel?.();if(vanessaCloudAudio){vanessaCloudAudio.pause();vanessaCloudAudio=null;}if(vanessaCloudAudioUrl){revokeManagedUrl(vanessaCloudAudioUrl);vanessaCloudAudioUrl=null;}vanessaVoicePlaybackState='idle';vanessaVoicePlaybackError='';hideVanessaVoiceOrb();if(vanessaWakeEnabled)setTimeout(startVanessaWakeRecognition,350);}else unlockVanessaAudio();mountVanessa();toast(vanessaVoiceEnabled?'ElevenLabs voice is on':'Vanessa voice is muted');}
 function chooseVanessaFemaleVoice(){
   if(!('speechSynthesis' in window))return null;
   const voices=window.speechSynthesis.getVoices(),language=(currentUser?.language||globalI18n.locale||navigator.language||'en-GB').slice(0,2).toLowerCase(),femaleNames=/sonia|aria|zira|samantha|jenny|ava|serena|victoria|karen|moira|tessa|fiona|susan|hazel|female|woman|google uk english female/i,naturalNames=/natural|neural|online|premium|enhanced/i,maleNames=/david|mark|guy|ryan|george|james|male|man/i;
@@ -3992,28 +4068,50 @@ function chooseVanessaFemaleVoice(){
   return vanessaFemaleVoice;
 }
 let vanessaSpeechRequest=0;
+let vanessaVoicePlayer=null,vanessaVoicePlaybackState='idle',vanessaVoicePlaybackError='',vanessaPendingVoicePlay=null,vanessaAudioUnlocked=false;
+const VANESSA_AUDIO_PRIMER='data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQIAAAAAAA==';
+function updateVanessaPlaybackControls(){
+  if(typeof document==='undefined')return;
+  const strip=document.querySelector('[data-vanessa-playback]');if(!strip)return;
+  const pending=vanessaVoicePlaybackState==='blocked',failed=vanessaVoicePlaybackState==='error',working=vanessaVoicePlaybackState==='preparing',speaking=vanessaVoicePlaybackState==='speaking',hasReply=typeof vanessaHistory!=='undefined'&&vanessaHistory.some(item=>item.role==='assistant');
+  strip.hidden=!(vanessaVoiceEnabled&&(hasReply||pending||failed||working||speaking));strip.dataset.state=vanessaVoicePlaybackState;
+  strip.querySelector('[data-vanessa-playback-status]').textContent=pending?'Voice is ready. Tap Play voice to hear it.':failed?vanessaVoicePlaybackError:working?'Preparing ElevenLabs voice…':speaking?'ElevenLabs · speaking':'ElevenLabs voice';
+  const button=strip.querySelector('[data-vanessa-play-reply]');button.textContent=pending?'▶ Play voice':failed?'Retry voice':'▶ Hear reply';button.disabled=working||speaking;button.hidden=working||speaking;
+}
+function unlockVanessaAudio(){
+  // Call in the tap/submit handler, before any await. Reuse the same media element
+  // when the cloud response arrives; Safari grants playback per media element.
+  if(!vanessaVoiceEnabled)return null;
+  const audio=vanessaVoicePlayer||(vanessaVoicePlayer=new Audio());audio.playsInline=true;audio.setAttribute?.('playsinline','');audio.preload='auto';
+  if(vanessaAudioUnlocked||['blocked','preparing','speaking'].includes(vanessaVoicePlaybackState))return audio;
+  audio.src=VANESSA_AUDIO_PRIMER;
+  try{const started=audio.play();Promise.resolve(started).then(()=>{vanessaAudioUnlocked=true;if(audio.src===VANESSA_AUDIO_PRIMER)audio.pause();}).catch(()=>{});}catch{}
+  return audio;
+}
+function playPendingVanessaAudio(){return vanessaPendingVoicePlay?.();}
 async function speakAsVanessa(text){
   if(!vanessaVoiceEnabled||!text)return;
   const spokenText=String(text).replace(/[*_#`]/g,'').replace(/\s+/g,' ').trim();if(!spokenText)return;
   const request=++vanessaSpeechRequest,userId=currentUser?.id;
   const active=()=>request===vanessaSpeechRequest&&vanessaVoiceEnabled&&currentUser?.id===userId;
+  vanessaVoicePlaybackState='preparing';vanessaVoicePlaybackError='';vanessaPendingVoicePlay=null;updateVanessaPlaybackControls();
   showVanessaVoiceOrb('speaking','Preparing ElevenLabs voice…');
   clearTimeout(vanessaSpeechTimer);window.speechSynthesis?.cancel?.();
-  if(vanessaCloudAudio){vanessaCloudAudio.pause();vanessaCloudAudio=null;}
+  if(vanessaCloudAudio){vanessaCloudAudio.onended=null;vanessaCloudAudio.onerror=null;vanessaCloudAudio.pause();vanessaCloudAudio=null;}
   if(vanessaCloudAudioUrl){revokeManagedUrl(vanessaCloudAudioUrl);vanessaCloudAudioUrl=null;}
   const resumeWake=vanessaWakeEnabled;stopVanessaWakeRecognition();
   const resumeListening=()=>{if(!active())return;if(resumeWake&&vanessaWakeEnabled){showVanessaVoiceOrb('listening','Ready when you say “Vanessa”');hideVanessaVoiceOrb(1800);setTimeout(startVanessaWakeRecognition,350);}else hideVanessaVoiceOrb(900);};
   let audio,url;
-  const cleanup=()=>{if(url){revokeManagedUrl(url);if(vanessaCloudAudioUrl===url)vanessaCloudAudioUrl=null;url=null;}if(vanessaCloudAudio===audio)vanessaCloudAudio=null;};
-  const fail=error=>{cleanup();if(!active())return;const message=error?.name==='NotAllowedError'?'Your browser blocked voice playback. Click the voice button, then try again.':error?.message||'ElevenLabs voice could not play. Try again.';toast(message);resumeListening();};
+  const cleanup=()=>{if(url){revokeManagedUrl(url);if(vanessaCloudAudioUrl===url)vanessaCloudAudioUrl=null;url=null;}if(vanessaCloudAudio===audio)vanessaCloudAudio=null;if(request===vanessaSpeechRequest)vanessaPendingVoicePlay=null;};
+  const fail=error=>{if(!active()){cleanup();return;}if(error?.name==='NotAllowedError'&&url){vanessaVoicePlaybackState='blocked';showVanessaVoiceOrb('listening','Tap Play voice to hear my reply');updateVanessaPlaybackControls();return;}cleanup();vanessaVoicePlaybackState='error';vanessaVoicePlaybackError=error?.message||'ElevenLabs voice could not play. Try again.';showVanessaVoiceOrb('error',vanessaVoicePlaybackError);updateVanessaPlaybackControls();toast(vanessaVoicePlaybackError);};
   try{
     const response=await vanessaFetch(vanessaEndpoint('vanessa-speech'),{method:'POST',headers:{'content-type':'application/json','accept':'audio/mpeg'},body:JSON.stringify({text:spokenText,language:currentUser?.language||globalI18n.locale})});
     if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(typeof data.error==='string'?data.error:'ElevenLabs voice is unavailable. Check your sign-in and voice provider settings.');}
     const blob=await response.blob();if(!active())return;
     if(!blob.size||!blob.type.startsWith('audio/'))throw new Error('ElevenLabs returned no playable audio.');
-    url=editorResources.createManagedUrl(blob);vanessaCloudAudioUrl=url;audio=new Audio(url);vanessaCloudAudio=audio;audio.preload='auto';
-    audio.onended=()=>{cleanup();resumeListening();};audio.onerror=()=>fail(new Error('ElevenLabs audio could not play in this browser.'));
-    await audio.play();if(!active()){audio.pause();cleanup();return;}showVanessaVoiceOrb('speaking','ElevenLabs voice');
+    url=editorResources.createManagedUrl(blob);vanessaCloudAudioUrl=url;audio=vanessaVoicePlayer||(vanessaVoicePlayer=new Audio());audio.src=url;vanessaCloudAudio=audio;audio.preload='auto';audio.playsInline=true;audio.setAttribute?.('playsinline','');
+    audio.onended=()=>{cleanup();if(active()){vanessaVoicePlaybackState='idle';updateVanessaPlaybackControls();resumeListening();}};audio.onerror=()=>fail(new Error('ElevenLabs audio could not play in this browser.'));
+    const play=async()=>{if(!active())return;try{await audio.play();if(!active()){audio.pause();cleanup();return;}vanessaAudioUnlocked=true;vanessaVoicePlaybackState='speaking';updateVanessaPlaybackControls();showVanessaVoiceOrb('speaking','ElevenLabs voice');}catch(error){fail(error);}};vanessaPendingVoicePlay=play;await play();
   }catch(error){fail(error);}
 }
 
@@ -4291,8 +4389,9 @@ function renderVanessaStream(){
  const log=document.querySelector('#vanessa-messages');if(!log)return;
  let preview=log.querySelector('[data-stream-preview]');
  if(!vanessaStreamText){preview?.remove();return;}
- if(!preview){preview=document.createElement('article');preview.className='assistant';preview.dataset.streamPreview='';preview.innerHTML='<span>V</span><div class="vanessa-message-body"><p style="white-space:pre-wrap"></p><small>Receiving response…</small></div>';log.appendChild(preview);}
- preview.querySelector('p').textContent=vanessaStreamText;log.querySelector('.thinking')?.remove();log.scrollTop=log.scrollHeight;
+ const followEnd=log.scrollHeight-log.scrollTop-log.clientHeight<100;
+ if(!preview){preview=document.createElement('article');preview.className='assistant';preview.dataset.streamPreview='';preview.setAttribute('aria-label','Vanessa');preview.innerHTML='<span aria-hidden="true">✦</span><div class="vanessa-message-body"><div class="vanessa-message-text"></div><small>Receiving response…</small></div>';log.appendChild(preview);}
+ preview.querySelector('.vanessa-message-text').innerHTML=vanessaFormattedText(vanessaStreamText);log.querySelector('.thinking')?.remove();if(followEnd)log.scrollTop=log.scrollHeight;
 }
 async function safeVanessaRequest(service,payload,{timeoutMs=120000}={}){
  if(!vanessaRemoteAvailable())return {ok:false,status:0,data:null,error:{kind:'offline',message:'remote unavailable'}};

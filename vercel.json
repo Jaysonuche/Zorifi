@@ -1,7 +1,7 @@
 {
   "buildCommand": "node scripts/build-web.cjs",
   "outputDirectory": "web-dist",
-  "functions": {"api/vanessa-provider.js": {"includeFiles": "{netlify/functions/**,zorifi-vanessa-identity.js,zorifi-tool-registry.js}", "maxDuration": 120}, "api/ai-settings.js": {"includeFiles": "{netlify/functions/**,zorifi-vanessa-identity.js,zorifi-tool-registry.js}"}},
+  "functions": {"api/vanessa-provider.js": {"includeFiles": "{netlify/functions/**,zorifi-vanessa-identity.js,zorifi-tool-registry.js,zorifi-sfx.js}", "maxDuration": 120}, "api/ai-settings.js": {"includeFiles": "{netlify/functions/**,zorifi-vanessa-identity.js,zorifi-tool-registry.js,zorifi-sfx.js}"}},
   "routes": [
     {"src": "/.netlify/functions/([a-z-]+)", "dest": "/api/vanessa-provider?service=$1"},
     {"handle": "filesystem"},

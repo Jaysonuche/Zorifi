@@ -1,0 +1,71 @@
+/* Vanessa conversation: compact, readable and reachable above touch keyboards. */
+.vanessa-assistant{--vc-bg:#11121c;--vc-surface:#1c1e2b;--vc-line:#ffffff13;--vc-text:#f2f0f8;--vc-muted:#a5a4b8;--vc-user:#392d58;--vc-assistant:#1b1d29}
+:root[data-theme="light"] .vanessa-assistant{--vc-bg:#fff;--vc-surface:#f5f4f9;--vc-line:#e9e6f0;--vc-text:#242333;--vc-muted:#747184;--vc-user:#eee8fb;--vc-assistant:#f6f5fa}
+.vanessa-assistant.open .vanessa-panel{grid-template-rows:auto auto auto auto minmax(0,1fr) auto auto auto!important;isolation:isolate;background:var(--vc-bg)!important;color:var(--vc-text)!important;border-color:var(--vc-line);overflow:hidden;min-height:0;font-size:14px;line-height:1.5;container-type:size;container-name:vanessa-conversation;animation:none!important}
+.vanessa-assistant .vanessa-panel>header{grid-row:1!important;min-height:70px;padding:12px 14px;gap:10px;border-bottom:1px solid var(--vc-line);background:var(--vc-bg)!important;color:var(--vc-text)!important}
+.vanessa-assistant .vanessa-panel>header>div:not(.vanessa-window-controls){flex:1;min-width:0}
+.vanessa-assistant .vanessa-panel>header b{font-size:15px;line-height:1.3;font-weight:750;letter-spacing:-.02em}
+.vanessa-assistant .vanessa-panel>header small{color:var(--vc-muted)!important;font-size:11px!important;line-height:1.5;max-width:100%;margin-top:2px}
+.vanessa-assistant .vanessa-panel>header>button,.vanessa-assistant .vanessa-window-controls button{width:36px;min-width:36px;height:36px;min-height:36px;padding:0;border:1px solid var(--vc-line);border-radius:11px;background:var(--vc-surface);color:var(--vc-muted);font-size:17px;box-shadow:none}
+.vanessa-assistant .vanessa-panel>header>.vanessa-wake{width:38px;font-size:8px;letter-spacing:.05em}
+.vanessa-assistant .vanessa-panel>header>.vanessa-sound.active{background:#9a6dee1a;border-color:#a27bf055;color:#ac82f5}
+.vanessa-assistant .vanessa-window-controls{display:flex;gap:5px;flex:none}
+.vanessa-assistant .vanessa-window-controls .vanessa-close{background:transparent;color:var(--vc-muted)}
+.vanessa-assistant .vanessa-context{grid-row:2!important;display:flex!important;align-items:center;gap:8px;margin:0;padding:9px 15px;border:0;border-bottom:1px solid var(--vc-line);border-radius:0;background:var(--vc-bg)!important}
+.vanessa-assistant .vanessa-context>span{font-size:14px;color:#9870dc;flex:none}
+.vanessa-assistant .vanessa-context p{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;min-width:0;font-size:11px;line-height:1.4}
+.vanessa-assistant .vanessa-context b{font-size:11px;font-weight:650;color:var(--vc-text)}
+.vanessa-assistant .vanessa-context small{font-size:10px;color:var(--vc-muted)}
+.vanessa-assistant .vanessa-session-controls{grid-row:3!important;display:flex;align-items:center;gap:5px;min-height:36px;padding:3px 10px;overflow-x:auto;scrollbar-width:none;border:0;background:var(--vc-bg)}
+.vanessa-assistant .vanessa-session-controls button{flex:none;min-height:30px;margin:0;padding:4px 8px;border:0;border-radius:7px;background:transparent;color:var(--vc-muted);font-size:10px;font-weight:550;box-shadow:none}
+.vanessa-assistant .vanessa-session-controls button:hover{background:var(--vc-surface);color:var(--vc-text)}
+.vanessa-assistant .vanessa-session-controls [hidden],.vanessa-assistant .vanessa-voice-playback[hidden]{display:none!important}
+.vanessa-assistant .vanessa-voice-playback{grid-row:4!important;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 12px 5px;padding:7px 9px;border:1px solid var(--vc-line);border-radius:9px;background:var(--vc-surface);font-size:10px;color:var(--vc-muted)}
+.vanessa-assistant .vanessa-voice-playback span{flex:1;min-width:0;overflow-wrap:anywhere}
+.vanessa-assistant .vanessa-voice-playback button{flex:none;min-height:30px;padding:4px 9px;border:1px solid #a27bf055;border-radius:7px;background:#9970e51a;color:var(--vc-text);font-size:10px;font-weight:650}
+.vanessa-assistant .vanessa-voice-playback[data-state="error"]{border-color:#e5688740}.vanessa-assistant .vanessa-voice-playback[data-state="error"] span{color:#d95678}
+.vanessa-assistant .vanessa-messages{grid-row:5!important;display:flex;flex-direction:column;gap:18px;min-width:0;min-height:0;margin:0;padding:13px 14px 18px;background:var(--vc-bg)!important;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#a9a1bf55 transparent;scrollbar-gutter:stable}
+.vanessa-assistant .vanessa-messages article{display:flex;align-items:flex-start;gap:8px;min-width:0;width:100%;flex:none;background:transparent!important;line-height:1.55}
+.vanessa-assistant .vanessa-messages article>span{width:24px;height:24px;margin-top:4px;display:grid;place-items:center;flex:none;border-radius:8px;background:#9b70d91a;color:#a876eb;font-size:13px;font-weight:650}
+.vanessa-assistant .vanessa-messages article.user{flex-direction:row-reverse}
+.vanessa-assistant .vanessa-messages article.user>span{background:var(--vc-surface);color:var(--vc-muted);font-size:9px}
+.vanessa-assistant .vanessa-messages article .vanessa-message-body{flex:0 1 auto!important;min-width:0;width:fit-content;max-width:calc(100% - 32px);padding:10px 12px;border:1px solid var(--vc-line)!important;border-radius:3px 14px 14px;background:var(--vc-assistant)!important;color:var(--vc-text)!important;overflow-wrap:anywhere;font-size:13px!important;line-height:1.6;box-shadow:none}
+.vanessa-assistant .vanessa-messages article.user .vanessa-message-body{max-width:82%;border:0!important;border-radius:14px 3px 14px 14px;background:var(--vc-user)!important;color:var(--vc-text)!important}
+.vanessa-assistant .vanessa-message-text{font-size:inherit;line-height:inherit;color:inherit}
+.vanessa-assistant .vanessa-message-body p{margin:0;padding:0;border:0;border-radius:0;background:transparent!important;color:inherit!important;font-size:inherit!important;line-height:inherit;white-space:normal}
+.vanessa-assistant .vanessa-message-text>*+*{margin-top:9px}.vanessa-assistant .vanessa-message-text :is(ul,ol){margin:5px 0;padding-left:18px}.vanessa-assistant .vanessa-message-text li+li{margin-top:4px}
+.vanessa-assistant .vanessa-message-text strong{font-weight:700}.vanessa-assistant .vanessa-message-text code{padding:2px 4px;border-radius:4px;background:#9388b31c;color:inherit;font:11px ui-monospace,monospace}
+.vanessa-assistant .vanessa-message-body>small,.vanessa-assistant .vanessa-messages .thinking small{display:block;color:var(--vc-muted);font-size:10px;font-weight:450;line-height:1.4}
+.vanessa-assistant .vanessa-action-status{margin-top:8px;padding:2px 6px;font-size:8px;font-weight:650;letter-spacing:.02em}
+.vanessa-assistant .vanessa-action-list{margin-top:8px}.vanessa-assistant .vanessa-action-list li{padding:6px;background:var(--vc-bg);border-color:var(--vc-line);font-size:10px}
+.vanessa-assistant .vanessa-action-diff{background:var(--vc-bg);border-color:var(--vc-line)}
+.vanessa-assistant .vanessa-suggestions{grid-row:6!important;display:flex!important;gap:6px;margin:0;padding:8px 12px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;background:var(--vc-bg);border-top:1px solid var(--vc-line)}
+.vanessa-assistant .vanessa-suggestions button{min-width:max-content;max-width:260px;min-height:30px;flex:none;padding:5px 9px;border:1px solid var(--vc-line);border-radius:8px;background:var(--vc-bg);color:var(--vc-muted);font-size:10px;line-height:1.3;text-align:left;box-shadow:none}
+.vanessa-assistant .vanessa-panel form{grid-row:7!important;display:flex!important;align-items:center;gap:5px;width:calc(100% - 24px)!important;max-width:calc(100% - 24px)!important;min-width:0;margin:1px 12px 5px!important;padding:5px!important;border:1px solid var(--vc-line)!important;border-radius:14px;background:var(--vc-surface)!important;box-shadow:none;overflow:hidden;flex-wrap:wrap}
+.vanessa-assistant .vanessa-panel form:focus-within{border-color:#a784e6!important;box-shadow:0 0 0 2px #9a6be212}
+.vanessa-assistant .vanessa-panel form>button{display:grid;place-items:center;flex:0 0 34px!important;width:34px!important;min-width:34px!important;min-height:34px!important;height:34px!important;padding:0;border:0;border-radius:10px;background:transparent!important;color:var(--vc-muted)!important;font-size:18px;box-shadow:none}
+.vanessa-assistant .vanessa-panel form>button[type="submit"]{background:#8855db!important;color:#fff!important;font-size:20px}
+.vanessa-assistant .vanessa-panel form>button.vanessa-mic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6}
+.vanessa-assistant .vanessa-panel form>input[name="message"]{flex:1 1 65px!important;width:0;max-width:100%;min-width:0;height:38px;padding:0 2px;border:0;background:transparent!important;color:var(--vc-text)!important;font:inherit;font-size:12px!important;box-shadow:none!important}
+.vanessa-assistant .vanessa-panel form>input::placeholder{color:var(--vc-muted)}.vanessa-assistant .vanessa-panel form>input[type="file"]{display:none!important}
+.vanessa-assistant .vanessa-attachment-strip{flex-basis:100%;min-width:0;max-width:100%;overflow:auto}
+.vanessa-assistant .vanessa-panel>footer{grid-row:8!important;min-height:24px;padding:3px 12px 6px;background:var(--vc-bg)!important;color:var(--vc-muted)!important;font-size:9px;line-height:1.4;text-align:center}
+.vanessa-assistant .vanessa-panel button:focus-visible{outline:2px solid #ad7ef7;outline-offset:-2px}.vanessa-assistant .vanessa-panel button:disabled{opacity:.5;cursor:default}
+body.touch-workspace .vanessa-assistant.open{position:fixed!important;inset:0!important;width:100%!important;height:100%!important;z-index:1600!important;pointer-events:none}
+body.touch-workspace .vanessa-assistant.open .vanessa-panel{display:grid!important;position:fixed!important;left:0!important;right:0!important;top:var(--zorifi-visual-top,0px)!important;bottom:auto!important;width:100%!important;height:var(--zorifi-visual-height,100dvh)!important;max-height:none!important;min-height:0;padding:0!important;border:0!important;border-radius:0!important;pointer-events:auto;box-shadow:0 10px 60px #0004;contain:layout style;animation:none!important;transform:none!important}
+body.touch-workspace .vanessa-assistant .vanessa-panel>header{min-height:72px;padding:max(8px,env(safe-area-inset-top)) 12px 8px}
+body.touch-workspace .vanessa-assistant .vanessa-panel>header>.vanessa-sound,body.touch-workspace .vanessa-assistant .vanessa-window-controls button{width:44px!important;min-width:44px;min-height:44px;height:44px}
+body.touch-workspace .vanessa-assistant .vanessa-energy-core,body.touch-workspace .vanessa-assistant .vanessa-panel>header>.vanessa-avatar{width:46px;height:46px}
+body.touch-workspace .vanessa-assistant .vanessa-messages{padding:14px 12px;gap:18px}
+body.touch-workspace .vanessa-assistant .vanessa-messages article .vanessa-message-body{font-size:14px!important;line-height:1.6;padding:10px 12px}
+body.touch-workspace .vanessa-assistant .vanessa-panel form{margin:2px 8px 4px!important;width:calc(100% - 16px)!important;max-width:calc(100% - 16px)!important;padding:4px!important;gap:0}
+body.touch-workspace .vanessa-assistant .vanessa-panel form>button{flex:0 0 44px!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important}
+body.touch-workspace .vanessa-assistant .vanessa-panel form>input[name="message"]{height:44px;font-size:16px!important;flex:1 1 40px!important;padding-inline:3px}
+body.touch-workspace .vanessa-assistant .vanessa-session-controls{min-height:40px;padding-block:0}
+body.touch-workspace .vanessa-assistant .vanessa-session-controls button{min-height:40px}
+body.touch-workspace .vanessa-assistant .vanessa-suggestions button{min-height:38px}
+body.touch-workspace .vanessa-assistant .vanessa-voice-playback button{min-height:40px}
+body.touch-workspace .vanessa-assistant .vanessa-panel>footer{padding-bottom:max(6px,env(safe-area-inset-bottom));font-size:8px;min-height:22px}
+@media(max-height:540px){body.touch-workspace .vanessa-assistant .vanessa-panel>header{min-height:52px;padding-block:4px}body.touch-workspace .vanessa-assistant .vanessa-context,body.touch-workspace .vanessa-assistant .vanessa-suggestions,body.touch-workspace .vanessa-assistant .vanessa-panel>footer{display:none!important}body.touch-workspace .vanessa-assistant .vanessa-session-controls{min-height:32px}body.touch-workspace .vanessa-assistant .vanessa-session-controls button{min-height:32px}}
+@container vanessa-conversation (max-height:540px){body.touch-workspace .vanessa-assistant .vanessa-panel>header{min-height:52px;padding-block:4px}body.touch-workspace .vanessa-assistant .vanessa-context,body.touch-workspace .vanessa-assistant .vanessa-suggestions,body.touch-workspace .vanessa-assistant .vanessa-panel>footer{display:none!important}body.touch-workspace .vanessa-assistant .vanessa-session-controls{min-height:32px}body.touch-workspace .vanessa-assistant .vanessa-session-controls button{min-height:32px}}
+@media(prefers-reduced-motion:reduce){.vanessa-assistant .vanessa-panel{animation:none!important;scroll-behavior:auto!important}}

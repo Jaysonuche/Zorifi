@@ -23,6 +23,18 @@ async function mocked(fetchImpl,run,overrides={}){
 }
 function localRequest(body=input()){return new Request('http://127.0.0.1:4173/.netlify/functions/vanessa-autocut',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});}
 
+test('optional sound design uses an explicit bounded cue catalog and protects speech and reading',async()=>{
+  await mocked(async()=>response(plan()),async({validateAutoCutInput,validateAutoCutPlan})=>{
+    const payload=input();payload.soundDesign=true;payload.cleanEdit=true;const p=plan();p.soundDesign=[{id:'soft-whoosh',at:3,volume:20,reason:'A visible movement introduces the closing detail.'}];
+    let result=validateAutoCutPlan(p,validateAutoCutInput(payload));assert.equal(result.soundDesign.length,1);
+    p.shots[1].contentRole='speech';p.shots[1].speed=.5;result=validateAutoCutPlan(p,validateAutoCutInput(payload));assert.equal(result.soundDesign.length,0);assert.equal(result.shots[1].speed,1);
+    p.shots[1].contentRole='reading';p.shots[1].motion='push-in';p.shots[1].fit='cover';result=validateAutoCutPlan(p,validateAutoCutInput(payload));assert.equal(result.shots[1].fit,'contain');assert.equal(result.shots[1].motion,'none');assert.equal(result.shots[1].caption,'');
+    payload.soundDesign=false;assert.throws(()=>validateAutoCutPlan(p,validateAutoCutInput(payload)),/without sound-design permission/);
+    payload.soundDesign=true;p.soundDesign[0].id='fetched-untrusted-audio';assert.throws(()=>validateAutoCutPlan(p,validateAutoCutInput(payload)),/invalid cue/);
+    payload.soundDesign='true';assert.throws(()=>validateAutoCutInput(payload),/enabled flag/);
+  });
+});
+
 test('AutoCut sends actual labelled frames and bounded audio to native Gemini and validates the story plan',async()=>{
   let sent;
   await mocked(async(url,options)=>{

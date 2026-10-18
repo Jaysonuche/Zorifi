@@ -77,21 +77,27 @@
         const media=byId.get(id),sourceStart=layer?0:start,playbackRate=media?.type==='image'?1:speed;
         if(!media||media.type==='video'&&sourceStart+duration*playbackRate>media.duration+.025)throw new Error('A planned shot extends beyond the original media. Generate again.');
         const c=cells?.[layer],cell=c?{left:50+c.x-c.w/2+.5,top:50+c.y-c.h/2+.5,width:c.w-1,height:c.h-1}:null;
-        const autoCutStyle={motion:shot.motion,grade:shot.grade,caption:layer?'':String(shot.caption||'').slice(0,160),captionPosition:shot.captionPosition,transition:shot.transition,focalPoint:layer?{x:.5,y:.5}:shot.focalPoint||{x:.5,y:.5},kinetic:true};
+        const autoCutStyle={motion:shot.motion,grade:shot.grade,caption:layer?'':String(shot.caption||'').slice(0,160),captionPosition:shot.captionPosition,transition:shot.transition,focalPoint:layer?{x:.5,y:.5}:shot.focalPoint||{x:.5,y:.5},kinetic:style==='anime-impact'||style==='energetic'};
         const clip={id:`autocut-${index}-${layer}-${Date.now()}`,mediaId:id,name:media.name,type:'video',start:round(time),duration,sourceStart:media.type==='image'?0:sourceStart,playbackRate,track:layer===0?0:layer+3,volume:layer||media.type==='image'?0:100,opacity:100,scale:100,positionX:0,positionY:0,rotation:0,fit:shot.fit,autoCutStyle,autoCutEvidence:{reason:String(shot.reason||'').slice(0,400),provider:'Gemini'},audioFadeIn:Math.min(.04,duration/8),audioFadeOut:Math.min(.04,duration/8),...(cell?{collage:{id:`autocut-panels-${index}`,layout:shot.layout,index:layer,background:'#090b10',cell}}:{})};
         const layerTools=operations.filter(operation=>(!layer||operation.id!=='caption')&&(shot.layout!=='hero-overlay'||layer||operation.id!=='person-cutout'));
-        clips.push(layerTools.length?{...tools.applyTools(clip,layerTools),autoCutTools:layerTools,autoCutToolsApplied:true}:clip);
+        // The catalog bounds up to 24 expanded operations but accepts at most
+        // 12 top-level calls. Apply validated primitives sequentially rather
+        // than reinterpreting the expanded list as 24 top-level requests.
+        const treated=layerTools.reduce((current,operation)=>tools.applyTools(current,[operation]),clip);
+        clips.push(layerTools.length?{...treated,autoCutTools:layerTools,autoCutToolsApplied:true}:clip);
       });time+=duration;
     }
     if(soundtrack?.id){const length=Math.min(time,Number(soundtrack.duration)||0);if(length>0){clips.push({id:'autocut-music-'+Date.now(),type:'audio',mediaId:soundtrack.id,name:soundtrack.name,start:0,duration:round(length),sourceStart:0,playbackRate:1,track:1,volume:25,audioFadeIn:.12,audioFadeOut:Math.min(.5,length/4)});notes.push('Soundtrack mixed quietly under original source sound. Adjust the mix with Edit further.');}}
-    return {clips,duration:round(time),title:String(plan.title||'AutoCut').slice(0,140),story:String(plan.story||'').slice(0,2000),pacing:style,evidence:{method:'gemini-multimodal',provider:response.metadata?.provider||'Gemini',model:response.metadata?.model||'',sampledFrames:Number(response.metadata?.analyzedFrames)||0,audioSamples:Number(response.metadata?.audioSamples)||0,shotCount:plan.shots.length},warnings:notes};
+    const soundDesign=plan.soundDesign||[],sfx=root.ZorifiSFX||(typeof require==='function'?require('./zorifi-sfx.js'):null);
+    if(soundDesign.length&&!sfx)throw new Error('The sound-design library is unavailable. Refresh Zorifi.');
+    return {clips,duration:round(time),soundDesign:sfx?sfx.validateCues(soundDesign,time):[],title:String(plan.title||'AutoCut').slice(0,140),story:String(plan.story||'').slice(0,2000),pacing:style,evidence:{method:'gemini-multimodal',provider:response.metadata?.provider||'Gemini',model:response.metadata?.model||'',sampledFrames:Number(response.metadata?.analyzedFrames)||0,audioSamples:Number(response.metadata?.audioSamples)||0,shotCount:plan.shots.length},warnings:notes};
   }
-  async function createPlan(assets,{requestPlan,signal,onProgress,prompt='',style='balanced',targetDuration=30,ratio='16:9',soundtrack,includeAudio=true,recipes=[],allowPersonCutout=false,rhythm}={}){
+  async function createPlan(assets,{requestPlan,signal,onProgress,prompt='',style='balanced',targetDuration=30,ratio='16:9',soundtrack,includeAudio=true,recipes=[],allowPersonCutout=false,rhythm,soundDesign=false}={}){
     if(typeof requestPlan!=='function')throw new Error('The Gemini AutoCut gateway is unavailable.');
     const collected=await collect(assets,{signal,onProgress,includeAudio});check(signal);
     const savedRecipes=registry()?.validateRecipes(recipes)||[];
     if(allowPersonCutout&&!root.ZorifiPersonCutout?.ready())throw new Error('Enable the on-device person cutout model before generating this plan.');
-    const input={prompt,style:styles.includes(style)?style:'balanced',targetDuration,ratio,media:collected.media,recipes:savedRecipes,allowPersonCutout:!!allowPersonCutout,...(rhythm?{rhythm:{bpm:rhythm.bpm,beatTimes:rhythm.beatTimes}}:{}),...(soundtrack?{soundtrack:{id:soundtrack.id,duration:soundtrack.duration,beatTimes:root.ZorifiAutoCut?.audioBeatTimes(soundtrack.waveform)||[]}}:{})};
+    const input={prompt,style:styles.includes(style)?style:'balanced',targetDuration,ratio,media:collected.media,recipes:savedRecipes,allowPersonCutout:!!allowPersonCutout,cleanEdit:true,soundDesign:!!soundDesign,...(rhythm?{rhythm:{bpm:rhythm.bpm,beatTimes:rhythm.beatTimes}}:{}),...(soundtrack?{soundtrack:{id:soundtrack.id,duration:soundtrack.duration,beatTimes:root.ZorifiAutoCut?.audioBeatTimes(soundtrack.waveform)||[]}}:{})};
     if(new root.TextEncoder().encode(JSON.stringify(input)).length>3900000)throw new Error('These previews exceed the online request size. Choose fewer media files.');
     onProgress?.({phase:'planning'});const response=await requestPlan(input,{signal});check(signal);
     const analyzedAssets=assets.map(asset=>{const item=collected.media.find(media=>media.id===String(asset.id));return item?{...asset,duration:item.duration,width:item.width,height:item.height}:asset;});

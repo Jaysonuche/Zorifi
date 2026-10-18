@@ -7,7 +7,7 @@
 
   // A standalone renderer: it reads an AutoCut plan without opening or changing
   // the editor. Media stays on the device. Canvas recording runs in real time.
-  const LIMITS=Object.freeze({duration:180,clips:192,assets:17,visualAssets:16,layers:4,maxDimension:1920,maxPixels:2073600});
+  const LIMITS=Object.freeze({duration:180,clips:192,assets:21,visualAssets:16,soundEffects:4,layers:4,maxDimension:1920,maxPixels:2073600});
   const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
   const number=(value,fallback=0)=>Number.isFinite(Number(value))?Number(value):fallback;
   const aborted=()=>{const error=new Error('AutoCut generation cancelled.');error.name='AbortError';return error;};
@@ -15,7 +15,7 @@
 
   function preparePlan(plan,assets){
     if(!Array.isArray(plan?.clips)||!plan.clips.length)throw new Error('AutoCut has no shots to render.');
-    if(plan.clips.length>LIMITS.clips+1)throw new Error('This AutoCut contains too many shots.');
+    if(plan.clips.length>LIMITS.clips+1+LIMITS.soundEffects)throw new Error('This AutoCut contains too many shots.');
     const byId=new Map((Array.isArray(assets)?assets:[]).map(asset=>[String(asset.id),asset]));
     const clips=plan.clips.map(clip=>{
       const asset=byId.get(String(clip.mediaId));
@@ -59,8 +59,9 @@
       end=scene.start+scene.duration;
     }
     if(end>LIMITS.duration+.025)throw new Error('AutoCut can render up to 3 minutes. Choose a shorter edit.');
-    if(audio.length>1)throw new Error('AutoCut supports one soundtrack per generated edit.');
-    if(new Set(visuals.map(item=>String(item.asset.id))).size>LIMITS.visualAssets||new Set(clips.map(item=>String(item.asset.id))).size>LIMITS.assets)throw new Error('Select up to 16 visual files and one soundtrack.');
+    if(audio.filter(item=>!item.clip.soundEffect).length>1||audio.filter(item=>item.clip.soundEffect).length>LIMITS.soundEffects)throw new Error('AutoCut supports one soundtrack and up to four sound-effect cues.');
+    if(new Set(visuals.map(item=>String(item.asset.id))).size>LIMITS.visualAssets||new Set(clips.map(item=>String(item.asset.id))).size>LIMITS.assets)throw new Error('Select up to 16 visual files, one soundtrack and four sound-effect sources.');
+    for(const [index,a] of audio.entries())for(const b of audio.slice(index+1))if(String(a.asset.id)===String(b.asset.id)&&a.clip.start<b.clip.start+b.clip.duration&&b.clip.start<a.clip.start+a.clip.duration)throw new Error('Overlapping sound cues need separate audio sources.');
     for(const soundtrack of audio){
       if(soundtrack.clip.start+soundtrack.clip.duration>end+.025)throw new Error('The AutoCut soundtrack extends past the generated edit.');
       if(visuals.some(item=>item.asset.id===soundtrack.asset.id&&item.clip.start<soundtrack.clip.start+soundtrack.clip.duration&&soundtrack.clip.start<item.clip.start+item.clip.duration))throw new Error('Choose a separate soundtrack source for this AutoCut.');
