@@ -21,6 +21,7 @@ const root = __dirname;
 // zorifi-vanessa-creative-conversation.js, zorifi-vanessa-creative-verification.js,
 // zorifi-vanessa-creative-pipeline.js. The server admits this bounded family below.
 const functionFiles = new Map([
+  ['vanessa-director-tools', 'vanessa-director-tools.mjs'],
   ['vanessa-autocut', 'vanessa-autocut.mjs'],
   ['vanessa', 'vanessa.mjs'],
   ['vanessa-video', 'vanessa-video.mjs'],
@@ -39,7 +40,7 @@ const functionFiles = new Map([
   ,['support-email', 'support-email.mjs']
 ]);
 const providerServices=new Set(functionFiles.keys());
-const mimeTypes = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml','.mp3':'audio/mpeg','.wav':'audio/wav'};
+const mimeTypes = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml','.mp4':'video/mp4','.webm':'video/webm','.mp3':'audio/mpeg','.wav':'audio/wav'};
 let localServer;
 let localOrigin='';
 let mainWindow=null;

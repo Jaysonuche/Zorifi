@@ -104,7 +104,7 @@ export function handler(run,{multipart=false}={}){
   }catch(error){return reply(json({error:error instanceof ServiceError?error.message:'The service could not complete this request.',code:error.code||'SERVICE_FAILED',configured:error.code!=='NOT_CONFIGURED'},error.status||500));}
  };
 }
-export async function language(prompt,{instructions='',jsonMode=false,preferredLanguage,image,webSearch=false}={}){
+export async function language(prompt,{instructions='',jsonMode=false,preferredLanguage,image,webSearch=false,signal}={}){
  if(usesGemini()){
   if(image||webSearch)throw new ServiceError('This Gemini integration currently supports text and structured planning only.',400,'UNSUPPORTED_CAPABILITY');
   const models=geminiModels();
@@ -113,9 +113,10 @@ export async function language(prompt,{instructions='',jsonMode=false,preferredL
   let data;
   for(const [index,model] of models.entries()){
    try{
-    data=await ai.models.generateContent({model,contents:[{role:'user',parts:[{text:prompt}]}],config:{systemInstruction:identity.providerInstructions({preferredLanguage})+'\n'+instructions,maxOutputTokens:8192,...(jsonMode?{responseMimeType:'application/json'}:{})}});
+    data=await ai.models.generateContent({model,contents:[{role:'user',parts:[{text:prompt}]}],config:{...(signal?{abortSignal:signal}:{}),systemInstruction:identity.providerInstructions({preferredLanguage})+'\n'+instructions,maxOutputTokens:8192,...(jsonMode?{responseMimeType:'application/json'}:{})}});
     break;
    }catch(error){
+    if(signal?.aborted)throw new ServiceError('The creative request was cancelled or took too long. Please retry.',504,'PROVIDER_TIMEOUT');
     if(index<models.length-1&&geminiTransient(error)){await geminiRetryPause();continue;}
     throw geminiFailure(error);
    }

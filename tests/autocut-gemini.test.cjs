@@ -149,3 +149,31 @@ test('temporary Gemini failure uses only the explicitly configured fallback and 
     const result=await autoCutPlan(localRequest());assert.equal(result.status,200);assert.equal((await result.json()).metadata.model,'gemini-3.5-flash-lite');assert.equal(urls.length,2);assert.match(urls[0],/gemini-2\.5-flash:generateContent/);assert.match(urls[1],/gemini-3\.5-flash-lite:generateContent/);
   },{GEMINI_FALLBACK_MODEL:'gemini-3.5-flash-lite'});
 });
+
+test('Gemini sees the actual executable tool catalogue and validated saved recipes, and cannot invent tools or code',async()=>{
+  const payload=input();payload.recipes=[{id:'recipe:depth-drift',name:'Depth drift',operations:[{id:'spatial',params:{rotateY:-30,endRotateY:15}},{id:'glow',params:{amount:8}}]}];
+  const generated=plan();generated.shots[0].tools=[{id:'recipe:depth-drift',params:{}}];generated.shots[1].spatial={rotateX:12,endRotateX:-8};
+  await mocked(async(url,options)=>{const parts=JSON.parse(options.body).contents[0].parts,summary=JSON.parse(parts[0].text);assert(summary.toolCatalog.some(tool=>tool.id==='spatial'));assert(summary.toolCatalog.some(tool=>tool.id==='recipe:depth-drift'));return response(generated);},async({autoCutPlan,validateAutoCutInput,validateAutoCutPlan})=>{
+    const result=await autoCutPlan(localRequest(payload));assert.equal(result.status,200);const body=await result.json();assert.equal(body.plan.shots[0].tools[0].id,'recipe:depth-drift');assert.equal(body.plan.shots[1].spatial.perspective,2.4);
+    const normalized=validateAutoCutInput(payload),p=plan();p.shots[0].tools=[{id:'arbitrary-code',params:{text:'alert(1)'}}];assert.throws(()=>validateAutoCutPlan(p,normalized),/unsupported editing tool/);
+    p.shots[0].tools=[{id:'spatial',params:{rotateY:90}}];assert.throws(()=>validateAutoCutPlan(p,normalized),/invalid tool parameters/);
+    const invalid=input();invalid.recipes=[{...payload.recipes[0],operations:[{id:'fetch',params:{url:'https://example.invalid'}}]}];assert.throws(()=>validateAutoCutInput(invalid),/built-in/);
+  });
+});
+
+test('person cutout and foreground overlay require explicit model opt-in and never silently request a download',async()=>{
+  await mocked(async()=>response(plan()),async({validateAutoCutInput,validateAutoCutPlan})=>{
+    const payload=input();payload.media.push({...payload.media[0],id:'portrait',type:'image',audio:undefined});const p=plan();p.shots[0].layout='hero-overlay';p.shots[0].secondaryMediaIds=['portrait'];p.shots[0].tools=[{id:'person-cutout',params:{threshold:.5}}];
+    assert.throws(()=>validateAutoCutPlan(p,validateAutoCutInput(payload)),/unsupported editing tool/);
+    payload.allowPersonCutout=true;const result=validateAutoCutPlan(p,validateAutoCutInput(payload));assert.equal(result.shots[0].tools[0].id,'person-cutout');
+    p.shots[0].tools=[];assert.throws(()=>validateAutoCutPlan(p,validateAutoCutInput(payload)),/requires an enabled person cutout/);
+  });
+});
+
+test('a Pulse rhythm is a bounded user cut guide, never misrepresented as detected audio beats',async()=>{
+  const payload=input();payload.rhythm={bpm:120,beatTimes:[0,.5,1,1.5,2,2.5,3]};
+  await mocked(async(url,options)=>{const body=JSON.parse(options.body),summary=JSON.parse(body.contents[0].parts[0].text);assert.equal(summary.rhythm.source,'user-tapped-guide');assert.deepEqual(summary.rhythm.beatTimes,payload.rhythm.beatTimes);assert.match(body.systemInstruction.parts[0].text,/USER-TAPPED CUT GUIDE/);return response(plan());},async({autoCutPlan,validateAutoCutInput})=>{
+    assert.equal((await autoCutPlan(localRequest(payload))).status,200);
+    for(const rhythm of [{bpm:0,beatTimes:[0]},{bpm:120,beatTimes:[1,0]},{bpm:120,beatTimes:[0,0]},{bpm:120,beatTimes:[0,7]},{bpm:120,beatTimes:Array.from({length:513},(_,i)=>i/100)}])assert.throws(()=>validateAutoCutInput({...payload,rhythm}),/tapped rhythm/);
+  });
+});

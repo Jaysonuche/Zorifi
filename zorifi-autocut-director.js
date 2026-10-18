@@ -3,6 +3,7 @@
   const check=signal=>{if(signal?.aborted){const e=new Error('AutoCut cancelled.');e.name='AbortError';throw e;}};
   const round=n=>Math.round(n*1000)/1000;
   const styles=['balanced','energetic','cinematic','anime-impact','motivational'];
+  const registry=()=>root.ZorifiToolRegistry||(typeof require==='function'?require('./zorifi-tool-registry.js'):null);
   function samples(duration,count){return Array.from({length:count},(_,i)=>round(count===1?0:Math.min(Math.max(0,duration-.05),i*duration/(count-1))));}
   function wait(element,event,signal){check(signal);return new Promise((resolve,reject)=>{let timer;const done=e=>{clearTimeout(timer);element.removeEventListener(event,ok);element.removeEventListener('error',fail);signal?.removeEventListener('abort',abort);e?reject(e):resolve();},ok=()=>done(),fail=()=>done(new Error('A source could not be read for Gemini analysis. Re-import it.')),abort=()=>{const e=new Error('AutoCut cancelled.');e.name='AbortError';done(e);};element.addEventListener(event,ok,{once:true});element.addEventListener('error',fail,{once:true});signal?.addEventListener('abort',abort,{once:true});timer=setTimeout(()=>done(new Error('A source took too long to open for analysis.')),15000);});}
   function base64(bytes){let out='';for(let i=0;i<bytes.length;i+=8192)out+=String.fromCharCode(...bytes.subarray(i,i+8192));return root.btoa(out);}
@@ -44,32 +45,37 @@
       return {media,warnings};
     }finally{if(audioContext&&audioContext.state!=='closed')await audioContext.close().catch(()=>{});}
   }
-  function compile(response,assets,{style='balanced',soundtrack,targetDuration=180,warnings=[]}={}){
+  function compile(response,assets,{style='balanced',soundtrack,targetDuration=180,warnings=[],recipes=[]}={}){
     const plan=response?.plan;if(!plan||!Array.isArray(plan.shots)||!plan.shots.length||plan.shots.length>48)throw new Error('Vanessa returned no valid shots. Try again.');
     const byId=new Map(assets.map(a=>[String(a.id),a])),clips=[],notes=[...warnings,...(plan.warnings||[])].map(String);let time=0;
     for(const [index,shot] of plan.shots.entries()){
-      const asset=byId.get(shot.mediaId),duration=Number(shot.duration),speed=Number(shot.speed),start=Number(shot.sourceStart),ids=[shot.mediaId,...(shot.secondaryMediaIds||[])],counts={single:1,split:2,triptych:3,grid:4};
+      const asset=byId.get(shot.mediaId),duration=Number(shot.duration),speed=Number(shot.speed),start=Number(shot.sourceStart),ids=[shot.mediaId,...(shot.secondaryMediaIds||[])],counts={single:1,split:2,triptych:3,grid:4,'hero-overlay':2};
       if(!asset||!Number.isFinite(duration)||duration<.25||duration>30||!Number.isFinite(speed)||speed<.5||speed>2||!Number.isFinite(start)||start<0||!counts[shot.layout]||ids.length!==counts[shot.layout]||new Set(ids).size!==ids.length)throw new Error('Vanessa returned invalid shot instructions. Generate again.');
       if(time+duration>Math.min(180,targetDuration)+.1)throw new Error('Vanessa’s plan exceeds the chosen duration.');
-      const cells=ids.length>1?root.ZorifiPhase11.collageLayout(shot.layout,ids.length):null;
+      const tools=registry();let operations=[];if(shot.tools?.length||shot.spatial){if(!tools)throw new Error('The editing-tool registry is unavailable. Refresh Zorifi.');operations=tools.expandTools(shot.tools||[],recipes);if(shot.spatial)operations.push({id:'spatial',params:tools.validateParams('spatial',shot.spatial)});}
+      const cells=shot.layout==='hero-overlay'?[{x:0,y:0,w:101,h:101},{x:0,y:0,w:61,h:97}]:ids.length>1?root.ZorifiPhase11.collageLayout(shot.layout,ids.length):null;
       ids.forEach((id,layer)=>{
         const media=byId.get(id),sourceStart=layer?0:start,playbackRate=media?.type==='image'?1:speed;
         if(!media||media.type==='video'&&sourceStart+duration*playbackRate>media.duration+.025)throw new Error('A planned shot extends beyond the original media. Generate again.');
         const c=cells?.[layer],cell=c?{left:50+c.x-c.w/2+.5,top:50+c.y-c.h/2+.5,width:c.w-1,height:c.h-1}:null;
         const autoCutStyle={motion:shot.motion,grade:shot.grade,caption:layer?'':String(shot.caption||'').slice(0,160),captionPosition:shot.captionPosition,transition:shot.transition,focalPoint:layer?{x:.5,y:.5}:shot.focalPoint||{x:.5,y:.5},kinetic:true};
-        clips.push({id:`autocut-${index}-${layer}-${Date.now()}`,mediaId:id,name:media.name,type:'video',start:round(time),duration,sourceStart:media.type==='image'?0:sourceStart,playbackRate,track:layer===0?0:layer+3,volume:layer||media.type==='image'?0:100,opacity:100,scale:100,positionX:0,positionY:0,rotation:0,fit:shot.fit,autoCutStyle,autoCutEvidence:{reason:String(shot.reason||'').slice(0,400),provider:'Gemini'},audioFadeIn:Math.min(.04,duration/8),audioFadeOut:Math.min(.04,duration/8),...(cell?{collage:{id:`autocut-panels-${index}`,layout:shot.layout,index:layer,background:'#090b10',cell}}:{})});
+        const clip={id:`autocut-${index}-${layer}-${Date.now()}`,mediaId:id,name:media.name,type:'video',start:round(time),duration,sourceStart:media.type==='image'?0:sourceStart,playbackRate,track:layer===0?0:layer+3,volume:layer||media.type==='image'?0:100,opacity:100,scale:100,positionX:0,positionY:0,rotation:0,fit:shot.fit,autoCutStyle,autoCutEvidence:{reason:String(shot.reason||'').slice(0,400),provider:'Gemini'},audioFadeIn:Math.min(.04,duration/8),audioFadeOut:Math.min(.04,duration/8),...(cell?{collage:{id:`autocut-panels-${index}`,layout:shot.layout,index:layer,background:'#090b10',cell}}:{})};
+        const layerTools=operations.filter(operation=>(!layer||operation.id!=='caption')&&(shot.layout!=='hero-overlay'||layer||operation.id!=='person-cutout'));
+        clips.push(layerTools.length?{...tools.applyTools(clip,layerTools),autoCutTools:layerTools,autoCutToolsApplied:true}:clip);
       });time+=duration;
     }
     if(soundtrack?.id){const length=Math.min(time,Number(soundtrack.duration)||0);if(length>0){clips.push({id:'autocut-music-'+Date.now(),type:'audio',mediaId:soundtrack.id,name:soundtrack.name,start:0,duration:round(length),sourceStart:0,playbackRate:1,track:1,volume:25,audioFadeIn:.12,audioFadeOut:Math.min(.5,length/4)});notes.push('Soundtrack mixed quietly under original source sound. Adjust the mix with Edit further.');}}
     return {clips,duration:round(time),title:String(plan.title||'AutoCut').slice(0,140),story:String(plan.story||'').slice(0,2000),pacing:style,evidence:{method:'gemini-multimodal',provider:response.metadata?.provider||'Gemini',model:response.metadata?.model||'',sampledFrames:Number(response.metadata?.analyzedFrames)||0,audioSamples:Number(response.metadata?.audioSamples)||0,shotCount:plan.shots.length},warnings:notes};
   }
-  async function createPlan(assets,{requestPlan,signal,onProgress,prompt='',style='balanced',targetDuration=30,ratio='16:9',soundtrack,includeAudio=true}={}){
+  async function createPlan(assets,{requestPlan,signal,onProgress,prompt='',style='balanced',targetDuration=30,ratio='16:9',soundtrack,includeAudio=true,recipes=[],allowPersonCutout=false,rhythm}={}){
     if(typeof requestPlan!=='function')throw new Error('The Gemini AutoCut gateway is unavailable.');
     const collected=await collect(assets,{signal,onProgress,includeAudio});check(signal);
-    const input={prompt,style:styles.includes(style)?style:'balanced',targetDuration,ratio,media:collected.media,...(soundtrack?{soundtrack:{id:soundtrack.id,duration:soundtrack.duration,beatTimes:root.ZorifiAutoCut?.audioBeatTimes(soundtrack.waveform)||[]}}:{})};
+    const savedRecipes=registry()?.validateRecipes(recipes)||[];
+    if(allowPersonCutout&&!root.ZorifiPersonCutout?.ready())throw new Error('Enable the on-device person cutout model before generating this plan.');
+    const input={prompt,style:styles.includes(style)?style:'balanced',targetDuration,ratio,media:collected.media,recipes:savedRecipes,allowPersonCutout:!!allowPersonCutout,...(rhythm?{rhythm:{bpm:rhythm.bpm,beatTimes:rhythm.beatTimes}}:{}),...(soundtrack?{soundtrack:{id:soundtrack.id,duration:soundtrack.duration,beatTimes:root.ZorifiAutoCut?.audioBeatTimes(soundtrack.waveform)||[]}}:{})};
     if(new root.TextEncoder().encode(JSON.stringify(input)).length>3900000)throw new Error('These previews exceed the online request size. Choose fewer media files.');
     onProgress?.({phase:'planning'});const response=await requestPlan(input,{signal});check(signal);
-    return compile(response,assets,{style,soundtrack,targetDuration,warnings:collected.warnings});
+    return compile(response,assets,{style,soundtrack,targetDuration,warnings:collected.warnings,recipes:savedRecipes});
   }
   return {styles,samples,wavExcerpt,collect,compile,createPlan};
 });

@@ -44,3 +44,18 @@ test('a long accepted title wraps and scales without silently losing its ending'
   Creative.drawCaption(context,{start:0,duration:5,opacity:100,autoCutStyle:{caption,captionPosition:'center',kinetic:false}},3,405,720);
   assert.equal(drawn.join(' '),caption);assert.match(drawn.at(-1),/together$/);
 });
+
+test('saved tools compile into actual editable renderer settings and preserve collage captions on one layer',()=>{
+  const recipe={id:'recipe:camera-drift',name:'Camera drift',operations:[{id:'spatial',params:{rotateY:-25,endRotateY:15}},{id:'caption',params:{text:'Forward'}}]};
+  const result=Director.compile(response([shot({layout:'split',secondaryMediaIds:['b'],tools:[{id:recipe.id,params:{}}]})]),assets,{recipes:[recipe]});
+  assert.equal(result.clips[0].spatial3D.rotateY,-25);assert.equal(result.clips[1].spatial3D.endRotateY,15);assert.equal(result.clips[0].autoCutStyle.caption,'Forward');assert.equal(result.clips[1].autoCutStyle.caption,'');
+  assert(result.clips.every(clip=>clip.autoCutToolsApplied));assert.equal(result.clips[0].autoCutTools[0].id,'spatial');
+  assert.throws(()=>Director.compile(response([shot({tools:[{id:'execute-javascript',params:{}}]})]),assets),/Unsupported/);
+});
+
+test('hero overlays keep the background intact and put a real person mask on the editable foreground only',()=>{
+  const result=Director.compile(response([shot({layout:'hero-overlay',secondaryMediaIds:['b'],tools:[{id:'person-cutout',params:{}}]})]),assets);
+  assert.equal(result.clips[0].subjectCutout,undefined);assert.equal(result.clips[1].subjectCutout.enabled,true);
+  assert.deepEqual(result.clips[0].collage.cell,{left:0,top:0,width:100,height:100});assert.deepEqual(result.clips[1].collage.cell,{left:20,top:2,width:60,height:96});
+  assert.equal(Renderer.preparePlan(result,assets).scenes[0].items.length,2);
+});

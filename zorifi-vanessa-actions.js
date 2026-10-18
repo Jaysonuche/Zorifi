@@ -13,6 +13,7 @@
     'text.add','text.edit','text.style','text.delete','caption.open','caption.generate','caption.style','caption.delete',
     'transition.apply','project.save','project.rename','project.duplicate','project.info','project.ratio','project.favorite','project.open_recent',
     'template.create','template.use','template.find','template.favorite','creator.format','creator.stage','export.prepare','export.preset'
+    ,'studio.open','tool.create','tool.apply'
   ]);
   const CLIP_PROPERTIES={
     positionX:[-150,150],positionY:[-150,150],scale:[5,500],scaleX:[5,500],scaleY:[5,500],rotation:[-360,360],
@@ -63,9 +64,13 @@
   function validate(action,context){
     action=normalizeAction(action);if(!action)return result(STATUS.FAILED,'Malformed Vanessa action.');
     if(!ACTIONS.has(action.command))return result(STATUS.UNSUPPORTED,`Zorifi does not support “${action.command}”.`,{action});
-    const p=action.parameters||{},needsClip=/^(clip|visual|audio|keyframe|effect|animation)\./.test(action.command)||/^(text\.(edit|style|delete))$/.test(action.command);
+    const p=action.parameters||{},needsClip=/^(clip|visual|audio|keyframe|effect|animation)\./.test(action.command)||/^(text\.(edit|style|delete))$/.test(action.command)||action.command==='tool.apply';
+    if(action.command==='studio.open'&&!context.capabilities?.deviceWorkspaces?.includes(p.id))return result(STATUS.UNSUPPORTED,'That workspace is unavailable on this device.',{action});
+    if(action.command==='tool.create'&&(typeof p.prompt!=='string'||p.prompt.trim().length<3||p.prompt.length>2000))return result(STATUS.FAILED,'Describe the editing tool in 3–2000 characters.',{action});
+    if(action.command==='tool.apply'&&!context.capabilities?.editingTools?.some(tool=>tool.id===p.id))return result(STATUS.FAILED,'Choose an available editing tool.',{action});
     const clip=needsClip?findClip(context,action):null;
     if(needsClip&&!clip)return result(STATUS.FAILED,'The target clip does not exist or no clip is selected.',{action});
+    if(action.command==='tool.apply'&&(clip.type!=='video'||context.tracks?.find(track=>track.id===clip.track)?.locked))return result(STATUS.FAILED,'Choose a photo or video on an unlocked track.',{action});
     if(/^audio\./.test(action.command)&&!['audio','video'].includes(clip.type))return result(STATUS.FAILED,'The target clip has no supported audio.',{action});
     if(/^visual\./.test(action.command)&&clip.type!=='video')return result(STATUS.FAILED,'The target is not a visual clip.',{action});
     if(/^(effect|animation)\./.test(action.command)&&!['video','text'].includes(clip.type))return result(STATUS.FAILED,'Select a visual or text element first.',{action});

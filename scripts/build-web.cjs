@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const output = path.join(root, 'web-dist');
-const files = ['index.html', 'styles.css', 'app.js', 'sw.js', 'manifest.webmanifest', '_redirects', 'ZorifiVanessaStudioCore.js', 'ZorifiVanessaTrueAudioAI.js', 'ZorifiAutoCaptions.js', 'ZorifiMulticamSyncEngine.js', ...fs.readdirSync(root).filter(name => /^zorifi-.*\.(js|json)$/.test(name))];
+const files = ['index.html', 'styles.css', 'app.js', 'sw.js', 'manifest.webmanifest', '_redirects', 'ZorifiVanessaStudioCore.js', 'ZorifiVanessaTrueAudioAI.js', 'ZorifiAutoCaptions.js', 'ZorifiMulticamSyncEngine.js', ...fs.readdirSync(root).filter(name => /^zorifi-.*\.(js|json|css)$/.test(name))];
 for (const name of files) if (!fs.existsSync(path.join(root, name))) throw new Error(`Missing web source: ${name}`);
 fs.mkdirSync(output, {recursive: true});
 for (const name of files) fs.copyFileSync(path.join(root, name), path.join(output, name));

@@ -230,11 +230,13 @@
           return abortable(entry.source.media.play(),signal,5000,'Media playback was blocked. Click Generate again.');
         }));
         const event=recorder.state==='inactive'?'start':'resume',ready=waitFor(recorder,event,{signal,label:'The AutoCut recorder could not start.'});
-        if(event==='start')recorder.start(500);else recorder.resume();videoTrack.requestFrame?.();await ready;
         const started=root.performance.now();
+        if(event==='start')recorder.start(500);else recorder.resume();videoTrack.requestFrame?.();await ready;
         while(true){
           checkAbort(signal);if(recordingError)throw recordingError;
-          const elapsed=Math.min(scene.duration,(root.performance.now()-started)/1000),time=scene.start+elapsed;
+          const frameStarted=root.performance.now(),elapsed=(frameStarted-started)/1000;
+          if(elapsed>=scene.duration)break;
+          const time=scene.start+elapsed;
           for(const entry of playing){
             const active=time>=entry.clip.start&&time<entry.clip.start+entry.clip.duration;
             if(entry.source.gain)entry.source.gain.gain.setValueAtTime(active?audioLevel(entry.clip,time):0,audioContext.currentTime);
@@ -243,9 +245,16 @@
           }
           drawScene(scene,time);videoTrack.requestFrame?.();
           notify('rendering',.12+.85*time/duration,time);
-          if(elapsed>=scene.duration)break;
-          await abortable(new Promise(resolve=>setTimeout(resolve,Math.min(1000/30,(scene.duration-elapsed)*1000))),signal);
+          const remaining=scene.duration*1000-(root.performance.now()-started);
+          if(remaining<=0)break;
+          // Rendering a perspective mesh or segmentation mask takes time too.
+          // Count that work inside the frame budget and pause before copying
+          // transition surfaces, rather than recording an extra end frame.
+          const wait=Math.min(Math.max(0,1000/30-(root.performance.now()-frameStarted)),remaining);
+          await abortable(new Promise(resolve=>setTimeout(resolve,wait)),signal);
         }
+        if(recorder.state==='recording'){const paused=waitFor(recorder,'pause',{signal,label:'The AutoCut recorder did not pause.'});recorder.pause();await paused;}
+        pauseAll();
         previousContext.drawImage(canvas,0,0);hasPreviousFrame=true;
       }
       pauseAll();checkAbort(signal);notify('finalizing',.98,duration);

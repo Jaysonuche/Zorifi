@@ -117,7 +117,16 @@
       "ZorifiVanessaStudioCore.js",
       "ZorifiVanessaTrueAudioAI.js",
       "ZorifiAutoCaptions.js",
-      "ZorifiMulticamSyncEngine.js"
+      "ZorifiMulticamSyncEngine.js",
+      "zorifi-tool-registry.js",
+      "zorifi-person-cutout.js",
+      "zorifi-template-feed.js",
+      "zorifi-template-feed.css",
+      "zorifi-vanessa-orb.css",
+      "zorifi-device-lab.js",
+      "zorifi-device-lab.css",
+      "zorifi-device-integration.js",
+      "zorifi-touch-workspace.css"
     ],
     "win": {
       "target": "nsis",
