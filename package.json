@@ -132,7 +132,17 @@
       "zorifi-editor-workbench.js",
       "zorifi-editor-workbench.css",
       "zorifi-workbench-integration.js",
-      "zorifi-vanessa-chat.css"
+      "zorifi-vanessa-chat.css",
+      "zorifi-music-catalogue.js",
+      "zorifi-music-catalogue.css",
+      "zorifi-vanessa-listening.js",
+      "zorifi-editor-refinements.css",
+      "zorifi-background-cutout.js",
+      "zorifi-background-cutout.css",
+      "zorifi-background-integration.js",
+      "zorifi-social.js",
+      "zorifi-social.css",
+      "zorifi-social-integration.js"
     ],
     "win": {
       "target": "nsis",

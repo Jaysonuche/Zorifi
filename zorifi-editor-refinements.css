@@ -286,6 +286,23 @@
   body:not(.touch-workspace) main.app-shell[data-view="editor"].inspector-collapsed .inspector>*:not(.inspector-collapse) { display:none; }
 }
 @media (min-width:1024px) {
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .topbar {
+    min-width:0;
+    gap:8px;
+  }
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .topbar>.project-name {
+    position:static;
+    left:auto;
+    transform:none;
+    flex:0 1 190px;
+    min-width:80px;
+    max-width:190px;
+  }
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .topbar>.studio-search {
+    flex:1 1 150px;
+    min-width:110px;
+  }
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .topbar>.top-spacer { min-width:0; }
   body:not(.touch-workspace) main.app-shell[data-view="editor"] .media-panel { container:editor-library / inline-size; }
   body:not(.touch-workspace) main.app-shell[data-view="editor"] .panel-collapse { right:auto;left:88px; }
   body:not(.touch-workspace) main.app-shell[data-view="editor"].panel-collapsed .panel-collapse { right:auto;left:17px; }
@@ -299,6 +316,11 @@
     scrollbar-width:thin;
   }
   body:not(.touch-workspace) main.app-shell[data-view="editor"] :is(.media-primary-tabs,.media-category-tabs)>button { flex:none;white-space:nowrap; }
+}
+@media (min-width:1024px) and (max-width:1200px) {
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .topbar>.studio-search { display:none; }
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .topbar>.brand { flex:0 0 90px;width:90px; }
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .topbar>.project-name { flex-basis:140px; }
 }
 @container editor-library (max-width:220px) {
   body:not(.touch-workspace) main.app-shell[data-view="editor"] .capture-tools { grid-template-columns:1fr;gap:5px; }
