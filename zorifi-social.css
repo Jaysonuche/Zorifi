@@ -3,3 +3,26 @@
 @media(max-width:420px){.home-topbar:has(>.zorifi-mode-switch) .mobile-home-brand>b{display:none!important}.social-brand>b{font-size:16px}.social-message-form{grid-template-columns:minmax(0,1fr) 54px}.social-message-form>button{padding:8px}.social-chat>header>button{padding:7px}}
 
 body.touch-workspace .touch-editor>.topbar>.project-name{display:none!important}body.touch-workspace .touch-editor>.topbar>.zorifi-mode-switch{display:inline-flex!important;grid-column:2!important;grid-row:1!important;justify-self:start;margin:0;min-width:0;padding:2px}
+
+/* Keep the workspace switch visible despite legacy mobile header navigation rules. */
+.home-topbar > nav.zorifi-mode-switch {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  flex: 0 0 auto;
+  height: auto;
+  gap: 3px;
+}
+
+.home-topbar > nav.zorifi-mode-switch > button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (max-width: 360px) {
+  body.touch-workspace .home-screen .home-topbar:has(> nav.zorifi-mode-switch) {
+    gap: 4px !important;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+}

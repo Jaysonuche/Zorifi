@@ -1,5 +1,5 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
-const CACHE = 'zorifi-v222';
+const CACHE = 'zorifi-v223';
 const CORE = [
   "./",
   "./manifest.webmanifest",
@@ -16,7 +16,7 @@ const CORE = [
   "./zorifi-music-catalogue.css?v=222",
   "./zorifi-background-cutout.css?v=222",
   "./zorifi-editor-refinements.css?v=222",
-  "./zorifi-social.css?v=222",
+  "./zorifi-social.css?v=223",
   "./zorifi-support.js?v=171",
   "./zorifi-beta-program.js?v=171",
   "./zorifi-terms.js?v=173",
