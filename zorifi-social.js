@@ -13,7 +13,33 @@
   class Client {
     constructor(gateway,{timeout=20000}={}){if(!gateway?.configured?.()||!gateway.session?.uid)throw fault('Sign in with your Zorifi cloud account to open Social.','SIGN_IN_REQUIRED');this.gateway=gateway;this.session=gateway.session;this.uid=uid(this.session.uid);this.project=String(gateway.config.projectId);if(!/^[a-z0-9-]{2,100}$/.test(this.project))throw new Error('Invalid Social project.');this.base=`https://firestore.googleapis.com/v1/projects/${this.project}/databases/(default)/documents`;this.name=`projects/${this.project}/databases/(default)/documents`;this.controller=new AbortController();this.timeout=timeout;this.closed=false;}
     assertSession(){if(this.closed||this.gateway.session?.uid!==this.uid)throw fault('Your account changed. Reopen Social after signing in.','ACCOUNT_CHANGED');this.session=this.gateway.session;}
-    async send(suffix,{method='GET',body,signal}={}){this.assertSession();if(!/^\/?[-_a-zA-Z0-9/~:]*$/.test(suffix))throw new Error('Invalid Social document path.');const combined=AbortSignal.any([this.controller.signal,AbortSignal.timeout(this.timeout),...(signal?[signal]:[])]);const assertResponse=()=>{this.assertSession();if(combined.aborted)throw fault('The Social request was cancelled or timed out. Retry when connected.','CANCELLED');};let response;try{response=await this.gateway.authenticatedFetch(this.base+suffix,{method,headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{}),signal:combined});}catch(error){assertResponse();throw fault('Social could not reach the cloud. Check your connection and retry.','NETWORK');}assertResponse();const data=await response.json().catch(()=>({}));assertResponse();if(!response.ok){const reason=data.error?.details?.map(item=>item.reason||'').join(' ')||'',upstream=String(data.error?.message||'');if(reason.includes('SERVICE_DISABLED')||/database .*does not exist|database.*not found|has not been used|is disabled/i.test(upstream))throw fault('Social is waiting for the Zorifi Firestore database and access rules to be enabled. Your editing workspace still works.','SETUP_REQUIRED',response.status);if(response.status===404)throw fault('This Social item was not found.','NOT_FOUND',404);if(response.status===409)throw fault('This Social item already exists.','ALREADY_EXISTS',409);if(response.status===401)throw fault('Sign in again to reconnect to Social.','SIGN_IN_REQUIRED',401);if(response.status===403)throw fault('Social access was denied. The account, connection or published Firestore rules need checking.','ACCESS_DENIED',403);if(response.status===429||/resource exhausted|quota/i.test(upstream))throw fault('Social is receiving too many requests. Please wait and retry.','RATE_LIMIT',response.status);throw fault('The Social service could not finish this request. Please retry.','SERVICE_ERROR',response.status);}return data;}
+    async send(suffix,{method='GET',body,signal}={}){
+      this.assertSession();
+      if(!/^\/?[-_a-zA-Z0-9/~:]*$/.test(suffix))throw new Error('Invalid Social document path.');
+      const combined=AbortSignal.any([this.controller.signal,AbortSignal.timeout(this.timeout),...(signal?[signal]:[])]);
+      const assertResponse=()=>{this.assertSession();if(combined.aborted)throw fault('The Social request was cancelled or timed out. Retry when connected.','CANCELLED');};
+      let response;
+      try{response=await this.gateway.authenticatedFetch(this.base+suffix,{method,headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{}),signal:combined});}
+      catch(error){assertResponse();throw fault('Social could not reach the cloud. Check your connection and retry.','NETWORK');}
+      assertResponse();
+      const data=await response.json().catch(()=>({}));
+      assertResponse();
+      if(!response.ok){
+        const details=Array.isArray(data.error?.details)?data.error.details:[],upstream=String(data.error?.message||'');
+        // Missing first-time profiles/messages include /databases/ in their
+        // document path. Only an error ABOUT the database means setup failed.
+        const missingDatabase=/^(?:the\s+)?database\b[^\n]{0,300}\b(?:does not exist|(?:was )?not found)\b/i.test(upstream);
+        const disabledFirestore=/^cloud firestore(?: api)?\b[^\n]{0,200}(?:has not been used|is disabled)\b/i.test(upstream);
+        if(details.some(item=>item.reason==='SERVICE_DISABLED')||missingDatabase||disabledFirestore)throw fault('Social is waiting for the Zorifi Firestore database and access rules to be enabled. Your editing workspace still works.','SETUP_REQUIRED',response.status);
+        if(response.status===404)throw fault('This Social item was not found.','NOT_FOUND',404);
+        if(response.status===409)throw fault('This Social item already exists.','ALREADY_EXISTS',409);
+        if(response.status===401)throw fault('Sign in again to reconnect to Social.','SIGN_IN_REQUIRED',401);
+        if(response.status===403)throw fault('Social access was denied. The account, connection or published Firestore rules need checking.','ACCESS_DENIED',403);
+        if(response.status===429||/resource exhausted|quota/i.test(upstream))throw fault('Social is receiving too many requests. Please wait and retry.','RATE_LIMIT',response.status);
+        throw fault('The Social service could not finish this request. Please retry.','SERVICE_ERROR',response.status);
+      }
+      return data;
+    }
     write(path,data,{create=false,updateFields,created=false,updated=false}={}){const value={update:{name:this.name+'/'+path,fields:Object.fromEntries(Object.entries(data).map(([key,item])=>[key,encode(item)]))}};if(create)value.currentDocument={exists:false};if(updateFields)value.updateMask={fieldPaths:updateFields};const fields=[...(created?['createdAt']:[]),...(updated?['updatedAt']:[])];if(fields.length)value.updateTransforms=fields.map(fieldPath=>({fieldPath,setToServerValue:'REQUEST_TIME'}));return value;}
     rate(field,path){const pathField={lastRequestAt:'lastRequestPath',lastMessageAt:'lastMessagePath',lastReportAt:'lastReportPath'}[field];if(!pathField||typeof path!=='string'||!/^[-_a-zA-Z0-9/~]+$/.test(path))throw new Error('Invalid Social rate binding.');return {update:{name:this.name+'/socialRates/'+this.uid,fields:{[pathField]:encode(path)}},updateMask:{fieldPaths:[pathField]},updateTransforms:[{fieldPath:field,setToServerValue:'REQUEST_TIME'}]};}
     async commit(writes,signal){if(!Array.isArray(writes)||!writes.length||writes.length>3)throw new Error('Invalid Social write batch.');return this.send(':commit',{method:'POST',body:{writes},signal});}

@@ -61,7 +61,7 @@ async function assertNavigation(page,width,label){
           await page.locator('.social-header nav [data-social-studio]').click();
           assert.equal(await page.locator('.zorifi-social-screen').count(),0);
           await page.evaluate(()=>{
-            const fake=installSocialFake({uid:'alice',profiles:{alice:{name:'Alice',discoverable:false},bob:{name:'Bob',bio:'A test creator'}}});
+            const fake=installSocialFake({uid:'alice',profiles:{bob:{name:'Bob',bio:'A test creator'}}});
             firebaseGateway.config={apiKey:'public-test-config',projectId:'zorifi',authDomain:'zorifi.firebaseapp.com'};
             firebaseGateway.transport=fake.transport;
             firebaseGateway.session={uid:'alice',idToken:'local-fixture-token',refreshToken:'local-fixture-refresh',expiresAt:Date.now()+3600000};
@@ -75,6 +75,8 @@ async function assertNavigation(page,width,label){
           await assertNavigation(page,width,label+' signed in');
           await page.waitForFunction(()=>document.querySelector('.social-status')?.textContent.startsWith('Connected'));
           await page.locator('.social-person h3',{hasText:'Bob'}).waitFor();
+          await page.getByRole('button',{name:'Create your profile',exact:true}).waitFor();
+          assert.equal(await page.evaluate(()=>__socialFake.stats.commits),0,'A missing first-time profile must load Social without automatically publishing one');
           assert.equal(await page.locator('.social-person').count(),1);
           assert.equal(await page.locator('#app').evaluate(element=>element.inert),true,'Social isolates the preserved Studio');
           await page.screenshot({path:path.join(__dirname,`../artifacts/social-navigation-${engine}-${width}.png`)});
