@@ -1,5 +1,7 @@
 allowBuilds:
+  '@google/genai': false
   electron: true
   electron-winstaller: true
+  protobufjs: false
   sharp: true
 nodeLinker: hoisted
