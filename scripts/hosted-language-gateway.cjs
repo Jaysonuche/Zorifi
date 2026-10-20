@@ -2,7 +2,7 @@
 // credentials remain on Vercel; neither the installer nor the local companion
 // receives a Gemini key.
 const HOSTED_ORIGIN = 'https://zorifi.vercel.app';
-const LANGUAGE_SERVICES = new Set(['vanessa', 'vanessa-global', 'vanessa-language', 'vanessa-scenes', 'vanessa-autocut', 'vanessa-director-tools', 'vanessa-video', 'vanessa-provider-test']);
+const LANGUAGE_SERVICES = new Set(['vanessa', 'vanessa-global', 'vanessa-language', 'vanessa-scenes', 'vanessa-autocut', 'vanessa-director-tools', 'vanessa-video', 'vanessa-background', 'vanessa-speech', 'vanessa-captions', 'vanessa-voice', 'vanessa-provider-test']);
 
 function validFirebaseWebConfig(config) {
   return config && typeof config === 'object' && !Array.isArray(config) &&
@@ -17,7 +17,7 @@ function parseHostedFirebaseWebConfig(html) {
   try {
     const config = JSON.parse(match[1]);
     if (!validFirebaseWebConfig(config)) return null;
-    return {apiKey: config.apiKey, projectId: config.projectId, authDomain: config.authDomain, appId: config.appId};
+    return {...publicFirebaseWebConfig(config)};
   } catch { return null; }
 }
 
@@ -28,14 +28,14 @@ async function hostedFirebaseWebConfig(fetchImpl = fetch) {
   } catch { return null; }
 }
 
+function publicFirebaseWebConfig(config) {
+  return {apiKey:config.apiKey,projectId:config.projectId,authDomain:config.authDomain,appId:config.appId,
+    googleClientId:/^[A-Za-z0-9_-]+\.apps\.googleusercontent\.com$/.test(config.googleClientId||'')?config.googleClientId:'',
+    storageBucket:/^[a-z0-9.-]+\.(?:appspot\.com|firebasestorage\.app)$/.test(config.storageBucket||'')?config.storageBucket:'',socialMediaEnabled:config.socialMediaEnabled===true};
+}
 function firebaseConfigScript(config) {
   if (!validFirebaseWebConfig(config)) return '';
-  const publicConfig = {
-    apiKey: config.apiKey,
-    projectId: config.projectId,
-    authDomain: config.authDomain,
-    appId: config.appId
-  };
+  const publicConfig = publicFirebaseWebConfig(config);
   return `<script>window.__ZORIFI_FIREBASE_CONFIG__=${JSON.stringify(publicConfig).replace(/</g, '\\u003c')};</script>`;
 }
 

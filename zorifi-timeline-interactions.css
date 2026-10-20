@@ -1,0 +1,25 @@
+/* Select once, then drag the selected layer. Unselected clips retain native horizontal scrolling. */
+body.touch-workspace main.touch-editor .clip.pointer-selected,
+body.touch-workspace main.touch-editor .clip.pointer-selected *,
+body.touch-workspace main.touch-editor .clip [data-trim],
+body.touch-workspace main.touch-editor .playhead,
+body.touch-workspace main.touch-editor .ruler {touch-action:none!important}
+.timeline-area .playhead{pointer-events:auto!important;cursor:ew-resize;touch-action:none!important;width:20px!important;margin-left:-10px;background:none!important;z-index:12!important}
+.timeline-area .playhead::before{content:'';position:absolute;left:9px;top:0;bottom:0;width:2px;background:#f481b5;box-shadow:0 0 8px #f481b544;pointer-events:none}
+.timeline-area .playhead::after{content:'';position:absolute;left:2px;top:0;width:16px;height:16px;background:#f481b5;border-radius:4px 4px 7px 7px;pointer-events:none}
+.timeline-area .playhead:focus-visible{outline:2px solid #d0afff;outline-offset:3px}
+.timeline-area .clip.pointer-selected{overflow:visible;z-index:4}
+/* Generic touch button targets must not inflate keyframe diamonds over a clip. */
+body.touch-workspace main.touch-editor .timeline-area .clip .clip-keyframe{width:12px!important;height:12px!important;min-width:12px!important;min-height:12px!important;max-width:12px!important;max-height:12px!important;padding:0!important;margin:0!important;bottom:3px!important;transform:translateX(-50%) rotate(45deg)!important}
+.timeline-area .clip [data-trim]{touch-action:none!important;transform:none!important;z-index:9;opacity:1!important}
+.timeline-area .clip [data-trim="left"]{left:0!important}
+.timeline-area .clip [data-trim="right"]{right:0!important}
+body.touch-workspace main.touch-editor .clip [data-trim]{min-width:17px!important;width:17px!important;border-radius:4px;background:#f2e8ffd9!important}
+body.timeline-pointer-edit,body.timeline-pointer-edit *{user-select:none!important;-webkit-user-select:none!important;cursor:grabbing!important}
+body.timeline-pointer-edit .timeline-scroll{scroll-behavior:auto!important}
+.timeline-gesture-note{font-size:11px;line-height:1.6;color:#8f829e;padding:8px 2px}
+.timeline-library-ghost{position:fixed;left:0;top:0;z-index:9000;pointer-events:none;max-width:180px;padding:10px 14px;border:1px solid #c69aff;border-radius:12px;background:#231b36ed;color:#fff;font-size:12px;box-shadow:0 12px 32px #0005}
+body.timeline-library-drag .timeline-content{outline:2px dashed #b786f0;outline-offset:-3px}
+.timeline-touch-drag-grip{display:none}
+body.touch-workspace :is([data-media-id],[data-text-preset],[data-text-template],[data-effect],[data-audio-track]){position:relative}
+body.touch-workspace .timeline-touch-drag-grip{position:absolute;right:4px;bottom:3px;z-index:8;display:grid;place-items:center;min-width:32px;min-height:30px;padding:3px 7px;border-radius:7px;background:#291f3ee8;color:#e9d6ff;font-size:23px;line-height:1;touch-action:none!important;-webkit-user-select:none;user-select:none}

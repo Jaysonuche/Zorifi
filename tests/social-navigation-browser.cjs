@@ -74,7 +74,7 @@ async function assertNavigation(page,width,label){
           });
           await assertNavigation(page,width,label+' signed in');
           await page.waitForFunction(()=>document.querySelector('.social-status')?.textContent.startsWith('Connected'));
-          await page.locator('.social-person h3',{hasText:'Bob'}).waitFor();
+          await page.locator('[data-social-tab="people"]').click();await page.locator('.social-person h3',{hasText:'Bob'}).waitFor();
           await page.getByRole('button',{name:'Create your profile',exact:true}).waitFor();
           assert.equal(await page.evaluate(()=>__socialFake.stats.commits),0,'A missing first-time profile must load Social without automatically publishing one');
           assert.equal(await page.locator('.social-person').count(),1);

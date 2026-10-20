@@ -12,7 +12,7 @@ if(!/^(127\.0\.0\.1|localhost|\[::1\]):\d+$/.test(host)||!/^demo-[-a-z0-9]+$/.te
 const origin='http://'+host,base=origin+'/v1/projects/'+project+'/databases/(default)/documents',name='projects/'+project+'/databases/(default)/documents/';
 const old='2020-01-01T00:00:00.000Z';
 function jwt(uid){const now=Math.floor(Date.now()/1000),encode=value=>Buffer.from(JSON.stringify(value)).toString('base64url');return encode({alg:'none',typ:'JWT'})+'.'+encode({iss:'https://securetoken.google.com/'+project,aud:project,auth_time:now-60,user_id:uid,sub:uid,iat:now-60,exp:now+3600,firebase:{identities:{},sign_in_provider:'custom'}})+'.';}
-function value(item){if(typeof item==='boolean')return {booleanValue:item};if(Array.isArray(item))return {arrayValue:{values:item.map(value)}};if(item&&typeof item==='object')return item;return {stringValue:String(item)};}
+function value(item){if(typeof item==='boolean')return {booleanValue:item};if(typeof item==='number')return Number.isInteger(item)?{integerValue:String(item)}:{doubleValue:item};if(Array.isArray(item))return {arrayValue:{values:item.map(value)}};if(item&&typeof item==='object')return item;return {stringValue:String(item)};}
 function write(documentPath,data,{create=false,created=false,updated=false,mask}={}){const result={update:{name:name+documentPath,fields:Object.fromEntries(Object.entries(data).map(([key,item])=>[key,value(item)]))}};if(create)result.currentDocument={exists:false};if(mask)result.updateMask={fieldPaths:mask};const transforms=[...(created?['createdAt']:[]),...(updated?['updatedAt']:[])];if(transforms.length)result.updateTransforms=transforms.map(fieldPath=>({fieldPath,setToServerValue:'REQUEST_TIME'}));return result;}
 function rate(uid,kind,documentPath){const field='last'+kind;return {...write('socialRates/'+uid,{[field+'Path']:documentPath},{mask:[field+'Path']}),updateTransforms:[{fieldPath:field+'At',setToServerValue:'REQUEST_TIME'}]};}
 function message(documentPath,sender='alice',text='Hello from the emulator'){return write(documentPath,{sender,text},{create:true,created:true});}
@@ -166,4 +166,87 @@ test('rate documents deny foreign writes, unknown fields and deletion of existin
  await denied(commit('alice',[write('socialRates/alice',{lastMessageAt:{timestampValue:old},lastMessagePath:'socialConnections/alice~bob/messages/old',admin:true})]));
  await denied(commit('alice',[write('socialRates/alice',{lastMessageAt:{timestampValue:old}})]));
  await denied(commit('alice',[{delete:name+'socialRates/alice'}]));
+});
+
+async function claimUsername(uid,username,previous){
+ const writes=[write('socialProfiles/'+uid,{username},{mask:['username'],updated:true}),write('socialUsernames/'+username,{uid},{create:true,created:true})];
+ if(previous)writes.push({delete:name+'socialUsernames/'+previous});
+ return commit(uid,writes);
+}
+const post=(uid='alice',id='post-first',overrides={})=>({uid,mediaPath:'social-media/'+uid+'/'+id+'/video',caption:'A finished edit I chose to share',status:'uploading',bytes:1024,mime:'video/mp4',duration:12.5,width:1080,height:1920,...overrides});
+async function draft(uid='alice',id='post-first',overrides={}){return commit(uid,[rate(uid,'Post','socialPosts/'+id),write('socialPosts/'+id,post(uid,id,overrides),{create:true,created:true})]);}
+function publishPost(id='post-first',overrides={}){const result=write('socialPosts/'+id,{status:'published',...overrides},{mask:['status',...Object.keys(overrides)]});result.updateTransforms=[{fieldPath:'publishedAt',setToServerValue:'REQUEST_TIME'}];return result;}
+
+test('usernames are claimed atomically, unique, and cannot be impersonated or enumerated',async()=>{
+ await allowed(claimUsername('alice','alice_edits'));
+ await allowed(call('/socialUsernames/alice_edits',{uid:'bob'}));
+ await denied(call('/socialUsernames'));await denied(call('/socialUsernames/alice_edits',{uid:null}));
+ const collision=await claimUsername('bob','alice_edits');assert([403,409].includes(collision.status),'A claimed username must be rejected by rules or the create precondition');
+ const bob=await allowed(call('/socialProfiles/bob',{uid:'bob'}));assert.equal(bob.fields.username,undefined,'A failed claim must leave the other profile unchanged');
+ await denied(commit('alice',[write('socialUsernames/spare_alias',{uid:'alice'},{create:true,created:true})]));
+ await denied(commit('bob',[write('socialProfiles/bob',{username:'alice_edits'},{mask:['username'],updated:true})]));
+ await denied(claimUsername('carol','Invalid Name'));
+ await denied(commit('alice',[write('socialUsernames/alice_edits',{uid:'bob'},{mask:['uid']})]));
+ await denied(commit('bob',[{delete:name+'socialUsernames/alice_edits'}]));
+});
+
+test('renaming and deleting profiles releases the old username in the same atomic batch',async()=>{
+ await allowed(claimUsername('alice','alice_edits'));
+ await denied(claimUsername('alice','alice_films'));
+ await allowed(claimUsername('alice','alice_films','alice_edits'));
+ assert.equal((await call('/socialUsernames/alice_edits',{admin:true})).status,404);
+ await denied(commit('alice',[{delete:name+'socialUsernames/alice_films'}]));
+ await denied(commit('alice',[{delete:name+'socialProfiles/alice'}]));
+ await allowed(commit('alice',[{delete:name+'socialProfiles/alice'},{delete:name+'socialUsernames/alice_films'}]));
+});
+
+test('private profiles conceal their username registry while preserving their owner access',async()=>{
+ await allowed(claimUsername('hidden','private_name'));
+ await allowed(call('/socialUsernames/private_name',{uid:'hidden'}));
+ await denied(call('/socialUsernames/private_name'));
+});
+
+test('draft video posts are owner-only and publish only with a genuine server timestamp',async()=>{
+ await allowed(claimUsername('alice','alice_edits'));await allowed(draft());
+ await allowed(call('/socialPosts/post-first'));await denied(call('/socialPosts/post-first',{uid:'bob'}));
+ await denied(call('/socialPosts/post-first',{uid:null}));
+ await denied(commit('bob',[publishPost()]));
+ await denied(commit('alice',[write('socialPosts/post-first',{status:'published'},{mask:['status']})]));
+ await denied(commit('alice',[write('socialPosts/post-first',{status:'published',publishedAt:{timestampValue:old}},{mask:['status','publishedAt']})]));
+ await allowed(commit('alice',[publishPost()]));
+ await allowed(call('/socialPosts/post-first',{uid:'bob'}));await denied(call('/socialPosts/post-first',{uid:null}));
+ await denied(commit('alice',[publishPost('post-first',{caption:'Edited after publication'})]));
+ await denied(commit('alice',[publishPost()]));
+ await denied(commit('bob',[{delete:name+'socialPosts/post-first'}]));
+ await allowed(commit('alice',[{delete:name+'socialPosts/post-first'}]));
+});
+
+test('video posts reject metadata, source path, privacy, owner and timestamp bypasses',async()=>{
+ await allowed(claimUsername('alice','alice_edits'));
+ for(const overrides of [{mediaPath:'projects/alice/private/video'},{uid:'bob'},{bytes:62914561},{bytes:1},{bytes:100.5},{mime:'text/html'},{duration:181},{width:7681},{width:0},{height:2.5},{caption:'a'.repeat(1201)},{privateProject:'source'}, {publishedAt:{timestampValue:old}},{status:'published'}])await denied(draft('alice','post-first',overrides));
+ await denied(commit('alice',[rate('alice','Post','socialPosts/post-first'),write('socialPosts/post-first',{...post(),createdAt:{timestampValue:old}},{create:true})]));
+ await denied(draft('bob'));
+ await allowed(claimUsername('hidden','hidden_edits'));await denied(draft('hidden'));
+});
+
+test('a post rate is bound to one draft, with a server enforced cooldown',async()=>{
+ await allowed(claimUsername('alice','alice_edits'));
+ await denied(commit('alice',[write('socialPosts/post-first',post(),{create:true,created:true})]));
+ await denied(commit('alice',[rate('alice','Post','socialPosts/post-wrong'),write('socialPosts/post-first',post(),{create:true,created:true})]));
+ await denied(commit('alice',[rate('alice','Post','socialPosts/post-first'),write('socialPosts/post-first',post(),{create:true,created:true}),write('socialPosts/post-second',post('alice','post-second'),{create:true,created:true})]));
+ assert.equal((await call('/socialPosts/post-first',{admin:true})).status,404);
+ await allowed(draft());await denied(draft('alice','post-second'));
+ await denied(commit('alice',[publishPost('post-first',{bytes:2000})]));
+ await denied(commit('alice',[write('socialPosts/post-first',{uid:'bob'},{mask:['uid']})]));
+});
+
+test('feed queries require bounded publication or owner filters; private Studio paths remain closed',async()=>{
+ const query=structuredQuery=>call(':runQuery',{uid:'bob',method:'POST',body:{structuredQuery}});
+ await allowed(claimUsername('alice','alice_edits'));await allowed(draft());await allowed(commit('alice',[publishPost()]));
+ const published={fieldFilter:{field:{fieldPath:'status'},op:'EQUAL',value:{stringValue:'published'}}};
+ await allowed(query({from:[{collectionId:'socialPosts'}],where:published,orderBy:[{field:{fieldPath:'publishedAt'},direction:'DESCENDING'}],limit:20}));
+ await denied(query({from:[{collectionId:'socialPosts'}],limit:20}));
+ await denied(query({from:[{collectionId:'socialPosts'}],where:published,limit:21}));
+ await denied(commit('alice',[write('projects/private-source',{uid:'alice',media:'source file'})]));
+ await denied(call('/projects/private-source'));
 });

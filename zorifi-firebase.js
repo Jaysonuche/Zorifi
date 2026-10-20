@@ -6,7 +6,7 @@
   'use strict';
   const clean=value=>String(value||'').trim();
   function normalizeConfig(value={}){
-    return {apiKey:clean(value.apiKey).slice(0,300),authDomain:clean(value.authDomain).slice(0,300),projectId:clean(value.projectId).replace(/[^a-z0-9-]/gi,'').slice(0,100),appId:clean(value.appId).slice(0,300)};
+    return {apiKey:clean(value.apiKey).slice(0,300),authDomain:clean(value.authDomain).slice(0,300),projectId:clean(value.projectId).replace(/[^a-z0-9-]/gi,'').slice(0,100),appId:clean(value.appId).slice(0,300),googleClientId:/^[A-Za-z0-9_-]+\.apps\.googleusercontent\.com$/.test(value.googleClientId||'')?value.googleClientId:'',storageBucket:/^[a-z0-9.-]+\.(?:appspot\.com|firebasestorage\.app)$/.test(value.storageBucket||'')?value.storageBucket:'',socialMediaEnabled:value.socialMediaEnabled===true};
   }
   function decodeField(value){
     if(!value||typeof value!=='object')return null;
@@ -36,6 +36,25 @@
     async auth(action,email,password){this.requireConfig();const epoch=++this.authEpoch;this.clearRefreshTimer();this.session=null;this.refreshPromise=null;this.persistSession();if(!['signUp','signInWithPassword'].includes(action))throw new Error('Unsupported authentication operation.');const response=await this.transport(`https://identitytoolkit.googleapis.com/v1/accounts:${action}?key=${encodeURIComponent(this.config.apiKey)}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:clean(email),password:String(password||''),returnSecureToken:true})}),data=await response.json().catch(()=>({}));if(!response.ok||!data.idToken||!data.localId){const code=String(data.error?.message||'').split(' : ')[0];const message=({EMAIL_EXISTS:'An online account with this email already exists. Log in instead.',INVALID_PASSWORD:'The email or password is incorrect.',EMAIL_NOT_FOUND:'The email or password is incorrect.',INVALID_LOGIN_CREDENTIALS:'The email or password is incorrect.',OPERATION_NOT_ALLOWED:'Online email sign-in is not enabled for Zorifi. Contact support.',TOO_MANY_ATTEMPTS_TRY_LATER:'Too many attempts. Please try again later.',API_KEY_SERVICE_BLOCKED:'Online sign-in is blocked by the Firebase configuration. Contact support.'})[code]||'The account service could not authenticate these details.';throw new Error(message);}if(epoch!==this.authEpoch)throw new Error('Account session changed.');this.session={uid:data.localId,email:data.email||clean(email),idToken:data.idToken,refreshToken:data.refreshToken||'',expiresAt:Date.now()+(Number(data.expiresIn)||3600)*1000};this.persistSession();this.scheduleRefresh();return {...this.session,idToken:'[protected]',refreshToken:'[protected]'};}
     signUp(email,password){return this.auth('signUp',email,password);}
     signIn(email,password){return this.auth('signInWithPassword',email,password);}
+    async signInWithGoogle(credential,requestUri){
+      this.requireConfig();
+      const uri=new URL(requestUri);
+      if(!/^https?:$/.test(uri.protocol)||uri.username||uri.password||uri.search||uri.hash)throw new Error('Use a secure Zorifi sign-in page.');
+      if(uri.protocol!=='https:'&&!['localhost','127.0.0.1','[::1]'].includes(uri.hostname))throw new Error('Use HTTPS for Google sign-in.');
+      if(typeof credential!=='string'||credential.length>16000||credential.split('.').length!==3)throw new Error('Google returned an invalid sign-in credential.');
+      const epoch=++this.authEpoch;
+      const response=await this.transport('https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key='+encodeURIComponent(this.config.apiKey),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({postBody:new URLSearchParams({id_token:credential,providerId:'google.com'}).toString(),requestUri:uri.href,returnSecureToken:true,returnIdpCredential:false}),signal:AbortSignal.timeout(20000)});
+      const data=await response.json().catch(()=>({}));
+      if(epoch!==this.authEpoch)throw new Error('Account session changed.');
+      if(!response.ok||!data.idToken||!data.refreshToken||!data.localId||!data.email){
+        const code=String(data.error?.message||'').split(' : ')[0];
+        throw new Error(({OPERATION_NOT_ALLOWED:'Google sign-in has not been enabled for Zorifi yet.',FEDERATED_USER_ID_ALREADY_LINKED:'This Google account is already linked to another account.',EMAIL_EXISTS:'Sign in using your existing method before linking Google.',USER_DISABLED:'This account is disabled.',TOO_MANY_ATTEMPTS_TRY_LATER:'Too many sign-in attempts. Please try again later.'})[code]||'Google sign-in could not be completed. Check that this site is authorized in Firebase.');
+      }
+      this.clearRefreshTimer();this.refreshPromise=null;
+      this.session={uid:data.localId,email:data.email,idToken:data.idToken,refreshToken:data.refreshToken,expiresAt:Date.now()+(Number(data.expiresIn)||3600)*1000};
+      this.persistSession();this.scheduleRefresh();
+      return {uid:data.localId,email:data.email,displayName:clean(data.displayName).slice(0,80),isNewUser:data.isNewUser===true};
+    }
     async getAccountRole(){
       const session=this.session;if(!session?.idToken)return 'member';
       const response=await this.authenticatedFetch('/api/vanessa-provider?service=account-permissions',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+session.idToken},body:'{}'});

@@ -1,5 +1,5 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
-const CACHE = 'zorifi-v224';
+const CACHE = 'zorifi-v225';
 const CORE = [
   "./",
   "./manifest.webmanifest",
@@ -17,11 +17,16 @@ const CORE = [
   "./zorifi-background-cutout.css?v=222",
   "./zorifi-editor-refinements.css?v=222",
   "./zorifi-social.css?v=223",
+  "./zorifi-timeline-interactions.css?v=225",
+  "./zorifi-pocket-editor.css?v=225",
+  "./zorifi-social-creator.css?v=225",
+  "./zorifi-app-settings.css?v=225",
+  "./zorifi-google-connections.css?v=225",
   "./zorifi-support.js?v=171",
   "./zorifi-beta-program.js?v=171",
   "./zorifi-terms.js?v=173",
   "./zorifi-billing.js?v=170&tier=2",
-  "./zorifi-firebase.js?v=214",
+  "./zorifi-firebase.js?v=225",
   "./zorifi-stickers.js?v=170",
   "./zorifi-vanessa-identity.js?v=170",
   "./zorifi-vanessa-memory.js?v=170",
@@ -74,7 +79,7 @@ const CORE = [
   "./zorifi-autocut-media.js?v=220&decode=2",
   "./zorifi-sfx.js?v=222",
   "./zorifi-music-catalogue.js?v=222",
-  "./zorifi-social.js?v=224",
+  "./zorifi-social.js?v=225",
   "./zorifi-autocut.js?v=220",
   "./zorifi-tool-registry.js?v=1",
   "./zorifi-person-cutout.js?v=1",
@@ -89,20 +94,19 @@ const CORE = [
   "./zorifi-editor-overhaul.js?v=170",
   "./zorifi-privacy.js?v=1",
   "./zorifi-vanessa-listening.js?v=222",
-  "./app.js?v=222",
+  "./app.js?v=225",
+  "./zorifi-app-settings.js?v=225",
+  "./zorifi-google-connections.js?v=225",
+  "./zorifi-google-integration.js?v=225",
+  "./zorifi-social-creator.js?v=225",
   "./zorifi-social-integration.js?v=222",
   "./zorifi-device-integration.js?v=222",
   "./zorifi-workbench-integration.js?v=222",
   "./zorifi-background-integration.js?v=222",
+  "./zorifi-timeline-interactions.js?v=225",
+  "./zorifi-pocket-editor.js?v=225",
   "./zorifi-master-app.js?v=220",
-  "./zorifi-privacy-ui.js?v=219",
-  "./index.html",
-  "./assets/zorifi-background.jpeg",
-  "./ZorifiVanessaStudioCore.js",
-  "./ZorifiVanessaTrueAudioAI.js",
-  "./ZorifiAutoCaptions.js",
-  "./ZorifiMulticamSyncEngine.js",
-  "./zorifi-audio-worker.js?v=1"
+  "./zorifi-privacy-ui.js?v=219"
 ];
 
 self.addEventListener('install', event => {

@@ -6,8 +6,8 @@
   function profile(value,accountUid){if(!CRAFTS.includes(value?.craft)||typeof value?.discoverable!=='boolean')throw new Error('Choose a craft and whether your profile is discoverable.');return {uid:uid(accountUid),name:text(value.name,60,2),bio:text(value.bio,300),craft:value.craft,discoverable:value.discoverable};}
   function pairId(a,b){a=uid(a);b=uid(b);if(a===b)throw new Error('Choose another creator.');return [a,b].sort().join('~');}
   const nonce=()=>root.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,14);
-  function encode(value){if(value===null)return {nullValue:null};if(typeof value==='boolean')return {booleanValue:value};if(typeof value==='number')return {integerValue:String(value)};if(Array.isArray(value))return {arrayValue:{values:value.map(encode)}};return {stringValue:String(value)};}
-  function decode(value){if(!value)return null;if('stringValue'in value)return value.stringValue;if('timestampValue'in value)return value.timestampValue;if('booleanValue'in value)return value.booleanValue;if('integerValue'in value)return Number(value.integerValue);if('arrayValue'in value)return (value.arrayValue.values||[]).map(decode);return null;}
+  function encode(value){if(value===null)return {nullValue:null};if(typeof value==='boolean')return {booleanValue:value};if(typeof value==='number')return Number.isInteger(value)?{integerValue:String(value)}:{doubleValue:value};if(Array.isArray(value))return {arrayValue:{values:value.map(encode)}};return {stringValue:String(value)};}
+  function decode(value){if(!value)return null;if('stringValue'in value)return value.stringValue;if('timestampValue'in value)return value.timestampValue;if('booleanValue'in value)return value.booleanValue;if('integerValue'in value)return Number(value.integerValue);if('doubleValue'in value)return Number(value.doubleValue);if('arrayValue'in value)return (value.arrayValue.values||[]).map(decode);return null;}
   function document(value){return {id:String(value.name||'').split('/').at(-1),...Object.fromEntries(Object.entries(value.fields||{}).map(([key,item])=>[key,decode(item)]))};}
   function fault(message,code,status){return Object.assign(new Error(message),{code,status});}
   class Client {
@@ -142,7 +142,7 @@
     }
     root.document.addEventListener('visibilitychange',()=>{clearTimeout(timer);if(root.document.visibilityState==='hidden')readController?.abort();else void refresh({initial:!loaded});},{signal:listenerController.signal});
     screen.addEventListener('keydown',event=>{if(event.key==='Escape'&&!screen.querySelector('.social-report-backdrop'))close();},{signal:listenerController.signal});
-    void refresh({initial:true});return {close,refresh:()=>refresh({initial:!loaded}),client,screen};
+    void refresh({initial:true});return {close,refresh:()=>refresh({initial:!loaded}),refreshProfile:()=>refresh({initial:true}),client,screen};
   }
   function openWelcome({onClose,configured=false}={}){
     const screen=root.document.createElement('section'),events=new AbortController();let closed=false;

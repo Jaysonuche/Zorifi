@@ -25,7 +25,7 @@ test('hosted AI requires a verified Firebase ID token while loopback preview rem
     assert.match(requests[0].url, /^https:\/\/identitytoolkit\.googleapis\.com\/v1\/accounts:lookup\?/);
 
     global.fetch = async () => Response.json({error: {message: 'INVALID_ID_TOKEN'}}, {status: 400});
-    await assert.rejects(authorize(authenticated), error => error.status === 401 && error.code === 'AUTH_REQUIRED');
+    await assert.rejects(authorize(new Request(authenticated)), error => error.status === 401 && error.code === 'AUTH_REQUIRED');
 
     await authorize(new Request('http://127.0.0.1:4173/api/vanessa-provider'));
     await assert.rejects(authorize(new Request('http://127.0.0.1:4173/api/vanessa-provider', {headers: {origin: 'https://untrusted.example'}})), error => error.status === 403);

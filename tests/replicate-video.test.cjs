@@ -21,7 +21,7 @@ test('Replicate validates inputs, binds jobs to accounts, and maps lifecycle tru
   const started=await renderVideo({prompt:'Ocean waves',duration:5},req);assert.equal(started.status,'queued');assert.equal(started.url,'');
   assert.equal(readTicket(started.requestId,'user-one').id,'job123');
   assert.throws(()=>readTicket(started.requestId+'x','user-one'));
-  uid='other-user';const before=predictionCalls;await assert.rejects(renderVideo({action:'status',requestId:started.requestId},req),e=>e.status===403);assert.equal(predictionCalls,before);
+  uid='other-user';const before=predictionCalls;await assert.rejects(renderVideo({action:'status',requestId:started.requestId},new Request(req)),e=>e.status===403);assert.equal(predictionCalls,before);
   uid='user-one';mode='succeeded';assert.equal((await renderVideo({action:'status',requestId:started.requestId},req)).status,'complete');
   mode='canceled';assert.equal((await renderVideo({action:'cancel',requestId:started.requestId},req)).status,'cancelled');
   assert.throws(()=>normalizePrediction({status:'succeeded',output:'https://evil.example/video.mp4'},'id',5));

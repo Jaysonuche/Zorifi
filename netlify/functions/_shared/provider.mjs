@@ -47,17 +47,38 @@ export function httpsUrl(value,{local=false}={}){
  if(url.username||url.password||!(url.protocol==='https:'||local&&url.protocol==='http:'&&['localhost','127.0.0.1','[::1]'].includes(url.hostname)))throw new ServiceError('Use HTTPS for remote providers, or HTTP for a loopback GPU server.');
  return url.href.replace(/\/$/,'');
 }
+// Share an in-flight identity check only within this request. A subsequent request
+// always checks Firebase again, so disabled accounts and revoked sessions are not
+// kept alive by a cross-request token cache.
+const requestIdentity=new WeakMap();
+export async function verifiedAccount(request){
+ const token=request.headers.get('authorization')?.match(/^Bearer (\S+)$/i)?.[1],apiKey=env('FIREBASE_WEB_API_KEY');
+ if(!token||!apiKey)throw new ServiceError('Sign in with a configured Firebase account before using hosted AI services.',401,'AUTH_REQUIRED');
+ const existing=requestIdentity.get(request);
+ if(existing?.token===token&&existing.apiKey===apiKey)return existing.promise;
+ const promise=(async()=>{
+  let response,data;
+  try{
+   response=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key='+encodeURIComponent(apiKey),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({idToken:token}),signal:AbortSignal.timeout(10000)});
+   if([400,401].includes(response.status))throw new ServiceError('Your online session expired. Sign in again.',401,'AUTH_REQUIRED');
+   if(!response.ok)throw new ServiceError('Account verification is temporarily unavailable. Please retry.',503,'AUTH_UNAVAILABLE');
+   data=await response.json();
+  }catch(error){
+   if(error instanceof ServiceError)throw error;
+   throw new ServiceError('Account verification is temporarily unavailable. Please retry.',503,'AUTH_UNAVAILABLE');
+  }
+  const account=data?.users?.[0];
+  if(!account?.localId||typeof account.localId!=='string'||account.disabled)throw new ServiceError('Your online session could not be verified. Sign in again.',401,'AUTH_REQUIRED');
+  return Object.freeze({uid:account.localId});
+ })();
+ requestIdentity.set(request,{token,apiKey,promise});
+ return promise;
+}
 // Administrator identity is pinned to Firebase UID in server configuration only.
 export async function accountRole(request){
- const token=request.headers.get('authorization')?.match(/^Bearer (\S+)$/i)?.[1];
- if(!token)throw new ServiceError('Sign in to check account permissions.',401,'AUTH_REQUIRED');
- const response=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key='+encodeURIComponent(needed('FIREBASE_WEB_API_KEY')),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({idToken:token}),signal:AbortSignal.timeout(10000)});
- if([400,401].includes(response.status))throw new ServiceError('Your session could not be verified. Sign in again.',401,'AUTH_REQUIRED');
- if(!response.ok)throw new ServiceError('Account verification is temporarily unavailable. Please retry.',503,'AUTH_UNAVAILABLE');
- const account=(await response.json()).users?.[0];
- if(!account?.localId||account.disabled)throw new ServiceError('Your session could not be verified.',401,'AUTH_REQUIRED');
- const admin=env('ZORIFI_ADMIN_UIDS').split(',').map(v=>v.trim()).filter(Boolean).includes(account.localId);
- return {uid:account.localId,role:admin?'admin':'member'};
+ const {uid}=await verifiedAccount(request);
+ const admin=env('ZORIFI_ADMIN_UIDS').split(',').map(v=>v.trim()).filter(Boolean).includes(uid);
+ return {uid,role:admin?'admin':'member'};
 }
 export async function requireAdmin(request){
  const account=await accountRole(request);
@@ -67,19 +88,14 @@ export async function requireAdmin(request){
 export async function subscription(request){
  const token=request.headers.get('authorization')?.match(/^Bearer (\S+)$/i)?.[1],apiKey=env('FIREBASE_WEB_API_KEY'),project=env('FIREBASE_PROJECT_ID');
  if(!token||!apiKey||!project)return {pro:false,uid:null};
- let response;
- try{response=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({idToken:token}),signal:AbortSignal.timeout(10000)});}
- catch{throw new ServiceError('Account verification is temporarily unavailable. Please retry.',503,'AUTH_UNAVAILABLE');}
- if([400,401].includes(response.status))throw new ServiceError('Your online session expired. Sign in again.',401,'AUTH_REQUIRED');
- if(!response.ok)throw new ServiceError('Account verification is temporarily unavailable. Please retry.',503,'AUTH_UNAVAILABLE');
- const account=await response.json().catch(()=>({}));
- const uid=account.users?.[0]?.localId;
- if(!uid||account.users[0].disabled)throw new ServiceError('Your online session could not be verified. Sign in again.',401,'AUTH_REQUIRED');
+ const {uid}=await verifiedAccount(request);
  const url=`https://firestore.googleapis.com/v1/projects/${encodeURIComponent(project)}/databases/(default)/documents/users/${encodeURIComponent(uid)}/private/subscription`;
- const subscriptionResponse=await fetch(url,{headers:{authorization:`Bearer ${token}`},signal:AbortSignal.timeout(10000)});
- if(!subscriptionResponse.ok)return {pro:false,uid};
- const record=await subscriptionResponse.json(),f=record.fields||{};
- return {uid,pro:f.uid?.stringValue===uid&&f.verified?.booleanValue===true&&f.plan?.stringValue==='PRO'&&['ACTIVE','TRIAL'].includes(f.status?.stringValue)};
+ try{
+  const subscriptionResponse=await fetch(url,{headers:{authorization:`Bearer ${token}`},signal:AbortSignal.timeout(10000)});
+  if(!subscriptionResponse.ok)return {pro:false,uid};
+  const record=await subscriptionResponse.json(),f=record.fields||{};
+  return {uid,pro:f.uid?.stringValue===uid&&f.verified?.booleanValue===true&&f.plan?.stringValue==='PRO'&&['ACTIVE','TRIAL'].includes(f.status?.stringValue)};
+ }catch{return {pro:false,uid};}
 }
 export async function authorize(request){
  const hostname=new URL(request.url).hostname;
@@ -87,7 +103,7 @@ export async function authorize(request){
   const origin=request.headers.get('origin');if(origin&&new URL(origin).origin!==new URL(request.url).origin)throw new ServiceError('Cross-origin local service requests are not allowed.',403,'FORBIDDEN');
   return;
  }
- const auth=await subscription(request);if(!auth.uid)throw new ServiceError('Sign in with a configured Firebase account before using hosted AI services.',401,'AUTH_REQUIRED');
+ await verifiedAccount(request);
 }
 export function handler(run,{multipart=false}={}){
  return async request=>{

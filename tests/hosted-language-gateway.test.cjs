@@ -26,12 +26,13 @@ test('desktop cloud metadata contains provider status but no credentials', async
 test('desktop loads only the public Firebase web config from the fixed site', async () => {
   const config = {apiKey: 'AIza' + 'a'.repeat(35), projectId: 'zorifi', authDomain: 'zorifi.firebaseapp.com', appId: '1:123:web:abcdef'};
   const html = `<html><head><script>window.__ZORIFI_FIREBASE_CONFIG__=${JSON.stringify(config)};</script></head></html>`;
-  assert.deepEqual(parseHostedFirebaseWebConfig(html), config);
+  const expected={...config,googleClientId:'',storageBucket:'',socialMediaEnabled:false};
+  assert.deepEqual(parseHostedFirebaseWebConfig(html), expected);
   assert.equal(parseHostedFirebaseWebConfig(html.replace('zorifi.firebaseapp.com', 'evil.example')), null);
   assert.equal(parseHostedFirebaseWebConfig('<html>missing config</html>'), null);
   const calls = [];
   const received = await hostedFirebaseWebConfig(async (url, options) => { calls.push({url, options}); return new Response(html); });
-  assert.deepEqual(received, config);
+  assert.deepEqual(received, expected);
   assert.equal(calls[0].url, `${HOSTED_ORIGIN}/`);
   assert.match(firebaseConfigScript(received), /window\.__ZORIFI_FIREBASE_CONFIG__/);
   assert.equal(firebaseConfigScript(null), '');

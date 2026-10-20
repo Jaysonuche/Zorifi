@@ -1,0 +1,24 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function post(postId) { return firestore.get(/databases/(default)/documents/socialPosts/$(postId)).data; }
+    match /social-media/{uid}/{postId}/video {
+      // Storage uses the same private draft as the database. No replacement
+      // uploads after publication, no tokenized public download links.
+      allow create: if owner(uid) && postId.matches('^[-_a-zA-Z0-9]{5,100}$') &&
+        post(postId).uid == uid && post(postId).status == 'uploading' &&
+        post(postId).mediaPath == 'social-media/' + uid + '/' + postId + '/video' &&
+        request.resource.size == post(postId).bytes && request.resource.size >= 16 && request.resource.size <= 62914560 &&
+        request.resource.contentType == post(postId).mime && request.resource.contentType in ['video/mp4', 'video/webm'] &&
+        request.resource.metadata.size() == 0;
+      allow get: if request.auth != null && post(postId).uid == uid &&
+        post(postId).mediaPath == 'social-media/' + uid + '/' + postId + '/video' &&
+        (owner(uid) || post(postId).status == 'published');
+      allow delete: if owner(uid);
+      allow list, update: if false;
+    }
+    // No private project, source-media, account or arbitrary file uploads.
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}

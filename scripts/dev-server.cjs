@@ -51,7 +51,14 @@ function createServer({crmDirectory=path.join(root,'.zorifi-private'),crmKey,loc
    const relative=decodeURIComponent(url.pathname).replace(/^\/+/, '') || 'index.html';
    if (!(['crm.html','crm.js','crm.css','ZorifiVanessaStudioCore.js','ZorifiVanessaTrueAudioAI.js','ZorifiAutoCaptions.js','ZorifiMulticamSyncEngine.js'].includes(relative)||relative==='index.html'||relative==='app.js'||relative==='styles.css'||relative==='sw.js'||relative==='manifest.webmanifest'||/^zorifi-[\w-]+\.(js|json|css)$/.test(relative)||/^(icons|assets)\/[\w./-]+$/.test(relative)))return json(res,404,{error:'Not found.'});
    const file=path.resolve(root,relative);if(!file.startsWith(root+path.sep))return json(res,403,{error:'Forbidden.'});
-   const data=await fs.promises.readFile(file);
+   let data=await fs.promises.readFile(file);
+   if(relative==='index.html'&&process.env.FIREBASE_WEB_API_KEY&&process.env.FIREBASE_PROJECT_ID){
+    // Local previews need the same public Firebase client configuration as the
+    // Vercel build. Never copy server/provider secrets into HTML.
+    const publicConfig={apiKey:process.env.FIREBASE_WEB_API_KEY,projectId:process.env.FIREBASE_PROJECT_ID,authDomain:process.env.FIREBASE_AUTH_DOMAIN||'',appId:process.env.FIREBASE_APP_ID||'',googleClientId:process.env.GOOGLE_OAUTH_CLIENT_ID||'',storageBucket:process.env.FIREBASE_STORAGE_BUCKET||'',socialMediaEnabled:process.env.ZORIFI_SOCIAL_MEDIA_ENABLED==='true'};
+    const bootstrap='<script>window.__ZORIFI_FIREBASE_CONFIG__='+JSON.stringify(publicConfig).replace(/</g,'\\u003c')+';</script>';
+    data=Buffer.from(data.toString('utf8').replace('</head>',bootstrap+'</head>'));
+   }
    res.writeHead(200,{'content-type':types[path.extname(file)]||'application/octet-stream','cache-control':'no-cache'});
    res.end(req.method==='HEAD'?undefined:data);
   } catch(error) {json(res,error.code==='ENOENT'?404:500,{error:error.code==='ENOENT'?'Not found.':'The local server could not complete this request.'});}

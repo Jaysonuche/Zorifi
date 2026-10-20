@@ -1,11 +1,12 @@
 {
   "name": "zorifi-video-editor",
-  "version": "3.37.0",
+  "version": "3.38.0",
+  "packageManager": "pnpm@11.25.0",
   "description": "Zorifi cross-platform video editor",
   "desktopName": "Zorifi",
-  "homepage": "https://zorifi.netlify.app",
+  "homepage": "https://zorifi.vercel.app",
   "main": "electron-main.cjs",
-  "author": "Zorifi Studio",
+  "author": "J.U.P.C.O Enterprises",
   "license": "UNLICENSED",
   "scripts": {
     "test": "node --test tests/*.test.cjs",
@@ -142,7 +143,18 @@
       "zorifi-background-integration.js",
       "zorifi-social.js",
       "zorifi-social.css",
-      "zorifi-social-integration.js"
+      "zorifi-social-integration.js",
+      "zorifi-app-settings.js",
+      "zorifi-app-settings.css",
+      "zorifi-google-connections.js",
+      "zorifi-google-connections.css",
+      "zorifi-google-integration.js",
+      "zorifi-social-creator.js",
+      "zorifi-social-creator.css",
+      "zorifi-timeline-interactions.js",
+      "zorifi-timeline-interactions.css",
+      "zorifi-pocket-editor.js",
+      "zorifi-pocket-editor.css"
     ],
     "win": {
       "target": "nsis",
@@ -204,7 +216,7 @@
       "synopsis": "AI-powered video creation and editing workspace",
       "description": "Zorifi is a professional video editor with timeline editing, effects, audio, captions, export and the Vanessa creative assistant.",
       "maintainer": "Zorifi Studio <zorifvideoeditor@gmail.com>",
-      "vendor": "Zorifi Studio",
+      "vendor": "J.U.P.C.O Enterprises",
       "artifactName": "Zorifi-${version}-${arch}.${ext}"
     },
     "deb": {

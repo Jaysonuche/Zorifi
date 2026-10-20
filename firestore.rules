@@ -34,15 +34,62 @@ service cloud.firestore {
       allow list: if signedIn() && request.query.limit <= 50 && resource.data.discoverable == true;
       function validProfile() {
         let d = request.resource.data;
-        return owner(uid) && d.keys().hasOnly(['uid', 'name', 'bio', 'craft', 'discoverable', 'createdAt', 'updatedAt']) &&
+        return owner(uid) && d.keys().hasOnly(['uid', 'name', 'bio', 'craft', 'discoverable', 'createdAt', 'updatedAt', 'username']) &&
           d.keys().hasAll(['uid', 'name', 'bio', 'craft', 'discoverable', 'createdAt', 'updatedAt']) &&
           d.uid == uid && d.name is string && d.name.size() >= 2 && d.name.size() <= 60 &&
           d.bio is string && d.bio.size() <= 300 && d.craft in ['Video', 'Music', 'Photography', 'Motion', 'Mixed media'] &&
-          d.discoverable is bool && d.updatedAt == request.time;
+          d.discoverable is bool && d.updatedAt == request.time &&
+          (!('username' in d) || (d.username is string && d.username.matches('^[a-z][a-z0-9_]{2,23}$') &&
+            getAfter(/databases/$(database)/documents/socialUsernames/$(d.username)).data.uid == uid));
+      }
+      function previousUsernameReleased() {
+        return !('username' in resource.data) ||
+          (request.resource.data.get('username', '') == resource.data.username) ||
+          !existsAfter(/databases/$(database)/documents/socialUsernames/$(resource.data.username));
       }
       allow create: if validProfile() && request.resource.data.createdAt == request.time;
-      allow update: if validProfile() && request.resource.data.createdAt == resource.data.createdAt;
-      allow delete: if owner(uid);
+      allow update: if validProfile() && previousUsernameReleased() && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if owner(uid) && (!('username' in resource.data) ||
+        !existsAfter(/databases/$(database)/documents/socialUsernames/$(resource.data.username)));
+    }
+    // A name belongs to exactly one profile. Both sides change atomically.
+    match /socialUsernames/{username} {
+      allow get: if signedIn() && (owner(resource.data.uid) || publicProfile(resource.data.uid));
+      allow list, update: if false;
+      allow create: if signedIn() && username.matches('^[a-z][a-z0-9_]{2,23}$') &&
+        request.resource.data.keys().hasOnly(['uid', 'createdAt']) &&
+        request.resource.data.keys().hasAll(['uid', 'createdAt']) &&
+        request.resource.data.uid == request.auth.uid && request.resource.data.createdAt == request.time &&
+        getAfter(/databases/$(database)/documents/socialProfiles/$(request.auth.uid)).data.username == username;
+      allow delete: if owner(resource.data.uid) &&
+        (!existsAfter(/databases/$(database)/documents/socialProfiles/$(request.auth.uid)) ||
+          getAfter(/databases/$(database)/documents/socialProfiles/$(request.auth.uid)).data.get('username', '') != username);
+    }
+    // Only explicitly selected finished videos are published here. These paths
+    // never contain Studio projects, editing timelines or imported source files.
+    match /socialPosts/{postId} {
+      allow get: if signedIn() && (resource.data.status == 'published' || owner(resource.data.uid));
+      allow list: if signedIn() && request.query.limit <= 20 &&
+        (resource.data.status == 'published' || owner(resource.data.uid));
+      function validPost() {
+        let d = request.resource.data;
+        return owner(d.uid) && postId.matches('^[-_a-zA-Z0-9]{5,100}$') &&
+          d.keys().hasOnly(['uid', 'mediaPath', 'caption', 'status', 'bytes', 'mime', 'duration', 'width', 'height', 'createdAt', 'publishedAt']) &&
+          d.keys().hasAll(['uid', 'mediaPath', 'caption', 'status', 'bytes', 'mime', 'duration', 'width', 'height', 'createdAt']) &&
+          d.mediaPath == 'social-media/' + request.auth.uid + '/' + postId + '/video' &&
+          d.caption is string && d.caption.size() <= 1200 && d.bytes is int && d.bytes >= 16 && d.bytes <= 62914560 &&
+          d.mime in ['video/mp4', 'video/webm'] && d.duration is number && d.duration > 0 && d.duration <= 180 &&
+          d.width is int && d.width >= 1 && d.width <= 7680 && d.height is int && d.height >= 1 && d.height <= 7680;
+      }
+      allow create: if validPost() && publicProfile(request.auth.uid) &&
+        get(/databases/$(database)/documents/socialProfiles/$(request.auth.uid)).data.username is string &&
+        request.resource.data.status == 'uploading' && !('publishedAt' in request.resource.data) &&
+        request.resource.data.createdAt == request.time && paced('lastPostAt', 'lastPostPath', 'socialPosts/' + postId, 30);
+      allow update: if validPost() && owner(resource.data.uid) && publicProfile(request.auth.uid) &&
+        resource.data.status == 'uploading' && request.resource.data.status == 'published' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'publishedAt']) &&
+        request.resource.data.publishedAt == request.time;
+      allow delete: if owner(resource.data.uid);
     }
     match /socialRates/{uid} {
       allow get: if owner(uid);
@@ -57,9 +104,10 @@ service cloud.firestore {
       }
       function validRates() {
         let d = request.resource.data;
-        return owner(uid) && d.keys().hasOnly(['lastRequestAt', 'lastRequestPath', 'lastMessageAt', 'lastMessagePath', 'lastReportAt', 'lastReportPath']) &&
+        return owner(uid) && d.keys().hasOnly(['lastRequestAt', 'lastRequestPath', 'lastMessageAt', 'lastMessagePath', 'lastReportAt', 'lastReportPath', 'lastPostAt', 'lastPostPath']) &&
           d.keys().size() > 0 && validRate(d, 'lastRequestAt', 'lastRequestPath', 10) &&
-          validRate(d, 'lastMessageAt', 'lastMessagePath', 1) && validRate(d, 'lastReportAt', 'lastReportPath', 30);
+          validRate(d, 'lastMessageAt', 'lastMessagePath', 1) && validRate(d, 'lastReportAt', 'lastReportPath', 30) &&
+          validRate(d, 'lastPostAt', 'lastPostPath', 30);
       }
       allow create: if validRates();
       allow update: if validRates() && request.resource.data.keys().hasAll(resource.data.keys());
