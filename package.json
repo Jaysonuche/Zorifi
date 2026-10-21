@@ -1,6 +1,6 @@
 {
   "name": "zorifi-video-editor",
-  "version": "3.38.0",
+  "version": "3.39.0",
   "packageManager": "pnpm@11.25.0",
   "description": "Zorifi cross-platform video editor",
   "desktopName": "Zorifi",
@@ -154,7 +154,12 @@
       "zorifi-timeline-interactions.js",
       "zorifi-timeline-interactions.css",
       "zorifi-pocket-editor.js",
-      "zorifi-pocket-editor.css"
+      "zorifi-pocket-editor.css",
+      "zorifi-editor-future.css",
+      "zorifi-music-future.css",
+      "zorifi-vanessa-future.css",
+      "zorifi-opening.css",
+      "zorifi-opening.js"
     ],
     "win": {
       "target": "nsis",

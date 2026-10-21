@@ -1,0 +1,284 @@
+/* Vanessa's control room: restrained light, clear states, and readable conversation. */
+.vanessa-assistant {
+  --vf-panel: #10111d;
+  --vf-deep: #0c0e18;
+  --vf-surface: #1a1b2a;
+  --vf-raised: #232438;
+  --vf-line: rgba(190, 171, 236, .19);
+  --vf-line-strong: rgba(185, 144, 255, .39);
+  --vf-ink: #f5f1ff;
+  --vf-muted: #aba6bd;
+  --vf-violet: #b28bff;
+  --vf-cyan: #8ee2ec;
+  --vf-glow: rgba(161, 95, 251, .2);
+}
+:root[data-theme="light"] .vanessa-assistant {
+  --vf-panel: #faf8ff;
+  --vf-deep: #f2effa;
+  --vf-surface: #fff;
+  --vf-raised: #eeebf6;
+  --vf-line: rgba(91, 65, 141, .19);
+  --vf-line-strong: rgba(125, 67, 214, .42);
+  --vf-ink: #252039;
+  --vf-muted: #655e78;
+  --vf-violet: #723ed1;
+  --vf-cyan: #176c83;
+  --vf-glow: rgba(134, 72, 228, .13);
+}
+
+.vanessa-assistant.open .vanessa-panel {
+  color: var(--vf-ink) !important;
+  border: 1px solid var(--vf-line-strong) !important;
+  background: var(--vf-panel) !important;
+  box-shadow: 0 28px 90px rgba(7, 6, 22, .43), 0 0 0 1px var(--vf-line), 0 0 40px var(--vf-glow);
+}
+.vanessa-assistant .vanessa-panel>header {
+  position: relative;
+  isolation: isolate;
+  border-bottom-color: var(--vf-line);
+  background: radial-gradient(ellipse 66% 130% at 4% 0%, rgba(178, 100, 255, .18), transparent 85%),
+    linear-gradient(111deg, var(--vf-deep), var(--vf-panel) 64%, rgba(212, 69, 165, .1)) !important;
+}
+.vanessa-assistant .vanessa-panel>header::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--vf-violet) 25%, rgba(242, 114, 188, .55) 62%, transparent);
+  opacity: .55;
+}
+.vanessa-assistant .vanessa-panel>header b {
+  color: var(--vf-ink);
+  font-size: 16px;
+  font-weight: 760;
+  letter-spacing: -.025em;
+}
+.vanessa-assistant .vanessa-panel>header small,
+.vanessa-assistant .vanessa-panel>header [data-vanessa-inline-status] {
+  color: var(--vf-muted) !important;
+  font-size: 10px;
+}
+.vanessa-assistant .vanessa-panel>header>.vanessa-avatar {
+  position: relative;
+  border: 1px solid var(--vf-line-strong);
+  background: radial-gradient(circle at 50% 48%, rgba(201, 117, 250, .22), rgba(23, 17, 43, .86) 62%) !important;
+  box-shadow: inset 0 0 18px rgba(219, 125, 250, .2), 0 0 0 3px var(--vf-glow), 0 0 18px var(--vf-glow) !important;
+}
+.vanessa-assistant .vanessa-energy-core {
+  filter: drop-shadow(0 0 7px rgba(186, 113, 248, .58));
+}
+.vanessa-assistant .vanessa-energy-core[data-voice-state="listening"] {
+  filter: drop-shadow(0 0 10px rgba(118, 229, 230, .65));
+}
+.vanessa-assistant .vanessa-energy-core[data-voice-state="listening"] .vec-orbit {
+  stroke: var(--vf-cyan) !important;
+}
+.vanessa-assistant .vanessa-energy-core[data-voice-state="error"] {
+  filter: drop-shadow(0 0 9px rgba(255, 107, 143, .65));
+}
+.vanessa-assistant .vanessa-panel>header>button,
+.vanessa-assistant .vanessa-window-controls button {
+  border-color: var(--vf-line);
+  background: var(--vf-surface);
+  color: var(--vf-ink);
+  transition: border-color .16s ease, background-color .16s ease, transform .16s ease;
+}
+.vanessa-assistant .vanessa-panel>header>button:hover,
+.vanessa-assistant .vanessa-window-controls button:hover {
+  border-color: var(--vf-line-strong);
+  background: var(--vf-raised);
+}
+.vanessa-assistant .vanessa-panel>header>.vanessa-wake {
+  color: var(--vf-muted);
+  letter-spacing: .08em;
+  font-weight: 800;
+}
+.vanessa-assistant .vanessa-panel>header>.vanessa-wake.active {
+  color: #65edb0;
+  border-color: rgba(62, 221, 151, .48);
+  background: rgba(48, 175, 126, .18);
+  box-shadow: inset 0 0 13px rgba(52, 214, 145, .12);
+}
+:root[data-theme="light"] .vanessa-assistant .vanessa-panel>header>.vanessa-wake.active { color: #086b4c; }
+.vanessa-assistant .vanessa-panel>header>.vanessa-sound.active {
+  color: var(--vf-violet);
+  border-color: var(--vf-line-strong);
+  background: var(--vf-glow);
+}
+
+.vanessa-assistant .vanessa-context {
+  min-width: 0;
+  padding: 10px 14px;
+  background: linear-gradient(100deg, var(--vf-surface), var(--vf-panel)) !important;
+  border-bottom-color: var(--vf-line);
+}
+.vanessa-assistant .vanessa-context>span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--vf-line);
+  border-radius: 9px;
+  background: var(--vf-glow);
+  color: var(--vf-violet);
+}
+.vanessa-assistant .vanessa-context b { color: var(--vf-ink); font-weight: 750; }
+.vanessa-assistant .vanessa-context small { color: var(--vf-muted); }
+.vanessa-assistant .vanessa-session-controls {
+  border-bottom: 1px solid var(--vf-line);
+  background: var(--vf-panel);
+}
+.vanessa-assistant .vanessa-session-controls button {
+  color: var(--vf-muted);
+  border-radius: 8px;
+}
+.vanessa-assistant .vanessa-session-controls button:hover {
+  background: var(--vf-raised);
+  color: var(--vf-ink);
+}
+.vanessa-assistant .vanessa-voice-options { color: var(--vf-muted); }
+.vanessa-assistant .vanessa-voice-options select {
+  color: var(--vf-ink);
+  border-color: var(--vf-line);
+  background: var(--vf-surface);
+}
+.vanessa-assistant .vanessa-voice-playback {
+  color: var(--vf-muted);
+  border-color: var(--vf-line-strong);
+  background: var(--vf-surface);
+  box-shadow: inset 2px 0 0 var(--vf-violet);
+}
+.vanessa-assistant .vanessa-voice-playback[data-state="speaking"] {
+  box-shadow: inset 2px 0 0 var(--vf-cyan), 0 0 14px var(--vf-glow);
+}
+.vanessa-assistant .vanessa-voice-playback button {
+  color: var(--vf-ink);
+  border-color: var(--vf-line-strong);
+  background: var(--vf-glow);
+}
+.vanessa-assistant .vanessa-dictation-bar { color: var(--vf-ink); border-color: var(--vf-line); }
+.vanessa-assistant .vanessa-dictation-bar>button { color: var(--vf-ink); background: var(--vf-glow); }
+
+.vanessa-assistant .vanessa-messages {
+  background: radial-gradient(circle at 91% 3%, var(--vf-glow), transparent 28%),
+    linear-gradient(var(--vf-line), var(--vf-line)) left 17px top / 1px 100% no-repeat,
+    var(--vf-panel) !important;
+  color: var(--vf-ink);
+}
+.vanessa-assistant .vanessa-messages article>span {
+  border: 1px solid var(--vf-line-strong);
+  background: var(--vf-surface);
+  color: var(--vf-violet);
+  box-shadow: 0 0 0 3px var(--vf-panel);
+}
+.vanessa-assistant .vanessa-messages article.user>span {
+  border-color: var(--vf-line);
+  color: var(--vf-muted);
+  background: var(--vf-raised);
+}
+.vanessa-assistant .vanessa-messages article .vanessa-message-body {
+  border-color: var(--vf-line) !important;
+  border-radius: 5px 16px 16px 16px;
+  background: var(--vf-surface) !important;
+  color: var(--vf-ink) !important;
+  box-shadow: 0 5px 17px rgba(5, 4, 18, .07);
+}
+.vanessa-assistant .vanessa-messages article.user .vanessa-message-body {
+  border: 1px solid rgba(175, 120, 255, .35) !important;
+  border-radius: 16px 5px 16px 16px;
+  background: linear-gradient(115deg, #533496, #7137b4 60%, #a53d9b) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(90, 38, 159, .17);
+}
+.vanessa-assistant .vanessa-message-text strong { color: var(--vf-violet); }
+.vanessa-assistant .vanessa-messages article.user .vanessa-message-text strong { color: #fff; }
+.vanessa-assistant .vanessa-message-text code { background: var(--vf-glow); }
+.vanessa-assistant .vanessa-message-body>small,
+.vanessa-assistant .vanessa-messages .thinking small { color: var(--vf-muted); }
+.vanessa-assistant .vanessa-action-list li,
+.vanessa-assistant .vanessa-action-diff {
+  color: var(--vf-ink);
+  border-color: var(--vf-line);
+  background: var(--vf-deep);
+}
+.vanessa-assistant .vanessa-action-diff summary { color: var(--vf-ink); }
+.vanessa-assistant .vanessa-attachment,
+.vanessa-assistant .vanessa-memory-prompt {
+  color: var(--vf-ink);
+  border-color: var(--vf-line-strong);
+  background: var(--vf-surface);
+}
+.vanessa-assistant .vanessa-attachment small,
+.vanessa-assistant .vanessa-memory-prompt>span { color: var(--vf-muted); }
+
+.vanessa-assistant .vanessa-suggestions {
+  border-top-color: var(--vf-line);
+  background: var(--vf-panel);
+}
+.vanessa-assistant .vanessa-suggestions button {
+  color: var(--vf-ink);
+  border-color: var(--vf-line);
+  border-radius: 999px;
+  background: var(--vf-surface);
+}
+.vanessa-assistant .vanessa-suggestions button:hover {
+  color: var(--vf-violet);
+  border-color: var(--vf-line-strong);
+  background: var(--vf-glow);
+}
+.vanessa-assistant .vanessa-panel form {
+  border-color: var(--vf-line-strong) !important;
+  border-radius: 16px;
+  background: var(--vf-surface) !important;
+  box-shadow: 0 7px 24px rgba(6, 5, 20, .13);
+}
+.vanessa-assistant .vanessa-panel form:focus-within {
+  border-color: var(--vf-violet) !important;
+  box-shadow: 0 0 0 3px var(--vf-glow), 0 8px 24px rgba(6, 5, 20, .15);
+}
+.vanessa-assistant .vanessa-panel form>input[name="message"] { color: var(--vf-ink) !important; }
+.vanessa-assistant .vanessa-panel form>input[name="message"]::placeholder { color: var(--vf-muted); }
+.vanessa-assistant .vanessa-panel form>button:not([type="submit"]) {
+  color: var(--vf-muted) !important;
+}
+.vanessa-assistant .vanessa-panel form>button:not([type="submit"]):hover {
+  color: var(--vf-violet) !important;
+  background: var(--vf-glow) !important;
+}
+.vanessa-assistant .vanessa-panel form>button.vanessa-mic.listening {
+  color: var(--vf-cyan) !important;
+  background: var(--vf-glow) !important;
+  box-shadow: inset 0 0 0 1px var(--vf-line-strong);
+}
+.vanessa-assistant .vanessa-panel form>button[type="submit"] {
+  border-radius: 11px;
+  background: linear-gradient(135deg, #7656e4, #ae48cf 60%, #ed618d) !important;
+  color: #fff !important;
+  box-shadow: 0 5px 14px rgba(131, 65, 199, .25);
+}
+.vanessa-assistant .vanessa-panel>footer {
+  color: var(--vf-muted) !important;
+  background: var(--vf-panel) !important;
+}
+.vanessa-assistant .vanessa-panel :is(button, select, input):focus-visible {
+  outline: 2px solid var(--vf-violet);
+  outline-offset: 2px;
+}
+
+body.touch-workspace .vanessa-assistant.open .vanessa-panel {
+  box-shadow: 0 10px 60px rgba(6, 5, 20, .33);
+}
+@media (max-width: 380px) {
+  .vanessa-assistant .vanessa-panel>header { gap: 6px; padding-inline: 9px; }
+  .vanessa-assistant .vanessa-panel>header>.vanessa-avatar,
+  .vanessa-assistant .vanessa-panel>header .vanessa-energy-core { width: 42px; height: 42px; }
+  .vanessa-assistant .vanessa-context { padding-inline: 10px; }
+  .vanessa-assistant .vanessa-messages { padding-inline: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vanessa-assistant .vanessa-panel>header>button,
+  .vanessa-assistant .vanessa-window-controls button { transition: none; }
+}

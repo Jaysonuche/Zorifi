@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Zorifi creative workspace tutorial">
+  <defs>
+    <radialGradient id="space"><stop stop-color="#39245f"/><stop offset=".65" stop-color="#171a32"/><stop offset="1" stop-color="#080b19"/></radialGradient>
+    <linearGradient id="light" x2="1" y2="1"><stop stop-color="#9573ff"/><stop offset=".52" stop-color="#e15ccb"/><stop offset="1" stop-color="#ff876b"/></linearGradient>
+    <linearGradient id="screen" x2="1" y2=".4"><stop stop-color="#251a49"/><stop offset="1" stop-color="#71399b"/></linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#space)"/>
+  <g opacity=".22" stroke="#b9a8ff"><circle cx="480" cy="270" r="126" fill="none"/><circle cx="480" cy="270" r="166" fill="none"/><circle cx="480" cy="270" r="211" fill="none"/></g>
+  <g transform="translate(212 112)"><rect width="536" height="316" rx="22" fill="#090c1c" stroke="#8d72c8" stroke-width="2"/><path d="M22 0h492a22 22 0 0 1 22 22v42H0V22A22 22 0 0 1 22 0" fill="#18172a"/><circle cx="31" cy="32" r="6" fill="#f264ab"/><circle cx="52" cy="32" r="6" fill="#b278fa"/><circle cx="73" cy="32" r="6" fill="#93aaff"/><rect x="24" y="83" width="144" height="145" rx="12" fill="#24213d"/><rect x="185" y="83" width="327" height="145" rx="12" fill="url(#screen)"/><circle cx="385" cy="141" r="34" fill="#ffa676"/><rect x="185" y="174" width="327" height="54" fill="#181e39"/><rect x="24" y="247" width="488" height="44" rx="8" fill="#141523"/><rect x="37" y="258" width="148" height="24" rx="6" fill="#874ee9"/><rect x="190" y="258" width="148" height="24" rx="6" fill="#b24eb4"/><rect x="343" y="258" width="154" height="24" rx="6" fill="#6855bd"/><path d="M264 246v48" stroke="#ff9fc8" stroke-width="3"/></g>
+  <circle cx="480" cy="267" r="42" fill="#141127de" stroke="#ffc4f3" stroke-width="2"/><path d="m470 242 32 25-32 25z" fill="#fff"/>
+  <text x="480" y="72" fill="#e9ddff" font-family="Arial,sans-serif" font-size="24" font-weight="700" text-anchor="middle" letter-spacing="5">THE ZORIFI FLIGHT PATH</text>
+  <text x="480" y="475" fill="#d2b5ff" font-family="Arial,sans-serif" font-size="16" font-weight="700" text-anchor="middle" letter-spacing="3">EDIT  ·  MUSIC  ·  VANESSA  ·  SOCIAL</text>
+  <rect y="530" width="960" height="10" fill="url(#light)"/>
+</svg>

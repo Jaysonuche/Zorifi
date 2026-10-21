@@ -4798,8 +4798,7 @@ document.addEventListener('click',event=>{
 });
 
 render();
-function playStartupSound(){if(matchMedia('(prefers-reduced-motion: reduce)').matches||localStorage.getItem('zorifi-startup-muted')==='true')return;try{const AudioClass=window.AudioContext||window.webkitAudioContext,context=AudioClass&&new AudioClass();if(!context||context.state==='suspended'){context?.close?.();return;}const gain=context.createGain(),first=context.createOscillator(),second=context.createOscillator(),now=context.currentTime;first.type='sine';second.type='triangle';first.frequency.setValueAtTime(392,now);first.frequency.exponentialRampToValueAtTime(587,now+.22);second.frequency.setValueAtTime(784,now+.08);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.07,now+.035);gain.gain.exponentialRampToValueAtTime(.0001,now+.42);first.connect(gain);second.connect(gain);gain.connect(context.destination);first.start(now);second.start(now+.08);first.stop(now+.43);second.stop(now+.43);second.onended=()=>context.close().catch(()=>{});}catch{}}
-function finishStartup(){const startup=document.getElementById('zorifi-startup');if(!startup)return;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;playStartupSound();startup.classList.add('ready');setTimeout(()=>startup.remove(),reduced?20:280);}
+function finishStartup(){const startup=document.getElementById('zorifi-startup');if(!startup)return;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;startup.classList.add('ready');setTimeout(()=>startup.remove(),reduced?20:280);}
 requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(finishStartup,matchMedia('(max-width: 1180px) and (pointer: coarse)').matches?140:260)));
 
 // Named chat tool dispatch: render only after a validated model tool call.

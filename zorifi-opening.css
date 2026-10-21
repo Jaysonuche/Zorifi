@@ -1,0 +1,68 @@
+/* A quiet, skippable launch sequence and a locally stored moving tour. */
+.zorifi-opening[hidden],.zorifi-tour-backdrop[hidden]{display:none!important}
+.zorifi-opening{position:fixed;inset:0;z-index:100001;display:grid;place-items:center;overflow:hidden;isolation:isolate;color:#fff;background:radial-gradient(ellipse 72% 64% at 50% 50%,#24164b 0%,#0a0b19 52%,#050713 100%);pointer-events:none;opacity:0;transition:opacity .18s ease}
+.zorifi-opening.is-live{opacity:1}
+.zorifi-opening::before{content:"";position:absolute;inset:-24%;opacity:.62;background:conic-gradient(from 40deg at 50% 50%,transparent 0 17%,#7e4bff3c 20%,transparent 27% 53%,#ff53953c 59%,transparent 64%);animation:zorifi-opening-field 2.7s linear infinite}
+.zorifi-opening::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,transparent 0 49%,#fff2 50%,transparent 51%);background-size:100% 7px;mix-blend-mode:screen;opacity:.12}
+.zorifi-opening-grid{position:absolute;inset:0;background-image:linear-gradient(#b892ff10 1px,transparent 1px),linear-gradient(90deg,#b892ff10 1px,transparent 1px);background-size:clamp(26px,4vw,58px) clamp(26px,4vw,58px);mask-image:radial-gradient(ellipse at center,#000 7%,transparent 76%);transform:perspective(700px) rotateX(62deg) scale(1.35);transform-origin:50% 70%}
+.zorifi-opening-core{position:relative;display:grid;place-items:center;width:min(66vw,390px);aspect-ratio:1;filter:drop-shadow(0 0 55px #a456ff53)}
+.zorifi-opening-core::before,.zorifi-opening-core::after{content:"";position:absolute;inset:3%;border:1px solid #b894ff55;border-radius:50%;box-shadow:inset 0 0 38px #984fff1a,0 0 20px #a470ff1b;animation:zorifi-opening-aperture 1.55s cubic-bezier(.2,.8,.25,1) both}
+.zorifi-opening-core::after{inset:15%;border:2px solid transparent;border-top-color:#f9c0ff;border-right-color:#a372ff;border-bottom-color:#ff6e9c;animation:zorifi-opening-spin 1.9s ease-in-out infinite;box-shadow:none}
+.zorifi-opening-iris{position:absolute;inset:8%;border-radius:50%;background:repeating-conic-gradient(from 10deg,#cc8cff55 0 2deg,transparent 3deg 29deg);mask-image:radial-gradient(circle,transparent 0 61%,#000 62% 72%,transparent 73%);animation:zorifi-opening-spin 3.8s linear infinite reverse}
+.zorifi-opening-mark{z-index:1;display:grid;place-items:center;width:34%;aspect-ratio:1;border-radius:30%;background:linear-gradient(155deg,#222342,#070a18 65%);border:1px solid #e7caff80;box-shadow:0 0 0 8px #9e64ff10,0 0 38px #ea59b76b,inset 0 0 25px #8444ff52;transform:scale(.5) rotate(-18deg);opacity:0;animation:zorifi-opening-mark .68s .23s cubic-bezier(.16,1.2,.36,1) forwards}
+.zorifi-opening-mark>span{font:900 clamp(48px,8vw,90px)/1 Arial,sans-serif;letter-spacing:-.13em;padding-right:.11em;background:linear-gradient(146deg,#a881ff,#f849aa 62%,#ff8a66);background-clip:text;-webkit-background-clip:text;color:transparent}
+.zorifi-opening-scan{position:absolute;width:min(88vw,590px);height:1px;background:linear-gradient(90deg,transparent,#efcaff,#b97dff,transparent);box-shadow:0 0 20px #d583ff,0 0 55px #c05bff;transform:translateY(-130px) scaleX(.15);opacity:0;animation:zorifi-opening-scan 1.3s .19s ease-in-out both}
+.zorifi-opening-copy{position:absolute;bottom:max(7vh,45px);display:grid;gap:7px;justify-items:center;text-align:center;letter-spacing:.38em;text-transform:uppercase;animation:zorifi-opening-copy .9s .42s both}
+.zorifi-opening-copy strong{font:800 clamp(23px,4vw,39px)/1.1 system-ui,sans-serif;letter-spacing:.34em;margin-right:-.34em}
+.zorifi-opening-copy small{color:#d5b4f5;font:600 9px/1.5 system-ui,sans-serif}
+.zorifi-opening-skip{pointer-events:auto;position:absolute;right:max(20px,env(safe-area-inset-right));top:max(18px,env(safe-area-inset-top));border:1px solid #b998ff66;border-radius:999px;padding:8px 13px;background:#14152caa;color:#f5eaff;font:600 12px system-ui,sans-serif;cursor:pointer}
+.zorifi-opening-skip:hover,.zorifi-opening-skip:focus-visible{background:#713dd6;outline:2px solid #eec9ff;outline-offset:2px}
+@keyframes zorifi-opening-field{to{transform:rotate(1turn)}}
+@keyframes zorifi-opening-aperture{from{transform:scale(2.2);opacity:0}60%{opacity:1}to{transform:scale(1);opacity:1}}
+@keyframes zorifi-opening-spin{to{transform:rotate(1turn)}}
+@keyframes zorifi-opening-mark{to{transform:scale(1) rotate(0);opacity:1}}
+@keyframes zorifi-opening-scan{10%{opacity:0}35%{opacity:.9;transform:translateY(-30px) scaleX(1)}95%{opacity:0;transform:translateY(120px) scaleX(.6)}100%{opacity:0}}
+@keyframes zorifi-opening-copy{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+
+.zorifi-tour-launch{border:1px solid #9d78f766;background:linear-gradient(120deg,#261848,#17172d);color:#f9f1ff;border-radius:999px;padding:8px 14px;font:700 12px system-ui,sans-serif;white-space:nowrap;cursor:pointer;box-shadow:inset 0 1px #ffffff20}
+.zorifi-tour-launch:hover,.zorifi-tour-launch:focus-visible{background:#6336b4;outline:2px solid #d6a5ff;outline-offset:2px}
+.zorifi-tour-launch>span{display:inline-block;margin-right:.4em;color:#ffc0d9}
+.auth-card .zorifi-tour-launch{display:block;margin:14px auto 0}
+.launch-sidebar .zorifi-tour-launch{width:calc(100% - 24px);margin:0 12px 12px;text-align:left;border-radius:13px}
+.home-topbar .zorifi-tour-launch{margin-right:12px}
+.topbar .zorifi-tour-launch,.music-topbar .zorifi-tour-launch{margin-inline:8px}
+.zorifi-tour-card{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(235px,.9fr) minmax(300px,1.1fr);align-items:center;min-height:220px;margin:22px 0 12px;overflow:hidden;border:1px solid #aa8bff70;border-radius:26px;background:radial-gradient(circle at 15% 15%,#7743de55,transparent 43%),linear-gradient(125deg,#151528,#261b42 65%,#3d234a);color:#fff;box-shadow:0 22px 48px #2b17452c}
+.launch-main>.home-content>.zorifi-tour-card{grid-column:1/-1;width:100%;min-width:0}
+.zorifi-tour-card::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 30%,#e998ff10 48%,transparent 66%);animation:zorifi-tour-shimmer 6s linear infinite}
+.zorifi-tour-card-copy{position:relative;z-index:1;padding:clamp(20px,3.2vw,42px)}
+.zorifi-tour-card-copy small,.zorifi-tour-kicker{display:block;font:800 10px/1.4 system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#d5a5ff}
+.zorifi-tour-card-copy h2{max-width:380px;margin:8px 0 10px;font:800 clamp(22px,2.2vw,34px)/1.07 system-ui,sans-serif;letter-spacing:-.045em}
+.zorifi-tour-card-copy p{max-width:440px;margin:0 0 16px;color:#ded6ee;font:400 13px/1.5 system-ui,sans-serif}
+.zorifi-tour-card-copy button{border:0;border-radius:12px;background:linear-gradient(110deg,#8b59ff,#e956af);color:#fff;padding:11px 17px;font:750 13px system-ui,sans-serif;cursor:pointer}
+.zorifi-tour-card-video{position:relative;align-self:stretch;display:flex;min-height:208px;overflow:hidden;border-left:1px solid #bfadff40;background:#0c0e1a}
+.zorifi-tour-card-video video{width:100%;height:100%;object-fit:cover;aspect-ratio:16/9}
+.zorifi-tour-card-video::after{content:"ILLUSTRATED PRODUCT TOUR";position:absolute;right:12px;bottom:12px;padding:5px 8px;border:1px solid #ffffff60;border-radius:6px;background:#0d0b18bb;color:#e8ddff;font:800 8px/1.1 system-ui;letter-spacing:.12em;pointer-events:none}
+@keyframes zorifi-tour-shimmer{to{transform:translateX(100%)}}
+
+.zorifi-tour-backdrop{position:fixed;inset:0;z-index:100005;display:grid;place-items:center;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:#080815d9;backdrop-filter:blur(18px)}
+.zorifi-tour-dialog{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:14px;width:min(100%,1100px);max-height:min(96dvh,850px);min-height:0;overflow:auto;border:1px solid #a78aff7a;border-radius:24px;background:linear-gradient(145deg,#1b1730,#0c1020 72%);color:#fff;box-shadow:0 30px 90px #000a,inset 0 1px #ffffff19}
+.zorifi-tour-head{display:flex;align-items:center;gap:12px;padding:18px 21px 0}
+.zorifi-tour-head-mark{display:grid;place-items:center;width:41px;height:41px;border:1px solid #c49bff91;border-radius:12px;background:linear-gradient(140deg,#8b51fc,#eb5a9d);font:900 28px Arial,sans-serif;box-shadow:0 0 26px #bb57ff74}
+.zorifi-tour-head h2{margin:2px 0 0;font:750 clamp(17px,2vw,23px)/1.2 system-ui,sans-serif}
+.zorifi-tour-head .zorifi-tour-close{margin-left:auto;display:grid;place-items:center;width:38px;height:38px;border:1px solid #a58ed05b;border-radius:11px;background:#ffffff12;color:#fff;font:26px/1 system-ui;cursor:pointer}
+.zorifi-tour-head .zorifi-tour-close:focus-visible,.zorifi-tour-chapters button:focus-visible{outline:2px solid #f0b8ff;outline-offset:2px}
+.zorifi-tour-player{position:relative;min-height:0;margin:0 18px;aspect-ratio:16/9;overflow:hidden;border:1px solid #ae89f980;border-radius:16px;background:#080b16}
+.zorifi-tour-player video{display:block;width:100%;height:100%;object-fit:contain;background:#070918}
+.zorifi-tour-fallback{position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;background:radial-gradient(circle at 50% 48%,#7c43ba70,#080a19 55%)}
+.zorifi-tour-fallback[hidden]{display:none}
+.zorifi-tour-fallback strong{font:800 clamp(20px,5vw,38px) system-ui,sans-serif}
+.zorifi-tour-fallback p{max-width:460px;line-height:1.5;color:#e1d3f5}
+.zorifi-tour-details{padding:0 22px 21px}
+.zorifi-tour-details p{margin:0 0 10px;min-height:2em;color:#e8def4;font:500 13px/1.45 system-ui,sans-serif}
+.zorifi-tour-chapters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:thin;padding:2px 0 3px}
+.zorifi-tour-chapters button{flex:0 0 auto;display:flex;align-items:center;gap:7px;border:1px solid #a487e251;border-radius:10px;padding:8px 11px;background:#222036;color:#dfd5f5;font:700 11px/1.25 system-ui,sans-serif;cursor:pointer}
+.zorifi-tour-chapters button[aria-current="true"]{background:#7849cd;color:white;border-color:#d7afff}
+.zorifi-tour-details>small{display:block;margin-top:10px;color:#ad9fc5;font:11px/1.4 system-ui,sans-serif}
+@media(max-width:900px){.zorifi-tour-card{grid-template-columns:1fr;align-items:stretch;height:max-content!important;min-height:0}.zorifi-tour-card-video{display:block;width:100%;height:clamp(180px,55vw,300px);border-left:0;border-top:1px solid #bfadff40;min-height:0;aspect-ratio:auto}.zorifi-tour-card-video video{display:block;height:100%;max-height:none}.home-topbar .zorifi-tour-launch{padding:8px;font-size:0}.home-topbar .zorifi-tour-launch span{font-size:16px;margin:0}.topbar .zorifi-tour-launch,.music-topbar .zorifi-tour-launch{font-size:0;padding:9px}.topbar .zorifi-tour-launch span,.music-topbar .zorifi-tour-launch span{font-size:16px;margin:0}}
+@media(max-width:540px){.zorifi-tour-dialog{border-radius:17px;gap:8px;max-height:97dvh}.zorifi-tour-head{padding:12px 13px 0}.zorifi-tour-player{margin:0 9px;border-radius:10px}.zorifi-tour-details{padding:0 13px 13px}.zorifi-tour-card{margin:16px 0}.zorifi-tour-card-copy{padding:20px}.zorifi-opening-copy{bottom:12vh}.zorifi-opening-core{width:min(80vw,310px)}}
+@media(prefers-reduced-motion:reduce){.zorifi-opening,.zorifi-opening::before,.zorifi-opening-core::before,.zorifi-opening-core::after,.zorifi-opening-iris,.zorifi-opening-mark,.zorifi-opening-scan,.zorifi-opening-copy,.zorifi-tour-card::before{animation:none!important;transition:none!important}.zorifi-opening-mark{opacity:1;transform:none}}

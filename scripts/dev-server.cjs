@@ -4,7 +4,7 @@ const path = require('node:path');
 const {pathToFileURL} = require('node:url');
 const {createLocalMediaJobs} = require('./local-media-jobs.cjs');
 const root = path.resolve(__dirname, '..');
-const types = {'.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.webmanifest':'application/manifest+json', '.png':'image/png', '.jpeg':'image/jpeg', '.mp4':'video/mp4', '.webm':'video/webm', '.wav':'audio/wav', '.mp3':'audio/mpeg', '.svg':'image/svg+xml', '.ico':'image/x-icon'};
+const types = {'.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.webmanifest':'application/manifest+json', '.png':'image/png', '.jpeg':'image/jpeg', '.mp4':'video/mp4', '.webm':'video/webm', '.wav':'audio/wav', '.mp3':'audio/mpeg', '.vtt':'text/vtt', '.svg':'image/svg+xml', '.ico':'image/x-icon'};
 const services = new Set(['vanessa-background','vanessa-director-tools','vanessa','vanessa-global','vanessa-language','vanessa-image','vanessa-scene-image','vanessa-video','vanessa-video-tool','vanessa-motion','vanessa-music','vanessa-stems','vanessa-voice','vanessa-speech','vanessa-captions','vanessa-scenes','vanessa-autocut','vanessa-provider-test','support-email']);
 function json(res, status, value) { res.writeHead(status, {'content-type':'application/json', 'cache-control':'no-store'}); res.end(JSON.stringify(value)); }
 function createServer({crmDirectory=path.join(root,'.zorifi-private'),crmKey,localMedia=createLocalMediaJobs()}={}) {
@@ -51,6 +51,30 @@ function createServer({crmDirectory=path.join(root,'.zorifi-private'),crmKey,loc
    const relative=decodeURIComponent(url.pathname).replace(/^\/+/, '') || 'index.html';
    if (!(['crm.html','crm.js','crm.css','ZorifiVanessaStudioCore.js','ZorifiVanessaTrueAudioAI.js','ZorifiAutoCaptions.js','ZorifiMulticamSyncEngine.js'].includes(relative)||relative==='index.html'||relative==='app.js'||relative==='styles.css'||relative==='sw.js'||relative==='manifest.webmanifest'||/^zorifi-[\w-]+\.(js|json|css)$/.test(relative)||/^(icons|assets)\/[\w./-]+$/.test(relative)))return json(res,404,{error:'Not found.'});
    const file=path.resolve(root,relative);if(!file.startsWith(root+path.sep))return json(res,403,{error:'Forbidden.'});
+   if(['.mp4','.webm','.wav','.mp3'].includes(path.extname(file))){
+    const stat=await fs.promises.stat(file);
+    if(!stat.isFile())return json(res,404,{error:'Not found.'});
+    const common={'content-type':types[path.extname(file)],'cache-control':'no-cache','accept-ranges':'bytes'};
+    const requested=req.headers.range;
+    if(requested){
+     const match=/^bytes=(\d*)-(\d*)$/.exec(requested);
+     let start,end;
+     if(match&&stat.size>0){
+      if(match[1]){start=Number(match[1]);end=match[2]?Number(match[2]):stat.size-1;}
+      else if(match[2]){const suffix=Number(match[2]);start=Math.max(0,stat.size-suffix);end=stat.size-1;}
+     }
+     if(!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||end<start||start>=stat.size){
+      res.writeHead(416,{...common,'content-range':`bytes */${stat.size}`});res.end();return;
+     }
+     end=Math.min(end,stat.size-1);
+     res.writeHead(206,{...common,'content-range':`bytes ${start}-${end}/${stat.size}`,'content-length':end-start+1});
+     if(req.method==='HEAD'){res.end();return;}
+     fs.createReadStream(file,{start,end}).on('error',()=>res.destroy()).pipe(res);return;
+    }
+    res.writeHead(200,{...common,'content-length':stat.size});
+    if(req.method==='HEAD'){res.end();return;}
+    fs.createReadStream(file).on('error',()=>res.destroy()).pipe(res);return;
+   }
    let data=await fs.promises.readFile(file);
    if(relative==='index.html'&&process.env.FIREBASE_WEB_API_KEY&&process.env.FIREBASE_PROJECT_ID){
     // Local previews need the same public Firebase client configuration as the

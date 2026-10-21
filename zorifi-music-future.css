@@ -1,0 +1,388 @@
+/* Music studio visual layer. Keep controls and the existing timeline behavior intact. */
+.music-editor-screen {
+  --music-ink: #f5f3ff;
+  --music-muted: #b8b5cc;
+  --music-line: rgba(173, 153, 221, .24);
+  --music-surface: #111425;
+  --music-surface-raised: #191b30;
+  --music-violet: #ab82ff;
+  --music-cyan: #69e2e9;
+  --music-coral: #ff8b9b;
+  color: var(--music-ink);
+  background:
+    radial-gradient(ellipse at 53% -14%, rgba(139, 89, 242, .26), transparent 46%),
+    radial-gradient(ellipse at 103% 50%, rgba(253, 90, 146, .09), transparent 30%),
+    #090b16;
+}
+
+.music-editor-screen.hybrid-music-studio {
+  grid-template-rows: 62px clamp(180px, 20dvh, 216px) minmax(210px, 1fr) clamp(210px, var(--timeline-height), 38dvh) !important;
+}
+
+.music-editor-screen .music-topbar {
+  position: relative;
+  height: auto;
+  min-height: 62px;
+  gap: 12px;
+  padding-inline: clamp(12px, 1.5vw, 24px);
+  border-bottom: 1px solid var(--music-line);
+  background: rgba(13, 15, 29, .96);
+  box-shadow: 0 10px 32px rgba(3, 4, 12, .25);
+}
+
+.music-editor-screen .music-topbar::before {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--music-violet) 21%, var(--music-cyan) 55%, var(--music-coral) 84%, transparent);
+}
+
+.music-editor-screen .music-workspace-badge,
+.music-editor-screen .music-library > header small,
+.music-editor-screen .music-monitor > header small,
+.music-editor-screen .music-mixer > header small {
+  color: var(--music-cyan);
+  font-size: 10px;
+  letter-spacing: .15em;
+}
+
+.music-editor-screen .music-workspace-badge {
+  border-color: rgba(105, 226, 233, .32);
+  border-radius: 999px;
+  background: rgba(105, 226, 233, .08);
+}
+
+.music-editor-screen .music-topbar .project-name {
+  max-width: 340px;
+  border-color: var(--music-line);
+  background: rgba(255, 255, 255, .035);
+  color: var(--music-ink);
+}
+
+.music-editor-screen .music-topbar .project-name:hover,
+.music-editor-screen .music-mode-switch:hover {
+  border-color: var(--music-violet);
+  background: rgba(171, 130, 255, .12);
+}
+
+.music-editor-screen .music-session-controls label,
+.music-editor-screen .music-presence,
+.music-editor-screen .music-mode-switch,
+.music-editor-screen .music-topbar .save-state {
+  border-color: var(--music-line);
+  background: rgba(28, 29, 48, .76);
+  color: var(--music-muted);
+  font-size: 10px;
+}
+
+.music-editor-screen .music-export-btn,
+.music-editor-screen .music-generate-button {
+  border-radius: 11px;
+  background: linear-gradient(114deg, #6e54ea 0%, #c947d0 58%, #f66583 100%) !important;
+  box-shadow: 0 8px 24px rgba(172, 71, 215, .22);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.music-editor-screen .music-export-btn:hover:not(:disabled),
+.music-editor-screen .music-generate-button:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+.music-editor-screen > .music-prompt-bar {
+  position: relative;
+  gap: 9px;
+  min-height: 0;
+  padding: 13px clamp(12px, 1.4vw, 22px) 11px;
+  border-bottom: 1px solid var(--music-line);
+  background:
+    radial-gradient(circle at 84% 4%, rgba(105, 226, 233, .09), transparent 31%),
+    linear-gradient(130deg, #171528, #111424 64%, #181324);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .045), 0 12px 28px rgba(0, 0, 0, .16);
+}
+
+.music-editor-screen .music-prompt-main {
+  min-height: 46px;
+  border-color: rgba(171, 130, 255, .45);
+  border-radius: 14px;
+  background: rgba(7, 9, 19, .77);
+  box-shadow: inset 0 0 22px rgba(139, 89, 242, .035);
+}
+
+.music-editor-screen .music-prompt-main > span { color: var(--music-cyan); }
+.music-editor-screen .music-prompt-main input { min-width: 0; font-size: 13px; }
+.music-editor-screen .music-prompt-main input::placeholder { color: #a8a5bd; }
+.music-editor-screen .music-prompt-main .music-generate-button { min-height: 38px; }
+
+.music-editor-screen .music-production-controls > label,
+.music-editor-screen .music-instrument-choices legend {
+  color: var(--music-muted);
+  font-size: 10px;
+  letter-spacing: .07em;
+}
+
+.music-editor-screen .music-production-controls :is(input, select),
+.music-editor-screen .music-prompt-options > select {
+  min-height: 34px;
+  border-color: var(--music-line);
+  border-radius: 9px;
+  background: rgba(8, 10, 20, .72);
+  color: var(--music-ink);
+  font-size: 11px;
+}
+
+.music-editor-screen :is(.music-instrument-choices button, .music-fx-toggles label span, .music-tempo-presets button, .music-stem-toggles label span) {
+  min-height: 32px;
+  border-color: var(--music-line);
+  border-radius: 9px;
+  background: rgba(24, 25, 44, .82);
+  color: #d5d1e5;
+  font-size: 10px;
+}
+
+.music-editor-screen :is(.music-instrument-choices button.active, .music-fx-toggles label input:checked + span, .music-tempo-presets button.active) {
+  border-color: rgba(105, 226, 233, .65);
+  background: linear-gradient(130deg, rgba(89, 76, 215, .36), rgba(45, 148, 170, .2));
+  color: #fff;
+}
+
+.music-editor-screen .music-tempo-presets small,
+.music-editor-screen .music-provider-message { font-size: 10px; }
+
+.music-editor-screen .music-workspace {
+  gap: 10px;
+  min-height: 0;
+  padding: 10px 10px 0;
+  background: transparent;
+}
+
+.music-editor-screen :is(.music-library, .music-monitor, .music-mixer) {
+  min-height: 0;
+  border: 1px solid var(--music-line);
+  border-radius: 15px 15px 0 0;
+  background: linear-gradient(160deg, rgba(25, 26, 45, .98), rgba(12, 15, 27, .98) 65%);
+  box-shadow: 0 12px 28px rgba(3, 4, 12, .13);
+}
+
+.music-editor-screen :is(.music-library, .music-monitor, .music-mixer) > header {
+  min-height: 68px;
+  border-bottom-color: var(--music-line);
+  background: rgba(255, 255, 255, .025);
+}
+
+.music-editor-screen :is(.music-library, .music-monitor, .music-mixer) > header :is(h1, h2) {
+  color: var(--music-ink);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.music-editor-screen .music-library-actions { border-bottom-color: var(--music-line); }
+.music-editor-screen .music-library-actions button,
+.music-editor-screen .music-quick-tools button,
+.music-editor-screen .music-monitor-actions > button {
+  border-color: var(--music-line);
+  border-radius: 10px;
+  background: rgba(32, 33, 54, .85);
+  color: #e0dcf0;
+  font-size: 11px;
+}
+
+.music-editor-screen .music-library-actions button { min-height: 54px; }
+.music-editor-screen .music-library-actions button b { color: var(--music-cyan); font-size: 17px; }
+
+.music-editor-screen .music-library-empty,
+.music-editor-screen .music-stem-card,
+.music-editor-screen .music-smart-mixer,
+.music-editor-screen .music-master-card > p {
+  border-color: var(--music-line);
+  background: rgba(22, 24, 42, .72);
+  color: var(--music-muted);
+}
+
+.music-editor-screen .music-stem-card :is(b, small),
+.music-editor-screen .music-smart-mixer :is(button, label) { font-size: max(10px, 1em); }
+.music-editor-screen .music-library-empty small,
+.music-editor-screen .music-master-card > p,
+.music-editor-screen .music-waveform-empty small { font-size: 11px; line-height: 1.5; }
+
+.music-editor-screen .music-monitor {
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(133, 83, 233, .16), transparent 44%),
+    linear-gradient(160deg, #12172a, #0b101c 74%);
+}
+
+.music-editor-screen .music-waveform {
+  height: min(100%, 280px);
+  min-height: 0;
+  border-color: rgba(105, 226, 233, .35);
+  border-radius: 18px;
+  background:
+    linear-gradient(rgba(130, 115, 173, .08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(130, 115, 173, .08) 1px, transparent 1px),
+    radial-gradient(ellipse at center, rgba(79, 48, 143, .26), transparent 70%),
+    #0b1120;
+  background-size: 100% 24px, 24px 100%, auto, auto;
+  box-shadow: inset 0 0 34px rgba(57, 181, 202, .08), 0 18px 32px rgba(0, 0, 0, .16);
+}
+
+.music-editor-screen .music-waveform i {
+  background: linear-gradient(180deg, var(--music-coral), var(--music-violet) 44%, var(--music-cyan));
+  box-shadow: 0 0 9px rgba(105, 226, 233, .22);
+}
+
+.music-editor-screen .music-waveform-empty > span {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 22px;
+  border-color: rgba(105, 226, 233, .44);
+  background: linear-gradient(130deg, rgba(102, 73, 220, .42), rgba(55, 156, 175, .3));
+  color: #c8f5f7;
+}
+.music-editor-screen .music-waveform-empty { gap: 4px; }
+.music-editor-screen .music-waveform-empty b { font-size: 13px; }
+
+.music-editor-screen .music-transport,
+.music-editor-screen .music-quick-tools { border-color: var(--music-line); background: rgba(12, 16, 30, .92); }
+.music-editor-screen .music-transport > span,
+.music-editor-screen .music-monitor-actions > span,
+.music-editor-screen .music-mixer > header > span { color: var(--music-muted); font-size: 11px; }
+.music-editor-screen .music-transport button { border-color: var(--music-line); color: var(--music-ink); font-size: 11px; }
+.music-editor-screen .music-transport .music-play { width: 47px; height: 47px; background: linear-gradient(135deg, #7354ed, #bc50cd, #ed788d); }
+.music-editor-screen .music-quick-tools button { min-height: 38px; }
+
+.music-editor-screen > .timeline-area {
+  margin: 10px 10px 0 !important;
+  border-color: var(--music-line) !important;
+  border-radius: 15px 15px 0 0 !important;
+  background: #0d1020 !important;
+}
+
+.music-editor-screen .timeline-toolbar,
+.music-editor-screen .timeline-tool-rail,
+.music-editor-screen .track-heads { background: #14172a; }
+.music-editor-screen .timeline-toolbar { border-bottom-color: var(--music-line); }
+.music-editor-screen .timeline-title { color: var(--music-ink); }
+.music-editor-screen .timeline-scroll { scrollbar-color: #7c69aa #111428; }
+.music-editor-screen .clip.audio { background: linear-gradient(115deg, #6651ce, #ae4dbd 60%, #e36a96); }
+
+.music-editor-screen :is(button, input, select, textarea):focus-visible,
+.music-editor-screen .music-fx-toggles label input:focus-visible + span,
+.music-editor-screen .music-stem-toggles label input:focus-visible + span {
+  outline: 2px solid #8de8f1;
+  outline-offset: 2px;
+}
+
+.music-editor-screen :is(button, input, select):disabled { cursor: not-allowed; }
+
+@media (max-width: 1220px) and (min-width: 761px) {
+  .music-editor-screen .music-workspace { grid-template-columns: minmax(200px, 250px) minmax(280px, 1fr) minmax(220px, 270px); }
+  .music-editor-screen .music-quick-tools button { font-size: 10px; }
+}
+
+/* Touch phones and tablets keep the existing swipeable Stems / Arrange / Mix pages. */
+.music-editor-screen.platform-mobile-music-editor.hybrid-music-studio {
+  grid-template-rows: 56px minmax(126px, 28dvh) 48px minmax(130px, 1fr) clamp(190px, 30dvh, 300px) !important;
+}
+
+.music-editor-screen.platform-mobile-music-editor .music-topbar { min-height: 56px; }
+.music-editor-screen.platform-mobile-music-editor .music-topbar .music-mode-switch { display: none !important; }
+.music-editor-screen.platform-mobile-music-editor > .music-prompt-bar { padding: 8px 10px; }
+.music-editor-screen.platform-mobile-music-editor .music-prompt-main { min-height: 44px; }
+.music-editor-screen.platform-mobile-music-editor .music-prompt-main input { height: 42px; font-size: 12px; }
+.music-editor-screen.platform-mobile-music-editor .music-prompt-main .music-generate-button { min-height: 40px; }
+.music-editor-screen.platform-mobile-music-editor .music-mobile-nav {
+  border-bottom-color: var(--music-line);
+  background: #101425;
+}
+.music-editor-screen.platform-mobile-music-editor .music-mobile-nav button {
+  min-height: 38px;
+  color: var(--music-muted);
+  font-size: 11px;
+}
+.music-editor-screen.platform-mobile-music-editor .music-mobile-nav button.active {
+  border-color: rgba(105, 226, 233, .55);
+  background: linear-gradient(125deg, rgba(105, 76, 208, .35), rgba(62, 160, 174, .16));
+  color: #fff;
+}
+.music-editor-screen.platform-mobile-music-editor .music-workspace { padding: 6px 0 0; gap: 0; }
+.music-editor-screen.platform-mobile-music-editor :is(.music-library, .music-monitor, .music-mixer) { border-radius: 14px 14px 0 0; }
+.music-editor-screen.platform-mobile-music-editor :is(.music-library, .music-monitor, .music-mixer) > header { min-height: 58px; }
+.music-editor-screen.platform-mobile-music-editor .music-transport { min-height: 55px; gap: 5px; }
+.music-editor-screen.platform-mobile-music-editor .music-transport button { min-width: 34px; min-height: 34px; }
+.music-editor-screen.platform-mobile-music-editor .music-quick-tools button { min-height: 42px; }
+.music-editor-screen.platform-mobile-music-editor > .timeline-area { margin: 7px 7px 0 !important; }
+.music-editor-screen.platform-mobile-music-editor .timeline-tool-rail button { min-height: 38px; }
+
+@media (max-width: 440px) {
+  .music-editor-screen.platform-mobile-music-editor .music-topbar { gap: 6px; padding-inline: 8px; }
+  /* Keep the working Studio, Vanessa and Export controls in view on phones.
+     Privacy remains reachable from the home/account screen. */
+  .music-editor-screen.platform-mobile-music-editor .music-topbar .privacy-shortcut { display: none; }
+  .music-editor-screen.platform-mobile-music-editor .music-topbar .zorifi-tour-launch { margin-inline: 0; }
+  .music-editor-screen.platform-mobile-music-editor .music-export-btn { padding-inline: 9px; font-size: 11px; }
+  .music-editor-screen.platform-mobile-music-editor .music-waveform-stage { padding: 9px; }
+  .music-editor-screen.platform-mobile-music-editor .music-waveform { min-height: 90px; }
+  .music-editor-screen.platform-mobile-music-editor .music-transport > span { font-size: 9px; white-space: nowrap; }
+}
+
+@media (max-width: 360px) {
+  /* The illustrated tour is still available on Home; the editor keeps its
+     creative controls usable even on narrow screens. */
+  .music-editor-screen.platform-mobile-music-editor .music-topbar .zorifi-tour-launch { display: none; }
+}
+
+@media (max-height: 650px) {
+  .music-editor-screen.platform-mobile-music-editor.hybrid-music-studio {
+    grid-template-rows: 50px 104px 42px minmax(110px, 1fr) clamp(150px, 27dvh, 210px) !important;
+  }
+  .music-editor-screen.platform-mobile-music-editor .music-topbar { min-height: 50px; }
+  .music-editor-screen.platform-mobile-music-editor .music-mobile-nav button { min-height: 32px; }
+}
+
+:root[data-theme="light"] .music-editor-screen {
+  --music-ink: #24213a;
+  --music-muted: #5d5b70;
+  --music-line: rgba(86, 68, 127, .19);
+  --music-surface: #fff;
+  --music-surface-raised: #f9f7ff;
+  background: #edeef6;
+}
+:root[data-theme="light"] .music-editor-screen .music-topbar { background: #fff; }
+:root[data-theme="light"] .music-editor-screen .music-topbar .project-name,
+:root[data-theme="light"] .music-editor-screen .music-session-controls label,
+:root[data-theme="light"] .music-editor-screen .music-presence,
+:root[data-theme="light"] .music-editor-screen .music-mode-switch,
+:root[data-theme="light"] .music-editor-screen .music-topbar .save-state { background: #f6f4fb; color: #3b3654; }
+:root[data-theme="light"] .music-editor-screen > .music-prompt-bar { background: linear-gradient(130deg, #fff, #f7f5ff); }
+:root[data-theme="light"] .music-editor-screen :is(.music-library, .music-monitor, .music-mixer) { background: #fff; }
+:root[data-theme="light"] .music-editor-screen :is(.music-library, .music-monitor, .music-mixer) > header { background: #faf9ff; }
+:root[data-theme="light"] .music-editor-screen .music-prompt-main,
+:root[data-theme="light"] .music-editor-screen .music-production-controls :is(input, select),
+:root[data-theme="light"] .music-editor-screen .music-prompt-options > select { background: #fff; color: var(--music-ink); }
+:root[data-theme="light"] .music-editor-screen .music-prompt-main input { color: var(--music-ink); }
+:root[data-theme="light"] .music-editor-screen .music-prompt-main input::placeholder { color: #656078; }
+:root[data-theme="light"] .music-editor-screen :is(.music-instrument-choices button, .music-fx-toggles label span, .music-tempo-presets button, .music-stem-toggles label span) { background: #f6f4fd; color: #3d3858; }
+:root[data-theme="light"] .music-editor-screen .music-workspace { background: #edeef6; }
+:root[data-theme="light"] .music-editor-screen .music-monitor { background: linear-gradient(150deg, #fff, #f7f5fe); }
+:root[data-theme="light"] .music-editor-screen .music-waveform { background-color: #f6f3fd; }
+:root[data-theme="light"] .music-editor-screen .music-waveform-empty { color: #55506b; }
+:root[data-theme="light"] .music-editor-screen .music-waveform-empty b { color: #28223e; }
+:root[data-theme="light"] .music-editor-screen .music-mobile-nav { background: #fff; }
+:root[data-theme="light"] .music-editor-screen .music-transport,
+:root[data-theme="light"] .music-editor-screen .music-quick-tools,
+:root[data-theme="light"] .music-editor-screen .music-library-actions button,
+:root[data-theme="light"] .music-editor-screen .music-quick-tools button,
+:root[data-theme="light"] .music-editor-screen .music-monitor-actions > button { background: #faf9ff; color: var(--music-ink); }
+:root[data-theme="light"] .music-editor-screen .music-transport > span b { color: var(--music-ink); }
+:root[data-theme="light"] .music-editor-screen .music-library > header > button { border-color: #bfb4dd; background: #eee9fb; color: #362b63; }
+:root[data-theme="light"] .music-editor-screen .music-stem-card,
+:root[data-theme="light"] .music-editor-screen .music-smart-mixer,
+:root[data-theme="light"] .music-editor-screen .music-master-card > p { background: #faf9ff; color: #4c485f; }
+:root[data-theme="light"] .music-editor-screen .music-transport button { background: #f7f6fc; color: #3c335b; }
+:root[data-theme="light"] .music-editor-screen .music-transport .music-play { color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .music-editor-screen *,
+  .music-editor-screen *::before,
+  .music-editor-screen *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

@@ -1,0 +1,231 @@
+/* Zorifi Lightfield: a calm, precise surface around the actual edit. */
+:root {
+  --ef-surface:#111521;
+  --ef-raised:#181c2b;
+  --ef-ink:#f0f1fa;
+  --ef-muted:#abb2c9;
+  --ef-line:rgba(181,167,239,.18);
+  --ef-grid:rgba(154,171,223,.055);
+  --ef-violet:#b68cff;
+  --ef-cyan:#7de0e9;
+  --ef-coral:#ff90a4;
+}
+:root[data-theme="light"] {
+  --ef-surface:#f8f8fd;
+  --ef-raised:#ffffff;
+  --ef-ink:#212339;
+  --ef-muted:#626982;
+  --ef-line:rgba(78,73,141,.2);
+  --ef-grid:rgba(86,83,159,.06);
+  --ef-violet:#7139ca;
+  --ef-cyan:#087d91;
+  --ef-coral:#c73f67;
+}
+
+main.app-shell[data-view="editor"] { color:var(--ef-ink); }
+main.app-shell[data-view="editor"] :is(.topbar,.left-panel,.inspector,.stage,.timeline-area) { min-width:0; }
+
+main.app-shell[data-view="editor"] .topbar {
+  position:relative;
+  background:
+    radial-gradient(ellipse 270px 90px at 31% -50%,rgba(150,93,247,.22),transparent 85%),
+    linear-gradient(105deg,var(--ef-surface),var(--ef-raised) 48%,var(--ef-surface))!important;
+  border-bottom:1px solid var(--ef-line)!important;
+  color:var(--ef-ink);
+}
+main.app-shell[data-view="editor"] .topbar::after {
+  content:"";position:absolute;z-index:1;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(90deg,transparent 5%,var(--ef-violet) 30%,var(--ef-cyan) 67%,transparent 95%);
+  opacity:.48;pointer-events:none;
+}
+main.app-shell[data-view="editor"] .project-name {
+  border:1px solid var(--ef-line);border-radius:11px;
+  background:linear-gradient(115deg,rgba(167,119,248,.1),rgba(125,224,233,.045));
+  color:var(--ef-ink);
+}
+main.app-shell[data-view="editor"] .export-btn {
+  background:linear-gradient(115deg,#7453ef,#a64fd5 61%,#f16b88)!important;
+  border:1px solid #c2a2fb66!important;color:#fff!important;
+  box-shadow:0 6px 22px rgba(133,70,219,.24);
+}
+
+main.app-shell[data-view="editor"] .stage {
+  background:var(--ef-surface)!important;
+  border:1px solid var(--ef-line)!important;
+  border-radius:14px!important;
+  overflow:hidden;
+}
+main.app-shell[data-view="editor"] .preview-wrap {
+  position:relative;
+  isolation:isolate;
+  background-color:#0c101b!important;
+  background-image:
+    radial-gradient(ellipse 70% 62% at 50% 50%,rgba(91,69,152,.19),transparent 85%),
+    linear-gradient(var(--ef-grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--ef-grid) 1px,transparent 1px)!important;
+  background-size:auto,30px 30px,30px 30px!important;
+}
+main.app-shell[data-view="editor"] .preview-wrap::after {
+  content:"";position:absolute;z-index:0;inset:12px;pointer-events:none;
+  background:
+    linear-gradient(var(--ef-cyan),var(--ef-cyan)) top left/17px 1px no-repeat,
+    linear-gradient(var(--ef-cyan),var(--ef-cyan)) top left/1px 17px no-repeat,
+    linear-gradient(var(--ef-violet),var(--ef-violet)) top right/17px 1px no-repeat,
+    linear-gradient(var(--ef-violet),var(--ef-violet)) top right/1px 17px no-repeat,
+    linear-gradient(var(--ef-violet),var(--ef-violet)) bottom left/17px 1px no-repeat,
+    linear-gradient(var(--ef-violet),var(--ef-violet)) bottom left/1px 17px no-repeat,
+    linear-gradient(var(--ef-cyan),var(--ef-cyan)) bottom right/17px 1px no-repeat,
+    linear-gradient(var(--ef-cyan),var(--ef-cyan)) bottom right/1px 17px no-repeat;
+  opacity:.56;
+}
+main.app-shell[data-view="editor"] .preview-wrap>.preview {
+  position:relative;z-index:1;
+  border:1px solid rgba(188,169,250,.3)!important;
+  box-shadow:0 20px 50px rgba(0,0,0,.3),0 0 0 5px rgba(134,98,199,.045);
+}
+main.app-shell[data-view="editor"] .transport {
+  background:linear-gradient(100deg,var(--ef-surface),var(--ef-raised),var(--ef-surface))!important;
+  border-top:1px solid var(--ef-line)!important;
+}
+main.app-shell[data-view="editor"] .transport .time-display {
+  color:var(--ef-ink)!important;font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";
+}
+main.app-shell[data-view="editor"] .transport :is(button:hover,button:focus-visible) {
+  color:var(--ef-cyan);
+}
+
+@media(min-width:1024px) {
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .workspace {gap:10px!important;padding:10px 10px 0!important;}
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] :is(.left-panel,.inspector) {
+    background:linear-gradient(155deg,var(--ef-raised),var(--ef-surface))!important;
+    border:1px solid var(--ef-line)!important;border-radius:14px!important;
+    box-shadow:0 12px 30px rgba(4,6,20,.12);
+    overflow:hidden;
+  }
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] :is(.sidebar,.media-panel,.inspector-tab-content) {background:transparent!important;}
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .sidebar {border-right:1px solid var(--ef-line)!important;}
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .sidebar .tool-group-label {
+    color:var(--ef-cyan)!important;letter-spacing:.14em;
+  }
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .sidebar .tool-btn.active {
+    border:1px solid rgba(182,140,255,.34)!important;
+    border-left:2px solid var(--ef-violet)!important;
+    background:linear-gradient(90deg,rgba(176,119,255,.18),rgba(176,119,255,.035))!important;
+    color:var(--ef-ink)!important;
+  }
+  body:not(.touch-workspace) main.app-shell[data-view="editor"] .inspector-head {
+    background:rgba(149,119,208,.075)!important;
+    border-bottom:1px solid var(--ef-line)!important;
+  }
+}
+
+main.app-shell[data-view="editor"] .timeline-area {
+  background:linear-gradient(165deg,var(--ef-raised),var(--ef-surface) 58%)!important;
+  border-color:var(--ef-line)!important;
+  color:var(--ef-ink);
+}
+main.app-shell[data-view="editor"] .timeline-toolbar {
+  background:linear-gradient(90deg,rgba(120,86,177,.11),transparent 72%)!important;
+  border-bottom:1px solid var(--ef-line)!important;
+}
+main.app-shell[data-view="editor"] .timeline-title small {color:var(--ef-cyan)!important;letter-spacing:.16em;}
+main.app-shell[data-view="editor"] .timeline-content {
+  background-color:var(--ef-surface)!important;
+  background-image:linear-gradient(90deg,var(--ef-grid) 1px,transparent 1px)!important;
+  background-size:45px 100%!important;
+}
+main.app-shell[data-view="editor"] .ruler {
+  background:linear-gradient(180deg,rgba(128,109,186,.11),transparent)!important;
+  border-bottom:1px solid var(--ef-line)!important;
+}
+main.app-shell[data-view="editor"] :is(.timeline-empty-drop,.timeline-new-track-drop) {
+  border:1px dashed rgba(182,140,255,.36)!important;
+  border-radius:15px;
+  background:radial-gradient(circle at 50% 0,rgba(154,113,240,.12),transparent 74%),rgba(148,119,199,.035)!important;
+  color:var(--ef-ink)!important;
+}
+main.app-shell[data-view="editor"] .timeline-empty-drop>span {
+  color:var(--ef-violet)!important;
+  filter:drop-shadow(0 0 10px rgba(183,140,255,.36));
+}
+main.app-shell[data-view="editor"] .timeline-empty-drop small {color:var(--ef-muted)!important;}
+main.app-shell[data-view="editor"] .track {
+  border-bottom:1px solid var(--ef-line)!important;
+  background:rgba(142,131,186,.028)!important;
+}
+main.app-shell[data-view="editor"] .track:nth-of-type(even) {background:rgba(142,131,186,.055)!important;}
+main.app-shell[data-view="editor"] .clip {
+  box-shadow:inset 0 1px rgba(255,255,255,.14),0 3px 10px rgba(0,0,0,.12);
+}
+main.app-shell[data-view="editor"] .clip.pointer-selected {outline:2px solid var(--ef-cyan)!important;outline-offset:2px;}
+
+/* Keep the video close to its actual frame size; the sequence uses the space saved. */
+body.touch-workspace main.pocket-editor[data-view="editor"] {
+  grid-template-rows:
+    calc(56px + env(safe-area-inset-top))
+    minmax(120px,min(46dvh,calc((100vw - 24px) / var(--preview-ratio,1.7778) + 58px)))
+    minmax(0,1fr)
+    var(--pocket-sheet-height)
+    calc(74px + env(safe-area-inset-bottom))!important;
+}
+body.touch-workspace main.pocket-editor:is(.pocket-panel-open,.pocket-inspector-open)[data-view="editor"] {
+  grid-template-rows:
+    calc(56px + env(safe-area-inset-top))
+    minmax(95px,min(22dvh,calc((100vw - 24px) / var(--preview-ratio,1.7778) - 14px)))
+    minmax(0,1fr)
+    var(--pocket-sheet-height)
+    calc(74px + env(safe-area-inset-bottom))!important;
+}
+body.touch-workspace main.pocket-editor[data-view="editor"] .stage {
+  border-radius:14px!important;margin:6px 8px!important;
+}
+body.touch-workspace main.pocket-editor[data-view="editor"] .stage .preview-wrap {padding:6px 9px!important;}
+body.touch-workspace main.pocket-editor[data-view="editor"] .timeline-area {
+  border-top:1px solid var(--ef-line)!important;border-radius:13px 13px 0 0!important;
+  box-shadow:0 -8px 30px rgba(34,17,70,.08);
+}
+body.touch-workspace main.pocket-editor[data-view="editor"]>.pocket-editor-dock {
+  background:linear-gradient(100deg,var(--ef-surface),var(--ef-raised) 52%,var(--ef-surface))!important;
+  border-top:1px solid var(--ef-line)!important;
+  box-shadow:0 -12px 25px rgba(2,4,16,.18);
+}
+body.touch-workspace main.pocket-editor[data-view="editor"]>.pocket-editor-dock>button {
+  color:var(--ef-muted)!important;
+}
+body.touch-workspace main.pocket-editor[data-view="editor"]>.pocket-editor-dock>button.active {
+  color:var(--ef-ink)!important;
+  background:linear-gradient(140deg,rgba(182,140,255,.28),rgba(125,224,233,.11))!important;
+  box-shadow:inset 0 0 0 1px rgba(182,140,255,.26);
+}
+main.app-shell[data-view="editor"] :is(button,a,input,select,textarea):focus-visible {
+  outline:2px solid var(--ef-cyan)!important;outline-offset:2px;
+}
+@media(min-width:650px) and (min-height:540px) {
+  body.touch-workspace main.pocket-editor[data-view="editor"] {
+    grid-template-rows:
+      calc(58px + env(safe-area-inset-top))
+      minmax(180px,min(54dvh,calc((100vw - 24px) / var(--preview-ratio,1.7778) + 58px)))
+      minmax(0,1fr)
+      var(--pocket-sheet-height)
+      calc(76px + env(safe-area-inset-bottom))!important;
+  }
+  body.touch-workspace main.pocket-editor:is(.pocket-panel-open,.pocket-inspector-open)[data-view="editor"] {
+    grid-template-rows:
+      calc(58px + env(safe-area-inset-top))
+      minmax(150px,min(32dvh,calc((100vw - 24px) / var(--preview-ratio,1.7778) - 14px)))
+      minmax(0,1fr)
+      var(--pocket-sheet-height)
+      calc(76px + env(safe-area-inset-bottom))!important;
+  }
+}
+@media(max-height:540px) and (orientation:landscape) {
+  body.touch-workspace main.pocket-editor[data-view="editor"] {
+    grid-template-rows:48px minmax(65px,1fr) 110px var(--pocket-sheet-height) 60px!important;
+  }
+  body.touch-workspace main.pocket-editor[data-view="editor"] .stage {margin:2px 5px!important;}
+  body.touch-workspace main.pocket-editor[data-view="editor"] .preview-wrap::after {inset:4px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  main.app-shell[data-view="editor"] :is(.stage,.preview-wrap,.transport,.timeline-area,.pocket-editor-dock) {animation:none!important;transition:none!important;}
+}
