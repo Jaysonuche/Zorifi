@@ -27,6 +27,7 @@
       const accounts=getAccounts(),existing=accounts.find(item=>item.cloudUid===cloud.uid),language=Phase10.normalizeLocale(globalI18n.locale);
       // Link only the identity verified by Firebase, never a matching unverified local email.
       const account={...(existing||{id:'firebase-'+cloud.uid,cloudUid:cloud.uid,createdAt:new Date().toISOString(),phone:''}),name:existing?.name||cloud.displayName||'Zorifi Creator',identifier:cloud.email.toLowerCase(),email:cloud.email.toLowerCase(),language};
+      if(cloud.isNewUser===true&&!existing)window.ZorifiTour?.markNewAccount(account.id);
       const terms=new TermsSystem.AcceptanceStore({storage:localStorage,userId:account.id});
       if(terms.requiresAcceptance(TermsSystem.CONFIG.version)){
         pendingAuthentication={kind:existing?'login':'signup',account,accounts:existing?accounts.map(item=>item.id===account.id?account:item):accounts};renderTermsAgreement();

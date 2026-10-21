@@ -1220,7 +1220,7 @@ function termsSectionMarkup(){return TermsSystem.SECTIONS.map(section=>`<section
 function finishAuthentication(account,accounts,{newAccount=false,oldProjects=null}={}){
   currentUser=account;currentUser.language=Phase10.normalizeLocale(account.language||globalI18n.locale);localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(accounts.map(item=>item.id===account.id?currentUser:item)));localStorage.setItem(SESSION_KEY,currentUser.id);localStorage.setItem('zorifi-language-v1',currentUser.language);globalI18n.setLocale(currentUser.language);globalI18n.applyDocument(document);phase10StoreScope='';syncPhase10Stores();
   if(newAccount&&accounts.length===1&&oldProjects&&!localStorage.getItem(projectStorageKey()))localStorage.setItem(projectStorageKey(),oldProjects);
-  pendingAuthentication=null;state.view='home';render();toast(`Welcome${newAccount?' to Zorifi':' back'}, ${currentUser.name.split(' ')[0]}`);if(firebaseGateway.session)firebaseGateway.syncSubscription(billingSubscription).then(()=>render()).catch(()=>{});
+  pendingAuthentication=null;state.view='home';render();window.ZorifiTour?.showPending(currentUser.id,()=>!BetaProgram.CONFIG.enabled||betaProgramState.acknowledged());toast(`Welcome${newAccount?' to Zorifi':' back'}, ${currentUser.name.split(' ')[0]}`);if(firebaseGateway.session)firebaseGateway.syncSubscription(billingSubscription).then(()=>render()).catch(()=>{});
 }
 function renderTermsAgreement(){
   const pending=pendingAuthentication,account=pending?.account||currentUser;if(!account){renderAuth();return;}const store=new TermsSystem.AcceptanceStore({storage:localStorage,userId:account.id}),current=store.current(),published=TermsSystem.agreementDate({acceptedAt:`${TermsSystem.CONFIG.publishedAt}T00:00:00.000Z`},globalI18n.locale);
@@ -1246,11 +1246,12 @@ async function handleAuthSubmit(event){
         const linked=Boolean(legacy);
         const account=linked?{...legacy,cloudUid:cloud.uid,name:form.elements.name.value.trim()||legacy.name,identifier,email:identifier,language}:{id:`firebase-${cloud.uid}`,cloudUid:cloud.uid,name:form.elements.name.value.trim()||'Zorifi Creator',identifier,email:identifier,phone:'',language,createdAt:new Date().toISOString()};
         const savedAccounts=linked?accounts.map(item=>item.id===account.id?account:item):accounts;
+        if(!linked)window.ZorifiTour?.markNewAccount(account.id);
         const store=new TermsSystem.AcceptanceStore({storage:localStorage,userId:account.id});
         if(linked&&!store.requiresAcceptance(TermsSystem.CONFIG.version)){finishAuthentication(account,savedAccounts);return;}
         pendingAuthentication={kind:linked?'login':'signup',account,accounts:savedAccounts,oldProjects:localStorage.getItem(STORAGE_KEY)||localStorage.getItem(LEGACY_STORAGE_KEY)};renderTermsAgreement();return;
       }
-      const salt=bytesToHex(crypto.getRandomValues(new Uint8Array(16))),account={id:crypto.randomUUID?.()||`user-${Date.now()}`,name:form.elements.name.value.trim()||'Zorifi Creator',identifier,email:identifier.includes('@')?identifier:'',phone:identifier.includes('@')?'':identifier,language,salt,passwordHash:await passwordHash(password,salt),createdAt:new Date().toISOString()};pendingAuthentication={kind:'signup',account,accounts,oldProjects:localStorage.getItem(STORAGE_KEY)||localStorage.getItem(LEGACY_STORAGE_KEY)};renderTermsAgreement();return;
+      const salt=bytesToHex(crypto.getRandomValues(new Uint8Array(16))),account={id:crypto.randomUUID?.()||`user-${Date.now()}`,name:form.elements.name.value.trim()||'Zorifi Creator',identifier,email:identifier.includes('@')?identifier:'',phone:identifier.includes('@')?'':identifier,language,salt,passwordHash:await passwordHash(password,salt),createdAt:new Date().toISOString()};window.ZorifiTour?.markNewAccount(account.id);pendingAuthentication={kind:'signup',account,accounts,oldProjects:localStorage.getItem(STORAGE_KEY)||localStorage.getItem(LEGACY_STORAGE_KEY)};renderTermsAgreement();return;
     }else{
       if(hosted){
         const cloud=await firebaseGateway.signIn(identifier,password);
@@ -4798,8 +4799,6 @@ document.addEventListener('click',event=>{
 });
 
 render();
-function finishStartup(){const startup=document.getElementById('zorifi-startup');if(!startup)return;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;startup.classList.add('ready');setTimeout(()=>startup.remove(),reduced?20:280);}
-requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(finishStartup,matchMedia('(max-width: 1180px) and (pointer: coarse)').matches?140:260)));
 
 // Named chat tool dispatch: render only after a validated model tool call.
 const vanessaVideoJobs=new Map();
