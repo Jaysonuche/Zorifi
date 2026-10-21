@@ -8,7 +8,8 @@ async function main(){
  const data=fs.mkdtempSync(path.join(root,'artifacts','desktop-profile-'));
  const port=49170;const env={...process.env,ZORIFI_SMOKE_DATA:data,ZORIFI_SMOKE_PORT:String(port)};delete env.ELECTRON_RUN_AS_NODE;
  const executable=process.env.ZORIFI_DESKTOP_EXECUTABLE||require('electron');
- const child=spawn(executable,process.env.ZORIFI_DESKTOP_EXECUTABLE?[]:['.'],{cwd:root,env,windowsHide:true,stdio:'pipe'});let log='';child.on('error',error=>{log+=error.message;});child.stderr?.on('data',data=>log+=data);child.stdout?.on('data',data=>log+=data);
+ const appPath=process.env.ZORIFI_DESKTOP_APP_PATH||'.';
+ const child=spawn(executable,process.env.ZORIFI_DESKTOP_EXECUTABLE&&!process.env.ZORIFI_DESKTOP_APP_PATH?[]:[appPath],{cwd:root,env,windowsHide:true,stdio:'pipe'});let log='';child.on('error',error=>{log+=error.message;});child.stderr?.on('data',data=>log+=data);child.stdout?.on('data',data=>log+=data);
  let browser;
  try{
   for(let i=0;i<60;i++){if(child.exitCode!==null)throw new Error(log);try{const result=await fetch(`http://127.0.0.1:${port}/json/version`);if(result.ok)break;}catch{}await new Promise(resolve=>setTimeout(resolve,500));}
