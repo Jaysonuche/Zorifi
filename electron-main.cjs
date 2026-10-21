@@ -42,7 +42,7 @@ const functionFiles = new Map([
   ,['support-email', 'support-email.mjs']
 ]);
 const providerServices=new Set(functionFiles.keys());
-const mimeTypes = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml','.mp4':'video/mp4','.webm':'video/webm','.mp3':'audio/mpeg','.wav':'audio/wav'};
+const mimeTypes = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml','.mp4':'video/mp4','.webm':'video/webm','.mp3':'audio/mpeg','.wav':'audio/wav','.vtt':'text/vtt'};
 let localServer;
 let localOrigin='';
 let mainWindow=null;
@@ -204,7 +204,8 @@ async function handleProvider(request,response,url){
   const service=String(url.searchParams.get('service')||'').trim();if(!providerServices.has(service))return json(response,404,{error:'Unknown Vanessa capability.'});
   const startedAt=Date.now();response.once('finish',()=>recordProviderUsage(service,response.statusCode,startedAt));return handleFunction(request,response,service);
 }
-function serveStatic(response,pathname){
+function serveStatic(request,response,pathname){
+  if(!['GET','HEAD'].includes(request.method))return json(response,405,{error:'Method not allowed.'});
   if(pathname==='/zorifi-terms.js'){
     const termsFile=path.join(root,'zorifi-terms.js');
     fs.readFile(termsFile,(error,data)=>{if(error)return json(response,404,{error:'Not found.'});response.writeHead(200,{'content-type':'text/javascript; charset=utf-8','cache-control':'public, max-age=0'});response.end(data);});
@@ -216,8 +217,36 @@ function serveStatic(response,pathname){
     return;
   }
   const relative=pathname==='/'?'index.html':decodeURIComponent(pathname).replace(/^\/+/,''),allowed=['ZorifiVanessaStudioCore.js','ZorifiVanessaTrueAudioAI.js','ZorifiAutoCaptions.js','ZorifiMulticamSyncEngine.js'].includes(relative)||relative==='index.html'||relative==='app.js'||relative==='zorifi-local-companion.js'||relative==='zorifi-optimization.js'||relative==='zorifi-audio-worker.js'||relative==='zorifi-multicam.js'||relative==='zorifi-color-scopes.js'||relative==='zorifi-master-app.js'||relative==='zorifi-privacy.js'||relative==='zorifi-privacy-ui.js'||relative==='zorifi-theme.js'||relative==='zorifi-support.js'||relative==='zorifi-billing.js'||relative==='zorifi-firebase.js'||relative==='zorifi-scenes.js'||relative==='zorifi-project-model.js'||relative==='zorifi-advanced-editing.js'||relative==='zorifi-visual-tools.js'||relative==='zorifi-motion-effects.js'||relative==='zorifi-compute-engine.js'||relative==='zorifi-ai-provider.js'||relative==='zorifi-ai-platform.js'||relative==='zorifi-audio-engine.js'||relative==='zorifi-music-studio.js'||relative==='zorifi-vanessa-actions.js'||relative==='zorifi-creator-platform.js'||relative==='zorifi-phase8.js'||relative==='zorifi-phase9.js'||relative==='zorifi-phase10.js'||relative==='zorifi-phase11.js'||relative==='zorifi-editor-overhaul.js'||relative==='zorifi-stickers.js'||relative==='zorifi-vanessa-identity.js'||relative==='zorifi-vanessa-memory.js'||relative==='zorifi-vanessa-memory-manager.js'||relative==='zorifi-vanessa-memory-context.js'||relative==='zorifi-vanessa-conversation-continuity.js'||relative==='zorifi-vanessa-personalization.js'||relative==='zorifi-vanessa-intent.js'||relative==='zorifi-vanessa-response-planner.js'||relative==='zorifi-vanessa-workflow.js'||relative==='zorifi-vanessa-reference-analysis.js'||relative==='zorifi-vanessa-visual-analysis.js'||relative==='zorifi-vanessa-reference-execution.js'||relative==='zorifi-vanessa-style-intelligence.js'||relative==='zorifi-vanessa-content-matching.js'||relative==='zorifi-vanessa-edit-planner.js'||relative==='zorifi-vanessa-execution-feedback.js'||relative==='zorifi-vanessa-edit-adaptation.js'||relative==='zorifi-vanessa-task-orchestration.js'||relative==='zorifi-vanessa-task-continuity.js'||relative==='zorifi-vanessa-goal-understanding.js'||relative.startsWith('zorifi-vanessa-creative-')||relative==='zorifi-vanessa-capability-planner.js'||relative==='zorifi-vanessa-router.js'||relative==='zorifi-vanessa-core.js'||relative==='styles.css'||relative==='sw.js'||relative==='manifest.webmanifest'||relative.startsWith('assets/')||relative.startsWith('icons/');
-  if(!allowed)return json(response,404,{error:'Not found.'});
+  if(!allowed&&!/^zorifi-[\w-]+\.(?:js|css)$/.test(relative))return json(response,404,{error:'Not found.'});
   const file=path.resolve(root,relative);if(!file.startsWith(path.resolve(root)+path.sep)&&file!==path.resolve(root,'index.html'))return json(response,403,{error:'Forbidden.'});
+  const type=mimeTypes[path.extname(file).toLowerCase()]||'application/octet-stream';
+  if(['.mp4','.webm','.mp3','.wav'].includes(path.extname(file).toLowerCase())){
+    fs.stat(file,(error,stat)=>{
+      if(error||!stat.isFile())return json(response,404,{error:'Not found.'});
+      const common={'content-type':type,'cache-control':'public, max-age=0','accept-ranges':'bytes'};
+      const range=request.headers.range;
+      if(range){
+        const match=/^bytes=(\d*)-(\d*)$/.exec(range);
+        let start,end;
+        if(match&&stat.size>0){
+          if(match[1]){start=Number(match[1]);end=match[2]?Number(match[2]):stat.size-1;}
+          else if(match[2]){const suffix=Number(match[2]);start=Math.max(0,stat.size-suffix);end=stat.size-1;}
+        }
+        if(!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||end<start||start>=stat.size){
+          response.writeHead(416,{...common,'content-range':`bytes */${stat.size}`});response.end();return;
+        }
+        end=Math.min(end,stat.size-1);
+        response.writeHead(206,{...common,'content-range':`bytes ${start}-${end}/${stat.size}`,'content-length':end-start+1});
+        if(request.method==='HEAD'){response.end();return;}
+        fs.createReadStream(file,{start,end}).on('error',()=>response.destroy()).pipe(response);
+        return;
+      }
+      response.writeHead(200,{...common,'content-length':stat.size});
+      if(request.method==='HEAD'){response.end();return;}
+      fs.createReadStream(file).on('error',()=>response.destroy()).pipe(response);
+    });
+    return;
+  }
   fs.readFile(file,(error,data)=>{if(error)return json(response,404,{error:'Not found.'});response.writeHead(200,{'content-type':mimeTypes[path.extname(file).toLowerCase()]||'application/octet-stream','cache-control':relative==='sw.js'?'no-cache':'public, max-age=0'});const script=relative==='index.html'?firebaseConfigScript(firebasePublicConfig):'';response.end(script?Buffer.from(data.toString('utf8').replace('<head>',`<head>\n    ${script}`)):data);});
 }
 function startLocalServer(){return new Promise((resolve,reject)=>{
@@ -238,7 +267,7 @@ function startLocalServer(){return new Promise((resolve,reject)=>{
       if(url.pathname==='/api/ai-settings')return handleSettings(request,response);
       if(url.pathname==='/api/vanessa-provider')return handleProvider(request,response,url);
       if(url.pathname.startsWith('/api/'))return handleFunction(request,response,url.pathname.slice(5));
-      serveStatic(response,url.pathname);
+      serveStatic(request,response,url.pathname);
     }catch(error){json(response,500,{error:error.message||'Vanessa Local server error.'});}
   });
   localServer.once('error',reject);localServer.listen(LOCAL_PORT,'127.0.0.1',()=>{localOrigin=`http://127.0.0.1:${LOCAL_PORT}`;resolve(localOrigin);});

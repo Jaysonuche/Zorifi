@@ -23,6 +23,16 @@ async function main(){
   const settings=await page.evaluate(()=>fetch('/api/ai-settings').then(response=>response.json()));assert.ok(settings.configurations.language);
   assert.equal(await page.evaluate(()=>firebaseGateway.configured()),true,'Desktop must load the public Firebase config before authentication.');
   assert.equal(await page.evaluate(()=>fetch('/zorifi-local-companion.js').then(response=>response.status)),200);
+  const appOrigin=`http://127.0.0.1:${port+1}`;
+  for(const asset of ['zorifi-opening.js','zorifi-opening.css','zorifi-editor-future.css','zorifi-music-future.css','zorifi-vanessa-future.css']){
+   const response=await fetch(`${appOrigin}/${asset}`);
+   assert.equal(response.status,200,`Desktop must serve ${asset}`);
+  }
+  const captions=await fetch(`${appOrigin}/assets/tutorial/zorifi-tour.vtt`);
+  assert.equal(captions.headers.get('content-type'),'text/vtt');
+  const tourRange=await fetch(`${appOrigin}/assets/tutorial/zorifi-tour.mp4`,{headers:{Range:'bytes=0-31'}});
+  assert.equal(tourRange.status,206);
+  assert.equal((await tourRange.arrayBuffer()).byteLength,32);
   const localEndpoint=`http://127.0.0.1:${port+1}`;
   if(settings.hostedLanguage){
    const unauthenticated=await fetch(`${localEndpoint}/api/vanessa-provider?service=vanessa-global`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:'What is 2 x 4?'})});
@@ -72,7 +82,7 @@ async function main(){
    const engine=new ZorifiMulticamSyncEngine();try{return (await engine.matchEnvelopes({envelope:samples,sampleRate:100},{envelope:delayed,sampleRate:100})).offsetSeconds;}finally{await engine.dispose();}
   });assert.equal(multicamOffset,-.1);
   await page.locator('#privacy-shortcut').click();assert.ok((await page.locator('[data-privacy-dialog]').innerText()).includes('zorifvideoeditor@gmail.com'));assert.equal(await page.evaluate(()=>ZorifiPrivacy.consent(localStorage,currentUser.id)),false);await page.locator('[data-close]').first().click();
-  assert.deepEqual(errors,[]);await page.screenshot({path:path.join(root,'artifacts','desktop-app.png')});console.log('Desktop smoke passed: Electron runtime, editor, assets, waveform worker, local provider settings and privacy controls.');
+  assert.deepEqual(errors,[]);console.log('Desktop smoke passed: Electron runtime, editor, tutorial assets, waveform worker, local provider settings and privacy controls.');
  }finally{await browser?.close();child.kill();}
 }
 fs.mkdirSync(path.join(root,'artifacts'),{recursive:true});main().catch(error=>{console.error(error);process.exitCode=1;});
