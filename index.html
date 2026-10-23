@@ -10,9 +10,31 @@
     <meta name="apple-mobile-web-app-title" content="Zorifi" />
     <meta name="application-name" content="Zorifi" />
     <title>Zorifi — Video Editor</title>
-    <link rel="manifest" href="manifest.webmanifest" />
+    <style id="zorifi-startup-critical">html,body{margin:0;background:#080918}.zorifi-opening{position:fixed;inset:0;z-index:100001;display:grid;place-items:center;background:#080918;color:#fff;text-align:center;font-family:system-ui,sans-serif}.zorifi-opening[hidden]{display:none}.zorifi-opening-core{display:grid;place-items:center;width:min(64vw,280px);aspect-ratio:1;border:1px solid #a881ff77;border-radius:50%;box-shadow:0 0 45px #a881ff44}.zorifi-opening-mark{display:grid;place-items:center;width:36%;aspect-ratio:1;border-radius:27%;background:#17152b;box-shadow:0 0 28px #b66aff88;color:#e9beff;font-size:clamp(42px,9vw,68px);font-weight:900}.zorifi-opening-copy{position:absolute;bottom:max(7vh,45px);display:grid;gap:7px;justify-items:center;letter-spacing:.3em;text-transform:uppercase}.zorifi-opening-copy strong{font-size:clamp(23px,4vw,39px)}.zorifi-opening-copy small{font-size:10px;letter-spacing:.12em;color:#d5b4f5}.zorifi-opening-retry[hidden]{display:none}</style>
+    <link rel="manifest" href="manifest.webmanifest?v=230" />
     <link rel="icon" href="icons/favicon-64.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  </head>
+  <body>
+    <div class="zorifi-opening" role="status" aria-label="Zorifi is opening" aria-busy="true">
+      <div class="zorifi-opening-grid" aria-hidden="true"></div>
+      <div class="zorifi-opening-core" aria-hidden="true"><div class="zorifi-opening-iris"></div><div class="zorifi-opening-mark"><span>Z</span></div><div class="zorifi-opening-scan"></div></div>
+      <div class="zorifi-opening-copy"><strong>ZORIFI</strong><small data-opening-status>Preparing your workspace</small><button class="zorifi-opening-retry" type="button" hidden>Reload Zorifi</button></div>
+    </div>
+    <script>
+      (()=>{
+        const gate=document.querySelector('.zorifi-opening'),retry=gate.querySelector('.zorifi-opening-retry');
+        retry.addEventListener('click',()=>location.reload());
+        window.addEventListener('error',event=>{
+          const target=event.target;
+          if(target instanceof HTMLScriptElement||(target instanceof HTMLLinkElement&&target.rel==='stylesheet')){
+            gate.dataset.bootFailed='true';gate.setAttribute('aria-busy','false');
+            gate.querySelector('[data-opening-status]').textContent='A required Zorifi file could not load. Check your connection and reload.';
+            retry.hidden=false;
+          }
+        },true);
+      })();
+    </script>
   <script src="zorifi-theme.js?v=174"></script>
   <link rel="stylesheet" href="styles.css?v=229&amp;studio=8" />
   <link rel="stylesheet" href="zorifi-touch-workspace.css?v=222" />
@@ -33,11 +55,9 @@
   <link rel="stylesheet" href="zorifi-editor-future.css?v=226" />
   <link rel="stylesheet" href="zorifi-music-future.css?v=226" />
   <link rel="stylesheet" href="zorifi-vanessa-future.css?v=226" />
-  <link rel="stylesheet" href="zorifi-opening.css?v=227" />
-  </head>
-  <body>
+  <link rel="stylesheet" href="zorifi-opening.css?v=230" />
     <div id="app"></div>
-    <script src="zorifi-opening.js?v=227"></script>
+    <script src="zorifi-opening.js?v=230"></script>
     <input id="file-picker" type="file" accept="video/*,audio/*,image/*" multiple hidden />
     <input id="extract-audio-picker" type="file" accept="video/*" hidden />
     <script src="zorifi-support.js?v=171"></script>
@@ -112,7 +132,7 @@
     <script src="zorifi-editor-overhaul.js?v=229"></script>
   <script src="zorifi-privacy.js?v=1"></script>
   <script src="zorifi-vanessa-listening.js?v=222"></script>
-  <script src="app.js?v=229"></script>
+  <script src="app.js?v=230"></script>
   <script src="zorifi-app-settings.js?v=228"></script>
   <script src="zorifi-google-connections.js?v=225"></script>
   <script src="zorifi-google-integration.js?v=227"></script>

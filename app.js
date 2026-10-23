@@ -907,6 +907,7 @@ function render() {
   document.querySelector('.app-shell')?.setAttribute('data-responsive-panel',state.responsivePanel||'');
   document.querySelectorAll('.workspace > .left-panel,.workspace > .inspector').forEach(panel=>{const close=document.createElement('button');close.className='responsive-panel-close';close.textContent='Close panel ×';close.onclick=()=>{state.responsivePanel='';render();};panel.prepend(close);});
   syncVideo();
+  if(selected&&['video','text'].includes(selected.type)&&trackEnabled(selected.track)&&state.currentTime>=selected.start&&state.currentTime<=selected.start+selected.duration)showAlignmentGuide('move',selected);
   startColorScopes();
   mountVanessa();
   scheduleProjectSave();
@@ -1073,6 +1074,14 @@ function previewTransformControls(){
 function formatPreviewRotation(value){const rounded=Math.round((Number(value)||0)*10)/10;return `${rounded>0?'+':''}${rounded}°`;}
 function shortestRotationStep(previous,next){let change=(next-previous+180)%360;if(change<0)change+=360;return change-180;}
 function updatePreviewRotationReadout(clip,turning=false){const output=document.querySelector('[data-preview-rotation-readout]');if(!output)return;output.textContent=formatPreviewRotation(keyframedValue(clip,'rotation'));output.classList.toggle('turning',turning);}
+function snapPreviewCenter(value,dimension){return Math.abs(value)*Math.max(1,dimension)/100<=8?0:value;}
+function snapPreviewTextToCenter(clip,element,previewRect){
+  const content=element.querySelector('.title-content')||element,rect=content.getBoundingClientRect();
+  if(!rect.width||!rect.height)return;
+  const offsetX=previewRect.left+previewRect.width/2-(rect.left+rect.width/2),offsetY=previewRect.top+previewRect.height/2-(rect.top+rect.height/2);
+  if(Math.abs(offsetX)<=8)setEditableClipValue(clip,'positionX',keyframedValue(clip,'positionX')+offsetX/previewRect.width*100);
+  if(Math.abs(offsetY)<=8)setEditableClipValue(clip,'positionY',keyframedValue(clip,'positionY')+offsetY/previewRect.height*100);
+}
 function previewTextTransformControls(){
   const clip=state.clips.find(item=>item.id===state.selected&&item.type==='text'&&state.currentTime>=item.start&&state.currentTime<=item.start+item.duration&&trackEnabled(item.track));
   if(!clip)return '';
@@ -1100,8 +1109,8 @@ function bindPreviewTransformControls(){
       if(action==='move'){
         const x=Math.max(-150,Math.min(150,start.positionX+(pointer.clientX-start.x)/Math.max(1,rect.width)*100));
         const y=Math.max(-150,Math.min(150,start.positionY+(pointer.clientY-start.y)/Math.max(1,rect.height)*100));
-        setEditableClipValue(clip,'positionX',Math.abs(x)<.65?0:x);
-        setEditableClipValue(clip,'positionY',Math.abs(y)<.65?0:y);
+        setEditableClipValue(clip,'positionX',snapPreviewCenter(x,rect.width));
+        setEditableClipValue(clip,'positionY',snapPreviewCenter(y,rect.height));
         showAlignmentGuide('move',clip);
       }else if(action==='scale'){
         const distance=Math.hypot(pointer.clientX-center.x,pointer.clientY-center.y);
@@ -1117,13 +1126,13 @@ function bindPreviewTransformControls(){
     window.addEventListener('pointermove',move,{passive:false});window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
   });
   let touchStart=null;
-  box.addEventListener('touchstart',event=>{if(state.playing||!event.touches.length)return;const clip=state.clips.find(item=>item.id===box.dataset.previewTransform);if(!clip||trackState(clip.track).locked)return;event.preventDefault();snapshot();const touches=[...event.touches],first=touches[0],second=touches[1]||first,angle=Math.atan2(second.clientY-first.clientY,second.clientX-first.clientX)*180/Math.PI;touchStart={transform:{x:keyframedValue(clip,'positionX'),y:keyframedValue(clip,'positionY'),scale:keyframedValue(clip,'scale'),rotation:keyframedValue(clip,'rotation')},center:{x:(first.clientX+second.clientX)/2,y:(first.clientY+second.clientY)/2},distance:Math.max(1,Math.hypot(second.clientX-first.clientX,second.clientY-first.clientY)),lastAngle:angle,rotationDelta:0,count:touches.length};box.classList.add('direct-editing');},{passive:false});
+  box.addEventListener('touchstart',event=>{if(state.playing||!event.touches.length)return;const clip=state.clips.find(item=>item.id===box.dataset.previewTransform);if(!clip||trackState(clip.track).locked)return;event.preventDefault();snapshot();const touches=[...event.touches],first=touches[0],second=touches[1]||first,angle=Math.atan2(second.clientY-first.clientY,second.clientX-first.clientX)*180/Math.PI;touchStart={transform:{positionX:keyframedValue(clip,'positionX'),positionY:keyframedValue(clip,'positionY'),scale:keyframedValue(clip,'scale'),rotation:keyframedValue(clip,'rotation')},center:{x:(first.clientX+second.clientX)/2,y:(first.clientY+second.clientY)/2},distance:Math.max(1,Math.hypot(second.clientX-first.clientX,second.clientY-first.clientY)),lastAngle:angle,rotationDelta:0,count:touches.length};box.classList.add('direct-editing');},{passive:false});
   box.addEventListener('touchmove',event=>{
     if(!touchStart||!event.touches.length)return;event.preventDefault();
     const clip=state.clips.find(item=>item.id===box.dataset.previewTransform),preview=box.closest('.preview'),rect=preview.getBoundingClientRect(),touches=[...event.touches],first=touches[0],second=touches[1]||first,current={center:{x:(first.clientX+second.clientX)/2,y:(first.clientY+second.clientY)/2},distance:Math.max(1,Math.hypot(second.clientX-first.clientX,second.clientY-first.clientY)),angle:Math.atan2(second.clientY-first.clientY,second.clientX-first.clientX)*180/Math.PI};
     const next=Phase11.pinchTransform(touchStart.transform,{startDistance:touchStart.distance,currentDistance:current.distance,startScale:touchStart.transform.scale,startCenter:touchStart.center,currentCenter:current.center,viewportWidth:rect.width,viewportHeight:rect.height});
     if(touches.length>1){touchStart.rotationDelta+=shortestRotationStep(touchStart.lastAngle,current.angle);touchStart.lastAngle=current.angle;next.rotation=Math.max(-3600,Math.min(3600,touchStart.transform.rotation+touchStart.rotationDelta));}
-    setEditableClipValue(clip,'positionX',Math.abs(next.positionX)<.65?0:next.positionX);setEditableClipValue(clip,'positionY',Math.abs(next.positionY)<.65?0:next.positionY);setEditableClipValue(clip,'scale',next.scale);if(touches.length>1)setEditableClipValue(clip,'rotation',Math.round(next.rotation*10)/10);
+    setEditableClipValue(clip,'positionX',snapPreviewCenter(next.positionX,rect.width));setEditableClipValue(clip,'positionY',snapPreviewCenter(next.positionY,rect.height));setEditableClipValue(clip,'scale',next.scale);if(touches.length>1)setEditableClipValue(clip,'rotation',Math.round(next.rotation*10)/10);
     box.classList.toggle('direct-rotate',touches.length>1);updatePreviewTransformBox(box,clip,touches.length>1);showAlignmentGuide(touches.length>1?'scale':'move',clip);
   },{passive:false});
   const endTouch=()=>{if(!touchStart)return;touchStart=null;box.classList.remove('direct-editing','direct-rotate');box.closest('.preview')?.classList.remove('guide-x','guide-y','guide-centered');scheduleProjectSave(120);render();};box.addEventListener('touchend',endTouch);box.addEventListener('touchcancel',endTouch);
@@ -1141,7 +1150,20 @@ function bindPreviewTextTransformControls(){
     const preview=box.closest('.preview'),previewRect=preview.getBoundingClientRect(),contentRect=(element.querySelector('.title-content')||element).getBoundingClientRect(),action=event.target.closest('[data-preview-text-action]')?.dataset.previewTextAction||'move',start={x:event.clientX,y:event.clientY,positionX:keyframedValue(clip,'positionX'),positionY:keyframedValue(clip,'positionY'),fontSize:Number(clip.fontSize)||44,rotation:keyframedValue(clip,'rotation')},center={x:contentRect.left+contentRect.width/2,y:contentRect.top+contentRect.height/2},startDistance=Math.max(10,Math.hypot(event.clientX-center.x,event.clientY-center.y)),startAngle=Math.atan2(event.clientY-center.y,event.clientX-center.x)*180/Math.PI;
     let lastAngle=startAngle,rotationDelta=0;
     box.classList.add('direct-editing',`direct-${action}`);showAlignmentGuide(action,clip);updatePreviewRotationReadout(clip,action==='rotate');
-    const move=pointer=>{if(pointer.pointerId!==event.pointerId)return;pointer.preventDefault?.();if(action==='move'){const nextX=Math.max(-150,Math.min(150,start.positionX+(pointer.clientX-start.x)/Math.max(1,previewRect.width)*100)),nextY=Math.max(-150,Math.min(150,start.positionY+(pointer.clientY-start.y)/Math.max(1,previewRect.height)*100));setEditableClipValue(clip,'positionX',Math.abs(nextX)<.65?0:nextX);setEditableClipValue(clip,'positionY',Math.abs(nextY)<.65?0:nextY);showAlignmentGuide('move',clip);}else if(action==='resize'){const distance=Math.hypot(pointer.clientX-center.x,pointer.clientY-center.y);clip.fontSize=Math.round(Math.max(8,Math.min(360,start.fontSize*distance/startDistance))*10)/10;}else{const angle=Math.atan2(pointer.clientY-center.y,pointer.clientX-center.x)*180/Math.PI;rotationDelta+=shortestRotationStep(lastAngle,angle);lastAngle=angle;setEditableClipValue(clip,'rotation',Math.round(Math.max(-3600,Math.min(3600,start.rotation+rotationDelta))*10)/10);}applyLiveTextStyle(element,clip,state.currentTime);positionPreviewTextTransformBox(box,element);updatePreviewRotationReadout(clip,action==='rotate');};
+    const move=pointer=>{
+      if(pointer.pointerId!==event.pointerId)return;
+      pointer.preventDefault?.();
+      if(action==='move'){
+        const nextX=Math.max(-150,Math.min(150,start.positionX+(pointer.clientX-start.x)/Math.max(1,previewRect.width)*100)),nextY=Math.max(-150,Math.min(150,start.positionY+(pointer.clientY-start.y)/Math.max(1,previewRect.height)*100));
+        setEditableClipValue(clip,'positionX',nextX);setEditableClipValue(clip,'positionY',nextY);
+        applyLiveTextStyle(element,clip,state.currentTime);snapPreviewTextToCenter(clip,element,previewRect);
+      }else if(action==='resize'){
+        const distance=Math.hypot(pointer.clientX-center.x,pointer.clientY-center.y);clip.fontSize=Math.round(Math.max(8,Math.min(360,start.fontSize*distance/startDistance))*10)/10;
+      }else{
+        const angle=Math.atan2(pointer.clientY-center.y,pointer.clientX-center.x)*180/Math.PI;rotationDelta+=shortestRotationStep(lastAngle,angle);lastAngle=angle;setEditableClipValue(clip,'rotation',Math.round(Math.max(-3600,Math.min(3600,start.rotation+rotationDelta))*10)/10);
+      }
+      applyLiveTextStyle(element,clip,state.currentTime);positionPreviewTextTransformBox(box,element);if(action==='move')showAlignmentGuide('move',clip);updatePreviewRotationReadout(clip,action==='rotate');
+    };
     const up=pointer=>{if(pointer.pointerId!==event.pointerId)return;box.releasePointerCapture?.(event.pointerId);box.classList.remove('direct-editing','direct-move','direct-resize','direct-rotate');preview.classList.remove('guide-x','guide-y','guide-centered');window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);scheduleProjectSave(120);render();};
     window.addEventListener('pointermove',move,{passive:false});window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
   });
@@ -2795,7 +2817,14 @@ function showAlignmentGuide(field,clip){
   const preview=document.querySelector('.preview');if(!preview)return;
   preview.classList.remove('guide-x','guide-y','guide-centered');
   if(!['move','positionX','positionY'].includes(field))return;
-  const centeredX=Math.abs(keyframedValue(clip,'positionX'))<=.05,centeredY=Math.abs(keyframedValue(clip,'positionY'))<=.05;
+  let centeredX=Math.abs(keyframedValue(clip,'positionX'))<=.05,centeredY=Math.abs(keyframedValue(clip,'positionY'))<=.05;
+  if(clip.type==='text'){
+    const element=[...preview.querySelectorAll('[data-preview-text]')].find(item=>item.dataset.previewText===clip.id),content=element?.querySelector('.title-content')||element;
+    if(!content)return;
+    const frame=preview.getBoundingClientRect(),rect=content.getBoundingClientRect();
+    centeredX=Math.abs(rect.left+rect.width/2-(frame.left+frame.width/2))<=2;
+    centeredY=Math.abs(rect.top+rect.height/2-(frame.top+frame.height/2))<=2;
+  }
   if(centeredX)preview.classList.add('guide-x');
   if(centeredY)preview.classList.add('guide-y');
   if(centeredX&&centeredY)preview.classList.add('guide-centered');
@@ -4883,6 +4912,7 @@ document.addEventListener('click',event=>{
 });
 
 render();
+window.ZorifiOpening?.ready();
 
 // Named chat tool dispatch: render only after a validated model tool call.
 const vanessaVideoJobs=new Map();

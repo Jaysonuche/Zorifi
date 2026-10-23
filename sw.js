@@ -1,8 +1,8 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
-const CACHE = 'zorifi-v229';
+const CACHE = 'zorifi-v230';
 const CORE = [
   "./",
-  "./manifest.webmanifest",
+  "./manifest.webmanifest?v=230",
   "./icons/favicon-64.png",
   "./icons/icon-192.png",
   "./zorifi-theme.js?v=174",
@@ -25,7 +25,7 @@ const CORE = [
   "./zorifi-editor-future.css?v=226",
   "./zorifi-music-future.css?v=226",
   "./zorifi-vanessa-future.css?v=226",
-  "./zorifi-opening.css?v=227",
+  "./zorifi-opening.css?v=230",
   "./assets/tutorial/zorifi-tour.mp4",
   "./assets/tutorial/zorifi-tour.vtt",
   "./assets/tutorial/zorifi-tour-poster.svg",
@@ -101,7 +101,7 @@ const CORE = [
   "./zorifi-editor-overhaul.js?v=229",
   "./zorifi-privacy.js?v=1",
   "./zorifi-vanessa-listening.js?v=222",
-  "./app.js?v=229",
+  "./app.js?v=230",
   "./zorifi-app-settings.js?v=228",
   "./zorifi-google-connections.js?v=225",
   "./zorifi-google-integration.js?v=227",
@@ -112,7 +112,7 @@ const CORE = [
   "./zorifi-background-integration.js?v=222",
   "./zorifi-timeline-interactions.js?v=225",
   "./zorifi-pocket-editor.js?v=225",
-  "./zorifi-opening.js?v=227",
+  "./zorifi-opening.js?v=230",
   "./zorifi-master-app.js?v=220",
   "./zorifi-privacy-ui.js?v=228"
 ];

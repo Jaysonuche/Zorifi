@@ -11,8 +11,7 @@ async function openMusic(page, port) {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(`http://127.0.0.1:${port}`);
-  const skipIntro = page.getByRole('button', { name: 'Skip intro' });
-  if (await skipIntro.count()) await skipIntro.click();
+  await page.locator('.zorifi-opening').waitFor({ state: 'detached' });
   await page.waitForFunction(() => typeof createMusicProject === 'function');
   await page.evaluate(() => {
     currentUser = { id: 'music-layout-browser', name: 'Music Layout Tester', identifier: 'music@example.invalid', email: 'music@example.invalid' };

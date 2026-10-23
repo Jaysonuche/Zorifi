@@ -9,7 +9,7 @@
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],
   "prefer_related_applications": false,
-  "background_color": "#090b10",
+  "background_color": "#080918",
   "theme_color": "#7c5cff",
   "orientation": "any",
   "launch_handler": {"client_mode": "navigate-existing"},

@@ -1,4 +1,4 @@
-/* Zorifi's silent launch and one-time new-account tour. Never gates auth or routes. */
+/* Zorifi's startup gate and one-time new-account tour. */
 (function(global){
   'use strict';
   const TOUR='assets/tutorial/zorifi-tour.mp4';
@@ -17,17 +17,42 @@
   const reduced=()=>global.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false;
   const store=(type,key,value)=>{try{if(value!==undefined)global[type].setItem(key,value);return global[type].getItem(key);}catch{return null;}};
   function startOpening(){
-    const params=new URLSearchParams(global.location.search);
-    if(reduced()||['code','state','error','error_description'].some(key=>params.has(key))||store('sessionStorage','zorifi-opening-227')==='seen')return;
-    store('sessionStorage','zorifi-opening-227','seen');
-    const layer=document.createElement('div');layer.className='zorifi-opening';layer.setAttribute('role','status');layer.setAttribute('aria-label','Zorifi is opening');
-    layer.innerHTML='<div class="zorifi-opening-grid" aria-hidden="true"></div><div class="zorifi-opening-core" aria-hidden="true"><div class="zorifi-opening-iris"></div><div class="zorifi-opening-mark"><span>Z</span></div><div class="zorifi-opening-scan"></div></div><div class="zorifi-opening-copy"><strong>ZORIFI</strong><small>Create in motion</small></div><button class="zorifi-opening-skip" type="button">Skip intro</button>';
-    document.body.append(layer);requestAnimationFrame(()=>layer.classList.add('is-live'));
-    let gone=false;
-    const dismiss=()=>{if(gone)return;gone=true;clearTimeout(timer);layer.classList.remove('is-live');setTimeout(()=>layer.remove(),200);};
-    const timer=setTimeout(dismiss,1550);
-    layer.querySelector('button').addEventListener('click',dismiss);
-    global.addEventListener('pagehide',dismiss,{once:true});
+    const layer=document.querySelector('.zorifi-opening');
+    if(!layer)return {ready(){}};
+    const status=layer.querySelector('[data-opening-status]');
+    const retry=layer.querySelector('.zorifi-opening-retry');
+    let appReady=false,loaded=document.readyState==='complete',failed=layer.dataset.bootFailed==='true',finished=false;
+    const slowTimer=global.setTimeout(()=>{
+      if(finished||failed)return;
+      status.textContent='Still preparing your workspace. You can wait or reload.';
+      retry.hidden=false;
+    },20000);
+    const fail=()=>{
+      if(finished||failed)return;
+      failed=true;global.clearTimeout(slowTimer);
+      status.textContent='A required Zorifi file could not load. Check your connection and reload.';
+      layer.setAttribute('aria-label','Zorifi could not open');
+      layer.setAttribute('aria-busy','false');
+      retry.hidden=false;
+    };
+    const finish=()=>{
+      if(finished||failed||!loaded||!appReady||!document.querySelector('#app > *'))return;
+      finished=true;global.clearTimeout(slowTimer);
+      layer.setAttribute('aria-busy','false');
+      layer.classList.add('is-closing');
+      global.setTimeout(()=>layer.remove(),180);
+    };
+    const check=()=>{
+      if(finished||failed||!loaded||!appReady)return;
+      if(document.visibilityState==='hidden')finish();
+      else global.requestAnimationFrame(finish);
+    };
+    global.addEventListener('error',event=>{
+      const target=event.target;
+      if(target instanceof HTMLScriptElement||(target instanceof HTMLLinkElement&&target.rel==='stylesheet'))fail();
+    },true);
+    if(!loaded)global.addEventListener('load',()=>{loaded=true;check();},{once:true});
+    return {ready(){appReady=true;check();},fail};
   }
   function playerMarkup(){
     return `<video controls playsinline preload="metadata" poster="${POSTER}" aria-label="An illustrated tour of the Zorifi Studio, editor, Music studio, Vanessa and Social"><source src="${TOUR}" type="video/mp4"><track kind="captions" src="${CAPTIONS}" srclang="en" label="English" default></video>`;
@@ -73,6 +98,6 @@
     if(!reduced())void video.play().catch(()=>{});
     return layer;
   }
-  startOpening();
+  global.ZorifiOpening=startOpening();
   global.ZorifiTour={open:openTour,markNewAccount,showPending,chapters:CHAPTERS.map(({at,title,copy})=>({at,title,copy}))};
 })(window);

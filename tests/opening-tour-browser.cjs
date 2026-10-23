@@ -56,8 +56,7 @@ async function checkDialog(page,label){
     const errors=[];signup.on('pageerror',error=>errors.push(error.message));
     await signup.goto(origin);
     assert.equal(await signup.locator('#zorifi-startup').count(),0,'The legacy startup layer is removed');
-    await signup.locator('.zorifi-opening').waitFor({state:'visible'});
-    await signup.getByRole('button',{name:'Skip intro'}).click();
+    assert.equal(await signup.getByRole('button',{name:'Skip intro'}).count(),0,'The startup gate has no skip control');
     await signup.locator('.zorifi-opening').waitFor({state:'detached'});
     assert.equal(await signup.locator('[data-zorifi-tour],.zorifi-tour-card').count(),0,'There is no persistent tour video or replay button');
     await signup.evaluate(()=>{if(firebaseGateway.configured())firebaseGateway.signUp=async()=>({uid:'opening-tour-new-user'});});
@@ -145,7 +144,8 @@ async function checkDialog(page,label){
     }
     const reduced=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce',serviceWorkers:'block'});
     await reduced.goto(origin);
-    assert.equal(await reduced.locator('.zorifi-opening').count(),0,'Reduced motion skips the opening');
+    await reduced.locator('.zorifi-opening').waitFor({state:'detached'});
+    assert.equal(await reduced.locator('.zorifi-opening').count(),0,'Reduced motion keeps startup gating but finishes normally');
     await reduced.close();
     console.log('Opening and first-signup tour passed: one-time lifecycle, playback, chapters, narrow phones, safe areas and reduced motion.');
   }finally{await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
