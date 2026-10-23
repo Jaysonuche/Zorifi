@@ -10,7 +10,7 @@
 .zorifi-opening-core::after{inset:15%;border:2px solid transparent;border-top-color:#f9c0ff;border-right-color:#a372ff;border-bottom-color:#ff6e9c;animation:zorifi-opening-spin 1.9s ease-in-out infinite;box-shadow:none}
 .zorifi-opening-iris{position:absolute;inset:8%;border-radius:50%;background:repeating-conic-gradient(from 10deg,#cc8cff55 0 2deg,transparent 3deg 29deg);mask-image:radial-gradient(circle,transparent 0 61%,#000 62% 72%,transparent 73%);animation:zorifi-opening-spin 3.8s linear infinite reverse}
 .zorifi-opening-mark{z-index:1;display:grid;place-items:center;width:34%;aspect-ratio:1;border-radius:30%;background:linear-gradient(155deg,#222342,#070a18 65%);border:1px solid #e7caff80;box-shadow:0 0 0 8px #9e64ff10,0 0 38px #ea59b76b,inset 0 0 25px #8444ff52;transform:scale(.5) rotate(-18deg);opacity:0;animation:zorifi-opening-mark .68s .23s cubic-bezier(.16,1.2,.36,1) forwards}
-.zorifi-opening-mark>span{font:900 clamp(48px,8vw,90px)/1 Arial,sans-serif;letter-spacing:-.13em;padding-right:.11em;background:linear-gradient(146deg,#a881ff,#f849aa 62%,#ff8a66);background-clip:text;-webkit-background-clip:text;color:transparent}
+.zorifi-opening-mark>img{display:block;width:100%;height:100%;border-radius:inherit;object-fit:cover}
 .zorifi-opening-scan{position:absolute;width:min(88vw,590px);height:1px;background:linear-gradient(90deg,transparent,#efcaff,#b97dff,transparent);box-shadow:0 0 20px #d583ff,0 0 55px #c05bff;transform:translateY(-130px) scaleX(.15);opacity:0;animation:zorifi-opening-scan 1.3s .19s ease-in-out both}
 .zorifi-opening-copy{position:absolute;bottom:max(7vh,45px);display:grid;gap:7px;justify-items:center;text-align:center;letter-spacing:.38em;text-transform:uppercase;animation:zorifi-opening-copy .9s .42s both}
 .zorifi-opening-copy strong{font:800 clamp(23px,4vw,39px)/1.1 system-ui,sans-serif;letter-spacing:.34em;margin-right:-.34em}
@@ -32,6 +32,7 @@
 .zorifi-tour-head{display:flex;align-items:center;gap:12px;padding:18px 21px 0}
 .zorifi-tour-head>div{flex:1;min-width:0;overflow-wrap:anywhere}
 .zorifi-tour-head-mark{display:grid;place-items:center;width:41px;height:41px;border:1px solid #c49bff91;border-radius:12px;background:linear-gradient(140deg,#8b51fc,#eb5a9d);font:900 28px Arial,sans-serif;box-shadow:0 0 26px #bb57ff74}
+.zorifi-tour-head-mark img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .zorifi-tour-head h2{margin:2px 0 0;font:750 clamp(17px,2vw,23px)/1.2 system-ui,sans-serif}
 .zorifi-tour-head .zorifi-tour-close{flex:0 0 38px;margin-left:auto;display:grid;place-items:center;width:38px;height:38px;border:1px solid #a58ed05b;border-radius:11px;background:#ffffff12;color:#fff;font:26px/1 system-ui;cursor:pointer}
 .zorifi-tour-head .zorifi-tour-close:focus-visible,.zorifi-tour-chapters button:focus-visible{outline:2px solid #f0b8ff;outline-offset:2px}

@@ -21,6 +21,7 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     const firstNavigation=firstPaint.goto(origin,{waitUntil:'load'});
     await firstPaint.locator('.zorifi-opening').waitFor({state:'visible'});
     assert.equal(await firstPaint.locator('.zorifi-opening').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(8, 9, 24)','Critical startup styling paints before the main stylesheet arrives');
+    assert.equal(await firstPaint.locator('.zorifi-opening-mark img').evaluate(async image=>{await image.decode();return image.naturalWidth;}),192,'The first-paint screen uses the new Zorifi app mark');
     releaseStyle();
     await firstNavigation;
     await firstPaint.locator('.zorifi-opening').waitFor({state:'detached'});

@@ -45,7 +45,7 @@ const computeScheduler=new ComputeEngine.Scheduler({maxConcurrent:2,cacheLimit:4
 let computeCapabilities=ComputeEngine.detectSync(window);
 ComputeEngine.detect(window).then(value=>{computeCapabilities=value;}).catch(()=>{});
 const icons = {
-  logo: '<img src="icons/zorifi-logo.jpeg" alt="Zorifi" />',
+  logo: '<img src="icons/zorifi-logo.jpeg?v=231" alt="Zorifi" />',
   media: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m8 14 2.5-3 3 3.5 2-2.5 3.5 4.5"/><circle cx="8.5" cy="8.5" r="1"/></svg>',
   overlay: '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="12" rx="2"/><rect x="9" y="3" width="12" height="12" rx="2"/><path d="M9 7h8v8H9z"/></svg>',
   text: '<svg viewBox="0 0 24 24"><path d="M5 6h14M12 6v13M8 19h8"/></svg>',
@@ -4092,7 +4092,7 @@ function bindVanessaPanelWindow(shell){
 }
 function readVanessaVoiceOrbPosition(){try{const value=JSON.parse(localStorage.getItem(vanessaVoiceOrbPositionKey())||'null');return Number.isFinite(value?.x)&&Number.isFinite(value?.y)?value:null;}catch{return null;}}
 function clampVanessaVoiceOrbPosition(x,y,shell){const rect=shell.getBoundingClientRect(),margin=12;return {x:Math.max(margin,Math.min(innerWidth-rect.width-margin,x)),y:Math.max(margin,Math.min(innerHeight-rect.height-margin,y))};}
-function vanessaEnergyCoreMarkup(){return `<span class="vanessa-energy-core" aria-hidden="true"><svg viewBox="0 0 120 120" focusable="false"><g class="vec-orbit"><circle cx="60" cy="60" r="51"/><circle cx="60" cy="60" r="46" stroke-dasharray="2 5 10 5"/>${Array.from({length:24},(_,i)=>`<path transform="rotate(${i*15} 60 60)" d="M60 5v${i%3?4:8}"/>`).join('')}</g><g class="vec-glyphs">${Array.from({length:12},(_,i)=>`<path transform="rotate(${i*30} 60 60)" d="M57 18v7l6-3v-4m-3 7v4"/>`).join('')}</g><g class="vec-inner"><circle cx="60" cy="60" r="31" stroke-dasharray="39 8 11 5"/><path d="M60 22v76M22 60h76M33 33l54 54M33 87l54-54"/></g><circle class="vec-halo" cx="60" cy="60" r="20"/><circle class="vec-heart" cx="60" cy="60" r="9"/><path class="vec-flare" d="M60 37l3 19 20 4-20 4-3 19-3-19-20-4 20-4z"/></svg></span>`;}
+function vanessaEnergyCoreMarkup(){return `<span class="vanessa-energy-core" aria-hidden="true"><img class="vanessa-orb-art" src="assets/vanessa-orb.webp?v=231" alt="" draggable="false"><span class="vanessa-orb-halo"></span></span>`;}
 function mountVanessaVoiceOrb(){
   // Voice status lives beside Vanessa's name, keeping the editing tools and chat composer clear.
   document.querySelectorAll('.vanessa-voice-orb-shell').forEach(node=>node.remove());

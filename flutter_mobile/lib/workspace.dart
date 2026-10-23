@@ -991,18 +991,9 @@ class _WorkspaceState extends State<Workspace> with WidgetsBindingObserver {
       appBar: AppBar(
         title: Row(
           children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: const LinearGradient(
-                  colors: [Color(0xff8a5cff), Color(0xffdd4bac)],
-                ),
-              ),
-              child: const Center(
-                child: Text('Z', style: TextStyle(fontWeight: FontWeight.w900)),
-              ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset('assets/zorifi-mark.png', width: 34, height: 34),
             ),
             const SizedBox(width: 10),
             const Text('zorifi', style: TextStyle(fontWeight: FontWeight.w800)),

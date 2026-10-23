@@ -1,15 +1,18 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
-const CACHE = 'zorifi-v230';
+const CACHE = 'zorifi-v231';
 const CORE = [
   "./",
-  "./manifest.webmanifest?v=230",
-  "./icons/favicon-64.png",
-  "./icons/icon-192.png",
+  "./manifest.webmanifest?v=231",
+  "./icons/favicon-64.png?v=231",
+  "./icons/icon-192.png?v=231",
+  "./icons/icon-512.png?v=231",
+  "./icons/zorifi-logo.jpeg?v=231",
+  "./assets/vanessa-orb.webp?v=231",
   "./zorifi-theme.js?v=174",
   "./styles.css?v=229&studio=8",
   "./zorifi-touch-workspace.css?v=222",
   "./zorifi-template-feed.css?v=1",
-  "./zorifi-vanessa-orb.css?v=222",
+  "./zorifi-vanessa-orb.css?v=231",
   "./zorifi-device-lab.css?v=1",
   "./zorifi-editor-workbench.css?v=222",
   "./zorifi-vanessa-chat.css?v=222",
@@ -24,8 +27,8 @@ const CORE = [
   "./zorifi-google-connections.css?v=225",
   "./zorifi-editor-future.css?v=226",
   "./zorifi-music-future.css?v=226",
-  "./zorifi-vanessa-future.css?v=226",
-  "./zorifi-opening.css?v=230",
+  "./zorifi-vanessa-future.css?v=231",
+  "./zorifi-opening.css?v=231",
   "./assets/tutorial/zorifi-tour.mp4",
   "./assets/tutorial/zorifi-tour.vtt",
   "./assets/tutorial/zorifi-tour-poster.svg",
@@ -101,7 +104,7 @@ const CORE = [
   "./zorifi-editor-overhaul.js?v=229",
   "./zorifi-privacy.js?v=1",
   "./zorifi-vanessa-listening.js?v=222",
-  "./app.js?v=230",
+  "./app.js?v=231",
   "./zorifi-app-settings.js?v=228",
   "./zorifi-google-connections.js?v=225",
   "./zorifi-google-integration.js?v=227",
@@ -112,7 +115,7 @@ const CORE = [
   "./zorifi-background-integration.js?v=222",
   "./zorifi-timeline-interactions.js?v=225",
   "./zorifi-pocket-editor.js?v=225",
-  "./zorifi-opening.js?v=230",
+  "./zorifi-opening.js?v=231",
   "./zorifi-master-app.js?v=220",
   "./zorifi-privacy-ui.js?v=228"
 ];

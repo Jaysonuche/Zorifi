@@ -71,10 +71,10 @@
   filter: drop-shadow(0 0 7px rgba(186, 113, 248, .58));
 }
 .vanessa-assistant .vanessa-energy-core[data-voice-state="listening"] {
-  filter: drop-shadow(0 0 10px rgba(118, 229, 230, .65));
+  filter: drop-shadow(0 0 10px rgba(195, 112, 250, .8));
 }
-.vanessa-assistant .vanessa-energy-core[data-voice-state="listening"] .vec-orbit {
-  stroke: var(--vf-cyan) !important;
+.vanessa-assistant .vanessa-energy-core[data-voice-state="listening"] .vanessa-orb-halo {
+  filter: drop-shadow(0 0 3px rgba(250, 171, 244, .85));
 }
 .vanessa-assistant .vanessa-energy-core[data-voice-state="error"] {
   filter: drop-shadow(0 0 9px rgba(255, 107, 143, .65));
