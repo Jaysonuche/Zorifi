@@ -1,12 +1,12 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
-const CACHE = 'zorifi-v228';
+const CACHE = 'zorifi-v229';
 const CORE = [
   "./",
   "./manifest.webmanifest",
   "./icons/favicon-64.png",
   "./icons/icon-192.png",
   "./zorifi-theme.js?v=174",
-  "./styles.css?v=227&studio=8",
+  "./styles.css?v=229&studio=8",
   "./zorifi-touch-workspace.css?v=222",
   "./zorifi-template-feed.css?v=1",
   "./zorifi-vanessa-orb.css?v=222",
@@ -98,10 +98,10 @@ const CORE = [
   "./zorifi-template-feed.js?v=1",
   "./zorifi-device-lab.js?v=222",
   "./zorifi-editor-workbench.js?v=222",
-  "./zorifi-editor-overhaul.js?v=170",
+  "./zorifi-editor-overhaul.js?v=229",
   "./zorifi-privacy.js?v=1",
   "./zorifi-vanessa-listening.js?v=222",
-  "./app.js?v=228",
+  "./app.js?v=229",
   "./zorifi-app-settings.js?v=228",
   "./zorifi-google-connections.js?v=225",
   "./zorifi-google-integration.js?v=227",

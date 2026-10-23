@@ -1,6 +1,6 @@
 {
   "name": "zorifi-video-editor",
-  "version": "3.39.2",
+  "version": "3.39.3",
   "packageManager": "pnpm@11.25.0",
   "description": "Zorifi cross-platform video editor",
   "desktopName": "Zorifi",

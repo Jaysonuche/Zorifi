@@ -26,7 +26,8 @@
     if(kind==='sticker')return ['video','empty'].includes(targetKind);
     if(['text','text-template','caption-template'].includes(kind))return ['text','empty'].includes(targetKind);
     if(kind==='transition')return targetKind==='video'||targetKind==='clip';
-    if(['effect','animation','filter','keyframe-preset'].includes(kind))return targetKind==='video'||targetKind==='text'||targetKind==='clip';
+    if(kind==='effect')return ['video','text','effect','clip','empty'].includes(targetKind);
+    if(['animation','filter','keyframe-preset'].includes(kind))return targetKind==='video'||targetKind==='text'||targetKind==='clip';
     return false;
   }
 
