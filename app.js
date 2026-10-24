@@ -782,6 +782,7 @@ function restoreEditorScroll(){
 
 function render() {
   captureEditorScroll();
+  document.body.classList.toggle('photos-workspace-open',state.view==='photos');
   if(!currentUser){renderAuth();return;}
   if(!termsAcceptance||termsAcceptance.userId!==currentUser.id){phase10StoreScope='';syncPhase10Stores();}
   if(termsAcceptance?.requiresAcceptance(TermsSystem.CONFIG.version)){renderTermsAgreement();return;}
@@ -789,6 +790,21 @@ function render() {
   if (state.view === 'template-use') { renderTemplateUseWorkspace(); return; }
   if (state.view === 'ai-video') { renderAiVideo(); return; }
   if (state.view === 'scenes') { renderZorifiScenes(); return; }
+  if (state.view === 'photos') {
+    ZorifiPhotos.render(app, {
+      onBack(origin) { state.view=origin==='editor'?'editor':'home'; render(); },
+      async onUseInEditor(file) {
+        const before=new Set(state.mediaAssets.map(asset=>asset.id));
+        await importFiles([file]);
+        const asset=state.mediaAssets.find(item=>!before.has(item.id));
+        if(!asset)throw new Error('The finished photo could not be added to the edit.');
+        ZorifiPhotos.dispose();
+        state.view='editor';
+        addMediaToTimeline(asset.id,{start:state.currentTime});
+      }
+    });
+    return;
+  }
   if (state.view === 'editor' && editorWorkspaceMode==='music') { renderMusicEditor(); return; }
   const selected = state.clips.find(c => c.id === state.selected);
   const ratioParts=String(state.ratio||'16 / 9').split('/').map(Number),previewRatio=ratioParts[0]/ratioParts[1]||16/9;
@@ -1701,7 +1717,7 @@ function renderHome() {
     {id:'demo-morning',name:'Morning routine',meta:'Edited 4 days ago · 00:22',thumb:'morning',badge:'9:16'}
   ];
   const hiddenDemos=getHiddenDemoProjects(),showDemos=projectLibraryWorkspace==='video'&&!projectLibraryQuery&&projectLibraryFilter==='all'&&projectLibraryFolder==='all',projects=[...saved,...(showDemos?demos.filter(d=>!hiddenDemos.includes(d.id)&&!saved.some(s=>s.name===d.name)):[])].slice(0,24),folders=[...new Set(typeProjects.map(item=>item.folder||'Unfiled'))].sort();
-  const quickTools=[['autocut','AC','AutoCut','Turn your media into a finished video'],['captions','CC','Auto captions','Speech to editable text'],['reframe','RF','Auto reframe','Resize for any platform'],['collage','▦','Collage','Arrange photos and video together'],...(runtimeMode.touch?[['pocket','⌖','Pocket Select','Pick moments. Build your edit.']]:[])];
+  const quickTools=[['autocut','AC','AutoCut','Turn your media into a finished video'],['captions','CC','Auto captions','Speech to editable text'],['reframe','RF','Auto reframe','Resize for any platform'],['photos','▧','Photos','Edit photos or make a collage'],...(runtimeMode.touch?[['pocket','⌖','Pocket Select','Pick moments. Build your edit.']]:[])];
   app.innerHTML=`<main data-view="home" class="home-screen ${runtimeMode.platform}-home ${runtimeMode.touch?'touch-home':'desktop-workspace-home'}">
     <aside class="launch-sidebar">
       <div class="launch-brand"><span class="brand-mark">${icons.logo}</span><span><b>zorifi</b><small>create in motion</small></span></div>
@@ -1833,8 +1849,9 @@ function showTemplateManager(templateId){const template=getTemplates().find(item
 
 function launchHomeTool(tool){
   if(tool==='autocut'){openAutoCutReview();return;}
+  if(tool==='photos'){ZorifiPhotos.start({origin:'home'});state.view='photos';render();return;}
   if(tool==='prompt'){toast('Choose your media, then Zorifi Assist will guide the edit');openProject('new');return;}
-  const labels={autocut:'AutoCut',collage:'Collage',captions:'Auto captions',reframe:'Auto reframe',audio:'Audio tools'};
+  const labels={autocut:'AutoCut',captions:'Auto captions',reframe:'Auto reframe',audio:'Audio tools'};
   pendingHomeTool=tool;toast(`${labels[tool]} ready — choose your media`);openProject('new');
 }
 
@@ -1848,7 +1865,7 @@ function ratioOptions(){
 
 function installTouchMediaPickers(){
   if(!runtimeMode.touch)return;
-  document.querySelectorAll('[data-open-project="new"],[data-action="import"],.home-screen [data-home-tool="captions"],.home-screen [data-home-tool="reframe"],.home-screen [data-home-tool="collage"],.home-screen [data-home-tool="audio"],.home-screen [data-zorifi-pocket]').forEach(button=>{
+  document.querySelectorAll('[data-open-project="new"],[data-action="import"],.home-screen [data-home-tool="captions"],.home-screen [data-home-tool="reframe"],.home-screen [data-home-tool="audio"],.home-screen [data-zorifi-pocket]').forEach(button=>{
     if(button.querySelector('[data-native-media-input]'))return;
     const input=document.createElement('input');input.type='file';input.accept='video/*,image/*,audio/*';input.multiple=true;input.dataset.nativeMediaInput='';input.setAttribute('aria-label',button.dataset.openProject==='new'?'Choose media for a new edit':'Import photos, videos or audio');
     button.classList.add('native-media-picker');button.tabIndex=-1;
@@ -2111,6 +2128,7 @@ function mediaPanel() {
     <div class="import-zone" data-action="import"><div class="upload-icon">${icons.upload}</div><strong>Import your media</strong><span>or drag and drop files here</span></div>
     <div class="capture-tools"><button data-capture="screen"><b>Screen</b><small>Record display</small></button><button data-capture="camera"><b>Camera</b><small>Record camera</small></button><button data-capture="microphone"><b>Voice-over</b><small>Record microphone</small></button></div>
     <div class="media-category-tabs" aria-label="Media categories">${[['all','All'],['video','Videos'],['photo','Photos'],['captions','Docs']].map(([value,label])=>`<button class="${requestedFilter===value||value==='all'&&primary==='media'&&!['video','photo','captions'].includes(requestedFilter)?'active':''}" data-media-quick-filter="${value}">${label}</button>`).join('')}</div>
+    ${requestedFilter==='photo'?'<div class="photos-media-actions"><button data-open-photos="photo">Edit photo</button><button data-open-photos="collage">Create collage</button></div>':''}
     <div class="search media-search">${icons.search}<input placeholder="Search media" value="${esc(mediaLibraryQuery)}" data-media-search /></div><div class="media-library-controls"><select data-media-filter>${[['all','All media'],['video','Videos'],['photo','Photos'],['generated','All generated'],['generated-image','Generated images'],['generated-video','Generated videos'],['captions','Captions / docs'],['stock','Stock'],['favorites','Favorites'],['recent','Recent'],['unused','Unused']].map(([value,label])=>`<option value="${value}" ${requestedFilter===value?'selected':''}>${label}</option>`).join('')}</select><select data-media-sort><option value="name">Name</option><option value="recent" ${mediaLibrarySort==='recent'?'selected':''}>Recent</option><option value="type" ${mediaLibrarySort==='type'?'selected':''}>Type</option><option value="duration" ${mediaLibrarySort==='duration'?'selected':''}>Duration</option><option value="size" ${mediaLibrarySort==='size'?'selected':''}>File size</option></select></div><div class="asset-label">${primary==='stock'?'Stock media':primary==='generated'?'Generated media':'Project media'} · ${assets.length} shown</div>
     ${assets.length?`<div class="asset-grid">${assets.map(assetCard).join('')}</div>`:'<div class="empty-media"><span>'+icons.media+'</span><b>No matching media</b><small>Change the filter or import media into this project.</small></div>'}`;
 }
@@ -2758,6 +2776,7 @@ function bindEvents() {
   document.querySelector('[data-open-chroma-controls]')?.addEventListener('click',()=>{const clip=cutoutTargetClip();if(!clip)return toast('Choose a video layer first');state.selected=clip.id;if(state.currentTime<clip.start||state.currentTime>=clip.start+clip.duration)seekProject(clip.start);state.activePanel='chroma';render();toast('Chroma key controls opened for the selected video');});
   document.querySelector('[data-media-search]')?.addEventListener('input', event=>{mediaLibraryQuery=event.target.value;clearTimeout(event.target._timer);event.target._timer=setTimeout(render,160);});
   document.querySelector('[data-media-filter]')?.addEventListener('change',event=>{mediaLibraryFilter=event.target.value;render();});document.querySelectorAll('[data-media-quick-filter]').forEach(button=>button.addEventListener('click',()=>{mediaLibraryFilter=button.dataset.mediaQuickFilter;render();}));document.querySelector('[data-media-sort]')?.addEventListener('change',event=>{mediaLibrarySort=event.target.value;render();});
+  document.querySelectorAll('[data-open-photos]').forEach(button=>button.addEventListener('click',()=>{const images=state.mediaAssets.filter(asset=>asset.type==='image'&&asset.url&&!asset.zorifiEnding);ZorifiPhotos.start({origin:'editor',items:images,mode:button.dataset.openPhotos});state.view='photos';render();}));
   document.querySelector('[data-preview-quality]')?.addEventListener('change',event=>setPreviewQuality(event.target.value));
   document.querySelector('[data-zorifi-ending]')?.addEventListener('change',event=>toggleZorifiEnding(event.target.checked));
   document.querySelector('[data-zorifi-ending-style]')?.addEventListener('change',event=>changeZorifiEndingStyle(event.target.value));
@@ -3797,7 +3816,6 @@ async function handleMediaPickerFiles(files){
     else if(tool==='captions'){state.activePanel='captions';render();toast('Choose the imported media to turn into text');}
     else if(tool==='reframe')runSmartTool('reframe');
     else if(tool==='autocut')await runSmartTool('autocut',{mediaIds:[...state.mediaAssets].filter(asset=>!mediaIdsBefore.has(asset.id)).map(asset=>asset.id)});
-    else if(tool==='collage'){collageSelection=state.mediaAssets.filter(asset=>!mediaIdsBefore.has(asset.id)&&(asset.type==='image'||asset.type==='video')).slice(0,4).map(asset=>asset.id);state.activePanel='collage';render();toast(collageSelection.length>=2?'Choose a layout, then create your editable collage':'Add at least two photos or videos for a collage');}
     else if(tool==='audio'){state.activePanel='audio';render();toast('Music library opened');}
   }
   }catch(error){toast(error.message||'Media could not be imported. Please try again.');}finally{progress.remove();filePicker.value='';}
@@ -4808,8 +4826,13 @@ async function executeVanessaAction(action,args={}){
   if(action==='auto_generate_video'){const prompt=String(args.value||'A bold creative story').slice(0,500),lower=prompt.toLowerCase(),ratio=/vertical|portrait|tiktok|reel|short/.test(lower)?'9:16':'16:9',style=/3d|animated|animation|cartoon|anthropomorphic|animal|cat|fox|lion|fantasy story/.test(lower)?'animated':/futur/.test(lower)?'futuristic':/vibrant|colourful|colorful|energetic/.test(lower)?'vibrant':/minimal|clean/.test(lower)?'minimal':/documentary|real story/.test(lower)?'documentary':'cinematic',voice=/voice|narrat|speak|dialogue/.test(lower),duration=Number(lower.match(/\b(4|8|12)\s*(?:second|sec|s)\b/)?.[1]||8);runVanessaGenerator({prompt,engine:'vanessa',duration,ratio,style,voice,auto:true});return `I started the configured cloud workflow for “${prompt.slice(0,70)}”. I will report provider failures instead of substituting placeholder media.`;}
   if(action==='account_settings'){showAccountSettings();return 'Your profile settings are open.';}
   if(action==='home'){if(state.view==='editor')saveProject();state.view='home';render();return 'You’re back in your Zorifi workspace.';}
+  if(action==='create_collage'||action==='open_panel'&&args.value==='collage'){
+    const origin=state.view==='editor'?'editor':'home',images=origin==='editor'?state.mediaAssets.filter(asset=>asset.type==='image'&&asset.url&&!asset.zorifiEnding):[];
+    ZorifiPhotos.start({origin,items:images,mode:'collage'});state.view='photos';render();
+    return 'Collage Studio is open in Photos. Choose two to nine images, arrange them, then export a PNG or use it in your edit.';
+  }
   const blocked=needsEditor();if(blocked)return blocked;
-  if(action==='open_panel'){const panel=['media','overlay','collage','background','text','audio','effects','filters','animation','keyframes','transitions','captions','smart','pro'].includes(args.value)?args.value:'media';state.activePanel=panel;render();return `${capitalize(panel)} tools are open.`;}
+  if(action==='open_panel'){const panel=['media','overlay','background','text','audio','effects','filters','animation','keyframes','transitions','captions','smart','pro'].includes(args.value)?args.value:'media';state.activePanel=panel;render();return `${capitalize(panel)} tools are open.`;}
   if(action==='play'){if(!state.playing)togglePlayback();return 'Playing your edit.';}if(action==='pause'){if(state.playing)togglePlayback();return 'Playback paused.';}
   if(action==='split_clip'){if(!state.selected)return 'Select a clip and place the playhead where you want the cut.';splitClip();return 'The selected clip was split at the playhead.';}
   if(action==='duplicate_clip'){if(!state.selected)return 'Select the clip you want me to duplicate.';duplicateSelectedClip();return 'The selected clip was duplicated.';}
@@ -4821,7 +4844,6 @@ async function executeVanessaAction(action,args={}){
   if(action==='toggle_snapping'){state.snapping=!state.snapping;render();return `Timeline snapping is ${state.snapping?'on':'off'}.`;}
   if(action==='extract_audio'){extractAudioPicker.value='';extractAudioPicker.click();return 'Choose a video and I’ll extract its audio.';}
   if(action==='add_overlay'){state.activePanel='overlay';render();return 'Overlay tools are open. Each added image or video can create another visual layer.';}
-  if(action==='create_collage'){const available=state.mediaAssets.filter(asset=>(asset.type==='image'||asset.type==='video')&&asset.url).slice(0,4);if(available.length<2){state.activePanel='collage';render();return 'Import at least two photos or videos, then I can build the collage.';}collageSelection=available.map(asset=>asset.id);state.activePanel='collage';render();applyCollage();return `I created an editable ${available.length}-layer collage from Project Media.`;}
   if(action==='remove_image_background'){const clip=cutoutTargetClip(),asset=clip&&state.mediaAssets.find(item=>item.id===clip.mediaId);if(asset?.type!=='image'){state.activePanel='background';render();return 'Choose a photo layer in Remove Background for local cutout. Video layers can use the chroma key workflow.';}await removeSelectedImageBackground();return 'I removed the photo background, saved the transparent cutout and updated the timeline layer.';}
   if(['set_clip_speed','set_clip_volume','set_clip_opacity','rotate_clip'].includes(action)){const clip=state.clips.find(item=>item.id===state.selected);if(!clip)return 'Select a clip first.';snapshot();if(action==='set_clip_speed')clip.playbackRate=Math.max(.1,Math.min(8,Number(args.value)||1));if(action==='set_clip_volume')clip.volume=Math.max(0,Math.min(200,Number(args.value)||0));if(action==='set_clip_opacity')clip.opacity=Math.max(0,Math.min(100,Number(args.value)||0));if(action==='rotate_clip')clip.rotation=Math.max(-360,Math.min(360,Number(args.value)||0));render();return `${capitalize(action.replaceAll('_',' '))} updated.`;}
   if(action==='captions'){state.activePanel='captions';render();return 'Captions are open. Choose the audio or video you want me to turn into editable text.';}
