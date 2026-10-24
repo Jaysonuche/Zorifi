@@ -13,7 +13,7 @@
     blur:{label:'Gaussian blur',params:{amount:numeric(0,24,3)}},
     glow:{label:'Edge glow',params:{amount:numeric(0,30,10),color:color('#af78ff')}},
     vignette:{label:'Vignette',params:{amount:numeric(0,1,.35)}},
-    mask:{label:'Shape mask',params:{shape:choice(['circle','rectangle','triangle','rounded'],'rounded'),radius:numeric(0,50,12),scale:numeric(20,120,100),x:numeric(-50,50,0),y:numeric(-50,50,0)}},
+    mask:{label:'Shape mask',params:{shape:choice(['circle','rectangle','triangle','rounded','band','diamond'],'rounded'),radius:numeric(0,50,12),scale:numeric(20,120,100),width:numeric(1,200,100),height:numeric(1,200,100),rotation:numeric(-180,180,0),feather:numeric(0,50,0),invert:{type:'boolean',default:false},x:numeric(-50,50,0),y:numeric(-50,50,0)}},
     chroma:{label:'Colour key cutout',params:{color:color('#00ff00'),tolerance:numeric(1,100,38),softness:numeric(0,100,18),spill:numeric(0,100,45)}},
     'person-cutout':{label:'On-device person cutout',requires:'person-cutout-model',params:{threshold:numeric(.05,.95,.45),softness:numeric(.01,.4,.12)}},
     spatial:{label:'Projective 3D panel and camera',params:{rotateX:numeric(-65,65,0),rotateY:numeric(-65,65,-22),rotateZ:numeric(-40,40,0),endRotateX:numeric(-65,65,0),endRotateY:numeric(-65,65,12),endRotateZ:numeric(-40,40,0),depth:numeric(-.5,.8,.15),endDepth:numeric(-.5,.8,0),perspective:numeric(1.5,5,2.4),cameraX:numeric(-.4,.4,0),cameraY:numeric(-.4,.4,0),endCameraX:numeric(-.4,.4,0),endCameraY:numeric(-.4,.4,0),scale:numeric(.35,1,.85),shadow:numeric(0,1,.6)}},
@@ -62,7 +62,7 @@
       case 'blur':result.autoCutBlur=p.amount;break;
       case 'glow':result.autoCutGlow={amount:p.amount,color:p.color};break;
       case 'vignette':result.autoCutVignette=p.amount;break;
-      case 'mask':Object.assign(result,{maskShape:p.shape,cornerRadius:p.radius,maskScale:p.scale,maskX:p.x,maskY:p.y});break;
+      case 'mask':Object.assign(result,{maskShape:p.shape,cornerRadius:p.radius,maskScale:p.scale,maskWidth:p.width,maskHeight:p.height,maskRotation:p.rotation,maskFeather:p.feather,maskInvert:p.invert,maskX:p.x,maskY:p.y});break;
       case 'chroma':Object.assign(result,{chromaKey:true,chromaColor:p.color,chromaTolerance:p.tolerance,chromaSoftness:p.softness,chromaSpill:p.spill});break;
       case 'person-cutout':result.subjectCutout={enabled:true,threshold:p.threshold,softness:p.softness};break;
       case 'spatial':result.spatial3D={...p};break;

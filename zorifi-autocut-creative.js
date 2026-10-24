@@ -20,6 +20,8 @@
     shown.forEach((text,index)=>{ctx.strokeText(text,0,index*lineHeight,maxWidth);ctx.fillText(text,0,index*lineHeight,maxWidth);});ctx.restore();
   }
   function drawFlat(ctx,media,clip,time,width,height,options={}){
+    if(root.ZorifiLayerMasks&&(root.ZorifiLayerMasks.hasMask(clip)||clip.silhouette)){media=root.ZorifiLayerMasks.prepareSource(media,clip);clip={...clip,maskShape:'none',maskFeather:0,silhouette:null,cornerRadius:0};}
+
     const sw=media.videoWidth||media.naturalWidth||media.width,sh=media.videoHeight||media.naturalHeight||media.height;if(!sw||!sh)return;
     const bounds=cell(clip,width,height),s=style(clip),m=motionAt(clip,time),w=bounds.width,h=bounds.height;if(!w||!h)return;
     ctx.save();ctx.globalAlpha=clamp((clip.opacity??100)/100,0,1);ctx.translate(bounds.x,bounds.y);ctx.beginPath();ctx.rect(0,0,w,h);ctx.clip();if((clip.collage||!clip.track)&&!(clip.subjectCutout?.enabled&&clip.track>0)){ctx.fillStyle=clip.collage?.background||'#090b10';ctx.fillRect(0,0,w,h);}

@@ -66,6 +66,34 @@
       root.addEventListener('pointerup',pointer=>end(pointer),{signal});root.addEventListener('pointercancel',pointer=>end(pointer,true),{signal});
       root.addEventListener('keydown',key=>{if(key.key==='Escape')end(null,true);},{signal});
     }
+    function clearDropFeedback(){
+      document.querySelectorAll('[data-track-lane]').forEach(lane=>{lane.classList.remove('drop-ready','drop-invalid');lane.style.removeProperty('--drop-x');});
+      document.querySelector('.timeline-new-track-drop')?.classList.remove('drag');
+      document.querySelector('[data-track-create-guide]')?.classList.remove('show');
+    }
+    function timelineDropAt(x,y,kind,{edgeNew=false}={}){
+      const scroll=document.querySelector('.timeline-scroll'),timeline=document.querySelector('.timeline-content');if(!scroll||!timeline)return null;
+      const viewport=scroll.getBoundingClientRect(),rect=timeline.getBoundingClientRect();
+      if(x<viewport.left||x>viewport.right||y<viewport.top||y>viewport.bottom)return null;
+      const lanes=[...timeline.querySelectorAll('[data-track-lane]')],lane=lanes.find(item=>{const box=item.getBoundingClientRect();return y>=box.top&&y<=box.bottom;});
+      if(lane){const track=Number(lane.dataset.trackLane),box=lane.getBoundingClientRect();
+        if(trackState(track).locked)return {valid:false,lane,track,locked:true};
+        const atEdge=edgeNew&&(y-box.top<7||box.bottom-y<7);
+        return atEdge||trackKind(track)!==kind?{valid:true,newTrack:true,lane,y}:{valid:true,track,lane,y};
+      }
+      // The visible blank space and the explicit + lane are both deliberate
+      // new-layer targets. The ruler and playhead transport never create lanes.
+      const first=lanes[0]?.getBoundingClientRect();
+      if(y>=(first?.top??rect.top+25))return {valid:true,newTrack:true,y};
+      return null;
+    }
+    function showDropFeedback(target,x,y,kind){
+      clearDropFeedback();if(!target)return;
+      if(target.lane){target.lane.classList.add(target.valid?'drop-ready':'drop-invalid');const box=target.lane.getBoundingClientRect();target.lane.style.setProperty('--drop-x',`${Math.max(0,Math.min(100,(x-box.left)/box.width*100))}%`);}
+      const guide=document.querySelector('[data-track-create-guide]');
+      if(target.newTrack&&guide){guide.classList.add('show');guide.style.top=`${Math.max(25,y-document.querySelector('.timeline-content').getBoundingClientRect().top)}px`;const label=guide.querySelector('span');if(label)label.textContent=`Release to create ${trackLabel(nextTrack(kind))}`;}
+      if(target.newTrack)document.querySelector('.timeline-new-track-drop')?.classList.add('drag');
+    }
     function editClip(event,element,side=null){
       if(event.button>0||event.isPrimary===false||!side&&event.target.closest('[data-trim],[data-clip-keyframe]'))return;
       const clip=state.clips.find(item=>item.id===element.dataset.clip);if(!clip)return;
@@ -73,26 +101,45 @@
       if(!side&&runtimeMode.touch&&event.pointerType!=='mouse'&&state.selected!==clip.id)return; // First tap selects. Dragging empty space always scrolls.
       if(!side&&state.timelineTool!=='select')return;
       const timeline=document.querySelector('.timeline-content'),scroll=document.querySelector('.timeline-scroll');if(!timeline||!scroll)return;
-      const original=copy(clip),initialDuration=state.duration,width=timeline.getBoundingClientRect().width,initialX=event.clientX,initialScroll=scroll.scrollLeft,asset=state.mediaAssets.find(item=>item.id===clip.mediaId);let changed=false,newTrack=false;
+      const original=copy(clip),initialDuration=state.duration,width=timeline.getBoundingClientRect().width,initialX=event.clientX,initialY=event.clientY,initialScroll=scroll.scrollLeft,asset=state.mediaAssets.find(item=>item.id===clip.mediaId);let changed=false,newTrack=false,target=null,ghost=null,activated=false;
+      const cleanup=()=>{ghost?.remove();element.style.removeProperty('opacity');element.classList.remove('moving');clearDropFeedback();};
       const update=pointer=>{
         const rect=scroll.getBoundingClientRect();if(pointer.clientX<rect.left+22)scroll.scrollLeft-=8;else if(pointer.clientX>rect.right-22)scroll.scrollLeft+=8;
         const delta=(pointer.clientX-initialX+scroll.scrollLeft-initialScroll)/width*initialDuration;
-        if(Math.abs(pointer.clientX-initialX)<3&&!changed)return;
+        if(!activated&&Math.hypot(pointer.clientX-initialX,pointer.clientY-initialY)<3)return;activated=true;
         if(side)Object.assign(clip,trimmedClip(original,asset,{side,time:snap((side==='left'?original.start:original.start+original.duration)+delta,clip),fps:fps()}));
-        else {const hit=document.elementFromPoint(pointer.clientX,pointer.clientY),lane=hit?.closest('[data-track-lane]'),target=lane?Number(lane.dataset.trackLane):original.track;newTrack=Boolean(hit?.closest('.timeline-new-track-drop'));Object.assign(clip,movedClip(original,snap(original.start+delta,clip),lane&&canMoveClipToTrack(clip,target)&&!trackState(target).locked?target:clip.track));}
-        changed=Math.abs(clip.start-original.start)>.0001||Math.abs(clip.duration-original.duration)>.0001||clip.track!==original.track;
+        else {
+          target=timelineDropAt(pointer.clientX,pointer.clientY,trackKind(original.track),{edgeNew:Math.abs(pointer.clientY-initialY)>10});newTrack=Boolean(target?.valid&&target.newTrack);
+          Object.assign(clip,movedClip(original,snap(original.start+delta,{...clip,track:target?.track??original.track}),target?.valid&&!newTrack?target.track:original.track));
+          if(!ghost){const box=element.getBoundingClientRect();ghost=element.cloneNode(true);ghost.removeAttribute('data-clip');ghost.removeAttribute('id');ghost.querySelectorAll('button').forEach(button=>button.remove());ghost.setAttribute('aria-hidden','true');Object.assign(ghost.style,{position:'fixed',left:'0',top:'0',width:`${Math.min(box.width,240)}px`,height:`${box.height}px`,pointerEvents:'none',zIndex:'9000',margin:'0',opacity:'.95',boxShadow:'0 8px 30px #0008'});document.body.appendChild(ghost);element.style.opacity='.28';}
+          ghost.style.transform=`translate(${pointer.clientX-Math.min(ghost.getBoundingClientRect().width/2,45)}px,${pointer.clientY-ghost.getBoundingClientRect().height/2}px)`;
+          showDropFeedback(target,pointer.clientX,pointer.clientY,trackKind(original.track));
+        }
+        changed=Math.abs(clip.start-original.start)>.0001||Math.abs(clip.duration-original.duration)>.0001||clip.track!==original.track||newTrack;
         element.style.left=`${clip.start/initialDuration*100}%`;element.style.width=`${clip.duration/initialDuration*100}%`;element.classList.add('moving');
         if(side)element.querySelector('span').textContent=`${clip.name} · ${clip.duration.toFixed(2)}s`;
-        document.querySelector('[data-track-create-guide]')?.classList.toggle('show',newTrack);
       };
-      gesture(event,element,{move:update,cancel:same=>{if(same){Object.assign(clip,original);render();}},finish:()=>{
+      gesture(event,element,{move:update,cancel:same=>{cleanup();if(same){Object.assign(clip,original);render();}},finish:()=>{
+        cleanup();
+        if(activated&&!side&&!target?.valid){Object.assign(clip,original);suppressClickUntil=Date.now()+400;render();if(target?.locked)toast(`Unlock ${trackLabel(target.track)} first`);return;}
         if(changed){pushHistory({clips:state.clips.map(item=>item.id===clip.id?original:item)});if(newTrack)clip.track=nextTrack(trackKind(original.track));if(clip.zorifiEnding)clip.endingAutoPlaced=false;state.selected=clip.id;recalculateDuration();scheduleProjectSave(0);suppressClickUntil=Date.now()+400;render();}
-        else element.classList.remove('moving');
       }});
     }
     const oldDrag=dragTimelineClip;
     dragTimelineClip=function(event,element){if(!event.target.closest('[data-trim],[data-clip-keyframe]')&&state.timelineTool==='select')return editClip(event,element);return oldDrag(event,element);};
     trimTimelineClip=function(event,handle){return editClip(event,handle.closest('[data-clip]'),handle.dataset.trim);};
+    const oldContextItems=contextMenuItems,oldContextCommand=runTimelineContextCommand;
+    contextMenuItems=function(clip){const items=oldContextItems(clip);return clip?[...items,['move-layer','Move to layer','⇵']]:items;};
+    runTimelineContextCommand=function(command){if(command!=='move-layer')return oldContextCommand(command);closeTimelineContextMenu();showLayerPicker();};
+    function showLayerPicker(){
+      const clip=state.clips.find(item=>item.id===state.selected);if(!clip)return;
+      if(trackState(clip.track).locked)return toast('Unlock this track first');
+      const owner=scope(),kind=trackKind(clip.track),tracks=matchingTracks(kind),wrap=document.createElement('div');wrap.className='modal-backdrop';
+      wrap.innerHTML=`<section class="modal mobile-layer-dialog" role="dialog" aria-modal="true" aria-label="Move clip to a layer"><header><b>Move ${esc(clip.name)} to a layer</b><button data-layer-close aria-label="Close layer picker">×</button></header>${tracks.map(track=>`<button data-move-layer="${track}" ${trackState(track).locked?'disabled':''}><span>${esc(trackState(track).name||trackLabel(track))}</span><span>${track===clip.track?'Current':trackState(track).locked?'Locked':'Move here'}</span></button>`).join('')}<button data-move-new-layer><b>＋ New ${kind==='effect'?'effects':kind} layer</b><span>${trackLabel(nextTrack(kind))}</span></button></section>`;
+      const controller=new AbortController(),previous=document.activeElement,close=()=>{controller.abort();wrap.remove();previous?.isConnected&&previous.focus();};
+      const move=track=>{if(!validScope(owner)||!state.clips.includes(clip))return close();if(trackState(clip.track).locked||trackState(track).locked)return toast('Unlock this layer first');if(track!==clip.track){snapshot();clip.track=track;state.selected=clip.id;if(clip.zorifiEnding)clip.endingAutoPlaced=false;close();render();scheduleProjectSave(0);toast(`Clip moved to ${trackLabel(track)}`);}else close();};
+      wrap.querySelector('[data-layer-close]').onclick=close;wrap.querySelectorAll('[data-move-layer]').forEach(button=>button.onclick=()=>move(Number(button.dataset.moveLayer)));wrap.querySelector('[data-move-new-layer]').onclick=()=>move(nextTrack(kind));wrap.addEventListener('click',event=>{if(event.target===wrap)close();});wrap.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close();}if(event.key==='Tab'){const controls=[...wrap.querySelectorAll('button:not(:disabled)')],first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}},{signal:controller.signal});document.body.appendChild(wrap);wrap.querySelector('button').focus();
+    }
     scrub=function(event){
       if(event.button>0)return;const timeline=document.querySelector('.timeline-content');if(!timeline)return;
       if(state.playing)stopProjectPlayback();
@@ -160,10 +207,12 @@
       if(!['media','audio','overlay','sticker','text','text-template','caption-template','timeline-effect'].includes(kind)&&!clipSpecific)return;
       event.preventDefault();event.stopImmediatePropagation();payload.dropEffect='copy';if(event.type==='dragover')return;
       const id=payload.getData(`application/x-zorifi-${kind}`)||(local?.kind===kind?local.id:''),timeline=document.querySelector('.timeline-content'),rect=timeline.getBoundingClientRect(),start=Phase8.frameTime(Math.max(0,(event.clientX-rect.left)/rect.width*state.duration),fps());
-      if(!id)return;state.currentTime=Math.min(state.duration,start);
-      if(kind==='timeline-effect'){addEffect(id);const added=state.clips.find(item=>item.id===state.selected);if(added){added.start=start;recalculateDuration();scheduleProjectSave(0);render();}}
+      if(!id)return;state.currentTime=Math.min(state.duration,start);clearDropFeedback();
+      const lane=event.target.closest('[data-track-lane]'),track=lane?Number(lane.dataset.trackLane):undefined,newTrack=!lane&&!target.classList.contains('timeline-empty-drop');
+      if(lane&&trackState(track).locked)return toast(`Unlock ${trackLabel(track)} first`);
+      if(kind==='timeline-effect'){if(lane&&trackKind(track)!=='effect')return toast('Drop this effect on an FX layer or the + new layer area');addEffect(id,{start,...(newTrack?{newTrack:true}:{track})});}
       else if(kind==='media'){const asset=state.mediaAssets.find(item=>item.id===id),lane=event.target.closest('[data-track-lane]'),track=lane?Number(lane.dataset.trackLane):null;if(asset)addMediaToTimeline(id,{start,...(track!==null&&allowedTrackForAsset(asset,track)?{track}:{newTrack:!target.classList.contains('timeline-empty-drop')})});}
-      else {const lane=event.target.closest('[data-track-lane]'),clip=event.target.closest('[data-clip]');applyLibraryDrop({kind,id,start,track:lane?Number(lane.dataset.trackLane):undefined,clipId:clip?.dataset.clip});recalculateDuration();scheduleProjectSave(0);render();}
+      else {const clip=event.target.closest('[data-clip]');applyLibraryDrop({kind,id,start,track,clipId:clip?.dataset.clip,newTrack});recalculateDuration();scheduleProjectSave(0);render();}
     }
     document.addEventListener('dragover',dropLibrary,true);document.addEventListener('drop',dropLibrary,true);
     let libraryTouch=null;

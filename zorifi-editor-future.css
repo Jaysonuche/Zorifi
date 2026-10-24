@@ -160,40 +160,68 @@ main.app-shell[data-view="editor"] .clip {
 }
 main.app-shell[data-view="editor"] .clip.pointer-selected {outline:2px solid var(--ef-cyan)!important;outline-offset:2px;}
 
-/* Keep the video close to its actual frame size; the sequence uses the space saved. */
-body.touch-workspace main.pocket-editor[data-view="editor"] {
+/* All editor rows share Safari's visible viewport, including moving browser bars. */
+body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] {
+  --pocket-safe-top:env(safe-area-inset-top,0px);
+  --pocket-safe-bottom:env(safe-area-inset-bottom,0px);
+  --pocket-safe-left:env(safe-area-inset-left,0px);
+  --pocket-safe-right:env(safe-area-inset-right,0px);
+  --pocket-height:var(--zorifi-visual-height,100dvh);
+  --pocket-content-height:calc(var(--pocket-height) - var(--pocket-safe-top) - var(--pocket-safe-bottom));
+  --pocket-sheet-height:0px;
+  --pocket-header-height:56px;
+  --pocket-dock-height:72px;
+  position:fixed!important;inset:var(--zorifi-visual-top,0px) 0 auto!important;
+  width:100%!important;height:var(--pocket-height)!important;max-height:var(--pocket-height)!important;min-height:0!important;
+  grid-template-columns:minmax(0,1fr)!important;
   grid-template-rows:
-    calc(56px + env(safe-area-inset-top))
-    minmax(120px,min(46dvh,calc((100vw - 24px) / var(--preview-ratio,1.7778) + 58px)))
+    calc(var(--pocket-header-height) + var(--pocket-safe-top))
+    minmax(0,min(calc(var(--pocket-content-height) * .47),calc((100vw - 24px) / var(--preview-ratio,1.7778) + 58px)))
     minmax(0,1fr)
     var(--pocket-sheet-height)
-    calc(74px + env(safe-area-inset-bottom))!important;
+    calc(var(--pocket-dock-height) + var(--pocket-safe-bottom))!important;
+  overflow:hidden!important;
 }
-body.touch-workspace main.pocket-editor:is(.pocket-panel-open,.pocket-inspector-open)[data-view="editor"] {
+body.touch-workspace main.pocket-editor.touch-editor:is(.pocket-panel-open,.pocket-inspector-open)[data-view="editor"] {
+  --pocket-sheet-height:min(310px,calc(var(--pocket-content-height) * .36));
   grid-template-rows:
-    calc(56px + env(safe-area-inset-top))
-    minmax(95px,min(22dvh,calc((100vw - 24px) / var(--preview-ratio,1.7778) - 14px)))
+    calc(var(--pocket-header-height) + var(--pocket-safe-top))
     minmax(0,1fr)
+    min(200px,max(180px,calc(var(--pocket-content-height) * .24)))
     var(--pocket-sheet-height)
-    calc(74px + env(safe-area-inset-bottom))!important;
+    calc(var(--pocket-dock-height) + var(--pocket-safe-bottom))!important;
 }
-body.touch-workspace main.pocket-editor[data-view="editor"] .stage {
-  border-radius:14px!important;margin:6px 8px!important;
+body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"]>.topbar {
+  grid-column:1!important;grid-row:1!important;
+  padding:var(--pocket-safe-top) max(8px,var(--pocket-safe-right)) 0 max(8px,var(--pocket-safe-left))!important;
 }
-body.touch-workspace main.pocket-editor[data-view="editor"] .stage .preview-wrap {padding:6px 9px!important;}
-body.touch-workspace main.pocket-editor[data-view="editor"] .timeline-area {
+body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] .stage {
+  grid-column:1!important;grid-row:2!important;border-radius:12px!important;margin:4px 6px!important;
+  grid-template-rows:minmax(0,1fr) 44px!important;
+}
+body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] .stage .preview-wrap {padding:4px 7px!important;}
+body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] .stage>.transport {height:44px!important;min-height:44px!important;}
+body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"]>.timeline-area {
+  grid-column:1!important;grid-row:3!important;
   border-top:1px solid var(--ef-line)!important;border-radius:13px 13px 0 0!important;
   box-shadow:0 -8px 30px rgba(34,17,70,.08);
 }
-body.touch-workspace main.pocket-editor[data-view="editor"]>.pocket-editor-dock {
+body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] :is(.left-panel,.mobile-clip-inspector) {
+  grid-column:1!important;grid-row:4!important;min-height:0!important;max-height:100%!important;bottom:auto!important;
+  translate:none!important;transform:none!important;transition:none!important;animation:none!important;
+}
+body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"]>.pocket-editor-dock {
+  grid-column:1!important;grid-row:5!important;height:calc(var(--pocket-dock-height) + var(--pocket-safe-bottom))!important;min-height:0!important;
+  padding:4px max(8px,var(--pocket-safe-right)) calc(4px + var(--pocket-safe-bottom)) max(8px,var(--pocket-safe-left))!important;align-items:flex-start!important;
   background:linear-gradient(100deg,var(--ef-surface),var(--ef-raised) 52%,var(--ef-surface))!important;
   border-top:1px solid var(--ef-line)!important;
   box-shadow:0 -12px 25px rgba(2,4,16,.18);
 }
-body.touch-workspace main.pocket-editor[data-view="editor"]>.pocket-editor-dock>button {
+body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"]>.pocket-editor-dock>button {
+  height:60px!important;min-height:60px!important;
   color:var(--ef-muted)!important;
 }
-body.touch-workspace main.pocket-editor[data-view="editor"]>.pocket-editor-dock>button.active {
+body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"]>.pocket-editor-dock>button.active {
   color:var(--ef-ink)!important;
   background:linear-gradient(140deg,rgba(182,140,255,.28),rgba(125,224,233,.11))!important;
   box-shadow:inset 0 0 0 1px rgba(182,140,255,.26);
@@ -201,30 +229,43 @@ body.touch-workspace main.pocket-editor[data-view="editor"]>.pocket-editor-dock>
 main.app-shell[data-view="editor"] :is(button,a,input,select,textarea):focus-visible {
   outline:2px solid var(--ef-cyan)!important;outline-offset:2px;
 }
-@media(min-width:650px) and (min-height:540px) {
-  body.touch-workspace main.pocket-editor[data-view="editor"] {
-    grid-template-rows:
-      calc(58px + env(safe-area-inset-top))
-      minmax(180px,min(54dvh,calc((100vw - 24px) / var(--preview-ratio,1.7778) + 58px)))
-      minmax(0,1fr)
-      var(--pocket-sheet-height)
-      calc(76px + env(safe-area-inset-bottom))!important;
+/* A visible drop target is essential when creating a layer with a finger drag. */
+body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] .timeline-new-track-drop {
+  display:flex!important;align-items:center;justify-content:center;min-height:38px!important;height:38px!important;
+  margin:4px 6px!important;padding:4px 10px!important;font-size:10px!important;border-radius:9px!important;
+}
+@media(min-width:650px) and (min-height:600px) {
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] {
+    --pocket-header-height:58px;--pocket-dock-height:74px;
   }
-  body.touch-workspace main.pocket-editor:is(.pocket-panel-open,.pocket-inspector-open)[data-view="editor"] {
-    grid-template-rows:
-      calc(58px + env(safe-area-inset-top))
-      minmax(150px,min(32dvh,calc((100vw - 24px) / var(--preview-ratio,1.7778) - 14px)))
-      minmax(0,1fr)
-      var(--pocket-sheet-height)
-      calc(76px + env(safe-area-inset-bottom))!important;
+}
+@media(max-height:600px) {
+  body.touch-workspace main.pocket-editor.touch-editor:is(.pocket-panel-open,.pocket-inspector-open)[data-view="editor"] {
+    --pocket-sheet-height:calc(var(--pocket-content-height) * .27);
+  }
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] .pocket-sheet-head small {display:none;}
+}
+@media(max-height:600px) and (orientation:portrait) {
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] {
+    grid-template-rows:calc(var(--pocket-header-height) + var(--pocket-safe-top)) minmax(0,1fr) min(190px,38dvh) var(--pocket-sheet-height) calc(var(--pocket-dock-height) + var(--pocket-safe-bottom))!important;
   }
 }
 @media(max-height:540px) and (orientation:landscape) {
-  body.touch-workspace main.pocket-editor[data-view="editor"] {
-    grid-template-rows:48px minmax(65px,1fr) 110px var(--pocket-sheet-height) 60px!important;
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"],
+  body.touch-workspace main.pocket-editor.touch-editor:is(.pocket-panel-open,.pocket-inspector-open)[data-view="editor"] {
+    --pocket-header-height:48px;--pocket-dock-height:60px;
+    grid-template-columns:minmax(0,1fr) minmax(0,1.12fr)!important;
+    grid-template-rows:calc(var(--pocket-header-height) + var(--pocket-safe-top)) minmax(0,1fr) var(--pocket-sheet-height) calc(var(--pocket-dock-height) + var(--pocket-safe-bottom))!important;
   }
-  body.touch-workspace main.pocket-editor[data-view="editor"] .stage {margin:2px 5px!important;}
-  body.touch-workspace main.pocket-editor[data-view="editor"] .preview-wrap::after {inset:4px;}
+  body.touch-workspace main.pocket-editor.touch-editor:is(.pocket-panel-open,.pocket-inspector-open)[data-view="editor"] {--pocket-sheet-height:calc(var(--pocket-content-height) * .24);}
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"]>.topbar {grid-column:1/-1!important;}
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] .stage {grid-column:1!important;grid-row:2!important;margin:2px 4px!important;}
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"]>.timeline-area {grid-column:2!important;grid-row:2!important;grid-template-rows:38px minmax(0,1fr)!important;}
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] .timeline-toolbar {min-height:38px!important;height:38px!important;}
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] :is(.left-panel,.mobile-clip-inspector) {grid-column:1/-1!important;grid-row:3!important;}
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"]>.pocket-editor-dock {grid-column:1/-1!important;grid-row:4!important;}
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"]>.pocket-editor-dock>button {height:50px!important;min-height:50px!important;gap:4px!important;}
+  body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] .preview-wrap::after {inset:4px;}
 }
 @media(prefers-reduced-motion:reduce) {
   main.app-shell[data-view="editor"] :is(.stage,.preview-wrap,.transport,.timeline-area,.pocket-editor-dock) {animation:none!important;transition:none!important;}

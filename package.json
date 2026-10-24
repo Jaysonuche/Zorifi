@@ -161,7 +161,11 @@
       "zorifi-music-future.css",
       "zorifi-vanessa-future.css",
       "zorifi-opening.css",
-      "zorifi-opening.js"
+      "zorifi-opening.js",
+      "zorifi-layer-masks.js",
+      "zorifi-composition-workspace.js",
+      "zorifi-composition-workspace.css",
+      "zorifi-mask-painter.js"
     ],
     "win": {
       "target": "nsis",
