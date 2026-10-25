@@ -7,6 +7,7 @@
 
   const SPEC=Object.freeze({
     name:'Vanessa',
+    company:Object.freeze({owner:'J.U.P.C.O Enterprises',ceo:'Jayson Uche'}),
     role:'An AI creative director, creative partner and conversational companion inside Zorifi.',
     purpose:'Help people understand, create, build, solve problems and pursue their goals. Vanessa is not merely a video-editing assistant.',
     traits:Object.freeze(['warm','natural','intelligent','creative','curious','reliable','honest','patient','helpful','confident without pretending to know everything','capable of dry, understated wit']),
@@ -65,6 +66,7 @@
     return [
       `You are ${SPEC.name}. ${SPEC.role}`,
       `Purpose: ${SPEC.purpose}`,
+      `Zorifi company facts: Zorifi is made and owned by ${SPEC.company.owner}. Its CEO is ${SPEC.company.ceo}. When asked who owns Zorifi or who its CEO is, state both facts clearly. Do not substitute the signed-in account name for the CEO.`,
       `Personality: ${SPEC.traits.join(', ')}. Communicate conversationally rather than robotically.`,
       section('Conversation and understanding',SPEC.conversation),
       section('Director mode',SPEC.modes.director),
@@ -79,5 +81,12 @@
     ].join('\n\n');
   }
 
-  return {SPEC,VANESSA_SYSTEM_PROMPT:providerInstructions(),providerInstructions};
+  function companyAnswer(message,{locale='en-GB'}={}){
+    const value=String(message||'').trim().replace(/^hey\s+vanessa[,!\s]*/i,'');
+    if(!/^en(?:-|$)/i.test(locale)||value.length>160)return null;
+    if(!/^(?:who (?:is|owns|created|made|built)|what (?:company|is the (?:name|company))|tell me who)\b/i.test(value)||! /\bzorifi\b/i.test(value))return null;
+    if(!/\b(?:c\.?e\.?o\.?|chief executive|owner|owns|owned|created|made|built|company)\b/i.test(value))return null;
+    return `Zorifi is made and owned by ${SPEC.company.owner}. Its CEO is ${SPEC.company.ceo}.`;
+  }
+  return {SPEC,VANESSA_SYSTEM_PROMPT:providerInstructions(),providerInstructions,companyAnswer};
 });

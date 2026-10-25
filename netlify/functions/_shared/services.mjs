@@ -1,5 +1,6 @@
 import {renderVideo,planVideoTool} from './replicate-video.mjs';
 import {generateGeminiImage,generateGeminiMusic} from './gemini-media.mjs';
+import {translateInterface} from './interface-translation.mjs';
 import {accountRole,requireAdmin,handler,languageStreamResponse,env,needed,text,language,upstream,upstreamJson,httpsUrl,normalizeMedia,configuration,subscription,ServiceError} from './provider.mjs';
 const post=(key,body)=>({method:'POST',headers:{authorization:`Bearer ${key}`,'content-type':'application/json'},body:JSON.stringify(body)});
 const prompt=input=>{const value=text(input.prompt||input.topic||input.text,4000);if(value.length<3)throw new ServiceError('Describe the request in at least 3 characters.');return value;};
@@ -27,6 +28,7 @@ export const editor=handler(async input=>{
  return language(JSON.stringify({message,context:input.context,history:(input.history||[]).slice(-12)}),{jsonMode:true,instructions:'Return JSON {"actions":[{"command":"supported command from the supplied capabilities","target":"existing clip ID","parametersJson":"JSON object encoded as a string"}],"reply":"brief reply"}. Use only supplied editor capabilities and existing IDs. If no supported edit matches, return {"actions":[],"legacyAction":"chat","reply":"explain limitation"}. You plan; the editor validates and executes. Never claim an edit already happened.'});
 });
 export const languageStudio=handler(async input=>{
+ if(input.action==='ui-translate')return {result:await translateInterface(input.input,{generate:language})};
  const action=text(input.action,40),value=input.input||{};if(!['script','hooks','storyboard','translate'].includes(action))throw new ServiceError('Unsupported language operation.');
  const shapes={script:'{title,hook,script,callToAction,estimatedSeconds}',hooks:'{hooks:[strings]}',storyboard:'{title,scenes:[{duration,description,visualPrompt,voiceover,caption,transition,animation,effects:[],musicRequirement}]}',translate:'{segments:[{id,start,end,text}],language}'};
  const result=await language(JSON.stringify({action,input:value}),{jsonMode:true,instructions:`Return JSON matching ${shapes[action]}. Preserve caption IDs and exact timings during translation. Use the requested duration; never invent available footage.`});

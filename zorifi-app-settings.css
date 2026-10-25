@@ -3,3 +3,62 @@
 @media(max-width:720px){.zs-shell{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}.zs-header{height:64px;min-height:64px;gap:10px}.zs-back,.zs-close{width:42px;height:42px;min-width:42px}.zs-brand small{font-size:8px}.zs-brand b{font-size:17px}.zs-mark{width:36px;height:36px;font-size:25px}.zs-body{padding:12px 0 22px}.zs-hero{min-height:190px;padding:22px}.zs-hero-light{right:-16px;top:0;font-size:160px}.zs-hero h1{font-size:37px}.zs-hero>p:not(.zs-kicker){max-width:240px;line-height:1.5}.zs-sections{grid-template-columns:1fr;gap:12px;margin-top:12px}.zs-group{padding:8px}.zs-group h2{margin:10px 12px 6px}.zs-row{min-height:58px}.zs-detail{min-height:calc(100dvh - 105px);padding:22px}.zs-legal{max-height:none}}
 @media(max-width:360px){.zs-header{gap:7px}.zs-brand{gap:7px}.zs-hero{padding:19px}.zs-identity{width:100%}.zs-account{flex-wrap:wrap}.zs-account button{margin-left:auto}}
 .zs-switch{pointer-events:none}
+:root[lang] body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI","Noto Sans Arabic","Noto Sans Hebrew","Noto Sans Devanagari",sans-serif}
+:root[dir="rtl"] :is(.zs-row,.zs-identity,.zs-detail,.zorifi-profile-page label){text-align:start}
+:root[dir="rtl"] :is(.zs-row-arrow,.profile-back){transform:scaleX(-1)}
+:root[dir="rtl"] .zs-close{margin-left:0;margin-inline-start:auto}
+:root[dir="rtl"] :is(.timeline,.timeline-scroll,.timeline-ruler,.preview-stage,.music-timeline){direction:ltr}
+.zs-language-progress{color:var(--account-muted);font-size:13px;line-height:1.6;max-width:430px}
+/* Both account pages follow the same resolved appearance as the workspace. */
+.zorifi-settings-screen,.zorifi-profile-page{--account-bg:#f5f3fa;--account-surface:#fff;--account-raised:#f8f5fc;--account-ink:#221b31;--account-muted:#6e6678;--account-line:#e0dbe9;--account-hover:#f1eafa;--account-accent:#7842bd;--account-input:#fff;color:var(--account-ink);color-scheme:light;scrollbar-color:#a399b4 transparent}
+:root[data-theme="dark"] :is(.zorifi-settings-screen,.zorifi-profile-page){--account-bg:#0e1018;--account-surface:#181b26;--account-raised:#202330;--account-ink:#f0f1f8;--account-muted:#b2b7cb;--account-line:#34394e;--account-hover:#2c2841;--account-accent:#c4a1ff;--account-input:#10131d;color-scheme:dark}
+.zorifi-settings-screen,.zorifi-profile-page{background:radial-gradient(ellipse at 85% 0,#9a60df18,transparent 40%),var(--account-bg)}
+.zs-header{border-color:var(--account-line)}
+.zs-back,.zs-close{background:var(--account-surface);color:var(--account-ink);border-color:var(--account-line)}
+.zs-group,.zs-detail{background:var(--account-surface);border-color:var(--account-line)}
+.zs-group h2,.zs-brand small,.zs-kicker,.zs-row-arrow,.zs-account em,.zs-status,.zs-info a{color:var(--account-accent)}
+.zs-row:hover,.zs-row:focus-visible{background:var(--account-hover)}
+.zs-row small,.zs-intro,.zs-account small,.zs-info p,.zs-note{color:var(--account-muted)}
+.zs-account,.zs-info,.zs-legal section{border-color:var(--account-line)}
+.zs-info{background:var(--account-raised)}
+.zs-field select{background:var(--account-input);color:var(--account-ink);border-color:var(--account-line)}
+.zs-identity{font:inherit;color:inherit;text-align:start;cursor:pointer}
+.zs-identity .profile-silhouette{width:32px;height:32px}
+.zs-identity>span:first-child{overflow:hidden;background:#13101e;color:#e1d1ff}
+.zs-identity img{width:100%;height:100%;object-fit:cover}
+.profile-silhouette{display:block;width:70%;height:70%;margin:auto}
+.user-avatar:has(.profile-silhouette),.avatar:has(.profile-silhouette),.account-avatar:has(.profile-silhouette){background:linear-gradient(145deg,#29263d,#171922);color:#d5c3f5;border:1px solid #787088}
+.zorifi-profile-page{position:fixed;inset:0;z-index:12000;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;box-sizing:border-box;padding:env(safe-area-inset-top,0px) max(20px,env(safe-area-inset-right,0px)) max(30px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
+.zorifi-profile-page *{box-sizing:border-box;min-width:0}
+.zorifi-profile-page>.account-modal{width:100%;max-width:1040px;max-height:none;margin:0 auto;padding:0;border:0;border-radius:0;background:transparent;color:var(--account-ink);overflow:visible;box-shadow:none}
+.zorifi-profile-page .account-modal-head{display:flex;gap:15px;align-items:center;padding:22px 0;border-bottom:1px solid var(--account-line)}
+.zorifi-profile-page .account-modal-head p{margin:0 0 4px;color:var(--account-accent);font-size:10px;font-weight:800;letter-spacing:.13em}
+.zorifi-profile-page .account-modal-head h1{margin:0;font-size:23px;letter-spacing:-.03em}
+.profile-back{display:grid;place-items:center;width:44px;min-width:44px;height:44px;border:1px solid var(--account-line);border-radius:13px;background:var(--account-surface);color:var(--account-ink);font-size:28px;cursor:pointer}
+.profile-page-mark{margin-inline-start:auto;color:var(--account-muted);font-size:18px;font-weight:800}
+.profile-page-intro{padding:34px 0 24px}
+.profile-page-intro>span{color:var(--account-accent);font-size:10px;font-weight:800;letter-spacing:.16em}
+.profile-page-intro h2{font-size:clamp(25px,4vw,38px);letter-spacing:-.045em;margin:10px 0}
+.profile-page-intro p,.zorifi-profile-page .account-help{color:var(--account-muted);font-size:13px;line-height:1.6}
+.zorifi-profile-page .account-modal-head+.account-help{margin:12px 0 0}
+.zorifi-profile-page .profile-photo-editor{display:flex;align-items:center;gap:24px;margin:0 0 20px;padding:26px;border:1px solid var(--account-line);border-radius:21px;background:var(--account-surface)}
+.zorifi-profile-page [data-profile-preview]{display:grid;place-items:center;width:100px;height:100px;flex:0 0 100px;overflow:hidden;border:1px solid #79708c;border-radius:28px;background:linear-gradient(145deg,#383046,#181b28);color:#dfcef9;box-shadow:0 0 0 5px var(--account-raised)}
+.zorifi-profile-page [data-profile-preview] img{width:100%;height:100%;object-fit:cover}
+.zorifi-profile-page .profile-photo-editor small{display:block;margin:5px 0 16px;color:var(--account-muted);font-size:12px}
+.zorifi-profile-page [data-account-form]{padding:26px;border:1px solid var(--account-line);border-radius:21px;background:var(--account-surface)}
+.zorifi-profile-page [data-account-form]>label{margin-bottom:18px}
+.zorifi-profile-page :is(input,select){width:100%;max-width:100%;background:var(--account-input);color:var(--account-ink);border:1px solid var(--account-line);border-radius:12px;min-height:48px;font:inherit;font-size:14px;padding:12px}
+.zorifi-profile-page :is(input,select):focus{outline:2px solid var(--account-accent);outline-offset:2px}
+.zorifi-profile-page :is(label,legend){color:var(--account-ink)}
+.zorifi-profile-page label{font-size:13px;line-height:1.5}
+.zorifi-profile-page .appearance-options :is(b,strong){font-size:13px}
+.zorifi-profile-page .appearance-options small{font-size:11px;line-height:1.4}
+.zorifi-profile-page :is(.secondary-btn,.photo-remove,.phase10-settings-link){min-height:43px;padding:10px 16px;background:var(--account-raised);border:1px solid var(--account-line);border-radius:12px;color:var(--account-ink);font:inherit;font-size:13px;white-space:normal}
+.zorifi-profile-page .phase10-settings-link{margin:0 7px 10px 0}
+.zorifi-profile-page .appearance-settings{border-color:var(--account-line);background:transparent}
+.zorifi-profile-page .appearance-settings p{color:var(--account-muted)}
+.zorifi-profile-page .modal-actions{position:static;display:flex;flex-wrap:wrap;gap:10px;padding:22px 0 0;margin-top:20px;border-top:1px solid var(--account-line);background:transparent}
+.zorifi-profile-page .modal-actions>span{flex:1}
+.zorifi-profile-page .modal-actions .primary-btn{min-height:44px;border-radius:12px}
+.zorifi-profile-page [data-logout-modal]{color:#ec698b}
+@media(max-width:600px){.zorifi-profile-page{padding-inline:max(12px,env(safe-area-inset-left,0px)) max(12px,env(safe-area-inset-right,0px))}.zorifi-profile-page .account-modal-head{padding:14px 0}.profile-page-mark{font-size:15px}.profile-page-intro{padding:26px 5px 20px}.zorifi-profile-page .profile-photo-editor{padding:20px;gap:18px}.zorifi-profile-page [data-profile-preview]{width:76px;height:76px;flex-basis:76px;border-radius:22px}.zorifi-profile-page [data-account-form]{padding:18px}.zorifi-profile-page .account-contact-grid{grid-template-columns:1fr}.zorifi-profile-page .appearance-options{grid-template-columns:1fr}.zorifi-profile-page .modal-actions>span{display:none}.zorifi-profile-page .modal-actions .primary-btn{flex:1}.zorifi-profile-page .modal-actions button{font-size:12px;padding-inline:12px}}

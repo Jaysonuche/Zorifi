@@ -24,7 +24,7 @@
     t(key,vars={}){const table=this.messages[this.locale]||this.messages[this.locale.split('-')[0]]||this.messages['en-GB'];return String(table?.[key]||this.messages['en-GB']?.[key]||key).replace(/\{(\w+)\}/g,(_,name)=>vars[name]??`{${name}}`);}
     formatDate(value,options={dateStyle:'medium'}){return new Intl.DateTimeFormat(this.locale,options).format(new Date(value));}
     formatNumber(value,options={}){return new Intl.NumberFormat(this.locale,options).format(Number(value));}
-    applyDocument(document){if(!document?.documentElement)return;document.documentElement.lang=this.locale;document.documentElement.dir=this.language.direction;document.body?.setAttribute('data-locale',this.locale);}
+    applyDocument(document){if(!document?.documentElement)return;document.documentElement.lang=this.locale;document.documentElement.dir=this.language.direction;document.body?.setAttribute('data-locale',this.locale);const view=document.defaultView;if(view?.CustomEvent)view.dispatchEvent(new view.CustomEvent('zorifi:languagechange',{detail:{locale:this.locale}}));}
   }
   const FORBIDDEN_SCOPES=new Set(['passwords','api_keys','system_files','operating_system','unrestricted_accounts']);
   class PermissionLayer{

@@ -1,6 +1,8 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
-const CACHE = 'zorifi-v236';
+const CACHE = 'zorifi-v237';
 const CORE = [
+  "./zorifi-interface-language.js?v=237",
+  "./zorifi-interface-catalog.json?v=237",
   "./zorifi-keyframe-workspace.css?v=236",
   "./assets/tool-previews/city-walk.webp",
   "./assets/tool-previews/park-portrait.webp",
@@ -34,7 +36,7 @@ const CORE = [
   "./zorifi-timeline-interactions.css?v=225",
   "./zorifi-pocket-editor.css?v=235",
   "./zorifi-social-creator.css?v=225",
-  "./zorifi-app-settings.css?v=228",
+  "./zorifi-app-settings.css?v=237",
   "./zorifi-google-connections.css?v=225",
   "./zorifi-editor-future.css?v=234",
   "./zorifi-music-future.css?v=226",
@@ -50,7 +52,7 @@ const CORE = [
   "./zorifi-billing.js?v=170&tier=2",
   "./zorifi-firebase.js?v=225",
   "./zorifi-stickers.js?v=170",
-  "./zorifi-vanessa-identity.js?v=170",
+  "./zorifi-vanessa-identity.js?v=237",
   "./zorifi-vanessa-memory.js?v=170",
   "./zorifi-vanessa-memory-manager.js?v=170",
   "./zorifi-vanessa-memory-context.js?v=170",
@@ -96,7 +98,7 @@ const CORE = [
   "./zorifi-creator-platform.js?v=219",
   "./zorifi-phase8.js?v=234",
   "./zorifi-phase9.js?v=170",
-  "./zorifi-phase10.js?v=170",
+  "./zorifi-phase10.js?v=237",
   "./zorifi-phase11.js?v=218",
   "./zorifi-autocut-media.js?v=220&decode=2",
   "./zorifi-sfx.js?v=222",
@@ -117,8 +119,8 @@ const CORE = [
   "./zorifi-privacy.js?v=1",
   "./zorifi-vanessa-listening.js?v=222",
   "./zorifi-photos.js?v=232",
-  "./app.js?v=236",
-  "./zorifi-app-settings.js?v=228",
+  "./app.js?v=237",
+  "./zorifi-app-settings.js?v=237",
   "./zorifi-google-connections.js?v=225",
   "./zorifi-google-integration.js?v=227",
   "./zorifi-social-creator.js?v=225",
