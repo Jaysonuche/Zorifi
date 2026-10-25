@@ -4,11 +4,11 @@
   if(typeof state==='undefined')return;
   let group='',workspace='';
   const groups={
-    edit:{name:'Edit',icon:'▣',panel:'media',tools:[['media','Media','▣'],['speed','Speed','1×'],['pro','Transform','↗'],['keyframes','Keyframes','◆']]},
+    edit:{name:'Edit',icon:'▣',panel:'media',tools:[['media','Media','▣'],['speed','Speed','1×'],['pro','Transform','↗'],['keyframes','Keyframes','◆'],['graph','Graph','⌁']]},
     audio:{name:'Audio',icon:'♪',panel:'audio',tools:[['audio','Sounds','♪','audioSection','music'],['audio','Sound effects','SFX','audioSection','sound-effects'],['beats','Beats','⌁'],['audio','Your audio','▣','audioSection','yours'],['audio','Mix & fades','☷','audioSection','workspace']]},
     text:{name:'Text',icon:'T',panel:'text',tools:[['text','Titles','T','textSection','templates'],['text','Add text','＋','textSection','yours'],['captions','Auto captions','CC'],['transcribe','Transcribe','TXT']]},
     effects:{name:'Effects',icon:'FX',panel:'effects',tools:[['effects','Element FX','FX','effectSection','element'],['effects','Timeline FX','▤','effectSection','effects'],['filters','Filters','◐'],['effects','Edit packs','✦','effectSection','packs']]},
-    motion:{name:'Motion',icon:'◇',panel:'animation',tools:[['animation','Animation','◇'],['transitions','Transitions','⇄'],['keyframes','Keyframes','◆'],['speed','Speed','1×']]},
+    motion:{name:'Motion',icon:'◇',panel:'animation',tools:[['animation','Animation','◇'],['transitions','Transitions','⇄'],['keyframes','Keyframes','◆'],['graph','Graph','⌁'],['speed','Speed','1×']]},
     adjust:{name:'Adjust',icon:'☼',panel:'color',tools:[['color','Colour','☼'],['pro','Transform','↗'],['mask','Mask','◒'],['background','Remove BG','✂'],['chroma','Chroma key','CK']]},
     overlay:{name:'Overlay',icon:'▱',panel:'overlay',tools:[['overlay','Add overlay','▱'],['mask','Mask','◒'],['pro','Blend & crop','▧'],['background','Remove BG','✂']]},
     captions:{name:'Captions',icon:'CC',panel:'captions',tools:[['captions','Auto captions','CC'],['transcribe','Transcribe','TXT'],['text','Text styles','T','textSection','templates']]}

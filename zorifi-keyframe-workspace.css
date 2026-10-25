@@ -1,0 +1,288 @@
+/* Keyframes and Graph share bounded controls, with no intrinsic-width overflow. */
+main.app-shell[data-view="editor"] .keyframe-workspace {
+  container-type:inline-size;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:10px;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  padding:0 0 24px;
+  box-sizing:border-box;
+  color:var(--editor-ink,#f1f2fa);
+}
+main.app-shell[data-view="editor"] .keyframe-workspace *,
+main.app-shell[data-view="editor"] .keyframe-workspace *::before,
+main.app-shell[data-view="editor"] .keyframe-workspace *::after {
+  box-sizing:border-box;
+}
+main.app-shell[data-view="editor"] .keyframe-workspace > *,
+main.app-shell[data-view="editor"] .keyframe-workspace :is(label,button,input,select) {
+  min-width:0;
+  max-width:100%;
+}
+main.app-shell[data-view="editor"] .keyframe-workspace :is(button,input,select) {
+  font-family:inherit;
+  font-size:11px;
+}
+main.app-shell[data-view="editor"] .keyframe-workspace button {
+  min-width:0!important;
+  min-height:36px;
+  height:auto;
+  margin:0;
+  padding:7px 6px;
+  line-height:1.3;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  border:1px solid var(--editor-line,#42475d);
+  border-radius:8px;
+  background:var(--editor-control,#282c3b);
+  color:var(--editor-ink,#f1f2fa);
+  cursor:pointer;
+}
+main.app-shell[data-view="editor"] .keyframe-workspace button:hover {
+  background:var(--editor-hover,#33364a);
+}
+main.app-shell[data-view="editor"] .keyframe-workspace button:disabled {
+  opacity:.45;
+  cursor:default;
+}
+main.app-shell[data-view="editor"] .keyframe-workspace :is(button,input,select):focus-visible {
+  outline:2px solid var(--editor-accent,#c8a7ff);
+  outline-offset:2px;
+}
+main.app-shell[data-view="editor"] .kf-clip-head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  align-items:start;
+  gap:4px;
+  width:100%;
+  padding:10px;
+  border-color:var(--editor-line,#42475d);
+  background:var(--editor-card,#20232f);
+}
+main.app-shell[data-view="editor"] .kf-clip-head b {
+  display:block;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:12px;
+  line-height:1.4;
+}
+main.app-shell[data-view="editor"] .kf-clip-head small {
+  min-width:0;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  font-size:10px;
+  color:var(--editor-muted,#bbc2d5);
+}
+main.app-shell[data-view="editor"] .kf-mode {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:6px;
+}
+main.app-shell[data-view="editor"] .kf-mode > span {
+  min-width:0;
+  color:var(--editor-muted,#bbc2d5);
+  font-size:11px;
+  line-height:1.4;
+  overflow-wrap:anywhere;
+}
+main.app-shell[data-view="editor"] .kf-mode .kf-auto {
+  padding-inline:8px;
+  white-space:nowrap;
+}
+main.app-shell[data-view="editor"] .kf-navigation {
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr) 36px;
+  align-items:center;
+  gap:6px;
+}
+main.app-shell[data-view="editor"] .kf-navigation > span {
+  min-width:0;
+  font-size:11px;
+  line-height:1.4;
+  font-variant-numeric:tabular-nums;
+  color:var(--editor-ink,#f1f2fa);
+}
+main.app-shell[data-view="editor"] .kf-navigation > select {
+  grid-column:1/-1;
+  width:100%;
+}
+main.app-shell[data-view="editor"] .kf-actions {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+}
+main.app-shell[data-view="editor"] .kf-property-picker {
+  display:flex;
+  gap:5px;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  padding:2px 1px 7px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+  scrollbar-color:var(--editor-line,#42475d) transparent;
+  touch-action:pan-x;
+}
+main.app-shell[data-view="editor"] .kf-property-picker button {
+  flex:0 0 auto;
+  max-width:none;
+  padding:6px 9px;
+  border-radius:999px;
+  font-size:10px;
+  white-space:nowrap;
+}
+main.app-shell[data-view="editor"] .keyframe-workspace :is(.kf-auto.active,.kf-property-picker button.active,.kf-row > button.active) {
+  border-color:var(--editor-accent,#c8a7ff);
+  background:var(--editor-selected,#443360);
+  color:var(--editor-ink,#f1f2fa);
+}
+main.app-shell[data-view="editor"] .keyframe-workspace-timeline {
+  width:100%;
+  min-width:0;
+  border-color:var(--editor-line,#42475d);
+  background:var(--editor-bg,#101119);
+}
+main.app-shell[data-view="editor"] .kf-row {
+  grid-template-columns:minmax(0,42%) minmax(0,1fr);
+  min-width:0;
+  min-height:38px;
+  border-color:var(--editor-line,#42475d);
+}
+main.app-shell[data-view="editor"] .kf-row > button {
+  min-height:38px;
+  padding:6px;
+  border:0;
+  border-right:1px solid var(--editor-line,#42475d);
+  border-radius:0;
+  font-size:10px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  background:var(--editor-card,#20232f);
+}
+main.app-shell[data-view="editor"] .kf-lane {
+  min-width:0;
+  margin-inline:9px;
+}
+main.app-shell[data-view="editor"] .kf-lane .kf-diamond {
+  width:13px;
+  height:13px;
+  min-height:13px;
+  padding:0;
+  border:2px solid var(--editor-accent,#c8a7ff);
+  border-radius:2px;
+  color:transparent;
+  background:var(--editor-selected,#443360);
+}
+main.app-shell[data-view="editor"] .kf-lane .kf-diamond.selected {
+  background:#e64c9b;
+  border-color:#ffd1e8;
+}
+main.app-shell[data-view="editor"] .keyframe-workspace-graph {
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  height:170px;
+  border-color:var(--editor-line,#42475d);
+  background-color:var(--editor-bg,#101119);
+  background-image:linear-gradient(var(--editor-line,#42475d) 1px,transparent 1px),linear-gradient(90deg,var(--editor-line,#42475d) 1px,transparent 1px);
+  background-size:25% 25%;
+}
+main.app-shell[data-view="editor"] .keyframe-workspace-empty {
+  min-width:0;
+  padding:26px 10px;
+  border-color:var(--editor-line,#42475d);
+  color:var(--editor-muted,#bbc2d5);
+  font-size:11px;
+  line-height:1.6;
+  overflow-wrap:anywhere;
+}
+main.app-shell[data-view="editor"] .kf-editor {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  min-width:0;
+  gap:9px;
+  padding:10px;
+  border-color:var(--editor-line,#42475d);
+  background:var(--editor-card,#20232f);
+}
+main.app-shell[data-view="editor"] .kf-editor label {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:5px;
+  min-width:0;
+  font-size:10px;
+  line-height:1.4;
+  color:var(--editor-muted,#bbc2d5);
+}
+main.app-shell[data-view="editor"] .keyframe-workspace :is(input,select) {
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  min-height:36px;
+  padding:7px 6px;
+  border:1px solid var(--editor-line,#42475d);
+  border-radius:7px;
+  background:var(--editor-control,#282c3b);
+  color:var(--editor-ink,#f1f2fa);
+}
+main.app-shell[data-view="editor"] .kf-bezier {
+  min-width:0;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+main.app-shell[data-view="editor"] .kf-bezier label {
+  grid-column:auto;
+}
+main.app-shell[data-view="editor"] .keyframe-workspace .clear-keyframes {
+  width:100%;
+  min-width:0;
+  padding:10px 8px;
+  border-color:var(--editor-line,#42475d);
+  background:var(--editor-card,#20232f);
+  color:var(--editor-ink,#f1f2fa);
+  font-size:11px;
+  white-space:normal;
+}
+@container (min-width:250px) {
+  main.app-shell[data-view="editor"] .kf-actions { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  main.app-shell[data-view="editor"] .kf-navigation { grid-template-columns:36px minmax(0,1fr) 36px minmax(65px,.8fr); }
+  main.app-shell[data-view="editor"] .kf-navigation > select { grid-column:auto; }
+}
+@container (min-width:330px) {
+  main.app-shell[data-view="editor"] .kf-actions { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  main.app-shell[data-view="editor"] .kf-editor { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  main.app-shell[data-view="editor"] .kf-bezier { grid-template-columns:repeat(4,minmax(0,1fr)); }
+}
+body.touch-workspace main.app-shell[data-view="editor"] .keyframe-workspace {
+  padding-bottom:16px;
+}
+body.touch-workspace main.app-shell[data-view="editor"] .keyframe-workspace :is(input,select,button:not(.kf-diamond)) {
+  min-height:44px;
+}
+body.touch-workspace main.app-shell[data-view="editor"] .kf-navigation {
+  grid-template-columns:44px minmax(0,1fr) 44px;
+}
+body.touch-workspace main.app-shell[data-view="editor"] .kf-navigation > select {
+  grid-column:1/-1;
+}
+body.touch-workspace main.app-shell[data-view="editor"] .keyframe-workspace .kf-lane .kf-diamond {
+  width:13px!important;
+  min-width:13px!important;
+  max-width:13px!important;
+  height:13px!important;
+  min-height:13px!important;
+  max-height:13px!important;
+  padding:0!important;
+}

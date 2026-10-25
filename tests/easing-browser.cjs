@@ -9,7 +9,7 @@ const {createServer}=require('../scripts/dev-server.cjs');
   await page.evaluate(()=>{
    currentUser={id:'easing-test',name:'Easing Test'};syncPhase10Stores();termsAcceptance.accept();createNewProject();addTitle({name:'Motion test'});
    const clip=state.clips.find(c=>c.id===state.selected);clip.start=0;clip.duration=1;clip.keyframes={positionX:[{time:0,value:0,easing:'linear'},{time:1,value:100}]};clip.keyframeVisibleProperties=['positionX'];
-   state.activePanel='keyframes';state.currentTime=0;activeKeyframeProperty='positionX';keyframeSelection=[{property:'positionX',time:0}];keyframeWorkspaceView='graph';render();
+   state.activePanel='graph';state.currentTime=0;activeKeyframeProperty='positionX';keyframeSelection=[{property:'positionX',time:0}];render();
   });
   await page.locator('[data-kf-easing]').selectOption('easeOutBounce');
   const bounce=await page.evaluate(()=>keyframedValue(state.clips.find(c=>c.id===state.selected),'positionX',.4));assert.ok(Math.abs(bounce-91)<.0001);
