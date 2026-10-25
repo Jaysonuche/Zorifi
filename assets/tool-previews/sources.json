@@ -1,0 +1,23 @@
+{
+  "generator": "Built-in image_gen",
+  "purpose": "Bundled fictional adult photographs for automatically looping editing-tool demonstrations",
+  "format": "640 x 360 WebP",
+  "photos": [
+    {
+      "file": "assets/tool-previews/city-walk.webp",
+      "prompt": "Use case: photorealistic-natural. Asset: a sample photograph for video-editor effect and transition demonstration cards. Create a natural editorial photo of a fictional adult Black woman with short curly hair, wearing an orange jacket over a white shirt, waist up, walking along a bright modern city street. Subject centered with comfortable space around head and shoulders and visible hands, wide horizontal 16:9 framing. Clear human facial detail, natural skin texture, saturated but realistic daylight, legible architectural background with depth, no motion blur. No text, logos, borders or collage. Return one photograph."
+    },
+    {
+      "file": "assets/tool-previews/park-portrait.webp",
+      "prompt": "Use case: photorealistic-natural. Asset: a sample photograph for video-editor animation and filter demonstration cards. Create a natural editorial photo of a fictional adult East Asian man in a teal overshirt, waist up, smiling casually in a sunlit leafy park, arms relaxed and visible. Subject centered with comfortable space around head and shoulders, wide horizontal 16:9 framing. Clear human facial detail, natural skin texture, soft bright daylight, green foliage background with depth. No text, logos, borders or collage. Return one photograph."
+    },
+    {
+      "file": "assets/tool-previews/rooftop-portrait.webp",
+      "prompt": "Use case: photorealistic-natural. Asset: a sample photograph for video-editor effect and transition demonstration cards. Create a natural editorial photo of a fictional adult South Asian woman with long dark hair, wearing a lavender sweater, waist up, looking towards the camera on a rooftop at golden hour with a softly detailed city skyline. Subject centered with comfortable space around head and shoulders, wide horizontal 16:9 framing. Clear human facial detail, natural skin texture, warm highlights and cool shadows, background with depth. No text, logos, borders or collage. Return one photograph."
+    },
+    {
+      "file": "assets/tool-previews/plaza-portrait.webp",
+      "prompt": "Use case: photorealistic-natural. Asset: a sample photograph for video-editor effect and transition demonstration cards. Create a natural editorial photo of a fictional adult white man with short brown hair in a cobalt-blue casual shirt, waist up, standing in an urban plaza with colorful buildings in soft evening light. Subject centered, head and shoulders comfortably inside frame, arms and hands visible, wide horizontal 16:9 framing. Natural human skin texture, crisp facial detail and background depth. No text, logos, borders or collage. Return one photograph."
+    }
+  ]
+}

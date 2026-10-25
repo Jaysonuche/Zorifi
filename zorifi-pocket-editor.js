@@ -2,7 +2,7 @@
 (function(){
   'use strict';
   if(typeof state==='undefined')return;
-  let group='',workspace='',previewEpoch=0,previewTimer=0;
+  let group='',workspace='';
   const groups={
     edit:{name:'Edit',icon:'▣',panel:'media',tools:[['media','Media','▣'],['speed','Speed','1×'],['pro','Transform','↗'],['keyframes','Keyframes','◆']]},
     audio:{name:'Audio',icon:'♪',panel:'audio',tools:[['audio','Sounds','♪','audioSection','music'],['audio','Sound effects','SFX','audioSection','sound-effects'],['beats','Beats','⌁'],['audio','Your audio','▣','audioSection','yours'],['audio','Mix & fades','☷','audioSection','workspace']]},
@@ -64,51 +64,89 @@
     scheduleProjectSave(0);return result;
   };
   const baseHome=renderHome;renderHome=function(){const result=baseHome.apply(this,arguments);decorateLibrary();return result;};
-  const baseRender=render;render=function(){clearTimeout(previewTimer);previewEpoch++;const result=baseRender.apply(this,arguments);decorateEditor();decorateLibrary();installPreviews();return result;};
+  const baseRender=render;render=function(){stopPreviews();const result=baseRender.apply(this,arguments);decorateEditor();decorateLibrary();installPreviews();return result;};
   window.addEventListener('pagehide',()=>{if(state.view==='editor')saveProject();});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&state.view==='editor')saveProject();});
 
-  // Every thumbnail uses the same image, colour, animation and transition engines as export.
-  const sample=document.createElement('canvas');sample.width=320;sample.height=180;
-  const sampleContext=sample.getContext('2d');
-  const sky=sampleContext.createLinearGradient(0,0,0,180);sky.addColorStop(0,'#92dce5');sky.addColorStop(1,'#f9c898');sampleContext.fillStyle=sky;sampleContext.fillRect(0,0,320,180);
-  [[18,60,60,95,'#7352aa'],[100,35,55,120,'#df7958'],[185,72,90,83,'#477b8d']].forEach(([x,y,w,h,c])=>{sampleContext.fillStyle=c;sampleContext.fillRect(x,y,w,h);sampleContext.fillStyle='#f7df9b';for(let row=y+12;row<y+h-5;row+=21)for(let col=x+9;col<x+w-7;col+=17)sampleContext.fillRect(col,row,7,10);});
-  sampleContext.fillStyle='#507c60';sampleContext.fillRect(0,151,320,29);
-  sampleContext.fillStyle='#252747';sampleContext.fillRect(149,127,21,45);sampleContext.fillStyle='#f4ad87';sampleContext.beginPath();sampleContext.arc(160,119,12,0,Math.PI*2);sampleContext.fill();
-  sampleContext.fillStyle='#cf8c45';sampleContext.beginPath();sampleContext.ellipse(230,159,22,10,0,0,Math.PI*2);sampleContext.fill();sampleContext.beginPath();sampleContext.arc(251,150,10,0,Math.PI*2);sampleContext.fill();sampleContext.fillStyle='#4a2b27';sampleContext.fillRect(249,141,6,14);
-  const sampleAlt=document.createElement('canvas');sampleAlt.width=320;sampleAlt.height=180;const alt=sampleAlt.getContext('2d');alt.filter='hue-rotate(92deg)';alt.drawImage(sample,0,0);
-  let cachedSource='',sourceImage=sample;
-  function getSource(){const selected=selectedVisualElement(),asset=selected&&state.mediaAssets.find(item=>item.id===selected.mediaId),url=asset?.thumbnail||'';if(url&&url!==cachedSource){cachedSource=url;const image=new Image();image.onload=()=>{if(cachedSource===url){sourceImage=image;document.querySelectorAll('.pocket-real-preview').forEach(canvas=>{try{drawPreview(canvas,canvas.dataset.previewKind,canvas.dataset.previewId,.55);}catch{}});installPreviews();}};image.onerror=()=>{if(cachedSource===url)sourceImage=sample;};image.src=url;}else if(!url){cachedSource='';sourceImage=sample;}return sourceImage;}
+  // Bundled human photographs stay independent of the user's project media.
+  // Only visible cards animate, through the same compositor used by the editor.
+  const photos=['city-walk','park-portrait','rooftop-portrait','plaza-portrait'].map(name=>({url:`assets/tool-previews/${name}.webp`,image:null,loading:false}));
+  const records=new Map(),visible=new Set(),cachedRecords=new WeakMap(),LOOP_MS=3200;
+  let observer=null,frameRequest=0,lastFrame=0,loopStart=0;
+  function hash(value){let result=0;for(const char of value)result=(Math.imul(result,31)+char.charCodeAt(0))>>>0;return result;}
+  function photoIndex(kind,id){const library=kind==='timeline'?effects:kind==='transition'?transitions:kind==='animation'?MotionEffects.ANIMATIONS:kind==='element'?MotionEffects.EFFECTS:Object.keys(VisualTools.FILTERS).map(id=>({id})),index=library.findIndex(item=>item.id===id);return ((index<0?hash(id):index)+hash(kind))%photos.length;}
+  function loadPhoto(index){
+    const photo=photos[index];if(photo.image||photo.loading)return;
+    photo.loading=true;const image=new Image();image.decoding='async';
+    image.onload=()=>{photo.image=image;photo.loading=false;wakePreviews();};
+    image.onerror=()=>{photo.loading=false;};image.src=photo.url;
+  }
   function previewClip(){return {id:'tool-preview-only',type:'video',start:0,duration:2,opacity:100,scale:100,scaleX:100,scaleY:100,positionX:0,positionY:0,rotation:0,fit:'cover',keyframes:{},visualEffects:VisualTools.normalize(),effectStack:[]};}
-  function drawPreview(canvas,kind,id,progress=.5){
-    const context=canvas.getContext('2d'),width=canvas.width,height=canvas.height,clip=previewClip(),source=getSource(),time=Math.max(.01,Math.min(1.99,progress*2));
-    context.clearRect(0,0,width,height);context.fillStyle='#19182a';context.fillRect(0,0,width,height);
-    if(kind==='transition'){
-      const transition=AdvancedEditing.transitionState(id,progress,'incoming'),draw=(image,t)=>{context.save();context.globalAlpha=t.opacity;context.translate(width/2+t.x/100*width,height/2+t.y/100*height);context.rotate(t.rotation*Math.PI/180);context.scale(t.scale,t.scale);context.filter=`blur(${t.blur*.35}px) brightness(${t.brightness})`;if(t.clipPath){context.beginPath();if(id==='iris')context.arc(0,0,Math.min(width,height)*.75*progress,0,Math.PI*2);else context.rect(-width/2,-height/2,width*progress,height);context.clip();}context.drawImage(image,-width/2,-height/2,width,height);context.restore();};draw(sampleAlt,AdvancedEditing.transitionState(id,progress,'outgoing'));draw(source,transition);return;
-    }
+  function previewRecord(canvas,kind,id){
+    let record=cachedRecords.get(canvas);if(record&&record.kind===kind&&record.id===id)return record;
+    const seed=hash(`${kind}:${id}`),photo=photoIndex(kind,id),alternate=(photo+1+seed%(photos.length-1))%photos.length,clip=previewClip();
     if(kind==='element')MotionEffects.addEffect(clip,id,{kind:'video'});
     if(kind==='animation')MotionEffects.applyAnimation(clip,id,{duration:2});
     if(kind==='filter')clip.visualEffects.filter={id,intensity:100};
-    const effect=kind==='timeline'?effects.find(item=>item.id===id):null,fxClip={type:'effect',start:0,duration:2,strength:80,opacity:100};
-    context.save();if(effect){context.filter=effect.filter||'none';applyExportEffectMotion(context,effect,fxClip,time,width,height);}
-    drawContainedMedia(context,source,clip,width,height,time);context.restore();drawClipVisualOverlay(context,clip,width,height,time);if(effect)drawExportEffectOverlay(context,effect,fxClip,time,width,height);
-    if(kind!=='animation'){
-      context.save();context.beginPath();context.rect(0,0,width*.35,height);context.clip();drawContainedMedia(context,source,previewClip(),width,height,time);context.restore();context.fillStyle='#fff9';context.fillRect(Math.round(width*.35),0,1,height);
-      context.fillStyle='#171325bf';context.fillRect(3,3,36,12);context.fillStyle='white';context.font='8px sans-serif';context.fillText('Before',6,12);
+    record={canvas,kind,id,photo,alternate,clip,plain:previewClip(),effect:kind==='timeline'?effects.find(item=>item.id===id):null,fxClip:{type:'effect',start:0,duration:2,strength:80,opacity:100},phase:seed%400};
+    cachedRecords.set(canvas,record);canvas.dataset.previewSource=photos[photo].url;
+    loadPhoto(photo);if(kind==='transition')loadPhoto(alternate);return record;
+  }
+  function drawTransition(context,image,id,progress,role,width,height){
+    const t=AdvancedEditing.transitionState(id,progress,role),factor=Math.max(width/image.naturalWidth,height/image.naturalHeight),w=image.naturalWidth*factor,h=image.naturalHeight*factor;
+    context.save();context.globalAlpha=t.opacity;context.translate(width/2+t.x/100*width,height/2+t.y/100*height);context.rotate(t.rotation*Math.PI/180);context.scale(t.scale,t.scale);context.filter=`blur(${t.blur*.35}px) brightness(${t.brightness})`;
+    if(t.clipPath){const reveal=role==='outgoing'?1-progress:progress;context.beginPath();if(id==='iris')context.arc(0,0,Math.min(w,h)*.75*Math.max(.001,reveal),0,Math.PI*2);else context.rect(-w/2,-h/2,w*Math.max(.001,reveal),h);context.clip();}
+    context.drawImage(image,-w/2,-h/2,w,h);context.restore();
+  }
+  function drawPreview(canvas,kind,id,progress=.5,cycle=0){
+    const record=previewRecord(canvas,kind,id),{clip,effect,fxClip}=record,context=canvas.getContext('2d'),width=canvas.width,height=canvas.height,source=photos[record.photo].image,time=Math.max(.01,Math.min(1.99,progress*2));
+    context.clearRect(0,0,width,height);context.fillStyle='#19182a';context.fillRect(0,0,width,height);
+    if(!source)return false;
+    if(kind==='transition'){
+      const alternate=photos[record.alternate].image;if(!alternate)return false;
+      const outgoing=cycle%2?source:alternate,incoming=cycle%2?alternate:source,p=Math.max(0,Math.min(1,(progress-.1)/.72));
+      drawTransition(context,outgoing,id,p,'outgoing',width,height);drawTransition(context,incoming,id,p,'incoming',width,height);
+    }else{
+      context.save();if(effect){context.filter=effect.filter||'none';applyExportEffectMotion(context,effect,fxClip,time,width,height);}
+      drawContainedMedia(context,source,clip,width,height,time);context.restore();drawClipVisualOverlay(context,clip,width,height,time);if(effect)drawExportEffectOverlay(context,effect,fxClip,time,width,height);
+      if(kind!=='animation'){
+        // Static colour/blur tools demonstrate their real result with a moving
+        // original-to-applied comparison; no invented camera motion is added.
+        const reveal=progress<.12?0:progress<.62?(progress-.12)/.5:progress<.9?1:1-(progress-.9)/.1,beforeWidth=width*(1-Math.max(0,Math.min(1,reveal)));
+        if(beforeWidth>0){context.save();context.beginPath();context.rect(0,0,beforeWidth,height);context.clip();drawContainedMedia(context,source,record.plain,width,height,time);context.restore();}
+        if(beforeWidth>1&&beforeWidth<width-1){context.fillStyle='#e5caff';context.fillRect(Math.round(beforeWidth),0,1,height);}
+      }
     }
+    canvas.dataset.previewFrame=String((Number(canvas.dataset.previewFrame)||0)+1);return true;
+  }
+  function canAnimate(){return !document.hidden&&state.view==='editor'&&visible.size>0;}
+  function wakePreviews(){if(canAnimate()&&!frameRequest)frameRequest=requestAnimationFrame(tickPreviews);}
+  function tickPreviews(now){
+    frameRequest=0;if(!canAnimate())return;
+    if(now-lastFrame>=80){lastFrame=now;for(const canvas of visible){const record=records.get(canvas);if(!record||!canvas.isConnected){visible.delete(canvas);continue;}const elapsed=now-loopStart+record.phase;try{drawPreview(canvas,record.kind,record.id,(elapsed%LOOP_MS)/LOOP_MS,Math.floor(elapsed/LOOP_MS));}catch{visible.delete(canvas);}}}
+    wakePreviews();
+  }
+  function stopPreviews(){if(frameRequest)cancelAnimationFrame(frameRequest);frameRequest=0;observer?.disconnect();observer=null;records.clear();visible.clear();lastFrame=0;}
+  function previewStatus(){return {registered:records.size,visible:visible.size,running:Boolean(frameRequest)};}
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){if(frameRequest)cancelAnimationFrame(frameRequest);frameRequest=0;}else wakePreviews();});
+  window.addEventListener('pagehide',stopPreviews);
+  window.addEventListener('pageshow',()=>installPreviews());
+  function observePreviews(panel){
+    if(observer)return;loopStart=performance.now();
+    observer=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting&&entry.intersectionRect.width>1&&entry.intersectionRect.height>1)visible.add(entry.target);else visible.delete(entry.target);}if(!visible.size&&frameRequest){cancelAnimationFrame(frameRequest);frameRequest=0;}wakePreviews();},{root:panel,threshold:.02});
   }
   function installPreviews(){
-    const panels=document.querySelectorAll('.app-shell[data-view="editor"] .media-panel');if(!panels.length)return;
-    const epoch=previewEpoch;
+    const panels=document.querySelectorAll('.app-shell[data-view="editor"] .media-panel');if(!panels.length){stopPreviews();return;}
+    document.querySelectorAll('.pocket-preview-play').forEach(button=>button.remove());
+    observePreviews(panels[0]);
     panels.forEach(panel=>panel.querySelectorAll('[data-element-effect],[data-animation-preset],[data-transition],.filter-card[data-filter],.effect-card[data-effect]').forEach(card=>{
-      if(card.closest('.creative-shelves,.filter-recent')||card.dataset.pocketPreviewReady)return;
+      if(card.closest('.filter-recent'))return;
       const kind=card.hasAttribute('data-element-effect')?'element':card.hasAttribute('data-animation-preset')?'animation':card.hasAttribute('data-transition')?'transition':card.hasAttribute('data-filter')?'filter':'timeline',id=card.dataset.elementEffect||card.dataset.animationPreset||card.dataset.transition||card.dataset.filter||card.dataset.effect;
-      const canvas=document.createElement('canvas');canvas.width=192;canvas.height=108;canvas.className='pocket-real-preview';canvas.dataset.previewKind=kind;canvas.dataset.previewId=id;canvas.setAttribute('aria-hidden','true');card.prepend(canvas);card.dataset.pocketPreviewReady='true';card.classList.add('pocket-preview-card');
-      try{drawPreview(canvas,kind,id,.55);}catch(error){canvas.remove();card.dataset.pocketPreviewReady='';return;}
-      const play=document.createElement('button');play.type='button';play.className='pocket-preview-play';play.textContent='▶ Preview';play.setAttribute('aria-label',`Preview ${card.textContent.trim().replace(/\s+/g,' ').slice(0,70)}`);card.after(play);
-      play.onclick=event=>{event.preventDefault();event.stopPropagation();clearTimeout(previewTimer);const started=performance.now();play.textContent='Playing…';const tick=()=>{if(epoch!==previewEpoch||!canvas.isConnected)return;const elapsed=performance.now()-started;if(elapsed>2200){play.textContent='▶ Preview';drawPreview(canvas,kind,id,.55);return;}drawPreview(canvas,kind,id,(elapsed%1800)/1800);previewTimer=setTimeout(tick,80);};tick();};
+      let canvas=card.querySelector('.pocket-real-preview');if(!canvas){canvas=document.createElement('canvas');canvas.width=240;canvas.height=135;canvas.className='pocket-real-preview';canvas.dataset.previewKind=kind;canvas.dataset.previewId=id;canvas.setAttribute('aria-hidden','true');card.prepend(canvas);}
+      if(records.has(canvas))return;
+      try{const record=previewRecord(canvas,kind,id);records.set(canvas,record);card.dataset.pocketPreviewReady='true';card.classList.add('pocket-preview-card');observer.observe(canvas);}catch{canvas.remove();}
     }));
   }
-  window.ZorifiPocketEditor={groups,closeTools,drawPreview,installPreviews};
+  window.ZorifiPocketEditor={groups,closeTools,drawPreview,installPreviews,previewStatus};
   decorateEditor();decorateLibrary();installPreviews();
 })();

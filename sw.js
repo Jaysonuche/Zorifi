@@ -1,6 +1,10 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
-const CACHE = 'zorifi-v234';
+const CACHE = 'zorifi-v235';
 const CORE = [
+  "./assets/tool-previews/city-walk.webp",
+  "./assets/tool-previews/park-portrait.webp",
+  "./assets/tool-previews/rooftop-portrait.webp",
+  "./assets/tool-previews/plaza-portrait.webp",
   "./zorifi-editor-colors.css?v=234",
   "./zorifi-timeline-tracks.js?v=234",
   "./zorifi-mask-painter.js?v=233",
@@ -27,7 +31,7 @@ const CORE = [
   "./zorifi-editor-refinements.css?v=222",
   "./zorifi-social.css?v=223",
   "./zorifi-timeline-interactions.css?v=225",
-  "./zorifi-pocket-editor.css?v=225",
+  "./zorifi-pocket-editor.css?v=235",
   "./zorifi-social-creator.css?v=225",
   "./zorifi-app-settings.css?v=228",
   "./zorifi-google-connections.css?v=225",
@@ -112,7 +116,7 @@ const CORE = [
   "./zorifi-privacy.js?v=1",
   "./zorifi-vanessa-listening.js?v=222",
   "./zorifi-photos.js?v=232",
-  "./app.js?v=234",
+  "./app.js?v=235",
   "./zorifi-app-settings.js?v=228",
   "./zorifi-google-connections.js?v=225",
   "./zorifi-google-integration.js?v=227",
@@ -122,7 +126,7 @@ const CORE = [
   "./zorifi-workbench-integration.js?v=222",
   "./zorifi-background-integration.js?v=222",
   "./zorifi-timeline-interactions.js?v=234",
-  "./zorifi-pocket-editor.js?v=225",
+  "./zorifi-pocket-editor.js?v=235",
   "./zorifi-opening.js?v=231",
   "./zorifi-master-app.js?v=220",
   "./zorifi-privacy-ui.js?v=228"
