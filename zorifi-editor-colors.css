@@ -1,0 +1,119 @@
+/* Editor chrome follows one palette. Media, effect previews and timeline clip
+   colours deliberately retain their own artwork and semantic colours. */
+main.app-shell[data-view="editor"] {
+  --editor-bg:#101119;
+  --editor-panel:#191b25;
+  --editor-card:#20232f;
+  --editor-control:#282c3b;
+  --editor-hover:#33364a;
+  --editor-line:#42475d;
+  --editor-ink:#f1f2fa;
+  --editor-muted:#bbc2d5;
+  --editor-accent:#c8a7ff;
+  --editor-selected:#443360;
+  --ef-surface:var(--editor-panel)!important;
+  --ef-raised:var(--editor-card)!important;
+  --ef-ink:var(--editor-ink)!important;
+  --ef-muted:var(--editor-muted)!important;
+  --ef-line:var(--editor-line)!important;
+  color:var(--editor-ink)!important;
+  background:var(--editor-bg)!important;
+  color-scheme:dark;
+}
+:root[data-theme="light"] main.app-shell[data-view="editor"] {
+  --editor-bg:#e9ecf4;
+  --editor-panel:#f6f7fc;
+  --editor-card:#ffffff;
+  --editor-control:#eef0f8;
+  --editor-hover:#e4def5;
+  --editor-line:#c8ccdc;
+  --editor-ink:#23263a;
+  --editor-muted:#596079;
+  --editor-accent:#6832a9;
+  --editor-selected:#e9dcfc;
+  color-scheme:light;
+}
+main.app-shell[data-view="editor"] :is(.workspace,.timeline-scroll,.track-heads) {
+  background:var(--editor-bg)!important;
+  color:var(--editor-ink)!important;
+}
+main.app-shell[data-view="editor"] :is(.topbar,.sidebar,.left-panel,.media-panel,.inspector,.inspector-tab-content,.mobile-clip-inspector,.pocket-sheet-head,.timeline-tool-rail,.timeline-toolbar,.transport,.inspector-head,.composition-monitor-bar,.composition-column-head) {
+  background:var(--editor-panel)!important;
+  color:var(--editor-ink)!important;
+  border-color:var(--editor-line)!important;
+}
+main.app-shell[data-view="editor"] :is(.inspect-section,.property-section,.filter-target,.tool-explanation,.tool-target,.tool-empty,.selected-effect,.media-card,.asset-card,.project-detail-card,.smart-tool,.audio-card,.phase9-card,.professional-tool-card,.pro-tool-card,.composition-actions,.composition-track-label,.composition-source,.composition-property) {
+  background:var(--editor-card)!important;
+  color:var(--editor-ink)!important;
+  border-color:var(--editor-line)!important;
+}
+main.app-shell[data-view="editor"] .asset-name { color:var(--editor-ink)!important; }
+main.app-shell[data-view="editor"] .asset-meta { color:var(--editor-muted)!important; }
+main.app-shell[data-view="editor"] .asset-actions button { background:var(--editor-control)!important;color:var(--editor-ink)!important;border-color:var(--editor-line)!important; }
+main.app-shell[data-view="editor"] .asset-thumb :is(.duration,.asset-favorite,.asset-sound-preview) { background:#10121dcc!important;color:#fff!important; }
+main.app-shell[data-view="editor"] :is(.left-panel,.inspector,.mobile-clip-inspector) :is(h1,h2,h3,h4,b,strong,legend,.section-title,.tool-label,.tool-group-label,.field>label,.time-fields>label,.audio-select>span,.filter-target>span,.filter-target>b) {
+  color:var(--editor-ink)!important;
+}
+main.app-shell[data-view="editor"] :is(.left-panel,.inspector,.mobile-clip-inspector) :is(p,small,dt,dd,label,.helper-text,.tool-description,.project-detail-hint,.audio-select) {
+  color:var(--editor-muted)!important;
+}
+main.app-shell[data-view="editor"] :is(.section-title,.panel-heading h2,.composition-monitor-bar b,.composition-track-label>b,.composition-source i) {
+  color:var(--editor-accent)!important;
+}
+main.app-shell[data-view="editor"] :is(.topbar,.left-panel,.inspector,.mobile-clip-inspector,.timeline-toolbar,.transport,.composition-property) :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="color"]),textarea,select) {
+  background:var(--editor-control)!important;
+  color:var(--editor-ink)!important;
+  border-color:var(--editor-line)!important;
+  -webkit-text-fill-color:var(--editor-ink)!important;
+  color-scheme:inherit;
+}
+main.app-shell[data-view="editor"] :is(input,textarea)::placeholder {
+  color:var(--editor-muted)!important;
+  -webkit-text-fill-color:var(--editor-muted)!important;
+  opacity:1;
+}
+main.app-shell[data-view="editor"] :is(select,option) {
+  background-color:var(--editor-control)!important;
+  color:var(--editor-ink)!important;
+}
+main.app-shell[data-view="editor"] :is(.icon-btn,.tool-btn,.secondary-btn,.timeline-text-btn,.timeline-toolbar button,.inspector-head button,.panel-collapse,.inspector-collapse,.media-category-tabs button,.media-primary-tabs button,.filter-recent button,.category-tabs button,.effect-category-tabs button,.text-category-tabs button,.animation-tabs button,.animation-category-tabs button,.preset,.creator-workflow button,.creator-workflow-grid button,.creator-format-grid button,.composition-view-buttons button,.composition-actions button,.mask-reference-tools button,.track-switches button,.composition-property input) {
+  background:var(--editor-control)!important;
+  color:var(--editor-ink)!important;
+  border-color:var(--editor-line)!important;
+}
+main.app-shell[data-view="editor"] :is(.icon-btn,.tool-btn,.secondary-btn,.timeline-text-btn,.timeline-toolbar button,.inspector-head button,.media-category-tabs button,.media-primary-tabs button,.preset,.composition-actions button):hover {
+  background:var(--editor-hover)!important;
+  color:var(--editor-ink)!important;
+}
+main.app-shell[data-view="editor"] :is(.tool-btn.active,.inspector-head button.active,.media-category-tabs button.active,.media-primary-tabs button.active,.category-tabs button.active,.effect-category-tabs button.active,.text-category-tabs button.active,.animation-tabs button.active,.animation-category-tabs button.active,.creator-workflow button.active,.creator-format-grid button.active,.track-switches button.active,.composition-source.selected) {
+  background:var(--editor-selected)!important;
+  color:var(--editor-ink)!important;
+  border-color:var(--editor-accent)!important;
+}
+main.app-shell[data-view="editor"] :is(.tool-btn,.icon-btn,.timeline-toolbar button,.inspector-head button,.panel-collapse,.inspector-collapse) svg {
+  color:inherit;
+}
+main.app-shell[data-view="editor"] :is(.topbar .project-name,.timeline-title strong,.time,.time-display,.composition-view-buttons button,.composition-monitor-bar,.composition-column-head,.composition-source,.composition-source em,.composition-track-label small,.composition-property,.composition-property input) {
+  color:var(--editor-ink)!important;
+}
+main.app-shell[data-view="editor"] :is(.ruler,.composition-channel-lane,.track) {
+  border-color:var(--editor-line)!important;
+}
+main.app-shell[data-view="editor"] :is(.ruler,.composition-channel-lane) {
+  color:var(--editor-muted)!important;
+}
+main.app-shell[data-view="editor"] .timeline-new-track-drop {
+  background:var(--editor-card)!important;
+  color:var(--editor-ink)!important;
+  border-color:var(--editor-accent)!important;
+}
+main.app-shell[data-view="editor"] .timeline-new-track-drop.drag { background:var(--editor-selected)!important;border:2px solid var(--editor-accent)!important; }
+main.app-shell[data-view="editor"] .timeline-new-track-drop { justify-content:flex-start!important;padding-inline:12px; }
+main.app-shell[data-view="editor"] .timeline-new-track-label { position:sticky;left:80px;display:inline-flex;align-items:center;gap:7px;flex:none;color:var(--editor-ink)!important;font-size:10px;white-space:nowrap; }
+main.app-shell[data-view="editor"] .timeline-new-track-label i { font-size:16px;font-style:normal;color:var(--editor-accent); }
+body:not(.touch-workspace) main.composition-workspace .timeline-new-track-label { left:290px; }
+body.touch-workspace main.app-shell[data-view="editor"] .timeline-new-track-label { left:62px; }
+main.app-shell[data-view="editor"] :is(input[type="checkbox"],input[type="radio"],input[type="range"]) { accent-color:#a875f5; }
+main.app-shell[data-view="editor"] :is(.sidebar,.media-panel,.inspector,.timeline-scroll) { scrollbar-color:var(--editor-line) var(--editor-panel); }
+main.app-shell[data-view="editor"] :is(.sidebar,.media-panel,.inspector,.timeline-scroll)::-webkit-scrollbar-track { background:var(--editor-panel); }
+main.app-shell[data-view="editor"] :is(.sidebar,.media-panel,.inspector,.timeline-scroll)::-webkit-scrollbar-thumb { background:var(--editor-line); border:2px solid var(--editor-panel); border-radius:8px; }

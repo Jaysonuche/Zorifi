@@ -988,11 +988,11 @@ function formatMediaBytes(bytes){const value=Number(bytes)||0;if(value<1024)retu
 
 function trackState(track){return state.trackStates[track]||{locked:false,hidden:false,muted:false,solo:false};}
 function trackHeight(track){return Math.max(32,Math.min(160,Number(trackState(track).height)||52));}
-function trackKind(track){if(track===0||(track>=4&&track<100))return 'video';if(track===1||(track>=100&&track<200))return 'audio';if(track===2||(track>=200&&track<300))return 'text';if(track===3||track>=300)return 'effect';return 'video';}
+function trackKind(track){return ZorifiTimelineTracks.kind(track);}
 function isOverlayTrack(track){return trackKind(track)==='video'&&track!==0;}
 function isOverlayClip(clip){return Boolean(clip&&(clip.overlay===true||(clip.overlay==null&&isOverlayTrack(clip.track))));}
-function trackNumber(track){const kind=trackKind(track);if(kind==='video')return track===0?1:track-2;if(kind==='audio')return track===1?1:track-98;if(kind==='text')return track===2?1:track-198;return track===3?1:track-298;}
-function nextTrack(kind){const used=[...new Set(state.clips.filter(clip=>trackKind(clip.track)===kind).map(clip=>clip.track))];if(!used.length)return ({video:0,audio:1,text:2,effect:3})[kind];if(kind==='video')return used.some(track=>track>=4)?Math.max(...used.filter(track=>track>=4))+1:4;const base={audio:100,text:200,effect:300}[kind];return used.some(track=>track>=base)?Math.max(...used.filter(track=>track>=base))+1:base;}
+function trackNumber(track){return ZorifiTimelineTracks.number(track);}
+function nextTrack(kind){return ZorifiTimelineTracks.next(state.clips,kind);}
 function matchingTracks(kind){return [...new Set(state.clips.filter(clip=>trackKind(clip.track)===kind).map(clip=>clip.track))].sort((a,b)=>trackNumber(a)-trackNumber(b));}
 function chooseTrack(kind,start,duration,forceNew=false){if(!forceNew){const available=matchingTracks(kind).find(track=>!state.clips.some(clip=>clip.track===track&&start<clip.start+clip.duration&&start+duration>clip.start));if(available!==undefined)return available;}return nextTrack(kind);}
 function timelineTrackOrder(){const used=[...new Set(state.clips.map(clip=>clip.track))];const group={video:0,text:1,effect:2,audio:3};return used.sort((a,b)=>group[trackKind(a)]-group[trackKind(b)]||(trackKind(a)==='video'?trackNumber(b)-trackNumber(a):trackNumber(a)-trackNumber(b)));}
@@ -2495,7 +2495,7 @@ function timeline() {
           <div class="scrub-zone"></div>
           ${timelineIsEmpty?`<div class="timeline-empty-drop" data-adaptive-track-drop><span>${icons.plus}</span><b>${runtimeMode.touch?'Add media to begin':'Drop media to begin'}</b><small>${runtimeMode.touch?'Choose your clips or photos from Edit below':'Video creates V1 · Audio creates A1 · images can create an overlay layer'}</small></div>`:''}
           ${timelineTracks.map(track => `<div class="track ${trackEnabled(track,trackKind(track)==='audio'?'audio':'visual')?'':'disabled'} ${trackState(track).collapsed?'collapsed':''}" data-track-lane="${track}" style="height:${runtimeMode.touch&&editorWorkspaceMode!=='music'?58:trackState(track).collapsed?25:trackHeight(track)}px">${state.clips.filter(c=>c.track===track).map(clipHtml).join('')}<div class="track-resize-handle" data-track-resize="${track}" title="Drag to adjust ${trackLabel(track)} layer height · double-click to reset"></div></div>`).join('')}
-          ${timelineIsEmpty?'':`<div class="timeline-new-track-drop" data-adaptive-track-drop title="Drop library media or drag a timeline clip here"><span>+</span> Drop media or a timeline clip here to create a new track</div><div class="playhead" style="left:${(state.currentTime/state.duration)*100}%"></div>`}
+          ${timelineIsEmpty?'':`<div class="timeline-new-track-drop" data-adaptive-track-drop title="Drop media, text, audio, an effect or an existing clip to create another layer"><span class="timeline-new-track-label"><i aria-hidden="true">+</i> New layer · drop here</span></div><div class="playhead" style="left:${(state.currentTime/state.duration)*100}%"></div>`}
           ${timelineIsEmpty?'':'<div class="track-create-guide" data-track-create-guide><span>Release to create a new track</span></div>'}
         </div>
       </div>

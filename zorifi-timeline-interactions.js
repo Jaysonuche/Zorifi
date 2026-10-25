@@ -91,7 +91,7 @@
       clearDropFeedback();if(!target)return;
       if(target.lane){target.lane.classList.add(target.valid?'drop-ready':'drop-invalid');const box=target.lane.getBoundingClientRect();target.lane.style.setProperty('--drop-x',`${Math.max(0,Math.min(100,(x-box.left)/box.width*100))}%`);}
       const guide=document.querySelector('[data-track-create-guide]');
-      if(target.newTrack&&guide){guide.classList.add('show');guide.style.top=`${Math.max(25,y-document.querySelector('.timeline-content').getBoundingClientRect().top)}px`;const label=guide.querySelector('span');if(label)label.textContent=`Release to create ${trackLabel(nextTrack(kind))}`;}
+      if(target.newTrack&&guide){guide.classList.add('show');const box=document.querySelector('.timeline-content').getBoundingClientRect();guide.style.top=`${Math.max(25,y-box.top)}px`;const label=guide.querySelector('span');if(label){label.textContent=`Release to create ${trackLabel(nextTrack(kind))}`;label.style.left=`${Math.max(8,Math.min(box.width-150,x-box.left))}px`;label.style.right='auto';}}
       if(target.newTrack)document.querySelector('.timeline-new-track-drop')?.classList.add('drag');
     }
     function editClip(event,element,side=null){
@@ -194,7 +194,7 @@
       const entries=[['mediaId','media'],['textPreset','text'],['textTemplate','text-template'],['effect','timeline-effect'],['audioTrack','audio'],['elementEffect','effect'],['animationPreset','animation'],['filter','filter'],['transition','transition']];
       const match=entries.find(([key])=>source.dataset[key]);if(match)activeLibraryDrag={kind:match[1],id:source.dataset[match[0]],scope:scope()};
     },true);
-    document.addEventListener('dragend',()=>{activeLibraryDrag=null;},true);
+    document.addEventListener('dragend',()=>{activeLibraryDrag=null;clearDropFeedback();},true);
     function dropLibrary(event){
       const target=event.target.closest('[data-adaptive-track-drop],[data-track-lane],.timeline-content');if(!target)return;
       const payload=event.dataTransfer,local=activeLibraryDrag&&validScope(activeLibraryDrag.scope)?activeLibraryDrag:null;
@@ -205,7 +205,13 @@
       if(clipSpecific&&nativeKind)return;
       if(!adaptive&&!['timeline-effect','media','audio','overlay','sticker','text','text-template','caption-template'].includes(kind)&&!clipSpecific)return;
       if(!['media','audio','overlay','sticker','text','text-template','caption-template','timeline-effect'].includes(kind)&&!clipSpecific)return;
-      event.preventDefault();event.stopImmediatePropagation();payload.dropEffect='copy';if(event.type==='dragover')return;
+      event.preventDefault();event.stopImmediatePropagation();payload.dropEffect='copy';
+      if(event.type==='dragover'){
+        const sourceId=payload.getData(`application/x-zorifi-${kind}`)||(local?.kind===kind?local.id:''),asset=kind==='media'&&state.mediaAssets.find(item=>item.id===sourceId),layerKind=kind==='media'?(asset?.type==='audio'?'audio':'video'):kind==='timeline-effect'?'effect':['text','text-template','caption-template'].includes(kind)?'text':kind==='audio'?'audio':null;
+        if(layerKind){const lane=event.target.closest('[data-track-lane]'),track=lane?Number(lane.dataset.trackLane):undefined,locked=lane&&trackState(track).locked,incompatible=lane&&trackKind(track)!==layerKind;
+          const valid=!locked&&!(kind==='timeline-effect'&&incompatible);showDropFeedback({valid,lane,track,newTrack:valid&&(!lane||incompatible)},event.clientX,event.clientY,layerKind);}
+        return;
+      }
       const id=payload.getData(`application/x-zorifi-${kind}`)||(local?.kind===kind?local.id:''),timeline=document.querySelector('.timeline-content'),rect=timeline.getBoundingClientRect(),start=Phase8.frameTime(Math.max(0,(event.clientX-rect.left)/rect.width*state.duration),fps());
       if(!id)return;state.currentTime=Math.min(state.duration,start);clearDropFeedback();
       const lane=event.target.closest('[data-track-lane]'),track=lane?Number(lane.dataset.trackLane):undefined,newTrack=!lane&&!target.classList.contains('timeline-empty-drop');

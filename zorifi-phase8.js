@@ -1,4 +1,4 @@
-(function(global,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else {global.ZorifiPhase8=api;global.ZorifiAutoCaptionsEngine=api.ZorifiAutoCaptionsEngine;global.ZorifiCaptionEditorBridge=api.ZorifiCaptionEditorBridge;}})(typeof globalThis!=='undefined'?globalThis:this,function(){
+(function(global,factory){const api=factory(typeof module==='object'&&module.exports?require('./zorifi-timeline-tracks.js'):global.ZorifiTimelineTracks);if(typeof module==='object'&&module.exports)module.exports=api;else {global.ZorifiPhase8=api;global.ZorifiAutoCaptionsEngine=api.ZorifiAutoCaptionsEngine;global.ZorifiCaptionEditorBridge=api.ZorifiCaptionEditorBridge;}})(typeof globalThis!=='undefined'?globalThis:this,function(TimelineTracks){
   'use strict';
   const PHOTO_PRESETS=Object.freeze([1,2,3,5,8,10,15,30]);
   const AUDIO_EXTENSIONS=new Set(['mp3','wav','m4a','aac','ogg','oga','opus','webm','flac','mp4']);
@@ -102,8 +102,7 @@
     applyToTimeline(editorState){
       if(!Array.isArray(editorState?.clips))throw new TypeError('An editor with clips is required.');
       const captions=this.normalizeSegments(this.captions);if(!captions.length)return editorState;
-      const textTracks=editorState.clips.filter(c=>c.type==='text').map(c=>Number(c.track)),track=textTracks.length?Math.max(199,...textTracks)+1:2;
-      if(track>=300)throw new Error('No text track is available.');
+      const track=TimelineTracks.next(editorState.clips,'text');
       const style={'kinetic-pop':'word-caption',fade:'shadow',highlight:'karaoke'}[this.settings.animationStyle];if(!style)throw new Error('Unsupported caption animation.');
       const stamp=`${Date.now()}-${Math.random().toString(36).slice(2)}`;
       const clips=captions.map((cap,index)=>({id:`caption-clip-${stamp}-${index}`,name:this.wrapText(cap.text),start:cap.start,duration:cap.end-cap.start,type:'text',track,opacity:100,volume:100,playbackRate:1,fontId:'modern',fontFamily:this.settings.fontName,fontSize:clamp(this.settings.fontSize,8,180),fontWeight:700,color:this.settings.fontColor,background:this.settings.backgroundColor,align:'center',bottom:10,style,autoCaption:true,captionLanguage:this.settings.language,captionWords:cap.words,keyframes:this.settings.animationStyle==='fade'?{opacity:[{time:cap.start,value:0,easing:'linear'},{time:cap.start+Math.min(.2,(cap.end-cap.start)/4),value:100,easing:'linear'},{time:cap.end-Math.min(.2,(cap.end-cap.start)/4),value:100,easing:'linear'},{time:cap.end,value:0,easing:'linear'}]}:{}}));

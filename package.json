@@ -1,6 +1,6 @@
 {
   "name": "zorifi-video-editor",
-  "version": "3.39.5",
+  "version": "3.39.6",
   "packageManager": "pnpm@11.25.0",
   "description": "Zorifi cross-platform video editor",
   "desktopName": "Zorifi",
@@ -85,6 +85,7 @@
       "zorifi-vanessa-actions.js",
       "zorifi-scenes.js",
       "zorifi-creator-platform.js",
+      "zorifi-timeline-tracks.js",
       "zorifi-phase8.js",
       "zorifi-phase9.js",
       "zorifi-phase10.js",
@@ -165,6 +166,7 @@
       "zorifi-layer-masks.js",
       "zorifi-composition-workspace.js",
       "zorifi-composition-workspace.css",
+      "zorifi-editor-colors.css",
       "zorifi-mask-painter.js"
     ],
     "win": {

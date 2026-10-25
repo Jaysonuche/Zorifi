@@ -249,6 +249,12 @@ body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] .timeli
   body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"] {
     grid-template-rows:calc(var(--pocket-header-height) + var(--pocket-safe-top)) minmax(0,1fr) min(190px,38dvh) var(--pocket-sheet-height) calc(var(--pocket-dock-height) + var(--pocket-safe-bottom))!important;
   }
+  body.touch-workspace main.pocket-editor.touch-editor:is(.pocket-panel-open,.pocket-inspector-open)[data-view="editor"] {
+    --pocket-header-height:48px;--pocket-dock-height:60px;
+    --pocket-sheet-height:calc(var(--pocket-content-height) * .26);
+    grid-template-rows:calc(var(--pocket-header-height) + var(--pocket-safe-top)) minmax(0,1fr) min(150px,26dvh) var(--pocket-sheet-height) calc(var(--pocket-dock-height) + var(--pocket-safe-bottom))!important;
+  }
+  body.touch-workspace main.pocket-editor.touch-editor:is(.pocket-panel-open,.pocket-inspector-open)[data-view="editor"]>.pocket-editor-dock>button {height:48px!important;min-height:48px!important;}
 }
 @media(max-height:540px) and (orientation:landscape) {
   body.touch-workspace main.pocket-editor.touch-editor[data-view="editor"],
