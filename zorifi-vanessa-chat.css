@@ -72,3 +72,28 @@ body.touch-workspace .vanessa-assistant .vanessa-panel>footer{padding-bottom:max
 @media(max-height:540px){body.touch-workspace .vanessa-assistant .vanessa-panel>header{min-height:52px;padding-block:4px}body.touch-workspace .vanessa-assistant .vanessa-context,body.touch-workspace .vanessa-assistant .vanessa-suggestions,body.touch-workspace .vanessa-assistant .vanessa-panel>footer{display:none!important}body.touch-workspace .vanessa-assistant .vanessa-session-controls{min-height:32px}body.touch-workspace .vanessa-assistant .vanessa-session-controls button{min-height:32px}}
 @container vanessa-conversation (max-height:540px){body.touch-workspace .vanessa-assistant .vanessa-panel>header{min-height:52px;padding-block:4px}body.touch-workspace .vanessa-assistant .vanessa-context,body.touch-workspace .vanessa-assistant .vanessa-suggestions,body.touch-workspace .vanessa-assistant .vanessa-panel>footer{display:none!important}body.touch-workspace .vanessa-assistant .vanessa-session-controls{min-height:32px}body.touch-workspace .vanessa-assistant .vanessa-session-controls button{min-height:32px}}
 @media(prefers-reduced-motion:reduce){.vanessa-assistant .vanessa-panel{animation:none!important;scroll-behavior:auto!important}}
+
+/* The editor's Vanessa tab shares the live conversation without another column. */
+body:not(.touch-workspace) main.app-shell[data-view="editor"] .inspector.vanessa-inspector-active{grid-template-rows:49px minmax(0,1fr);}
+body:not(.touch-workspace) main.app-shell[data-view="editor"] .inspector-vanessa-content{min-width:0;min-height:0;padding:0!important;overflow:hidden!important;scrollbar-gutter:auto;}
+.vanessa-inspector-host{width:100%;height:100%;min-width:0;min-height:0;}
+body:not(.touch-workspace) .vanessa-inspector-host>.vanessa-assistant.inspector-embedded.open{display:block!important;position:relative!important;inset:auto!important;width:100%!important;height:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:0!important;z-index:auto;}
+body:not(.touch-workspace) .vanessa-inspector-host .vanessa-assistant.inspector-embedded .vanessa-panel{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;transform:none!important;}
+.vanessa-assistant.inspector-embedded :is(.vanessa-launch,[data-vanessa-resize],[data-vanessa-minimize],.vanessa-context,footer){display:none!important;}
+.vanessa-assistant.inspector-embedded .vanessa-panel>header{display:grid;grid-template-columns:34px minmax(0,1fr) 30px 30px 30px;gap:5px;min-height:62px;padding:9px 8px;}
+.vanessa-assistant.inspector-embedded .vanessa-panel>header :is(.vanessa-avatar,.vanessa-energy-core){width:34px;height:34px;}
+.vanessa-assistant.inspector-embedded .vanessa-panel>header b{font-size:13px;}
+.vanessa-assistant.inspector-embedded .vanessa-panel>header small{font-size:9px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vanessa-assistant.inspector-embedded .vanessa-panel>header>button,.vanessa-assistant.inspector-embedded .vanessa-window-controls button{width:30px;min-width:30px;height:30px;min-height:30px;}
+.vanessa-assistant.inspector-embedded .vanessa-session-controls{flex-wrap:wrap;padding:4px 8px;gap:2px;overflow:visible;}
+.vanessa-assistant.inspector-embedded .vanessa-session-controls button{padding-inline:6px;font-size:9px;}
+.vanessa-assistant.inspector-embedded .vanessa-voice-options{flex:1 0 100%;justify-content:space-between;margin:0;padding:2px 6px;}
+.vanessa-assistant.inspector-embedded .vanessa-messages{gap:12px;padding:10px 8px;}
+.vanessa-assistant.inspector-embedded .vanessa-messages article .vanessa-message-body{padding:8px 9px;font-size:12px!important;}
+main.app-shell[data-view="editor"] .inspector .vanessa-assistant.inspector-embedded .vanessa-messages article.user .vanessa-message-body,main.app-shell[data-view="editor"] .inspector .vanessa-assistant.inspector-embedded .vanessa-messages article.user .vanessa-message-body p{color:#fff!important;}
+.vanessa-assistant.inspector-embedded .vanessa-suggestions{padding:7px 8px;}
+.vanessa-assistant.inspector-embedded .vanessa-panel form{width:calc(100% - 16px)!important;max-width:calc(100% - 16px)!important;margin:3px 8px 8px!important;}
+.vanessa-assistant.inspector-embedded .vanessa-panel form>input[name="message"]{order:1;flex:1 0 100%!important;width:100%;padding-inline:7px;}
+.vanessa-assistant.inspector-embedded .vanessa-panel form>button{order:2;}
+.vanessa-assistant.inspector-embedded .vanessa-panel form>button[type="submit"]{margin-left:auto;}
+@container vanessa-conversation (max-height:420px){.vanessa-assistant.inspector-embedded :is(.vanessa-suggestions,.vanessa-voice-options){display:none!important;}}
