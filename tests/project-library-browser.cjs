@@ -66,8 +66,10 @@ async function main() {
     assert.equal(await music.locator('.project-ratio').innerText(), 'Audio');
     await page.locator('.project-library').screenshot({ path: path.join(root, 'artifacts', 'project-library-music.png') });
 
+    const qualityBeforeSearch = await page.evaluate(() => state.previewQuality);
     await page.locator('[data-project-search]').fill('no matches');
     await page.waitForTimeout(250);
+    assert.equal(await page.evaluate(() => state.previewQuality), qualityBeforeSearch, 'Project search must not trigger the editor preview-quality control');
     assert.equal(await music.count(), 0, 'Music search should filter music cards');
     await page.locator('[data-project-workspace="video"]').click();
     assert.equal(await edit.count(), 1, 'Edit search preference should be independent');
@@ -86,6 +88,8 @@ async function main() {
     await page.waitForFunction(() => document.querySelector('[data-view="editor"]'));
     assert.equal(await page.evaluate(() => state.creatorSettings.workspaceMode), 'video');
     assert.equal(await page.evaluate(() => state.currentProject), 'Edit browser check');
+    await page.locator('select[data-preview-quality]').selectOption('quarter');
+    assert.equal(await page.evaluate(() => state.previewQuality), 'quarter', 'The actual preview-quality selector must still work');
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.evaluate(() => { detectRuntimeMode(); state.view = 'home'; renderHome(); });

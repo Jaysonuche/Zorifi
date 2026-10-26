@@ -41,10 +41,70 @@
   function effectiveGain({clipVolume=100,keyframedVolume=clipVolume,trackVolume=100,masterVolume=100,time=0,clip={start:0,duration:1},dialogueActive=false}){const settings=normalize(clip.audioEffects);if(settings.muted)return 0;return clamp(keyframedVolume,0,200)/100*clamp(trackVolume,0,200)/100*clamp(masterVolume,0,200)/100*fadeGain(clip,time)*duckGain(settings,dialogueActive);}
   function effectivePan(clipPan=0,trackPan=0){return clamp((Number(clipPan)||0)+(Number(trackPan)||0),-100,100)/100;}
 
-  function waveformFromChannels(channels,sampleCount=320){if(!channels?.length||!channels[0]?.length)return [];const length=channels[0].length,count=Math.min(length,Math.max(1,Math.min(2048,Math.round(sampleCount)))),block=Math.max(1,Math.floor(length/count)),peaks=[];for(let index=0;index<count;index++){const from=index*block,to=index===count-1?length:Math.min(length,from+block);let peak=0;for(let sample=from;sample<to;sample++){let value=0;for(const channel of channels)value+=Math.abs(channel[sample]||0);peak=Math.max(peak,value/channels.length);}peaks.push(Math.round(clamp(peak,0,1)*1000)/1000);}return peaks;}
+  function waveformBucketPeak(channels,from,to,peak=0){
+    for(let sample=from;sample<to;sample++){
+      let value=0;
+      for(const channel of channels)value+=Number.isFinite(channel[sample])?Math.abs(channel[sample]):0;
+      peak=Math.max(peak,value/channels.length);
+    }
+    return peak;
+  }
+  function waveformPointCount(length,sampleCount){
+    if(!Number.isFinite(sampleCount)||sampleCount<1)throw new TypeError('Invalid waveform sample count.');
+    return Math.min(length,Math.max(1,Math.min(2048,Math.round(sampleCount))));
+  }
+  function waveformFromChannels(channels,sampleCount=320){
+    const length=channels?.[0]?.length||0,count=waveformPointCount(length,sampleCount),peaks=[];
+    if(!channels?.length||!length)return peaks;
+    for(let index=0;index<count;index++){
+      const peak=waveformBucketPeak(channels,Math.floor(index*length/count),Math.floor((index+1)*length/count));
+      peaks.push(Math.round(clamp(peak,0,1)*1000)/1000);
+    }
+    return peaks;
+  }
+  function throwIfWaveformAborted(signal){if(signal?.aborted)throw signal.reason||Object.assign(new Error('Audio analysis was cancelled.'),{name:'AbortError'});}
+  async function waveformFromChannelsAsync(channels,sampleCount=320,{signal}={}){
+    throwIfWaveformAborted(signal);
+    const length=channels?.[0]?.length||0,count=waveformPointCount(length,sampleCount),peaks=[];
+    if(!channels?.length||!length)return peaks;
+    // Bound work even when one display bucket spans hours of decoded audio.
+    const chunkFrames=Math.max(1,Math.floor(32768/channels.length));let remaining=chunkFrames;
+    for(let index=0;index<count;index++){
+      const to=Math.floor((index+1)*length/count);let from=Math.floor(index*length/count),peak=0;
+      while(from<to){
+        const end=Math.min(to,from+remaining);peak=waveformBucketPeak(channels,from,end,peak);remaining-=end-from;from=end;
+        if(!remaining&&(from<length)){
+          if(typeof global.scheduler?.yield==='function')await global.scheduler.yield();else await new Promise(resolve=>global.setTimeout(resolve,0));
+          throwIfWaveformAborted(signal);remaining=chunkFrames;
+        }
+      }
+      peaks.push(Math.round(clamp(peak,0,1)*1000)/1000);
+    }
+    throwIfWaveformAborted(signal);return peaks;
+  }
   let waveformWorker=null;
   function disposeWaveformWorker(){waveformWorker?.terminate();waveformWorker=null;}
-  async function decodeWaveform(file,AudioClass,sampleCount=480){if(!AudioClass||!file?.arrayBuffer)throw new Error('Audio decoding is not supported on this device');const context=new AudioClass();try{const buffer=await context.decodeAudioData(await file.arrayBuffer()),channels=Array.from({length:buffer.numberOfChannels},(_,index)=>buffer.getChannelData(index));let peaks;if(global.ZorifiOptimization&&typeof global.Worker==='function'){try{if(!waveformWorker||waveformWorker.closed)waveformWorker=new global.ZorifiOptimization.AudioWorkerPipeline();peaks=await waveformWorker.analyzeChannels(channels,sampleCount);}catch{disposeWaveformWorker();peaks=waveformFromChannels(channels,sampleCount);}}else peaks=waveformFromChannels(channels,sampleCount);return {peaks,duration:buffer.duration,sampleRate:buffer.sampleRate,channels:buffer.numberOfChannels};}catch(error){throw new Error('This audio file could not be decoded. Try WAV, MP3, M4A, AAC or WebM audio.');}finally{await context.close().catch(()=>{});}}
+  async function decodeWaveform(file,AudioClass,sampleCount=480,{signal}={}){
+    throwIfWaveformAborted(signal);
+    if(!AudioClass||!file?.arrayBuffer)throw new Error('Audio decoding is not supported on this device');
+    const context=new AudioClass();
+    try{
+      const encoded=await file.arrayBuffer();throwIfWaveformAborted(signal);
+      const buffer=await context.decodeAudioData(encoded);throwIfWaveformAborted(signal);
+      const channels=Array.from({length:buffer.numberOfChannels},(_,index)=>buffer.getChannelData(index));let peaks;
+      if(global.ZorifiOptimization&&typeof global.Worker==='function'){
+        try{
+          if(!waveformWorker||waveformWorker.closed)waveformWorker=new global.ZorifiOptimization.AudioWorkerPipeline();
+          peaks=await waveformWorker.analyzeChannels(channels,sampleCount,{signal});
+        }catch(error){
+          throwIfWaveformAborted(signal);if(error?.name==='AbortError')throw error;
+          peaks=await waveformFromChannelsAsync(channels,sampleCount,{signal});
+        }
+      }else peaks=await waveformFromChannelsAsync(channels,sampleCount,{signal});
+      throwIfWaveformAborted(signal);return {peaks,duration:buffer.duration,sampleRate:buffer.sampleRate,channels:buffer.numberOfChannels};
+    }catch(error){throwIfWaveformAborted(signal);if(error?.name==='AbortError')throw error;throw new Error('This audio file could not be decoded. Try WAV, MP3, M4A, AAC or WebM audio.');}
+    finally{await context.close().catch(()=>{});}
+  }
   function sliceWaveform(peaks=[],assetDuration=1,sourceStart=0,clipDuration=1,points=96,playbackRate=1){if(!peaks.length)return [];const start=clamp(sourceStart/Math.max(.01,assetDuration),0,1),end=clamp((sourceStart+clipDuration*Math.max(.05,playbackRate))/Math.max(.01,assetDuration),start,1),output=[];for(let index=0;index<points;index++){const progress=index/Math.max(1,points-1),sourceIndex=Math.min(peaks.length-1,Math.floor((start+(end-start)*progress)*peaks.length));output.push(peaks[sourceIndex]||0);}return output;}
 
   function connect(source,node){source.connect(node);return node;}
@@ -202,6 +262,6 @@
   global.ZorifiVanessaTrueAudioAI=ZorifiVanessaAudioCleanup;
   global.ZorifiAudioCleanupEngine=ZorifiAudioCleanupEngine;
   global.ZorifiAudioStudio=ZorifiAudioStudio;
-  global.ZorifiAudioEngine={ZorifiAudioCleanupEngine,ZorifiAudioStudio,EQ_BANDS,DEFAULTS,PRESETS,normalize,ensure,dbToGain,fadeGain,duckGain,effectiveGain,effectivePan,waveformFromChannels,decodeWaveform,disposeWaveformWorker,sliceWaveform,createProcessingChain,updateProcessingChain,meter,applyPreset,setEffectEnabled,resetEffects,applyAction};
+  global.ZorifiAudioEngine={ZorifiAudioCleanupEngine,ZorifiAudioStudio,EQ_BANDS,DEFAULTS,PRESETS,normalize,ensure,dbToGain,fadeGain,duckGain,effectiveGain,effectivePan,waveformFromChannels,waveformFromChannelsAsync,decodeWaveform,disposeWaveformWorker,sliceWaveform,createProcessingChain,updateProcessingChain,meter,applyPreset,setEffectEnabled,resetEffects,applyAction};
   Object.assign(global.ZorifiAudioEngine,{ZorifiVanessaAudioCleanup,ZorifiVanessaTrueAudioAI:ZorifiVanessaAudioCleanup,audioBufferToWavBlob:cleanupWavBlob});
 })(typeof window!=='undefined'?window:globalThis);

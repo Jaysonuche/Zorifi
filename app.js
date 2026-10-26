@@ -707,7 +707,14 @@ function showProjectVersions(){
 function firstProjectVisual(project){const assets=(project.mediaAssets||[]).filter(asset=>['image','video'].includes(asset.type)&&!asset.zorifiEnding),pinned=assets.find(asset=>asset.id===project.creatorSettings?.firstMediaId);if(pinned)return pinned;const imported=assets.filter(asset=>Number.isFinite(asset.importOrder)).sort((a,b)=>a.importOrder-b.importOrder)[0];if(imported)return imported;const clip=(project.clips||[]).filter(item=>item.type==='video'&&!item.zorifiEnding).sort((a,b)=>a.start-b.start||a.track-b.track)[0];return assets.find(asset=>asset.id===clip?.mediaId)||assets[0];}
 function projectThumbnail(project){const asset=firstProjectVisual(project);return asset?.thumbnail||project.thumbnail||(asset?.generated?asset.url:'')||'';}
 function currentProjectThumbnail(){return firstProjectVisual(state)?.thumbnail||'';}
-function releaseProjectMediaUrls(){state.mediaAssets.forEach(asset=>{if(typeof asset.url==='string'&&asset.url.startsWith('blob:')){try{revokeManagedUrl(asset.url);}catch{}}});stopTimelineAudio();}
+function releaseProjectMediaUrls(){
+  const media=new Set([...document.querySelectorAll('video[data-preview-clip],audio[data-timeline-audio]'),...timelineAudioPlayers.values(),...[...previewAudioGraphs.values()].map(entry=>entry.media)]);
+  stopProjectPlayback('project-release');
+  for(const {graph} of previewAudioGraphs.values())for(const node of Object.values(graph).flat())if(typeof node?.disconnect==='function')try{node.disconnect();}catch{}
+  previewAudioGraphs.clear();
+  for(const element of media){element.pause();element.removeAttribute('src');element.load();}
+  state.mediaAssets.forEach(asset=>{if(typeof asset.url==='string'&&asset.url.startsWith('blob:')){try{revokeManagedUrl(asset.url);}catch{}}});
+}
 
 function saveProject() {
   if (state.view !== 'editor' || !state.projectId) return;
@@ -1911,6 +1918,10 @@ async function openProject(project) {
 }
 
 function createNewProject(){
+  stopProjectPlayback('new-project');
+  if(state.view==='editor'&&state.projectId&&saveProject()===false)throw new Error('Save the current project before creating another edit.');
+  clearTimeout(autosaveTimer);autosaveTimer=null;
+  releaseProjectMediaUrls();state.undo=[];state.redo=[];
   editorWorkspaceMode='video';
   selectProjectLibraryWorkspace('video',{refresh:false});
   state.projectId=`project-${Date.now()}`; state.currentProject=`Untitled project ${getSavedProjects().length+1}`; state.duration=30; state.currentTime=0; state.selected=null;
@@ -2787,7 +2798,7 @@ function bindEvents() {
   document.querySelector('[data-media-search]')?.addEventListener('input', event=>{mediaLibraryQuery=event.target.value;clearTimeout(event.target._timer);event.target._timer=setTimeout(render,160);});
   document.querySelector('[data-media-filter]')?.addEventListener('change',event=>{mediaLibraryFilter=event.target.value;render();});document.querySelectorAll('[data-media-quick-filter]').forEach(button=>button.addEventListener('click',()=>{mediaLibraryFilter=button.dataset.mediaQuickFilter;render();}));document.querySelector('[data-media-sort]')?.addEventListener('change',event=>{mediaLibrarySort=event.target.value;render();});
   document.querySelectorAll('[data-open-photos]').forEach(button=>button.addEventListener('click',()=>{const images=state.mediaAssets.filter(asset=>asset.type==='image'&&asset.url&&!asset.zorifiEnding);ZorifiPhotos.start({origin:'editor',items:images,mode:button.dataset.openPhotos});state.view='photos';render();}));
-  document.querySelector('[data-preview-quality]')?.addEventListener('change',event=>setPreviewQuality(event.target.value));
+  document.querySelector('select[data-preview-quality]')?.addEventListener('change',event=>setPreviewQuality(event.target.value));
   document.querySelector('[data-zorifi-ending]')?.addEventListener('change',event=>toggleZorifiEnding(event.target.checked));
   document.querySelector('[data-zorifi-ending-style]')?.addEventListener('change',event=>changeZorifiEndingStyle(event.target.value));
   const timelineScroll=document.querySelector('.timeline-scroll');if(timelineScroll&&state.timelineTool==='hand'&&!runtimeMode.touch)timelineScroll.addEventListener('pointerdown',panTimeline);
