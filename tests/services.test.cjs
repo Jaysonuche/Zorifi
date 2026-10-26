@@ -62,6 +62,18 @@ test('Gemini Lyria prompt returns a playable 30-second MP3 without polling or in
  finally{global.fetch=savedFetch;global.Netlify=savedNetlify;}
 });
 
+test('Gemini Lyria keeps Studio key, scale and rhythm in its music direction',async()=>{
+ const savedFetch=global.fetch,savedNetlify=global.Netlify;let body;
+ global.Netlify={env:{get:key=>key==='GEMINI_API_KEY'?'unit-test-key':''}};
+ global.fetch=async(url,options)=>{body=JSON.parse(options.body);return Response.json({steps:[{type:'model_output',content:[{type:'audio',mime_type:'audio/mp3',data:Buffer.from('music-clip').toString('base64')}]}]});};
+ try{
+  const response=await run('vanessa-music',{prompt:'A driving synthwave soundtrack',genre:'Synthwave',mood:'Energetic & Driving',tempo:128,key:'D',scaleMode:'minor',timeSignature:'6/8',groove:'half-time',instrumentation:'synth lead, bass guitar',duration:90});
+  const result=await response.json();assert.equal(response.status,200);assert.equal(result.duration,30);
+  for(const expected of ['Genre: Synthwave','Mood: Energetic & Driving','Tempo: 128 BPM','Key: D','Scale: minor','Time signature: 6/8','Groove: half-time','Instruments: synth lead, bass guitar'])assert.ok(body.input.includes(expected),expected);
+  assert.equal(body.model,'lyria-3-clip-preview');assert.equal(typeof body.input,'string');assert.ok(!body.parameters);assert.equal(result.mimeType,'audio/mpeg');
+ }finally{global.fetch=savedFetch;global.Netlify=savedNetlify;}
+});
+
 test('Gemini media errors are safe and never claim a generated file',async()=>{
  const savedFetch=global.fetch,savedNetlify=global.Netlify;
  global.Netlify={env:{get:key=>key==='GEMINI_API_KEY'?'unit-test-key':''}};

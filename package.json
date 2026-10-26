@@ -1,6 +1,6 @@
 {
   "name": "zorifi-video-editor",
-  "version": "3.39.10",
+  "version": "3.40.0",
   "packageManager": "pnpm@11.25.0",
   "description": "Zorifi cross-platform video editor",
   "desktopName": "Zorifi",
@@ -122,6 +122,8 @@
       "zorifi-color-scopes.js",
       "zorifi-master-app.js",
       "ZorifiVanessaStudioCore.js",
+      "ZorifiVanessaStudioDirector.js",
+      "zorifi-studio-director.js",
       "ZorifiVanessaTrueAudioAI.js",
       "ZorifiAutoCaptions.js",
       "ZorifiMulticamSyncEngine.js",

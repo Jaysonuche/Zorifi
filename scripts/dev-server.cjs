@@ -49,7 +49,7 @@ function createServer({crmDirectory=path.join(root,'.zorifi-private'),crmKey,loc
    }
    if (!['GET','HEAD'].includes(req.method)) return json(res,405,{error:'Method not allowed.'});
    const relative=decodeURIComponent(url.pathname).replace(/^\/+/, '') || 'index.html';
-   if (!(['crm.html','crm.js','crm.css','ZorifiVanessaStudioCore.js','ZorifiVanessaTrueAudioAI.js','ZorifiAutoCaptions.js','ZorifiMulticamSyncEngine.js'].includes(relative)||relative==='index.html'||relative==='app.js'||relative==='styles.css'||relative==='sw.js'||relative==='manifest.webmanifest'||/^zorifi-[\w-]+\.(js|json|css)$/.test(relative)||/^(icons|assets)\/[\w./-]+$/.test(relative)))return json(res,404,{error:'Not found.'});
+   if (!(['crm.html','crm.js','crm.css','ZorifiVanessaStudioCore.js','ZorifiVanessaStudioDirector.js','ZorifiVanessaTrueAudioAI.js','ZorifiAutoCaptions.js','ZorifiMulticamSyncEngine.js'].includes(relative)||relative==='index.html'||relative==='app.js'||relative==='styles.css'||relative==='sw.js'||relative==='manifest.webmanifest'||/^zorifi-[\w-]+\.(js|json|css)$/.test(relative)||/^(icons|assets)\/[\w./-]+$/.test(relative)))return json(res,404,{error:'Not found.'});
    const file=path.resolve(root,relative);if(!file.startsWith(root+path.sep))return json(res,403,{error:'Forbidden.'});
    if(['.mp4','.webm','.wav','.mp3'].includes(path.extname(file))){
     const stat=await fs.promises.stat(file);

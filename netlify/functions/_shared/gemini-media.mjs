@@ -60,7 +60,11 @@ export async function generateGeminiImage(input,description){
 export async function generateGeminiMusic(input,description){
  const model=geminiMediaModel('music');
  if(model!=='lyria-3-clip-preview')throw new ServiceError('Zorifi currently supports the 30-second Lyria Clip model only.',503,'NOT_CONFIGURED');
- const direction=[description,`Genre: ${text(input.genre,50)||'cinematic'}`,`Mood: ${text(input.mood,50)||'energetic'}`,input.instrumentation?`Instruments: ${text(input.instrumentation,200)}`:'',Number.isFinite(Number(input.tempo))?`Tempo: ${Math.max(40,Math.min(220,Number(input.tempo)))} BPM`:'',input.key?`Key: ${text(input.key,8)}`:'',input.timeSignature?`Time signature: ${text(input.timeSignature,8)}`:'',input.vocals==='instrumental'?'Instrumental, no vocals.':input.vocals==='vocal'?'Include vocals.':''].filter(Boolean).join('\n');
+ // Studio stores the tonic and scale separately. Preserve both in the natural-
+ // language brief; Lyria does not accept a nested `parameters` music object.
+ const scale=['major','minor','pentatonic'].includes(input.scaleMode)?input.scaleMode:'';
+ const groove=['straight','swing','half-time'].includes(input.groove)?input.groove:'';
+ const direction=[description,`Genre: ${text(input.genre,50)||'cinematic'}`,`Mood: ${text(input.mood,50)||'energetic'}`,input.instrumentation?`Instruments: ${text(input.instrumentation,200)}`:'',Number.isFinite(Number(input.tempo))?`Tempo: ${Math.max(40,Math.min(220,Number(input.tempo)))} BPM`:'',input.key?`Key: ${text(input.key,24)}`:'',scale?`Scale: ${scale}`:'',input.timeSignature?`Time signature: ${text(input.timeSignature,8)}`:'',groove?`Groove: ${groove}`:'',input.vocals==='instrumental'?'Instrumental, no vocals.':input.vocals==='vocal'?'Include vocals.':''].filter(Boolean).join('\n');
  const data=await interact('music',{model,input:direction});
  const result=outputBlock(data,'audio',['audio/mpeg','audio/mp3']);
  return {status:'complete',url:result.url,audioUrl:result.url,mimeType:'audio/mpeg',duration:30,stems:{},metadata:{provider:'Gemini Lyria',model}};

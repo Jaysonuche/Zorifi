@@ -96,11 +96,11 @@
     constructor(){this.currentPlan=null;}
     createScenePlan(input){this.currentPlan=createScenePlan(input);return this.currentPlan;}
     validateScenePlan(plan,capabilities={}){return validateScenePlan(plan,capabilities);}
-    applyToTimeline(state,plan){
+    applyToTimeline(state,plan,{capabilities={}}={}){
       if(!state||!Array.isArray(state.clips)||!Array.isArray(state.mediaAssets))throw new Error('A project with clips and media assets is required.');
       const assets=new Map(state.mediaAssets.map(asset=>[asset.id,asset]));
       if(!plan?.scenes?.every(scene=>Number.isFinite(Number(scene.duration))&&Number(scene.duration)>0))throw new Error('Every scene needs a positive finite duration.');
-      const valid=validateScenePlan(plan,{mediaIds:[...assets.keys()]});
+      const valid=validateScenePlan(plan,{...capabilities,mediaIds:[...assets.keys()]});
       // Prepare everything before changing state. Never replace missing media with unrelated footage.
       const additions=[];let cursor=state.clips.reduce((end,clip)=>Math.max(end,(Number(clip.start)||0)+(Number(clip.duration)||0)),0);
       const offset=cursor;
