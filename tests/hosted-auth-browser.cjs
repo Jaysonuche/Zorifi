@@ -24,9 +24,9 @@ function routeHostedAssets(context, localOrigin, seen) {
     context.route(`${HOSTED_ORIGIN}/**`, async route => {
       const request = route.request();
       const url = new URL(request.url());
-      if (url.pathname === '/.netlify/functions/vanessa-global') {
+      if (url.pathname === '/api/vanessa/chat') {
         seen.vanessa.push({authorization: request.headers().authorization || '', body: request.postDataJSON()});
-        return route.fulfill({status: 200, contentType: 'application/json', body: JSON.stringify({reply: '8', text: '8'})});
+        const input=request.postDataJSON();return route.fulfill({status: 200, contentType: 'application/json', body: JSON.stringify({sessionId:input.sessionId,requestId:input.requestId,sequence:input.sequence,reply:'8',text:'8',actions:[]})});
       }
       const response = await route.fetch({url: `${localOrigin}${url.pathname}${url.search}`});
       return route.fulfill({response});
@@ -184,8 +184,8 @@ async function main() {
     assert.equal(identity.stored[0].cloudUid, TEST_UID, 'The device-local profile must be tied to the Firebase UID.');
     const answer = await page.evaluate(async () => {
       ZorifiPrivacy.setConsent(localStorage, currentUser.id, true);
-      const response = await vanessaFetch(vanessaEndpoint('vanessa-global'), {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({message: 'What is 2 x 4?'})});
-      return {status: response.status, data: await response.json()};
+      const response = await safeVanessaRequest('vanessa-global', {message:'What is 2 x 4?'});
+      return {status: response.status, data: response.data};
     });
     assert.equal(answer.status, 200);
     assert.equal(answer.data.reply, '8');

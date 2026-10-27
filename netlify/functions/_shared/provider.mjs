@@ -37,7 +37,7 @@ export function configuration(){
  };
 }
 export async function upstream(url,options={}){
- let response;try{response=await fetch(url,{...options,redirect:'error',signal:AbortSignal.timeout(120000)});}catch{throw new ServiceError('The provider could not be reached. Check its configuration and retry.',502,'PROVIDER_UNAVAILABLE');}
+ let response;try{response=await fetch(url,{...options,redirect:'error',signal:options.signal?AbortSignal.any([options.signal,AbortSignal.timeout(120000)]):AbortSignal.timeout(120000)});}catch{if(options.signal?.aborted)throw new ServiceError('The request was cancelled.',499,'CANCELLED');throw new ServiceError('The provider could not be reached. Check its configuration and retry.',502,'PROVIDER_UNAVAILABLE');}
  if(!response.ok)throw new ServiceError(`The provider rejected the request (${response.status}). Check credentials, model access, and account limits.`,response.status===429?429:502,'PROVIDER_REJECTED');
  return response;
 }
@@ -59,11 +59,12 @@ export async function verifiedAccount(request){
  const promise=(async()=>{
   let response,data;
   try{
-   response=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key='+encodeURIComponent(apiKey),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({idToken:token}),signal:AbortSignal.timeout(10000)});
+   response=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key='+encodeURIComponent(apiKey),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({idToken:token}),signal:AbortSignal.any([request.signal,AbortSignal.timeout(10000)])});
    if([400,401].includes(response.status))throw new ServiceError('Your online session expired. Sign in again.',401,'AUTH_REQUIRED');
    if(!response.ok)throw new ServiceError('Account verification is temporarily unavailable. Please retry.',503,'AUTH_UNAVAILABLE');
    data=await response.json();
   }catch(error){
+   if(request.signal.aborted)throw new ServiceError('The request was cancelled.',499,'CANCELLED');
    if(error instanceof ServiceError)throw error;
    throw new ServiceError('Account verification is temporarily unavailable. Please retry.',503,'AUTH_UNAVAILABLE');
   }
@@ -97,17 +98,13 @@ export async function subscription(request){
   return {uid,pro:f.uid?.stringValue===uid&&f.verified?.booleanValue===true&&f.plan?.stringValue==='PRO'&&['ACTIVE','TRIAL'].includes(f.status?.stringValue)};
  }catch{return {pro:false,uid};}
 }
-export async function authorize(request){
- const hostname=new URL(request.url).hostname;
- if(['localhost','127.0.0.1','[::1]'].includes(hostname)){
-  const origin=request.headers.get('origin');if(origin&&new URL(origin).origin!==new URL(request.url).origin)throw new ServiceError('Cross-origin local service requests are not allowed.',403,'FORBIDDEN');
-  return;
- }
- await verifiedAccount(request);
-}
-export function handler(run,{multipart=false}={}){
+export async function authorize(request){return verifiedAccount(request);}
+export function handler(run,{multipart=false,rateLimited=false,privateSession=false}={}){
  return async request=>{
-  const origin=request.headers.get('origin'),allowed=[new URL(request.url).origin,'https://localhost','http://localhost',...env('ZORIFI_ALLOWED_ORIGINS').split(',').map(value=>value.trim()).filter(Boolean)];
+  const callerSignal=request.signal;
+  // Reserve time inside the 120-second host limit to finalize cancelled sessions.
+  if(rateLimited)request=new Request(request,{signal:AbortSignal.any([callerSignal,AbortSignal.timeout(105000)])});
+  const origin=request.headers.get('origin'),allowed=[new URL(request.url).origin,'https://localhost','http://localhost','capacitor://localhost',...env('ZORIFI_ALLOWED_ORIGINS').split(',').map(value=>value.trim()).filter(Boolean)];
   const reply=response=>{if(origin&&allowed.includes(origin)){response.headers.set('access-control-allow-origin',origin);response.headers.set('vary','Origin');response.headers.set('access-control-allow-methods','POST, OPTIONS');response.headers.set('access-control-allow-headers','content-type, authorization');}return response;};
   try{
    if(origin&&!allowed.includes(origin))throw new ServiceError('Origin is not allowed.',403,'FORBIDDEN');
@@ -116,8 +113,9 @@ export function handler(run,{multipart=false}={}){
    const length=Number(request.headers.get('content-length')||0);if(length>25*1024*1024)throw new ServiceError('Upload is too large.',413);
    await authorize(request);
    let input;if(multipart)input=await request.formData();else{const raw=await request.text();if(raw.length>12*1024*1024)throw new ServiceError('Request is too large.',413);try{input=JSON.parse(raw||'{}');}catch{throw new ServiceError('Request must contain valid JSON.');}if(!input||Array.isArray(input)||typeof input!=='object')throw new ServiceError('A JSON object is required.');}
+   if(rateLimited&&!(privateSession&&input.operation==='clear')){const {storeFor}=await import('./chat-session-store.mjs');const {uid}=await verifiedAccount(request);await storeFor(request,uid).limit(request.signal);}
    const result=await run(input,request);return reply(result instanceof Response?result:json(result));
-  }catch(error){return reply(json({error:error instanceof ServiceError?error.message:'The service could not complete this request.',code:error.code||'SERVICE_FAILED',configured:error.code!=='NOT_CONFIGURED'},error.status||500));}
+  }catch(error){if(request.signal.aborted)error=callerSignal.aborted?new ServiceError('The request was cancelled.',499,'CANCELLED'):new ServiceError('Vanessa took too long to respond. Please retry.',504,'PROVIDER_TIMEOUT');const response=json({error:error instanceof ServiceError?error.message:'The service could not complete this request.',code:error.code||'SERVICE_FAILED',configured:error.code!=='NOT_CONFIGURED',...(error.expectedSequence?{expectedSequence:error.expectedSequence}:{})},error.status||500);if(error.retryAfter)response.headers.set('Retry-After',String(error.retryAfter));return reply(response);}
  };
 }
 export async function language(prompt,{instructions='',jsonMode=false,preferredLanguage,image,webSearch=false,signal}={}){
@@ -146,7 +144,7 @@ export async function language(prompt,{instructions='',jsonMode=false,preferredL
  }
  if(usesOpenRouter()){
   if(image||webSearch)throw new ServiceError('This OpenRouter integration supports text and structured planning. Image analysis and web research require a separately configured capability.',400,'UNSUPPORTED_CAPABILITY');
-  const data=await upstreamJson('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{authorization:`Bearer ${needed('AI_PROVIDER_KEY')}`,'content-type':'application/json','X-OpenRouter-Title':'Zorifi Media Suite'},body:JSON.stringify({model:env('AI_PROVIDER_MODEL')||'openrouter/free',messages:[{role:'system',content:`${identity.providerInstructions({preferredLanguage})}\n${instructions}${jsonMode?'\nReturn a valid JSON object only.':''}`},{role:'user',content:prompt}],max_tokens:6000,stream:false,...(jsonMode?{response_format:{type:'json_object'}}:{})})});
+  const data=await upstreamJson('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{authorization:`Bearer ${needed('AI_PROVIDER_KEY')}`,'content-type':'application/json','X-OpenRouter-Title':'Zorifi Media Suite'},signal,body:JSON.stringify({model:env('AI_PROVIDER_MODEL')||'openrouter/free',messages:[{role:'system',content:`${identity.providerInstructions({preferredLanguage})}\n${instructions}${jsonMode?'\nReturn a valid JSON object only.':''}`},{role:'user',content:prompt}],max_tokens:6000,stream:false,...(jsonMode?{response_format:{type:'json_object'}}:{})})});
   const choice=data.choices?.[0],output=choice?.message?.content;
   if(data.error||choice?.finish_reason!=='stop'||typeof output!=='string'||!output.trim())throw new ServiceError('The provider did not return a complete result.',502,'INVALID_PROVIDER_RESPONSE');
   if(!jsonMode)return output;
@@ -157,7 +155,7 @@ export async function language(prompt,{instructions='',jsonMode=false,preferredL
  if(jsonMode)payload.text={format:{type:'json_object'}};
  if(webSearch)payload.tools=[{type:'web_search'}];
  if(image){if(!/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(image))throw new ServiceError('Upload a supported image for analysis.');payload.input=[{role:'user',content:[{type:'input_text',text:prompt},{type:'input_image',image_url:image}]}];}
- const data=await upstreamJson('https://api.openai.com/v1/responses',{method:'POST',headers:{authorization:`Bearer ${key}`,'content-type':'application/json'},body:JSON.stringify(payload)});
+ const data=await upstreamJson('https://api.openai.com/v1/responses',{method:'POST',headers:{authorization:`Bearer ${key}`,'content-type':'application/json'},body:JSON.stringify(payload),signal});
  const output=data.output?.flatMap(item=>item.content||[]).filter(item=>item.type==='output_text').map(item=>item.text).join('\n');
  if(!output||data.status==='incomplete')throw new ServiceError('The language provider did not return a complete result.',502,'INVALID_PROVIDER_RESPONSE');
  if(!jsonMode){const citations=webSearch?data.output?.flatMap(item=>item.content||[]).flatMap(item=>item.annotations||[]).filter(item=>item.type==='url_citation'&&/^https:\/\//.test(item.url)).map(item=>`${item.title||'Source'}: ${item.url}`):[];return output+(citations?.length?`\n\nSources:\n${[...new Set(citations)].join('\n')}`:'');}
@@ -174,10 +172,11 @@ export function normalizeMedia(data,kind){
 }
 
 // SSE is opt-in; complete JSON plans continue through language().
-export function languageStreamResponse(prompt,{instructions='',preferredLanguage}={}){
+export function languageStreamResponse(prompt,{instructions='',preferredLanguage,signal}={}){
  if(!usesGemini())throw new ServiceError('Streaming requires the Gemini language provider.',400,'STREAM_UNSUPPORTED');
  const models=geminiModels();
  const abort=new AbortController(),encoder=new TextEncoder();let cancelled=false;
+ const disconnect=()=>abort.abort(signal?.reason);if(signal?.aborted)disconnect();else signal?.addEventListener('abort',disconnect,{once:true});
  const timer=setTimeout(()=>abort.abort(),120000);
  async function* events(){
   let visibleLength=0,attemptedModel='',finishReason='';
@@ -213,8 +212,8 @@ export function languageStreamResponse(prompt,{instructions='',preferredLanguage
     yield 'data: '+JSON.stringify({error:failure.message,code:failure.code})+'\n\n';
    }
   }
-  finally{clearTimeout(timer);}
+  finally{clearTimeout(timer);signal?.removeEventListener('abort',disconnect);}
  }
  const iterator=events();
- return new Response(new ReadableStream({async pull(controller){const next=await iterator.next();if(cancelled)return;if(next.done)controller.close();else controller.enqueue(encoder.encode(next.value));},cancel(){cancelled=true;abort.abort();clearTimeout(timer);void iterator.return();}}),{headers:{'content-type':'text/event-stream; charset=utf-8','cache-control':'no-store, no-transform','x-accel-buffering':'no'}});
+ return new Response(new ReadableStream({async pull(controller){const next=await iterator.next();if(cancelled)return;if(next.done)controller.close();else controller.enqueue(encoder.encode(next.value));},cancel(){cancelled=true;abort.abort();clearTimeout(timer);signal?.removeEventListener('abort',disconnect);void iterator.return();}}),{headers:{'content-type':'text/event-stream; charset=utf-8','cache-control':'no-store, no-transform','x-accel-buffering':'no'}});
 }

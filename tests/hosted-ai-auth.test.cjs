@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-test('hosted AI requires a verified Firebase ID token while loopback preview remains local', async () => {
+test('AI requires a verified Firebase ID token on hosted and loopback routes', async () => {
   const {authorize} = await import('../netlify/functions/_shared/provider.mjs');
   const previousFetch = global.fetch;
   const previousKey = process.env.FIREBASE_WEB_API_KEY;
@@ -27,8 +27,8 @@ test('hosted AI requires a verified Firebase ID token while loopback preview rem
     global.fetch = async () => Response.json({error: {message: 'INVALID_ID_TOKEN'}}, {status: 400});
     await assert.rejects(authorize(new Request(authenticated)), error => error.status === 401 && error.code === 'AUTH_REQUIRED');
 
-    await authorize(new Request('http://127.0.0.1:4173/api/vanessa-provider'));
-    await assert.rejects(authorize(new Request('http://127.0.0.1:4173/api/vanessa-provider', {headers: {origin: 'https://untrusted.example'}})), error => error.status === 403);
+    await assert.rejects(authorize(new Request('http://127.0.0.1:4173/api/vanessa-provider')), error => error.status === 401);
+    await assert.rejects(authorize(new Request('http://127.0.0.1:4173/api/vanessa-provider', {headers: {origin: 'https://untrusted.example'}})), error => error.status === 401);
   } finally {
     global.fetch = previousFetch;
     if (previousKey === undefined) delete process.env.FIREBASE_WEB_API_KEY;

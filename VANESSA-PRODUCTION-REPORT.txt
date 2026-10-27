@@ -1,0 +1,174 @@
+VANESSA PRODUCTION INTEGRATION — ZORIFI 3.42.0
+27 October 2026
+Workspace: C:\Users\User\Documents\ChatGPT\Zorifi
+Status: Implemented and tested locally. Firebase rules staged but NOT published;
+the application release must follow that permission change. No paid live AI call
+was made during verification.
+
+ACTUAL ARCHITECTURE FOUND (PHASE 1)
+
+Frontend: Vanilla JavaScript, HTML and CSS, with UMD modules; no React/Vue store.
+C:\Users\User\Documents\ChatGPT\Zorifi\index.html loads app.js and the existing
+zorifi-* feature modules. app.js owns the single mutable state object and render().
+
+Authentication: zorifi-firebase.js exports FirebaseGateway. signIn(), signUp(),
+signInWithGoogle(), getIdToken() and authenticatedFetch() use Firebase Identity
+Toolkit/Secure Token REST. app.js currentUser.cloudUid must match session.uid.
+currentUser.id is the established local storage namespace and may differ from the
+Firebase UID. Existing verified legacy-account linking preserves that namespace.
+
+Backend: Vercel Node handlers under api/, sharing ESM provider and service code in
+netlify/functions/_shared/. Netlify function wrappers and scripts/dev-server.cjs
+reuse those handlers. api/vanessa-provider.js adapts HTTP requests and responses.
+verifiedAccount(request) verifies Firebase tokens with accounts:lookup on every
+new request; verification is deduplicated only within that request.
+
+Editor: app.js state, splitClip(), undo(), redo(), snapshot()/pushHistory(),
+recalculateDuration(), render(), and vanessaActionAdapter().
+zorifi-project-model.js captureHistory()/restoreHistory() define Undo snapshots;
+serializeProject()/migrateProject() define persisted projects. History is capped
+at 30 entries and is currently a runtime stack, not a cross-refresh Undo log.
+
+Persistence: app.js saveProject(), getSavedProjects(), loadProject() and recovery
+checkpoints. Project JSON lives at localStorage key zorifi-projects-v1:<localId>.
+Media blobs use IndexedDB zorifi-project-media-v1/media with keys
+<localId>::<projectId>::<assetId>. No Studio project file/media upload was added.
+Firestore retains existing account/Social data and now has proposed private
+Vanessa conversation and quota paths. Device storage is not server-side ownership
+proof or a security boundary against someone controlling that same browser.
+
+IMPLEMENTED INTEGRATION (PHASES 2–4)
+
+The existing floating orb, shared inspector/chat, first-use introduction, optional
+idle assistance, opt-in microphone/wake mode and ElevenLabs playback remain in
+use. There is no standalone demo or duplicate editor state. Idle help is scoped
+to active editor projects. Microphone/wake starts disabled unless that account
+previously enabled it.
+
+New zorifi-vanessa-production.js provides the authenticated conversation/proposal
+bridge and window.ZorifiEditorStore as a facade over the existing live state.
+New zorifi-timeline-edit-api.js supplies shared native split and trim primitives,
+used by both manual editing and the validated Vanessa adapter.
+
+Pipeline: instruction -> authenticated POST /api/vanessa/chat -> server provider
+interpretation -> allowlisted structured proposal -> strict client validation ->
+review and Apply for split/trim -> existing editor mutation/history -> actual
+timeline verification -> local save/readback -> truthful assistant result.
+Supported initial commands: clip.split, clip.trim, history.undo, history.redo,
+project.save. Unsupported parameters, arbitrary code/state fields, nonexistent
+clips, locked tracks, automatic endings and invalid source bounds are rejected.
+Split/trim preserve independent nested clip data, bound animation to the retained
+window and clamp fades. The playhead remains at its actual timeline time.
+
+Pending proposals are bound to the Firebase session, local account, project,
+view, selection and timeline revision. A stale proposal or navigation during
+authentication fails before mutation. Stop invalidates proposals and aborts
+pending requests. Completed synchronous mutations require Undo to reverse.
+Save failure rolls back the edit; a second persistence failure is reported as an
+unsaved rollback instead of claiming everything was saved.
+
+New backend files:
+  api/vanessa/chat.js
+  netlify/functions/vanessa-chat.mjs
+  netlify/functions/_shared/vanessa-router.mjs
+  netlify/functions/_shared/chat-session-store.mjs
+All are under C:\Users\User\Documents\ChatGPT\Zorifi.
+
+The route verifies Firebase identity and binds sessions to that UID/project ID.
+Firestore sessions: /users/{uid}/sessions/{sessionId}.
+Durable quota: /users/{uid}/vanessaLimits/chat, 20 requests per 60-second window.
+Compare-and-set writes enforce ordering and concurrent-request exclusion.
+Request hashes bind retry IDs to the original input. Stored response signatures
+use a server-only HMAC key, domain-separated from other uses; altered replies
+cannot be replayed as valid provider proposals. An optional stable
+VANESSA_SESSION_SIGNING_KEY is documented in .env.example; otherwise the existing
+text-provider key signs responses. Credentials never enter browser bundles.
+Quota storage failure fails closed; there is no process-memory quota fallback.
+
+The loopback authentication exemption and local-password sign-in fallback were
+removed. Firebase-verified legacy profile linking remains. Provider cancellation
+signals now propagate through auth, HTTP adapters, text and speech requests.
+Rate-limited text routes have a 105-second budget to reserve host cleanup time.
+Electron routes /api/vanessa/chat through its fixed hosted relay with the user's
+Firebase bearer; local provider keys cannot replace that private session route.
+Capacitor builds target Zorifi's fixed HTTPS chat route with authenticated CORS.
+Busy requests are rejected explicitly instead of silently discarded. Request
+controllers/listeners and bridge lifecycle hooks are cleaned up.
+
+ADDITIONAL CHANGED FILES
+
+app.js; api/vanessa-provider.js; netlify/functions/_shared/provider.mjs;
+netlify/functions/_shared/services.mjs; scripts/dev-server.cjs; firestore.rules;
+zorifi-master-app.js; zorifi-director-integration.js; zorifi-phase8.js;
+electron-main.cjs; scripts/hosted-language-gateway.cjs;
+index.html; sw.js; package.json; vercel.json; .env.example;
+zorifi-app-settings.js; generated zorifi-interface-catalog.json.
+Existing provider/auth tests were migrated to explicit Firebase fixtures.
+New tests/helpers/firebase-provider.cjs is test-only and is never shipped.
+Unrelated README, src/services and native-project changes were preserved.
+
+VERIFICATION (PHASE 5)
+
+node --test tests/*.test.cjs: 325 passed, 0 failed, 0 skipped.
+This includes 15 native timeline tests and 7 production server tests covering
+schemas, replay integrity, per-UID quotas, concurrency, auth and cancellation.
+The desktop private-session relay also verifies its fixed destination, forwarded
+Firebase bearer, cancellation signal, JSON response and exclusion of other secrets.
+
+Official Firestore emulator, demo-zorifi-social on loopback port 8085:
+node --test tests/vanessa-rules-emulator.cjs: 4 passed.
+node --test tests/social-rules-emulator.cjs: 22 passed.
+Sessions/quota owner isolation, private list denial, server timestamps, exact
+fields, monotonic turns, pending locks, immutable project binding, 20-request
+limit/reset, and denied Studio project/media writes were checked. Existing Social
+privacy, blocking, contacts, messages, usernames and explicit video sharing passed.
+
+node tests/vanessa-production-browser.cjs: Chromium and Windows WebKit passed.
+Real running editor: proposed split waits for Apply; DOM timeline shows both
+clips; Undo/Redo; positive trim; save and refresh; local media restore; stale
+confirmation; Stop; navigation while auth is pending; ordinary conversation;
+microphone stays opt-in; second-account project/media isolation.
+Chromium used a real persisted IndexedDB Blob. This Windows WebKit build could
+not save Blobs; its project/reload checks used a real device-persisted data URL.
+That is a browser capability limitation, not evidence of iPhone Blob behavior.
+
+node tests/director-companion-browser.cjs: Chromium and WebKit passed.
+node tests/director-companion-ui-browser.cjs: Chromium and WebKit passed for
+first-use introduction, modal defer, responsive orb, shared chat, idle suppression
+and logout cleanup. Chromium played a real fixture WAV and speech captions cleared
+when audio ended. Windows WebKit could not play that audio and displayed failure;
+no simulated playback was counted as successful speech.
+
+node tests/hosted-auth-browser.cjs: Chromium passed. Hosted session guards,
+email/phone legacy linking, fresh-device login, real FirebaseGateway bearer flow,
+reload/token refresh and revoked-token recovery were exercised with REST fixtures.
+
+node scripts/build-web.cjs: 139 web files plus assets built.
+node scripts/check-project.cjs: 305 source files and 277 browser/cache references
+passed syntax/integrity checks. Release cache is zorifi-v242.
+Evidence/logs are in C:\Users\User\Documents\ChatGPT\Zorifi\artifacts\v5-*.
+
+REMAINING LIMITATIONS AND DEPLOYMENT
+
+1. Publish approval is required for the staged Firebase rules before deploying the
+   application. The staged text exactly matches tested firestore.rules. Existing
+   published rules were compared with repository HEAD before adding the two new
+   private paths. Production access behavior has not yet been exercised.
+2. Device-only projects have no authoritative server document. The server verifies
+   authenticated workspace/session binding; the client checks actual local state.
+   It cannot independently verify the provenance of local media or project files.
+3. Provider/auth browser responses were controlled fixtures; no paid live Gemini
+   or ElevenLabs request was made. Credentials, provider availability, quotas and
+   model access can still fail and are surfaced as errors.
+4. The durable chat route returns complete JSON replies; the legacy SSE endpoint
+   remains available. Word-accurate speech alignment is not claimed: the existing
+   ElevenLabs response has no word timestamps. Captions track actual speech state.
+5. Cloud sessions keep bounded recent context and the last signed reply, not an
+   unlimited transcript archive. Clearing the current conversation removes its
+   cloud session as well as the corresponding local UI conversation.
+6. Undo stacks do not survive refresh; committed edited project contents do.
+   Trimming/splitting synthesizes boundary keyframes; it does not promise identical
+   mathematical Bezier subcurves for every complex custom easing case.
+7. Web behavior and the desktop cloud relay were verified. No native packaging,
+   installed Electron UI, or physical iPhone microphone/installation behavior was
+   verified in this pass.

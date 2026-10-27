@@ -11,6 +11,12 @@ class Reply extends EventEmitter {
   destroy() { this.destroyed = true; }
 }
 
+test('desktop private-session bridge reaches the fixed hosted route with only the user token', async()=>{
+ const response=new Reply(),body=Buffer.from(JSON.stringify({sessionId:'private-session',requestId:'turn',sequence:1,message:'Hello'}));let received;
+ await relayHostedLanguage({service:'vanessa-chat',request:{method:'POST',headers:{authorization:'Bearer user-token',cookie:'private-cookie','x-api-key':'never-forward'}},response,body,fetchImpl:async(url,options)=>{received={url,options};return Response.json({sessionId:'private-session',requestId:'turn',sequence:1,reply:'Hello',actions:[]});}});
+ assert.equal(received.url,`${HOSTED_ORIGIN}/api/vanessa-provider?service=vanessa-chat`);assert.equal(received.options.headers.authorization,'Bearer user-token');assert(!received.options.headers.cookie);assert(!received.options.headers['x-api-key']);assert(received.options.signal);assert.equal(response.status,200);assert.equal(JSON.parse(response.text).reply,'Hello');
+});
+
 test('desktop cloud metadata contains provider status but no credentials', async () => {
   const calls = [];
   const configuration = await hostedLanguageConfiguration(async (url, options) => {

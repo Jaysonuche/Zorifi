@@ -1,3 +1,4 @@
+const {firebaseTransport,firebaseEnv}=require('./helpers/firebase-provider.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const {once}=require('node:events');
@@ -17,11 +18,11 @@ async function mocked(fetchImpl,run,overrides={}){
   const saved=Object.fromEntries(keys.map(key=>[key,process.env[key]]));
   for(const key of keys)delete process.env[key];
   const configuration={GEMINI_API_KEY:'mock-private-autocut-key',GEMINI_MODEL:'gemini-2.5-flash',FIREBASE_WEB_API_KEY:'public-auth-test',FIREBASE_PROJECT_ID:'test-project',...overrides};
-  global.Netlify={env:{get:key=>configuration[key]||''}};global.fetch=fetchImpl;
+  global.Netlify={env:{get:firebaseEnv(key=>configuration[key]||'')}};global.fetch=firebaseTransport(fetchImpl);
   try{return await run(await import('../netlify/functions/_shared/autocut-planner.mjs'));}
   finally{global.fetch=oldFetch;global.Netlify=oldNetlify;for(const key of keys)if(saved[key]===undefined)delete process.env[key];else process.env[key]=saved[key];}
 }
-function localRequest(body=input()){return new Request('http://127.0.0.1:4173/.netlify/functions/vanessa-autocut',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});}
+function localRequest(body=input()){return new Request('http://127.0.0.1:4173/.netlify/functions/vanessa-autocut',{method:'POST',headers:{authorization:'Bearer fixture-token','content-type':'application/json'},body:JSON.stringify(body)});}
 
 test('optional sound design uses an explicit bounded cue catalog and protects speech and reading',async()=>{
   await mocked(async()=>response(plan()),async({validateAutoCutInput,validateAutoCutPlan})=>{
@@ -123,7 +124,7 @@ test('AutoCut requires hosted Firebase authorization and disallows cross-origin 
   await mocked(async()=>{count++;throw Error('Unauthenticated traffic must not reach a provider');},async({autoCutPlan})=>{
     const missing=await autoCutPlan(new Request('https://zorifi.vercel.app/api/vanessa-provider?service=vanessa-autocut',{method:'POST',body:JSON.stringify(input())}));
     assert.equal(missing.status,401);assert.equal((await missing.json()).code,'AUTH_REQUIRED');
-    const crossOrigin=await autoCutPlan(new Request('http://127.0.0.1:4173/api/vanessa-autocut',{method:'POST',headers:{origin:'https://untrusted.example'},body:JSON.stringify(input())}));assert.equal(crossOrigin.status,403);assert.equal(count,0);
+    const crossOrigin=await autoCutPlan(new Request('http://127.0.0.1:4173/api/vanessa-autocut',{method:'POST',headers:{authorization:'Bearer fixture-token',origin:'https://untrusted.example'},body:JSON.stringify(input())}));assert.equal(crossOrigin.status,403);assert.equal(count,0);
   });
 });
 
@@ -144,7 +145,7 @@ test('the local and Vercel gateway adapters both dispatch the AutoCut planner',a
     const {createServer}=require('../scripts/dev-server.cjs');
     const server=createServer({localMedia:{enabled:()=>false,dispose(){}}});server.listen(0,'127.0.0.1');await once(server,'listening');
     try{
-      const result=await fetch(`http://127.0.0.1:${server.address().port}/.netlify/functions/vanessa-autocut`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(input())});
+      const result=await fetch(`http://127.0.0.1:${server.address().port}/.netlify/functions/vanessa-autocut`,{method:'POST',headers:{authorization:'Bearer fixture-token','content-type':'application/json'},body:JSON.stringify(input())});
       assert.equal(result.status,200);assert.equal((await result.json()).metadata.provider,'Gemini');
     }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
     const adapter=require('../api/vanessa-provider.js');

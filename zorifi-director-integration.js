@@ -35,7 +35,7 @@
     if(voice&&vanessaVoiceEnabled&&ZorifiPrivacy.consent(localStorage,currentUser.id))void speakAsVanessa(text);
   }
   function canPrompt(){
-    return Boolean(ready()&&preferences.idleHelp&&!vanessaOpen&&!state.playing&&!vanessaBusy&&!vanessaListening&&!engine?.busy&&!['preparing','speaking','blocked'].includes(vanessaVoicePlaybackState)&&!document.querySelector('.mobile-tool-sheet,.mobile-clip-inspector')&&!document.activeElement?.matches('input,textarea,select,[contenteditable="true"]'));
+    return Boolean(ready()&&state.view==='editor'&&state.projectId&&preferences.idleHelp&&!vanessaOpen&&!state.playing&&!vanessaBusy&&!vanessaListening&&!engine?.busy&&!['preparing','speaking','blocked'].includes(vanessaVoicePlaybackState)&&!document.querySelector('.mobile-tool-sheet,.mobile-clip-inspector')&&!document.activeElement?.matches('input,textarea,select,[contenteditable="true"]'));
   }
   function tryIntroduction(){
     clearTimeout(introTimer);introTimer=null;

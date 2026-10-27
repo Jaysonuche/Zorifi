@@ -173,6 +173,49 @@ service cloud.firestore {
       allow get: if signedIn() && resource.data.reporter == request.auth.uid;
       allow list, update, delete: if false;
     }
+    // Private Vanessa sessions contain chat turns and project IDs, never Studio files.
+    match /users/{uid}/vanessaLimits/chat {
+      allow get: if owner(uid);
+      allow list, delete: if false;
+      function validLimit() {
+        let d = request.resource.data;
+        return owner(uid) && d.keys().hasOnly(['uid','count','startedAt','updatedAt']) &&
+          d.uid == uid && d.count is int && d.count >= 1 && d.count <= 20 &&
+          d.startedAt is timestamp && d.updatedAt == request.time;
+      }
+      allow create: if validLimit() && request.resource.data.count == 1 && request.resource.data.startedAt == request.time;
+      allow update: if validLimit() &&
+        ((request.resource.data.startedAt == resource.data.startedAt && request.resource.data.count == resource.data.count + 1 && request.time < resource.data.startedAt + duration.value(60,'s')) ||
+         (resource.data.startedAt <= request.time - duration.value(60,'s') && request.resource.data.startedAt == request.time && request.resource.data.count == 1));
+    }
+    match /users/{uid}/sessions/{sessionId} {
+      allow get, delete: if owner(uid);
+      allow list: if false;
+      function validSession() {
+        let d = request.resource.data;
+        return owner(uid) && sessionId.matches('^[a-zA-Z0-9_-]{1,160}$') &&
+          d.keys().hasOnly(['uid','projectId','sequence','requestId','status','historyJson','resultJson','requestHash','resultSignature','startedAt','updatedAt']) &&
+          d.uid == uid && d.projectId is string && d.projectId.size() <= 160 &&
+          d.sequence is int && d.sequence > 0 && d.requestId is string && d.requestId.size() <= 160 &&
+          d.status in ['pending','complete','cancelled','failed'] && d.startedAt is timestamp &&
+          d.updatedAt == request.time && d.historyJson is string && d.historyJson.size() <= 100000 &&
+          d.resultJson is string && d.resultJson.size() <= 32000 &&
+          d.requestHash is string && d.requestHash.matches('^[a-f0-9]{64}$') &&
+          d.resultSignature is string && (d.resultSignature == '' || d.resultSignature.matches('^[a-f0-9]{64}$'));
+      }
+      allow create: if validSession() && request.resource.data.sequence == 1 &&
+        request.resource.data.status == 'pending' && request.resource.data.startedAt == request.time &&
+        request.resource.data.historyJson == '[]' && request.resource.data.resultJson == '' && request.resource.data.resultSignature == '';
+      allow update: if validSession() && request.resource.data.projectId == resource.data.projectId &&
+        ((resource.data.status == 'pending' && request.resource.data.sequence == resource.data.sequence &&
+          request.resource.data.requestId == resource.data.requestId && request.resource.data.startedAt == resource.data.startedAt &&
+          request.resource.data.requestHash == resource.data.requestHash &&
+          request.resource.data.status in ['complete','cancelled','failed']) ||
+         (request.resource.data.sequence == resource.data.sequence + 1 && request.resource.data.requestId != resource.data.requestId &&
+          request.resource.data.status == 'pending' && request.resource.data.startedAt == request.time &&
+          request.resource.data.historyJson == resource.data.historyJson && request.resource.data.resultJson == '' && request.resource.data.resultSignature == '' &&
+          (resource.data.status != 'pending' || resource.data.startedAt < request.time - duration.value(130,'s'))));
+    }
     // Existing billing records remain owner-readable and server-written only.
     match /users/{uid}/private/subscription { allow get: if owner(uid); allow list, write: if false; }
     match /{document=**} { allow read, write: if false; }

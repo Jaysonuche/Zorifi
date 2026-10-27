@@ -5,7 +5,7 @@ const {pathToFileURL} = require('node:url');
 const {createLocalMediaJobs} = require('./local-media-jobs.cjs');
 const root = path.resolve(__dirname, '..');
 const types = {'.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.webmanifest':'application/manifest+json', '.png':'image/png', '.jpeg':'image/jpeg', '.mp4':'video/mp4', '.webm':'video/webm', '.wav':'audio/wav', '.mp3':'audio/mpeg', '.vtt':'text/vtt', '.svg':'image/svg+xml', '.ico':'image/x-icon'};
-const services = new Set(['vanessa-background','vanessa-director-tools','vanessa','vanessa-global','vanessa-language','vanessa-image','vanessa-scene-image','vanessa-video','vanessa-video-tool','vanessa-motion','vanessa-music','vanessa-stems','vanessa-voice','vanessa-speech','vanessa-captions','vanessa-scenes','vanessa-autocut','vanessa-provider-test','support-email']);
+const services = new Set(['vanessa-chat','vanessa-background','vanessa-director-tools','vanessa','vanessa-global','vanessa-language','vanessa-image','vanessa-scene-image','vanessa-video','vanessa-video-tool','vanessa-motion','vanessa-music','vanessa-stems','vanessa-voice','vanessa-speech','vanessa-captions','vanessa-scenes','vanessa-autocut','vanessa-provider-test','support-email']);
 function json(res, status, value) { res.writeHead(status, {'content-type':'application/json', 'cache-control':'no-store'}); res.end(JSON.stringify(value)); }
 function createServer({crmDirectory=path.join(root,'.zorifi-private'),crmKey,localMedia=createLocalMediaJobs()}={}) {
  const crm=require('./crm-store.cjs').createCRM({directory:crmDirectory,...(crmKey?{key:crmKey}:{})});
@@ -23,10 +23,14 @@ function createServer({crmDirectory=path.join(root,'.zorifi-private'),crmKey,loc
     return json(res, 200, {server:'Zorifi development server', configurations, imageConfigured:configurations.image.configured, musicConfigured:configurations.music.configured, secureStorage:{available:false}, provider:{name:'Vanessa AI Provider'}});
    }
    if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/.netlify/functions/')) {
-    const name = url.pathname === '/api/vanessa-provider' ? (url.searchParams.get('service')||'vanessa-global') : url.pathname.split('/').at(-1);
+    const name = url.pathname === '/api/vanessa/chat'?'vanessa-chat':url.pathname === '/api/vanessa-provider' ? (url.searchParams.get('service')||'vanessa-global') : url.pathname.split('/').at(-1);
     if (!services.has(name)) return json(res, 404, {error:'Unknown service.'});
     const chunks=[]; let size=0;
     for await (const chunk of req) {size+=chunk.length;if(size>32*1024*1024)return json(res,413,{error:'Request too large.'});chunks.push(chunk);}
+    const controller=new AbortController(),disconnect=()=>{if(!res.writableEnded)controller.abort();};req.once('aborted',disconnect);res.once('close',disconnect);res.once('finish',()=>{req.off('aborted',disconnect);res.off('close',disconnect);});
+    const authHeaders=new Headers();for(const [key,value]of Object.entries(req.headers))if(value)authHeaders.set(key,Array.isArray(value)?value.join(','):value);
+    const authRequest=new Request(`${origin}${req.url}`,{method:'POST',headers:authHeaders,signal:controller.signal});
+    if(name==='vanessa-provider-test'||name==='vanessa-image'||name==='vanessa-music'){try{await(await import('../netlify/functions/_shared/provider.mjs')).authorize(authRequest);}catch(error){return json(res,error.status||401,{error:error.message,code:error.code});}}
     const localKind=name==='vanessa-image'?'image':name==='vanessa-music'?'music':null;
     if(localKind&&localMedia.enabled(localKind)){
       if(req.method!=='POST')return json(res,405,{error:'Method not allowed.'});
@@ -43,7 +47,7 @@ function createServer({crmDirectory=path.join(root,'.zorifi-private'),crmKey,loc
       }
     }
     const headers = new Headers(); for(const [key,value] of Object.entries(req.headers)) if(value) headers.set(key, Array.isArray(value)?value.join(','):value);
-    const request = new Request(`${origin}${req.url}`, {method:req.method, headers, ...(!['GET','HEAD'].includes(req.method)?{body:Buffer.concat(chunks)}:{})});
+    const request = new Request(`${origin}${req.url}`, {method:req.method, headers, signal:controller.signal, ...(!['GET','HEAD'].includes(req.method)?{body:Buffer.concat(chunks)}:{})});
     const handler = (await import(pathToFileURL(path.join(root,'netlify','functions',`${name}.mjs`)).href)).default;
     const result = await handler(request); if(result.headers.get('content-type')?.includes('text/event-stream'))return await require('../netlify/functions/_shared/stream-response.cjs')(result,res); res.writeHead(result.status,Object.fromEntries(result.headers));res.end(Buffer.from(await result.arrayBuffer()));return;
    }

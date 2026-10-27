@@ -17,7 +17,7 @@
   function trimClip(clip,asset,{side,time,fps=30,minimumFrames=2}={}){
     if(!clip)throw new Error('A clip is required.');const next=structuredClone(clip),kind=mediaKind(asset),minimum=Math.max(1/fps,minimumFrames/fps),start=finite(clip.start),end=start+Math.max(minimum,finite(clip.duration,minimum)),rate=Math.max(.01,finite(clip.playbackRate,1)),target=frameTime(time,fps);
     if(side==='left'){
-      const newStart=clamp(target,0,end-minimum),change=newStart-start;next.start=frameTime(newStart,fps);next.duration=Math.max(minimum,frameTime(end-next.start,fps));
+      const earliest=kind==='image'?0:Math.max(0,start-finite(clip.sourceStart)/rate),newStart=clamp(target,earliest,end-minimum),change=newStart-start;next.start=frameTime(newStart,fps);next.duration=Math.max(minimum,frameTime(end-next.start,fps));
       if(kind!=='image')next.sourceStart=Math.max(0,finite(clip.sourceStart)+change*rate);
     }else if(side==='right'){
       let newEnd=Math.max(start+minimum,target);if(kind!=='image'&&finite(asset?.duration)>0)newEnd=Math.min(newEnd,start+Math.max(minimum,(finite(asset.duration)-finite(clip.sourceStart))/rate));next.duration=Math.max(minimum,frameTime(newEnd-start,fps));

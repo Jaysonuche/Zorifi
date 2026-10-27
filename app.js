@@ -519,7 +519,7 @@ let vanessaStreamText='',vanessaStreamFailure='',vanessaStreamEpoch=0;
 let vanessaHistory=[];
 let vanessaListening=false;
 let vanessaRecognition=null;
-let vanessaWakeEnabled=true;
+let vanessaWakeEnabled=false;
 let vanessaPreferenceUserId=null;
 let vanessaWakeRecognition=null;
 let vanessaAwaitingCommand=false;
@@ -562,7 +562,7 @@ const isCapacitorNative=()=>Boolean(window.Capacitor?.isNativePlatform?.());
 const isVanessaLocalServer=()=>!isCapacitorNative()&&location.protocol==='http:'&&(location.hostname==='127.0.0.1'||location.hostname==='localhost');
 const vanessaEndpoint=name=>isVanessaLocalServer()?`/api/vanessa-provider?service=${encodeURIComponent(name)}`:`${isCapacitorNative()?'https://zorifi.netlify.app':''}/.netlify/functions/${encodeURIComponent(name)}`;
 // Interface translation is limited server-side to public, shipped labels. All user-content AI operations still require consent.
-async function vanessaFetch(url,options={}){const service=new URL(url,location.href);const name=service.searchParams.get('service')||service.pathname.split('/').at(-1);let publicInterface=false;if(name==='vanessa-language'&&typeof options.body==='string'){try{publicInterface=JSON.parse(options.body)?.action==='ui-translate';}catch{}}if(String(options.method||'GET').toUpperCase()==='POST'&&name!=='support-email'&&!publicInterface&&!ZorifiPrivacy.consent(localStorage,currentUser?.id||'guest'))throw Object.assign(new Error('Enable optional AI processing in Privacy & data first.'),{code:'PRIVACY_CONSENT_REQUIRED'});if(isVanessaLocalServer()&&service.origin===location.origin&&service.pathname==='/api/vanessa-provider')return fetch(url,options);if(firebaseGateway.session||firebaseGateway.configured())return firebaseGateway.authenticatedFetch(url,options);return fetch(url,options);}
+async function vanessaFetch(url,options={}){const service=new URL(url,location.href),name=service.searchParams.get('service')||service.pathname.split('/').at(-1);let publicInterface=false;try{publicInterface=name==='vanessa-language'&&JSON.parse(options.body||'{}').action==='ui-translate';}catch{}if(String(options.method||'GET').toUpperCase()==='POST'&&name!=='support-email'&&!publicInterface&&!ZorifiPrivacy.consent(localStorage,currentUser?.id||'guest'))throw Object.assign(new Error('Enable optional AI processing in Privacy & data first.'),{code:'PRIVACY_CONSENT_REQUIRED'});if(!firebaseGateway.configured()||!currentUser?.cloudUid||firebaseGateway.session?.uid!==currentUser.cloudUid)throw Object.assign(new Error('Sign in with your Firebase account before using Vanessa.'),{code:'AUTH_REQUIRED'});return firebaseGateway.authenticatedFetch(url,options);}
 
 
 function detectRuntimeMode(){
@@ -626,9 +626,9 @@ async function storeProjectMedia(projectId,assetId,blob,{signal,userId=currentUs
   });
 }
 async function getProjectMedia(projectId,assetId){
-  const db=await openMediaDatabase();
+  const key=mediaRecordKey(projectId,assetId),ownerId=currentUser?.id;const db=await openMediaDatabase();if(currentUser?.id!==ownerId)throw new DOMException('The media account changed.','AbortError');
   return new Promise((resolve,reject)=>{
-    const request=db.transaction(MEDIA_STORE_NAME,'readonly').objectStore(MEDIA_STORE_NAME).get(mediaRecordKey(projectId,assetId));
+    const request=db.transaction(MEDIA_STORE_NAME,'readonly').objectStore(MEDIA_STORE_NAME).get(key);
     request.onsuccess=()=>resolve(request.result?.blob||null);
     request.onerror=()=>reject(request.error||new Error('Could not restore media'));
   });
@@ -721,8 +721,8 @@ function saveProject() {
   const projects=getSavedProjects();
   let project=ProjectModel.serializeProject(state,currentProjectThumbnail());
   try{project=CreatorPlatform.validateProject(project);}catch(error){const indicator=document.querySelector('.save-state');if(indicator)indicator.textContent='Save failed';toast(error.message);return false;}
-  const contentSignature=JSON.stringify({...project,updatedAt:''});
-  if(contentSignature===lastSavedProjectSignature){const indicator=document.querySelector('.save-state');if(indicator)indicator.textContent='All changes saved';return;}
+  const contentSignature=projectStorageKey()+'|'+JSON.stringify({...project,updatedAt:''});
+  if(contentSignature===lastSavedProjectSignature&&projects.some(saved=>saved.id===project.id&&JSON.stringify(saved.clips)===JSON.stringify(project.clips))){const indicator=document.querySelector('.save-state');if(indicator)indicator.textContent='All changes saved';return true;}
   const index=projects.findIndex(p=>p.id===project.id);
   if(index>=0) projects[index]=project; else projects.unshift(project);
   const serialized=JSON.stringify(projects.slice(0,24));
@@ -1312,13 +1312,13 @@ function renderTermsAgreement(){
 
 async function handleAuthSubmit(event){
   event.preventDefault();const form=event.currentTarget,error=form.querySelector('[data-auth-error]'),button=form.querySelector('.auth-submit'),identifier=normalizeIdentifier(form.elements.identifier.value),password=form.elements.password.value,language=Phase10.normalizeLocale(form.elements.language?.value||globalI18n.locale);error.textContent='';
-  const hosted=firebaseGateway.configured();
+  const hosted=firebaseGateway.configured();if(!hosted){error.textContent='Online account sign-in is not configured. Reconnect to the published Zorifi app; existing device projects have not been removed.';return;}
   if(!validIdentifier(identifier)||hosted&&!identifier.includes('@')){error.textContent=hosted?'Enter a valid email address.':'Enter a valid email address or phone number.';return;}if(password.length<8){error.textContent='Password must contain at least 8 characters.';return;}button.disabled=true;button.textContent='Please wait…';
   try{
     const accounts=getAccounts();
     if(authMode==='signup'){
       if(form.elements.confirm.value!==password)throw new Error('Passwords do not match.');if(!hosted&&accounts.some(account=>account.identifier===identifier))throw new Error('An account with these details already exists.');
-      if(hosted){
+
         const cloud=await firebaseGateway.signUp(identifier,password);
         const previousId=localStorage.getItem(SESSION_KEY);
         let legacy=null;
@@ -1332,10 +1332,9 @@ async function handleAuthSubmit(event){
         const store=new TermsSystem.AcceptanceStore({storage:localStorage,userId:account.id});
         if(linked&&!store.requiresAcceptance(TermsSystem.CONFIG.version)){finishAuthentication(account,savedAccounts);return;}
         pendingAuthentication={kind:linked?'login':'signup',account,accounts:savedAccounts,oldProjects:localStorage.getItem(STORAGE_KEY)||localStorage.getItem(LEGACY_STORAGE_KEY)};renderTermsAgreement();return;
-      }
-      const salt=bytesToHex(crypto.getRandomValues(new Uint8Array(16))),account={id:crypto.randomUUID?.()||`user-${Date.now()}`,name:form.elements.name.value.trim()||'Zorifi Creator',identifier,email:identifier.includes('@')?identifier:'',phone:identifier.includes('@')?'':identifier,language,salt,passwordHash:await passwordHash(password,salt),createdAt:new Date().toISOString()};window.ZorifiTour?.markNewAccount(account.id);pendingAuthentication={kind:'signup',account,accounts,oldProjects:localStorage.getItem(STORAGE_KEY)||localStorage.getItem(LEGACY_STORAGE_KEY)};renderTermsAgreement();return;
+
     }else{
-      if(hosted){
+
         const cloud=await firebaseGateway.signIn(identifier,password);
         let account=accounts.find(item=>item.cloudUid===cloud.uid);
         if(!account){
@@ -1349,9 +1348,7 @@ async function handleAuthSubmit(event){
         const store=new TermsSystem.AcceptanceStore({storage:localStorage,userId:account.id});
         if(store.requiresAcceptance(TermsSystem.CONFIG.version)){pendingAuthentication={kind:newAccount?'signup':'login',account,accounts:newAccount?accounts:savedAccounts};renderTermsAgreement();return;}
         finishAuthentication(account,savedAccounts,{newAccount});return;
-      }
-      const account=accounts.find(item=>item.identifier===identifier||item.email===identifier||item.phone===identifier);if(!account||await passwordHash(password,account.salt)!==account.passwordHash)throw new Error('The login details are incorrect.');
-      const store=new TermsSystem.AcceptanceStore({storage:localStorage,userId:account.id});if(store.requiresAcceptance(TermsSystem.CONFIG.version)){pendingAuthentication={kind:'login',account:{...account,language},accounts};renderTermsAgreement();return;}finishAuthentication({...account,language},accounts);return;
+
     }
   }catch(authError){error.textContent=authError.message||'Account access failed. Please try again.';button.disabled=false;button.innerHTML=`${authMode==='signup'?'Create account':'Log in'} <span>→</span>`;}
 }
@@ -3288,18 +3285,15 @@ function trimTimelineClip(event,handle){
   document.body.classList.add('trimming-clip');element.classList.add('trimming');
   const move=moveEvent=>{
     const delta=(moveEvent.clientX-startX)/width*state.duration;
-    const raw=side==='left'?original.start+delta:originalEnd+delta,target=Phase8.snapTimelineTime(raw,{fps,enabled:state.snapping,threshold:.16,playhead:state.currentTime,clips:state.clips,excludeId:clip.id,track:clip.track});Object.assign(clip,Phase8.trimClip(originalClip,asset,{side,time:target,fps}));
+    const raw=side==='left'?original.start+delta:originalEnd+delta,target=Phase8.snapTimelineTime(raw,{fps,enabled:state.snapping,threshold:.16,playhead:state.currentTime,clips:state.clips,excludeId:clip.id,track:clip.track});Object.assign(clip,ZorifiTimelineEditAPI.trimToBounds(originalClip,Phase8.trimClip(originalClip,asset,{side,time:target,fps})));
     changed=Math.abs(clip.start-original.start)>.001||Math.abs(clip.duration-original.duration)>.001;element.style.left=`${clip.start/state.duration*100}%`;element.style.width=`${clip.duration/state.duration*100}%`;element.querySelector('span').textContent=`${isOverlayClip(clip)?'Overlay · ':''}${clip.name} · ${clip.duration.toFixed(1)}s`;
   };
-  const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);document.body.classList.remove('trimming-clip');if(changed){pushHistory({clips:state.clips.map(item=>item.id===clip.id?{...item,...original}:item)});recalculateDuration();saveProject();render();toast(`Clip trimmed to ${clip.duration.toFixed(1)} seconds`);}else{element.classList.remove('trimming');}};
+  const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);document.body.classList.remove('trimming-clip');if(changed){pushHistory({clips:state.clips.map(item=>item.id===clip.id?originalClip:item)});recalculateDuration();saveProject();render();toast(`Clip trimmed to ${clip.duration.toFixed(1)} seconds`);}else{element.classList.remove('trimming');}};
   window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
 }
 
 function splitClip() {
-  const clip=state.clips.find(c=>c.id===state.selected);
-  if(clip&&trackState(clip.track).locked)return toast('Unlock this track first');
-  if(!clip || state.currentTime<=clip.start+.2 || state.currentTime>=clip.start+clip.duration-.2) return toast('Move the playhead inside the selected clip');
-  snapshot();const leftDuration=state.currentTime-clip.start;const right={...clip,id:`${clip.id}-${Date.now()}`,name:`${clip.name} • 2`,start:state.currentTime,duration:clip.duration-leftDuration,sourceStart:(clip.sourceStart||0)+leftDuration*(clip.playbackRate||1)};clip.duration=leftDuration;state.clips.push(right);state.selected=right.id;render();toast('Clip split at playhead');
+ try{const staged={...state,clips:structuredClone(state.clips)};const result=ZorifiTimelineEditAPI.splitClip(staged,{clipId:state.selected,time:state.currentTime});snapshot();state.clips=staged.clips;state.selected=staged.selected;render();scheduleProjectSave(0);toast('Clip split at playhead');return result;}catch(error){toast(error.message);return false;}
 }
 
 function deleteClip() { if(!state.selected)return;const clip=state.clips.find(c=>c.id===state.selected);if(clip&&trackState(clip.track).locked)return toast('Unlock this track first');snapshot();state.clips=state.clips.filter(c=>c.id!==state.selected);if(clip?.zorifiEnding)state.creatorSettings.addZorifiEnding=false;state.selected=null;recalculateDuration();render();scheduleProjectSave(0);toast(clip?.zorifiEnding?'Zorifi ending removed and automatic ending turned off':'Clip removed'); }
@@ -3774,8 +3768,8 @@ async function translateGeneratedCaptions(){
   try{const data=await requestVanessaLanguage('translate',{sourceLanguage:state.captionSettings.language,targetLanguage,segments}),translated=data.result?.segments;if(!Array.isArray(translated)||translated.length!==segments.length)throw new Error('The provider returned an incomplete translation.');const byId=new Map(translated.map(item=>[String(item.id),item]));if(segments.some(item=>!byId.has(item.id)))throw new Error('The provider changed caption identifiers. Translation was not applied.');if(originals.some(source=>{const result=byId.get(source.id);return Math.abs(Number(result.start)-source.start)>.02||Math.abs(Number(result.end)-(source.start+source.duration))>.02||!String(result.text||'').trim();}))throw new Error('The provider changed caption timing or returned empty text. Translation was not applied.');snapshot();const track=chooseTrack('text',Math.min(...originals.map(item=>item.start)),Math.max(...originals.map(item=>item.start+item.duration))-Math.min(...originals.map(item=>item.start)),true),stamp=Date.now();originals.forEach((source,index)=>{const result=byId.get(source.id);state.clips.push({...JSON.parse(JSON.stringify(source)),id:`translated-caption-${stamp}-${index}`,name:String(result.text).trim(),track,autoCaption:true,translatedFromId:source.id,captionLanguage:targetLanguage});});state.selected=`translated-caption-${stamp}-${originals.length-1}`;render();scheduleProjectSave(0);toast(`${originals.length} captions translated to ${targetLanguage} on a new track.`);return true;}catch(error){toast(error.message||'Caption translation failed.');return false;}
 }
 function toggleCaptions() { snapshot();state.hasCaptions=!state.hasCaptions;render();toast(state.hasCaptions?'Captions generated':'Captions hidden'); }
-function undo(){if(!state.undo.length)return;state.redo.push(JSON.stringify(ProjectModel.captureHistory(state)));ProjectModel.restoreHistory(state,JSON.parse(state.undo.pop()));recalculateDuration();render();scheduleProjectSave(0);}
-function redo(){if(!state.redo.length)return;state.undo.push(JSON.stringify(ProjectModel.captureHistory(state)));if(state.undo.length>30)state.undo.shift();ProjectModel.restoreHistory(state,JSON.parse(state.redo.pop()));recalculateDuration();render();scheduleProjectSave(0);}
+function undo(){if(!state.undo.length)return false;state.redo.push(JSON.stringify(ProjectModel.captureHistory(state)));ProjectModel.restoreHistory(state,JSON.parse(state.undo.pop()));recalculateDuration();render();scheduleProjectSave(0);return true;}
+function redo(){if(!state.redo.length)return false;state.undo.push(JSON.stringify(ProjectModel.captureHistory(state)));if(state.undo.length>30)state.undo.shift();ProjectModel.restoreHistory(state,JSON.parse(state.redo.pop()));recalculateDuration();render();scheduleProjectSave(0);return true;}
 
 function readVideoMetadata(url){
   return new Promise(resolve=>{
@@ -4174,7 +4168,7 @@ function mountVanessa(){
   shell.querySelectorAll('[data-vanessa-suggestion]').forEach(button=>button.onclick=()=>{unlockVanessaAudio();sendToVanessa(button.dataset.vanessaSuggestion);});
   const chatForm=shell.querySelector('[data-vanessa-form]');chatForm.elements.message.id='vanessa-chat-input';chatForm.querySelector('[type="submit"]').id='vanessa-chat-submit';
   const chatLog=shell.querySelector('.vanessa-messages');if(chatLog){chatLog.id='vanessa-messages';chatLog.setAttribute('role','log');chatLog.setAttribute('aria-live','polite');}renderVanessaStream();
-  chatForm.onsubmit=async event=>{event.preventDefault();if(vanessaBusy||window.ZorifiMasterApp?.chatSubmitting)return;const input=event.currentTarget.elements.message,message=input.value.trim()||(vanessaAttachments.length?'Analyze these attachments and explain what you can do with them.':'');if(!message)return;unlockVanessaAudio();input.value='';vanessaVoiceDraft='';vanessaListeningEngine?.stop({clearDraft:true});const voiceOwner=currentUser?.id,voiceProject=state.projectId;try{await window.ZorifiMasterApp.consultVanessa(message);}catch{finishVanessaTurn('Vanessa could not complete this request. Please try again.',{actionStatus:'FAILED'});}finally{if(currentUser?.id===voiceOwner&&!vanessaVoiceEnabled&&vanessaWakeEnabled)scheduleVanessaWake(350);}};
+  chatForm.onsubmit=async event=>{event.preventDefault();if(vanessaBusy||window.ZorifiMasterApp?.chatSubmitting)return;const input=event.currentTarget.elements.message,message=input.value.trim()||(vanessaAttachments.length?'Analyze these attachments and explain what you can do with them.':'');if(!message)return;unlockVanessaAudio();input.value='';vanessaVoiceDraft='';vanessaListeningEngine?.stop({clearDraft:true});const voiceOwner=currentUser?.id,voiceProject=state.projectId;try{await window.ZorifiMasterApp.consultVanessa(message);}catch{if(currentUser?.id===voiceOwner&&state.projectId===voiceProject)finishVanessaTurn('Vanessa could not complete this request. Please try again.',{actionStatus:'FAILED'});}finally{if(currentUser?.id===voiceOwner&&!vanessaVoiceEnabled&&vanessaWakeEnabled)scheduleVanessaWake(350);}};
   shell.querySelector('[data-vanessa-dictation-done]').onclick=finishVanessaDictation;shell.querySelector('[data-vanessa-dictation-cancel]').onclick=()=>{vanessaListeningEngine?.stop({clearDraft:true});vanessaVoiceDraft='';vanessaRecognitionMessage='Dictation cleared.';vanessaMountSignature='';mountVanessa();};
   shell.querySelector('[data-vanessa-pause-send]').onchange=event=>{vanessaVoicePauseMs=Number(event.target.value)||0;localStorage.setItem(vanessaAccountKey('zorifi-voice-pause-ms'),String(vanessaVoicePauseMs));vanessaListeningEngine?.setPause(vanessaVoicePauseMs);};
   shell.querySelector('[data-vanessa-mic]').onclick=startVanessaVoice;
@@ -4186,7 +4180,7 @@ function mountVanessa(){
   shell.querySelector('[data-vanessa-play-reply]')?.addEventListener('click',()=>{unlockVanessaAudio();if(vanessaVoicePlaybackState==='blocked')playPendingVanessaAudio();else{const text=[...vanessaHistory].reverse().find(item=>item.role==='assistant')?.text;if(text){if(!vanessaVoiceEnabled){vanessaVoiceEnabled=true;localStorage.setItem(VANESSA_VOICE_KEY,'on');}speakAsVanessa(text);}}});
   shell.querySelector('[data-vanessa-wake]')?.addEventListener('click',toggleVanessaWakeWord);
   shell.querySelector('[data-vanessa-command-center]')?.addEventListener('click',()=>showVanessaCommandCenter());
-  shell.querySelector('[data-vanessa-clear]').onclick=()=>{if(vanessaHistory.length&&confirm('Clear this Vanessa conversation?')){cancelVanessaStream();vanessaHistory=[];vanessaConversationContinuity.clearSessionContinuity();saveVanessaHistory();mountVanessa();}};
+  shell.querySelector('[data-vanessa-clear]').onclick=async()=>{if(vanessaHistory.length&&confirm('Clear this Vanessa conversation?')){cancelVanessaStream();const owner=currentUser?.id,project=state.projectId;try{await window.ZorifiProductionBridge?.clearConversation();if(owner!==currentUser?.id||project!==state.projectId)return;vanessaHistory=[];vanessaConversationContinuity.clearSessionContinuity();saveVanessaHistory();mountVanessa();}catch(error){if(owner===currentUser?.id&&project===state.projectId)toast(error.message);}}};
   shell.querySelector('[data-vanessa-regenerate]').onclick=()=>{const last=[...vanessaHistory].reverse().find(item=>item.role==='user');if(last){while(vanessaHistory.at(-1)?.role==='assistant')vanessaHistory.pop();saveVanessaHistory();sendToVanessa(last.text);}};
   shell.querySelector('[data-vanessa-stop]').onclick=()=>{cancelVanessaStream();mountVanessa();toast('Vanessa request stopped');};
   shell.querySelectorAll('[data-vanessa-confirm]').forEach(button=>button.onclick=()=>resolveVanessaConfirmation(button.dataset.vanessaConfirm==='apply'));
@@ -4237,7 +4231,7 @@ function vanessaWakeMemoryKey(){return `${VANESSA_WAKE_ENABLED_KEY}:${currentUse
 function syncVanessaAccountPreferences(){
   const userId=currentUser?.id||null;if(vanessaPreferenceUserId===userId)return;
   vanessaListeningEngine?.stop({clearDraft:true});vanessaVoiceDraft='';vanessaRecognitionMessage='';const input=document.querySelector('[data-vanessa-form] [name="message"]');if(input)input.value='';vanessaVoicePauseMs=Number(localStorage.getItem(vanessaAccountKey('zorifi-voice-pause-ms')))===3500?3500:Number(localStorage.getItem(vanessaAccountKey('zorifi-voice-pause-ms')))===6000?6000:0;
-  cancelVanessaStream();vanessaPreferenceUserId=userId;vanessaWakeEnabled=Boolean(userId)&&localStorage.getItem(vanessaWakeMemoryKey())!=='off';vanessaAutoWakeAttempted=false;vanessaHistory=[];vanessaHistoryScope='';vanessaPendingPlan=null;
+  cancelVanessaStream();vanessaPreferenceUserId=userId;vanessaWakeEnabled=Boolean(userId)&&localStorage.getItem(vanessaWakeMemoryKey())==='on';vanessaAutoWakeAttempted=false;vanessaHistory=[];vanessaHistoryScope='';vanessaPendingPlan=null;
 }
 function saveVanessaWakePreference(){if(currentUser)localStorage.setItem(vanessaWakeMemoryKey(),vanessaWakeEnabled?'on':'off');}
 function rememberVanessaMicrophone(){localStorage.setItem(vanessaMicrophoneMemoryKey(),JSON.stringify({approved:true,origin:location.origin,approvedAt:Date.now()}));}
@@ -4336,7 +4330,7 @@ async function speakAsVanessa(text){
 
 if('speechSynthesis' in window){chooseVanessaFemaleVoice();window.speechSynthesis.addEventListener?.('voiceschanged',chooseVanessaFemaleVoice);}
 function vanessaContext(){return {creator:currentUser?.name||'Creator',view:state.view,project:state.currentProject,hasProject:state.view==='editor',duration:state.duration,currentTime:state.currentTime,selectedClip:state.clips.find(clip=>clip.id===state.selected)?.name||null,ratio:state.ratio.replaceAll(' ',''),scenePlan:state.scenePlan?{id:state.scenePlan.id,title:state.scenePlan.title,direction:state.scenePlan.direction,scenes:state.scenePlan.scenes.map((scene,index)=>({number:index+1,id:scene.id,purpose:scene.purpose,duration:scene.duration,pacing:scene.pacing,mediaIds:scene.mediaIds}))}:null,timeline:state.clips.slice(0,30).map(clip=>({id:clip.id,type:clip.type,name:clip.name,start:clip.start,duration:clip.duration,track:clip.track,volume:clip.volume,opacity:clip.opacity,playbackRate:clip.playbackRate})),panels:['media','overlay','text','audio','effects','filters','animation','keyframes','graph','beats','color','speed','transitions','captions','smart','pro'],effects:effects.map(item=>item.name),transitions:transitions.map(item=>item.name),textTemplates:textTemplates.map(item=>item.name),textEffects:textEffects.map(item=>item.name),audioTracks:allAudioItems.map(item=>item.name),conversationDomains:['greetings and small talk','emotions and relationships','general knowledge','education and explanations','math and science','writing and brainstorming','planning and productivity','career and business','technology and coding','travel and culture','food and lifestyle','language learning and translation','entertainment and recommendations','philosophy and reflection','accessibility and troubleshooting','careful general medical legal and financial information'],features:['general contextual conversation','Zorifi Scenes structured planning and remixing','natural-language Scene edits','auto-generate complete video from prompt','new project','import media','playback and seeking','timeline tools','select and duplicate clips','trim clips','split','delete','ripple delete','clip speed volume opacity and rotation','undo','redo','text','fonts','text templates','text effects','editable captions','effects library','filters and colour looks','professional adjustments','video quality tools','transitions','audio','sound effects','extract audio','overlay section','overlay layouts','overlay blend styles','smart tools','snapping','preview mute','social formats','save','export','AI video creation','account settings']};}
-function isDirectVanessaCommand(message){const text=message.trim().toLowerCase();return /^(?:please\s+)?(?:open|show|go|seek|play|pause|mute|unmute|stop|start|create|make|generate|add|apply|import|extract|upload|export|download|save|undo|redo|duplicate|copy|delete|remove|split|cut|rotate|set|change|turn|hide|select)\b/.test(text)||/^(?:can|could|would) you (?:please )?(?:open|show|go|seek|play|pause|mute|unmute|start|create|make|generate|add|apply|import|extract|export|save|undo|redo|duplicate|copy|delete|remove|split|rotate|set|change)\b/.test(text)||/^(?:help|what can you do|features|commands)$/.test(text);}
+function isDirectVanessaCommand(message){const text=message.trim().toLowerCase();return /^(?:please\s+)?(?:open|show|go|seek|play|pause|mute|unmute|stop|start|create|make|generate|add|apply|import|extract|upload|export|download|save|undo|redo|duplicate|copy|delete|remove|trim|shorten|split|cut|rotate|set|change|turn|hide|select)\b/.test(text)||/^(?:can|could|would) you (?:please )?(?:open|show|go|seek|play|pause|mute|unmute|start|create|make|generate|add|apply|import|extract|export|save|undo|redo|duplicate|copy|delete|remove|trim|shorten|split|rotate|set|change)\b/.test(text)||/^(?:help|what can you do|features|commands)$/.test(text);}
 function needsVanessaConversationContext(message){return /\b(?:it|that|this|those|them|same|previous|earlier|again|instead|shorter|longer|more|less|like before|we discussed|I mentioned|you said)\b/i.test(message);}
 function vanessaEditorContext(){
   return VanessaActions.buildContext(state,{selectedTrack:vanessaSelectedTrack,capabilities:{filters:Object.keys(VisualTools.FILTERS),effects:effects.map(item=>item.id),elementEffects:MotionEffects.EFFECTS.map(item=>item.id),effectLibrary:MotionEffects.EFFECTS.map(item=>({id:item.id,name:item.name})),animations:MotionEffects.ANIMATIONS.map(item=>item.id),animationLibrary:MotionEffects.ANIMATIONS.map(item=>({id:item.id,name:item.name})),transitions:transitions.map(item=>item.id),audioPresets:Object.keys(ZorifiAudioEngine.PRESETS),keyframeProperties:Object.keys(KEYFRAME_META),compute:computeCapabilities,providers:AIProvider?.KINDS||[],templates:getTemplates().map(item=>({id:item.id,name:item.name,category:item.category,tags:item.tags,usageCount:item.usageCount,favorite:item.favorite}))}});
@@ -4360,8 +4354,8 @@ function vanessaActionAdapter({project=state,detached=false}={}){
     async apply(action,clip){
       const p=action.parameters||{},success=message=>({status:VanessaActions.STATUS.SUCCESS,message});
       if(action.command==='clip.select'){const target=state.clips.find(item=>item.id===action.target||item.name.toLowerCase()===String(p.name||'').toLowerCase());if(!target)throw new Error('That clip could not be found.');state.selected=target.id;vanessaSelectedTrack=target.track;return success(`Selected ${target.name}.`);}
-      if(action.command==='clip.trim'){const oldDuration=clip.duration,newDuration=Number(p.duration);clip.duration=newDuration;if(p.from==='start')clip.sourceStart=(clip.sourceStart||0)+(oldDuration-newDuration)*(clip.playbackRate||1);return success(`Trimmed ${clip.name} to ${newDuration.toFixed(1)} seconds.`);}
-      if(action.command==='clip.split'){const time=Number(p.time),left=time-clip.start,right={...structuredClone(clip),id:`${clip.id}-vanessa-${Date.now()}`,name:`${clip.name} • 2`,start:time,duration:clip.duration-left,sourceStart:(clip.sourceStart||0)+left*(clip.playbackRate||1)};clip.duration=left;state.clips.push(right);state.selected=right.id;return success(`Split ${clip.name} at ${fmtShort(time)}.`);}
+      if(action.command==='clip.trim'){const result=ZorifiTimelineEditAPI.trimClip(state,{clipId:clip.id,...p});if(!result.changed)throw Error('The trim would not change this clip.');return success(`Trimmed ${clip.name} to ${p.duration} seconds.`);}
+      if(action.command==='clip.split'){ZorifiTimelineEditAPI.splitClip(state,{clipId:clip.id,time:p.time});return success(`Split ${clip.name} at ${fmtShort(p.time)}.`);}
       if(action.command==='clip.delete'||action.command==='clip.ripple_delete'){state.clips=state.clips.filter(item=>item.id!==clip.id);if(action.command==='clip.ripple_delete')state.clips.forEach(item=>{if(item.track===clip.track&&item.start>=clip.start+clip.duration-.01)item.start=Math.max(clip.start,item.start-clip.duration);});state.selected=null;return success(`${action.command==='clip.ripple_delete'?'Ripple deleted':'Deleted'} ${clip.name}.`);}
       if(action.command==='clip.duplicate'){const copy=structuredClone(clip);copy.id=`${clip.id}-copy-${Date.now()}`;copy.name=`${clip.name} copy`;copy.start=Math.min(state.duration,clip.start+clip.duration+.1);copy.track=chooseTrack(clip.type,copy.start,copy.duration,true);state.clips.push(copy);state.selected=copy.id;return success(`Duplicated ${clip.name} on ${trackLabel(copy.track)}.`);}
       if(action.command==='clip.move'){if(!canMoveClipToTrack(clip,Number(p.track)))throw new Error('That clip cannot be moved to the requested track type.');clip.start=Number(p.start);clip.track=Number(p.track);state.selected=clip.id;return success(`Moved ${clip.name} to ${fmtShort(clip.start)} on ${trackLabel(clip.track)}.`);}
@@ -4401,7 +4395,7 @@ function vanessaActionAdapter({project=state,detached=false}={}){
       if(action.command==='caption.generate'){const before=state.clips.filter(item=>item.autoCaption).length;await generateSmartCaptions();const after=state.clips.filter(item=>item.autoCaption).length;if(after<=before)throw new Error('Captions were not generated. Check the selected media and AI connection.');return success(`Generated ${after-before} editable captions from the selected media.`);}
       if(action.command==='caption.delete'){const captions=state.clips.filter(item=>item.autoCaption);if(!captions.length)throw new Error('There are no generated captions to delete.');state.clips=state.clips.filter(item=>!item.autoCaption);return success(`Deleted ${captions.length} generated captions.`);}
       if(action.command==='transition.apply'){const transition=transitions.find(item=>item.id===p.id);if(!transition)throw new Error('That transition is unavailable.');clip.transition=transition.id;clip.transitionDuration=Math.max(.1,Math.min(3,Number(p.duration)||.6));return success(`Applied ${transition.name} to ${clip.name}.`);}
-      if(action.command==='project.save'){saveProject();return success('Saved the project on this device.');}
+      if(action.command==='project.save'){if(saveProject()!==true)throw Error('The project could not be saved.');return success('Saved the project on this device.');}
       if(action.command==='project.rename'){const name=String(p.name||'').trim().slice(0,80);if(!name)throw new Error('Project name cannot be empty.');state.currentProject=name;return success(`Renamed the project to ${name}.`);}
       if(action.command==='project.duplicate'){saveProject();const source=ProjectModel.serializeProject(state,currentProjectThumbnail()),copy=structuredClone(source);copy.id=`project-${Date.now()}`;copy.name=`${state.currentProject} copy`;copy.updatedAt=new Date().toISOString();const projects=getSavedProjects();projects.unshift(copy);saveProjectCollection(projects);await copyProjectMedia(state.projectId,copy.id,copy.mediaAssets);return success(`Duplicated the project as ${copy.name}.`);}
       if(action.command==='project.info')return success(`${state.currentProject} is ${fmtShort(state.duration)} long with ${state.clips.length} clips.`);
@@ -4422,13 +4416,23 @@ function vanessaActionAdapter({project=state,detached=false}={}){
 }
 async function executeVanessaPlan(plan,{confirmed=false}={}){
   if(state.view!=='editor')return {status:VanessaActions.STATUS.FAILED,message:'Open a project first, then I can perform that edit.',items:[]};
+  if(window.ZorifiProductionBridge&&plan.actions?.length&&plan.actions.every(action=>ZorifiProductionBridge.initial.has(action.command))){try{const result=await ZorifiProductionBridge.execute(plan,{confirmed});vanessaPendingPlan=result.status===VanessaActions.STATUS.REQUIRES_CONFIRMATION?result.plan:null;return result;}catch(error){vanessaPendingPlan=null;return {status:error.name==='AbortError'?'CANCELLED':'FAILED',message:error.message,items:[]};}}
   vanessaActionState='validating';mountVanessa();const context=vanessaEditorContext(),result=await VanessaActions.execute(plan,context,vanessaActionAdapter(),{confirmed});
   if(result.status===VanessaActions.STATUS.REQUIRES_CONFIRMATION)vanessaPendingPlan=result.plan;else vanessaPendingPlan=null;
   vanessaActionState='idle';return result;
 }
 async function resolveVanessaConfirmation(apply){
-  const plan=vanessaPendingPlan;if(!plan)return;vanessaPendingPlan=null;const pendingEntry=[...vanessaHistory].reverse().find(item=>item.actionStatus==='REQUIRES_CONFIRMATION');if(pendingEntry)pendingEntry.actionStatus='REVIEWED';if(!apply){const running=vanessaWorkflowPlanner?.getNextStep();if(running)vanessaWorkflowPlanner.markStepFailed(running.id,'The user cancelled the requested editor operation.');vanessaHistory.push({role:'assistant',text:'Cancelled. I did not change the project.',actionStatus:'FAILED',items:[],workflow:vanessaWorkflowPlanner?.inspectWorkflow()});saveVanessaHistory();mountVanessa();return;}
-  vanessaBusy=true;vanessaActionState='executing';mountVanessa();const result=await executeVanessaPlan(plan,{confirmed:true}),running=vanessaWorkflowPlanner?.getNextStep();if(running&&result.status==='SUCCESS')vanessaWorkflowPlanner.markStepComplete(running.id,result.message);else if(running&&result.status!=='REQUIRES_CONFIRMATION')vanessaWorkflowPlanner.markStepFailed(running.id,result.message,{unsupported:result.status==='UNSUPPORTED'});const text=result.status==='SUCCESS'?result.message:`Sorry, I couldn't apply that change because ${result.message}`;vanessaHistory.push({role:'assistant',text,actionStatus:result.status,items:result.items||[],preview:result.preview||[],workflow:vanessaWorkflowPlanner?.inspectWorkflow()});saveVanessaHistory();vanessaBusy=false;mountVanessa();speakAsVanessa(text);
+  const plan=vanessaPendingPlan;if(!plan)return;vanessaPendingPlan=null;
+  const owner=currentUser?.id,project=state.projectId,epoch=vanessaStreamEpoch,history=vanessaHistory;
+  const current=()=>owner===currentUser?.id&&project===state.projectId&&epoch===vanessaStreamEpoch&&history===vanessaHistory;
+  const pendingEntry=[...vanessaHistory].reverse().find(item=>item.actionStatus==='REQUIRES_CONFIRMATION');if(pendingEntry)pendingEntry.actionStatus='REVIEWED';
+  if(!apply){ZorifiProductionBridge?.cancel();return finishVanessaTurn('Cancelled. I did not change the project.',{actionStatus:'CANCELLED'});}
+  vanessaBusy=true;vanessaActionState='executing';mountVanessa();
+  try{const result=await executeVanessaPlan(plan,{confirmed:true});if(!current())return;
+    const running=vanessaWorkflowPlanner?.getNextStep();if(running&&result.status==='SUCCESS')vanessaWorkflowPlanner.markStepComplete(running.id,result.message);else if(running&&result.status!=='REQUIRES_CONFIRMATION')vanessaWorkflowPlanner.markStepFailed(running.id,result.message,{unsupported:result.status==='UNSUPPORTED'});
+    return finishVanessaTurn(result.message,{actionStatus:result.status,items:result.items||[],preview:result.preview||[],workflow:vanessaWorkflowPlanner?.inspectWorkflow()},VanessaRouter.TYPES.EDITING_COMMAND);
+  }catch(error){if(current())return finishVanessaTurn(error.message||'The proposed edit could not be applied.',{actionStatus:error.name==='AbortError'?'CANCELLED':'FAILED'},VanessaRouter.TYPES.EDITING_COMMAND);}
+  finally{if(current()){vanessaBusy=false;vanessaActionState='idle';mountVanessa();}}
 }
 function resolveVanessaMemoryForget(id,apply){
   const entry=[...vanessaHistory].reverse().find(item=>item.memoryForgetId===id);if(!entry)return;
@@ -4605,7 +4609,7 @@ async function handleVanessaReferenceTurn(message){
 // navigator.onLine is only a browser hint. A reachable local/serverless
 // gateway must get the chance to answer, even if that hint is false.
 function vanessaRemoteAvailable(){return isCapacitorNative()||VanessaRouter.remoteAvailable({protocol:location.protocol});}
-function cancelVanessaStream(){window.ZorifiVanessaDirector?.cancel?.();window.ZorifiMasterApp?.cancelDirectorCommand?.();vanessaStreamEpoch++;vanessaRequestController?.abort();vanessaRequestController=null;vanessaStreamText='';vanessaStreamFailure='';vanessaBusy=false;vanessaActionState='idle';}
+function cancelVanessaStream(){vanessaPendingPlan=null;window.ZorifiProductionBridge?.cancel?.();window.ZorifiVanessaDirector?.cancel?.();window.ZorifiMasterApp?.cancelDirectorCommand?.();vanessaStreamEpoch++;vanessaRequestController?.abort();vanessaRequestController=null;vanessaStreamText='';vanessaStreamFailure='';vanessaBusy=false;vanessaActionState='idle';}
 function renderVanessaStream(){
  const log=document.querySelector('#vanessa-messages');if(!log)return;
  let preview=log.querySelector('[data-stream-preview]');
@@ -4620,7 +4624,7 @@ async function safeVanessaRequest(service,payload,{timeoutMs=120000}={}){
  const current=()=>epoch===vanessaStreamEpoch&&currentUser?.id===userId&&state.projectId===projectId;
  try{
   const options={method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:controller.signal};
-  if(service!=='vanessa-global')return await VanessaRouter.requestJson(vanessaFetch,vanessaEndpoint(service),options);
+  if(service==='vanessa-global'&&window.ZorifiProductionBridge){const data=await ZorifiProductionBridge.request(payload,{signal:controller.signal});return {ok:true,status:200,data,error:null};}if(service!=='vanessa-global'){const result=await VanessaRouter.requestJson(vanessaFetch,vanessaEndpoint(service),options);return current()?result:{ok:false,status:0,data:null,error:{kind:'cancelled',message:'Conversation changed'}};}
   options.body=JSON.stringify({...payload,stream:true});options.headers.accept='text/event-stream';
   const result=await VanessaRouter.requestStream(vanessaFetch,vanessaEndpoint(service),options,text=>{if(!current()){controller.abort();return;}vanessaStreamText=text;renderVanessaStream();});
   if(!current())return {ok:false,status:0,data:null,error:{kind:'cancelled',message:'Conversation changed'}};
@@ -4686,7 +4690,8 @@ async function handleVanessaSupportTurn(message){
   return {reply:`I couldn’t safely resolve this myself. I recorded case ${item.id} for human review.${related} Email delivery is not configured right now, so I’m not claiming it was sent; your case remains safely saved in Help & Support.`,entry:{actionStatus:'SUPPORT_RECORDED',supportCaseId:item.id,supportAssessment:assessment,escalationConfirmed:false}};
 }
 async function sendToVanessa(message,{background=false}={}){
-  if(vanessaBusy)return;if(!background)vanessaOpen=true;else showVanessaVoiceOrb('thinking','Understanding your request…');syncVanessaHistoryScope();if(vanessaPendingClarification){const resolved=Phase11.resolveFollowUp(vanessaPendingClarification,message);message=`${resolved.originalRequest} User preference: ${resolved.answer}`;vanessaPendingClarification=null;}vanessaHistory.push({role:'user',text:message});saveVanessaHistory();vanessaBusy=true;vanessaActionState='planning';mountVanessa();
+  if(vanessaBusy){toast('Vanessa is finishing the previous request. Your current draft is kept.');return {status:'BUSY'};}syncVanessaAccountPreferences();syncVanessaHistoryScope();const turnOwner=currentUser?.id,turnProject=state.projectId,turnEpoch=vanessaStreamEpoch,currentTurn=()=>turnOwner===currentUser?.id&&turnProject===state.projectId&&turnEpoch===vanessaStreamEpoch;if(!background)vanessaOpen=true;else showVanessaVoiceOrb('thinking','Understanding your request…');syncVanessaHistoryScope();if(vanessaPendingClarification){const resolved=Phase11.resolveFollowUp(vanessaPendingClarification,message);message=`${resolved.originalRequest} User preference: ${resolved.answer}`;vanessaPendingClarification=null;}vanessaHistory.push({role:'user',text:message});saveVanessaHistory();vanessaBusy=true;vanessaActionState='planning';mountVanessa();
+  if(window.ZorifiProductionBridge){try{const result=await ZorifiProductionBridge.turn(message);if(!currentTurn())return;if(result){vanessaPendingPlan=result.status==='REQUIRES_CONFIRMATION'?result.plan:null;return finishVanessaTurn(result.message,{actionStatus:result.status,preview:result.preview||[],items:result.items||[]},VanessaRouter.TYPES.EDITING_COMMAND);}}catch(error){if(currentTurn())return finishVanessaTurn(error.message||'The edit request could not finish.',{actionStatus:error.name==='AbortError'?'CANCELLED':'FAILED'},VanessaRouter.TYPES.EDITING_COMMAND);return;}}
   const companyReply=window.ZorifiVanessaIdentity?.companyAnswer(message,{locale:currentUser?.language||globalI18n.locale});if(companyReply)return finishVanessaTurn(companyReply,{actionStatus:'SUCCESS'},VanessaRouter.TYPES.CONVERSATION);
   if(window.ZorifiDirectorBridge){const owner=currentUser?.id,history=vanessaHistory,epoch=vanessaStreamEpoch;try{const directed=await window.ZorifiDirectorBridge.handleTurn(message);if(owner!==currentUser?.id||history!==vanessaHistory||epoch!==vanessaStreamEpoch)return;if(directed)return finishVanessaTurn(directed.message,{actionStatus:directed.status,items:directed.items||[],preview:directed.preview||[],director:directed.director},VanessaRouter.TYPES.EDITING_COMMAND);}catch(error){if(owner!==currentUser?.id||history!==vanessaHistory||epoch!==vanessaStreamEpoch)return;return finishVanessaTurn(error.message||'The director pass could not finish.',{actionStatus:error.name==='AbortError'?'CANCELLED':'FAILED'},VanessaRouter.TYPES.EDITING_COMMAND);}}
   const studioIntent=window.ZorifiStudioDirector?.classifyIntent(message);if(studioIntent&&studioIntent.kind!=='conversational'&&window.ZorifiMasterApp?.executeDirectorCommand){const owner=currentUser?.id,history=vanessaHistory,epoch=vanessaStreamEpoch,current=()=>owner===currentUser?.id&&history===vanessaHistory&&epoch===vanessaStreamEpoch;try{const directed=await window.ZorifiMasterApp.executeDirectorCommand(message);if(!current())return;return finishVanessaTurn(directed.message,{actionStatus:directed.status,studioDirector:{kind:directed.kind,planner:directed.planner,warning:directed.warning}},VanessaRouter.TYPES.EDITING);}catch(error){if(!current())return;return finishVanessaTurn(error.message||'The studio request could not finish.',{actionStatus:error.name==='AbortError'?'CANCELLED':'FAILED'},VanessaRouter.TYPES.EDITING);}}
@@ -4736,6 +4741,7 @@ async function sendToVanessa(message,{background=false}={}){
   if(!decision&&contextAvailable){const remote=await safeVanessaRequest('vanessa',{message,context,history:vanessaHistory.slice(0,-1).slice(-30)});if(remote.ok){const data=remote.data;if(Array.isArray(data.actions)&&data.actions.length){decision={...data,actions:data.actions.map(item=>{let parameters={};try{parameters=JSON.parse(item.parametersJson||'{}');}catch{}return {command:item.command,target:item.target,parameters};})};}else decision={...data,action:data.legacyAction||data.action||'chat',args:{value:data.legacyValue||message}};cloudReply=true;}else requestFailure=remote.error;}
   if(!decision)decision=interpretVanessaLocally(commandMessage,false);
   if(!decision){if(workflowStep){vanessaWorkflowPlanner.markStepFailed(workflowStep.id,'No supported editor action matched this workflow step.',{unsupported:true});if(workflowStep.executionOperationId){vanessaReferenceExecutor.fail(workflowStep.executionOperationId,'No supported editor action matched this workflow step.');vanessaEditPlanner.failExternal(workflowStep.executionOperationId,'No supported editor action matched this workflow step.');}}const executionFeedback=finishVanessaExecutionVerification(workflowStep,{status:'FAILED',message:'No supported editor action matched this workflow step.'});return finishVanessaTurn(executionFeedback?.userFeedback?.message||VanessaRouter.safeMessage(requestFailure,{type:requestType,projectAvailable:contextAvailable&&state.view==='editor'}),{actionStatus:'FAILED',workflow:vanessaWorkflowPlanner.inspectWorkflow(),referenceExecution:vanessaReferenceExecutor.inspect(),editPlan:vanessaEditPlanner.inspect().plan,executionFeedback});}
+  if(!currentTurn())return;const legacyInitial={split_clip:{command:'clip.split',target:state.selected,parameters:{time:state.currentTime}},undo:{command:'history.undo',parameters:{}},redo:{command:'history.redo',parameters:{}},save:{command:'project.save',parameters:{}}};if(legacyInitial[decision.action])decision={actions:[legacyInitial[decision.action]]};
   vanessaActionState='validating';mountVanessa();let reply='',entry={role:'assistant',text:''};
   if(decision?.actions?.length){
     const result=await executeVanessaPlan(decision);entry.actionStatus=result.status;entry.items=result.items||[];entry.preview=result.preview||[];
@@ -4868,11 +4874,11 @@ async function executeVanessaAction(action,args={}){
   const blocked=needsEditor();if(blocked)return blocked;
   if(action==='open_panel'){const panel=['media','overlay','background','text','audio','effects','filters','animation','keyframes','graph','transitions','captions','smart','pro'].includes(args.value)?args.value:'media';state.activePanel=panel;render();return `${capitalize(panel)} tools are open.`;}
   if(action==='play'){if(!state.playing)togglePlayback();return 'Playing your edit.';}if(action==='pause'){if(state.playing)togglePlayback();return 'Playback paused.';}
-  if(action==='split_clip'){if(!state.selected)return 'Select a clip and place the playhead where you want the cut.';splitClip();return 'The selected clip was split at the playhead.';}
+  if(action==='split_clip'){if(!state.selected)throw Error('Select a clip and place the playhead where you want the cut.');if(!splitClip())throw Error('The editor did not split this clip. Check the playhead and track lock.');return 'The selected clip was split at the playhead.';}
   if(action==='duplicate_clip'){if(!state.selected)return 'Select the clip you want me to duplicate.';duplicateSelectedClip();return 'The selected clip was duplicated.';}
   if(action==='delete_clip'){if(!state.selected)return 'Select the clip you want me to remove.';deleteClip();return 'The selected clip was deleted.';}
   if(action==='ripple_delete'){if(!state.selected)return 'Select a clip first, then I can remove it and close the gap.';rippleDelete();return 'The clip was removed and the gap was closed.';}
-  if(action==='undo'){undo();return 'Undone.';}if(action==='redo'){redo();return 'Redone.';}
+  if(action==='undo'){if(!undo())throw Error('There is no edit to undo.');return 'Undone.';}if(action==='redo'){if(!redo())throw Error('There is no edit to redo.');return 'Redone.';}
   if(action==='seek'){seekProject(Number(args.value)||0);render();return `The playhead is at ${fmtShort(state.currentTime)}.`;}
   if(action==='mute_preview'){state.previewMuted=!state.previewMuted;render();return state.previewMuted?'Preview audio is muted.':'Preview audio is on.';}
   if(action==='toggle_snapping'){state.snapping=!state.snapping;render();return `Timeline snapping is ${state.snapping?'on':'off'}.`;}
@@ -4890,7 +4896,7 @@ async function executeVanessaAction(action,args={}){
   if(action==='set_ratio'){const ratio=['16:9','9:16','1:1','4:5'].includes(args.value)?args.value:'9:16';state.ratio=ratio.replace(':',' / ');state.frameWidth=null;state.frameHeight=null;render();return `The project frame is now ${ratio}.`;}
   if(action==='smart_tool'){const tool=['autocut','captions','reframe','shorts','fillers','background','voice','stabilize'].includes(args.value)?args.value:'autocut';if(tool==='autocut')return await runSmartTool(tool,{prompt:String(args.prompt||'').slice(0,300)});await runSmartTool(tool);return `${capitalize(tool)} has been applied.`;}
   if(action==='timeline_tool'){setTimelineTool(['select','razor','slip','hand','text'].includes(args.value)?args.value:'select');return `${capitalize(args.value||'select')} tool selected.`;}
-  if(action==='save'){saveProject();return 'All project changes are saved on this device.';}
+  if(action==='save'){if(saveProject()!==true)throw Error('The project could not be saved.');return 'All project changes are saved on this device.';}
   if(action==='export'){showExport();return 'Export settings are open.';}
   return 'I can help with that once you tell me which Zorifi tool or edit you want to use.';
 }

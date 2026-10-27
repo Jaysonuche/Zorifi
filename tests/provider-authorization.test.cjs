@@ -75,7 +75,7 @@ test('changing a Request bearer token triggers a new identity check; local servi
  global.fetch=async()=>{calls++;return Response.json({users:[{localId:'member'}]});};
  try{
   const request=hosted();await authorize(request);request.headers.set('authorization','Bearer changed-token');await accountRole(request);assert.equal(calls,2);
-  await authorize(new Request('http://127.0.0.1:4173/api/test',{headers:{origin:'http://127.0.0.1:4173'}}));assert.equal(calls,2);
-  await assert.rejects(authorize(new Request('http://127.0.0.1:4173/api/test',{headers:{origin:'https://foreign.example'}})),error=>error.status===403);
+  await assert.rejects(authorize(new Request('http://127.0.0.1:4173/api/test',{headers:{origin:'http://127.0.0.1:4173'}})),error=>error.status===401);assert.equal(calls,2);
+  const local=new Request('http://127.0.0.1:4173/api/test',{headers:{authorization:'Bearer local-token'}});await authorize(local);assert.equal(calls,3,'Signed-in loopback requests receive the same live verification.');
  }finally{global.fetch=originalFetch;if(key===undefined)delete process.env.FIREBASE_WEB_API_KEY;else process.env.FIREBASE_WEB_API_KEY=key;}
 });

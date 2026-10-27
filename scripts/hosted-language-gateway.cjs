@@ -2,7 +2,7 @@
 // credentials remain on Vercel; neither the installer nor the local companion
 // receives a Gemini key.
 const HOSTED_ORIGIN = 'https://zorifi.vercel.app';
-const LANGUAGE_SERVICES = new Set(['vanessa', 'vanessa-global', 'vanessa-language', 'vanessa-scenes', 'vanessa-autocut', 'vanessa-director-tools', 'vanessa-video', 'vanessa-background', 'vanessa-speech', 'vanessa-captions', 'vanessa-voice', 'vanessa-provider-test']);
+const LANGUAGE_SERVICES = new Set(['vanessa-chat', 'vanessa', 'vanessa-global', 'vanessa-language', 'vanessa-scenes', 'vanessa-autocut', 'vanessa-director-tools', 'vanessa-video', 'vanessa-background', 'vanessa-speech', 'vanessa-captions', 'vanessa-voice', 'vanessa-provider-test']);
 
 function validFirebaseWebConfig(config) {
   return config && typeof config === 'object' && !Array.isArray(config) &&

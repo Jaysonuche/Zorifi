@@ -21,6 +21,7 @@ const root = __dirname;
 // zorifi-vanessa-creative-conversation.js, zorifi-vanessa-creative-verification.js,
 // zorifi-vanessa-creative-pipeline.js. The server admits this bounded family below.
 const functionFiles = new Map([
+  ['vanessa-chat', 'vanessa-chat.mjs'],
   ['vanessa-director-tools', 'vanessa-director-tools.mjs'],
   ['vanessa-autocut', 'vanessa-autocut.mjs'],
   ['vanessa', 'vanessa.mjs'],
@@ -188,7 +189,7 @@ async function handleFunction(request,response,name){
         return json(response,music.configured?200:503,music.configured?{connected:true,provider:music.provider,model:music.model,verification:'Local CPU runtime and model files are installed.'}:{error:'Local music runtime is not installed on this computer.'});
       }
     }
-    if(!hasDesktopLanguageKey()&&LANGUAGE_SERVICES.has(name)){
+    if((name==='vanessa-chat'||!hasDesktopLanguageKey())&&LANGUAGE_SERVICES.has(name)){
       let hostedLanguageRequest=name!=='vanessa-provider-test';
       if(!hostedLanguageRequest){try{hostedLanguageRequest=JSON.parse(body.toString('utf8')).type==='language';}catch{}}
       if(hostedLanguageRequest)return relayHostedLanguage({service:name,request,response,body});
@@ -266,6 +267,7 @@ function startLocalServer(){return new Promise((resolve,reject)=>{
       }
       if(url.pathname==='/api/ai-settings')return handleSettings(request,response);
       if(url.pathname==='/api/vanessa-provider')return handleProvider(request,response,url);
+      if(url.pathname==='/api/vanessa/chat')return handleFunction(request,response,'vanessa-chat');
       if(url.pathname.startsWith('/api/'))return handleFunction(request,response,url.pathname.slice(5));
       serveStatic(request,response,url.pathname);
     }catch(error){json(response,500,{error:error.message||'Vanessa Local server error.'});}
