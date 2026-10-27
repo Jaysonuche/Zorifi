@@ -38,3 +38,19 @@ The injectable core in `zorifi-studio-director.js` accepts `(aiGateway, scenePla
 - Private projects and generated originals remain in the device's account-scoped local store. The scene planner can use its existing metadata-based on-device fallback, and the result identifies that fallback.
 
 Tests cover mixed commands, real WAV decoding/persistence with fixture provider responses, one Undo, track selection, cancellation, stale scope cleanup, failure handling, public module imports and the Vanessa chat route. They do not make paid generation calls.
+
+## Companion and Director modes
+
+The `ZorifiVanessaDirectorEngine.js` public module exports the companion lifecycle core. The running, account-scoped instance is `window.ZorifiVanessaDirector` (also `window.ZorifiMasterApp.directorEngine`). It uses the existing wake-word recognition, ElevenLabs player, Gemini gateway and Vanessa inspector tab.
+
+```js
+await window.ZorifiVanessaDirector.handleUserRequest('Take over and add smooth transitions.');
+await window.ZorifiVanessaDirector.handleUserRequest('Guide me through this edit.');
+window.ZorifiVanessaDirector.cancel();
+```
+
+Choosing Director mode alone does not change a project. An explicit request prepares bounded actions with the registered timeline tools, validates source limits, track locks, keyframes and overlaps, and commits the pass in one Undo. Changes to the project, sources or account invalidate a pending pass. The on-device fallback identifies itself and preserves clip order; timing alone is not treated as an analysis of the footage's story.
+
+The orb opens the shared chat and can be moved by dragging or with Alt + arrow keys. Captions follow actual voice playback and clear when it finishes; playback blocked by the browser offers the existing Play voice control. Voice and microphone permissions remain the user's choices. First-use guidance is account scoped and waits for the workspace and tutorial to be ready.
+
+Idle help waits at least 15 seconds, prompts at most once per interaction period with a three-minute cooldown, and stays quiet during playback, typing, open chat, background tabs and blocking dialogs. The Idle help checkbox disables it. Skill adaptation uses an explicit self-description within the session, rather than treating technical vocabulary as proof of expertise or saving inferred skill as personal memory.

@@ -13,4 +13,5 @@ export class ZorifiAIProviderGateway {
   }
 }
 export {ZorifiVanessaStudioDirector} from './ZorifiVanessaStudioDirector.js';
+export {ZorifiVanessaDirectorEngine} from './ZorifiVanessaDirectorEngine.js';
 export const ZorifiScenePlanner=globalThis.ZorifiScenePlanner;

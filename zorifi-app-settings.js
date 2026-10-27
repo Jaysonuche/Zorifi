@@ -13,7 +13,7 @@
   }
   document.addEventListener('click',event=>{if(!event.target.closest('[data-install-app]'))return;event.preventDefault();event.stopImmediatePropagation();void install();},true);
   const decorate=()=>document.querySelectorAll('.account-modal [data-account-form]').forEach(form=>{if(form.querySelector('[data-zorifi-about]'))return;const target=form.querySelector('.account-help');for(const [label,attribute,action] of [['Install Zorifi','data-zorifi-install',install],['About Zorifi','data-zorifi-about',about]]){const button=document.createElement('button');button.type='button';button.className='secondary-btn phase10-settings-link';button.setAttribute(attribute,'');button.textContent=label;button.onclick=action;form.insertBefore(button,target);}});
-  const RELEASE='3.40.1';
+  const RELEASE='3.41.0';
   let activeSettingsClose=null;
   function endingKey(){return `zorifi-default-ending-v1:${typeof currentUser!=='undefined'?currentUser?.id||'guest':'guest'}`;}
   function defaultEnding(){try{return localStorage.getItem(endingKey())!=='false';}catch{return true;}}

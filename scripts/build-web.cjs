@@ -3,7 +3,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 require('./build-interface-catalog.cjs');
 const output = path.join(root, 'web-dist');
-const files = ['index.html', 'styles.css', 'app.js', 'sw.js', 'manifest.webmanifest', '_redirects', 'ZorifiVanessaStudioCore.js', 'ZorifiVanessaStudioDirector.js', 'ZorifiVanessaTrueAudioAI.js', 'ZorifiAutoCaptions.js', 'ZorifiMulticamSyncEngine.js', ...fs.readdirSync(root).filter(name => /^zorifi-.*\.(js|json|css)$/.test(name))];
+const files = ['index.html', 'styles.css', 'app.js', 'sw.js', 'manifest.webmanifest', '_redirects', 'ZorifiVanessaStudioCore.js', 'ZorifiVanessaStudioDirector.js', 'ZorifiVanessaDirectorEngine.js', 'ZorifiVanessaTrueAudioAI.js', 'ZorifiAutoCaptions.js', 'ZorifiMulticamSyncEngine.js', ...fs.readdirSync(root).filter(name => /^zorifi-.*\.(js|json|css)$/.test(name))];
 for (const name of files) if (!fs.existsSync(path.join(root, name))) throw new Error(`Missing web source: ${name}`);
 fs.mkdirSync(output, {recursive: true});
 for (const name of files) fs.copyFileSync(path.join(root, name), path.join(output, name));

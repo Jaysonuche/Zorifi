@@ -4306,12 +4306,14 @@ function unlockVanessaAudio(){
   return audio;
 }
 function playPendingVanessaAudio(){return vanessaPendingVoicePlay?.();}
+function notifyVanessaSpeech(status,text,request=vanessaSpeechRequest){window.dispatchEvent(new CustomEvent('zorifi:vanessa-speech',{detail:{status,text:String(text||''),request,userId:currentUser?.id}}));}
 async function speakAsVanessa(text){
   if(!vanessaVoiceEnabled||!text)return;
   const spokenText=String(text).replace(/[*_#`]/g,'').replace(/\s+/g,' ').trim();if(!spokenText)return;
   const request=++vanessaSpeechRequest,userId=currentUser?.id;
   const active=()=>request===vanessaSpeechRequest&&vanessaVoiceEnabled&&currentUser?.id===userId;
   vanessaVoicePlaybackState='preparing';vanessaVoicePlaybackError='';vanessaPendingVoicePlay=null;updateVanessaPlaybackControls();
+  notifyVanessaSpeech('preparing',spokenText,request);
   showVanessaVoiceOrb('speaking','Preparing ElevenLabs voice…');
   clearTimeout(vanessaSpeechTimer);window.speechSynthesis?.cancel?.();
   if(vanessaCloudAudio){vanessaCloudAudio.onended=null;vanessaCloudAudio.onerror=null;vanessaCloudAudio.pause();vanessaCloudAudio=null;}
@@ -4320,15 +4322,15 @@ async function speakAsVanessa(text){
   const resumeListening=()=>{if(!active())return;if(resumeWake&&vanessaWakeEnabled){showVanessaVoiceOrb('listening','Ready when you say “Vanessa”');hideVanessaVoiceOrb(1800);scheduleVanessaWake(350);}else hideVanessaVoiceOrb(900);};
   let audio,url;
   const cleanup=()=>{if(url){revokeManagedUrl(url);if(vanessaCloudAudioUrl===url)vanessaCloudAudioUrl=null;url=null;}if(vanessaCloudAudio===audio)vanessaCloudAudio=null;if(request===vanessaSpeechRequest)vanessaPendingVoicePlay=null;};
-  const fail=error=>{if(!active()){cleanup();return;}if(error?.name==='NotAllowedError'&&url){vanessaVoicePlaybackState='blocked';showVanessaVoiceOrb('listening','Tap Play voice to hear my reply');updateVanessaPlaybackControls();return;}cleanup();vanessaVoicePlaybackState='error';vanessaVoicePlaybackError=error?.message||'ElevenLabs voice could not play. Try again.';showVanessaVoiceOrb('error',vanessaVoicePlaybackError);updateVanessaPlaybackControls();toast(vanessaVoicePlaybackError);};
+  const fail=error=>{if(!active()){cleanup();return;}if(error?.name==='NotAllowedError'&&url){vanessaVoicePlaybackState='blocked';showVanessaVoiceOrb('listening','Tap Play voice to hear my reply');notifyVanessaSpeech('blocked','Open Vanessa and tap Play voice to hear this reply.',request);updateVanessaPlaybackControls();return;}cleanup();vanessaVoicePlaybackState='error';vanessaVoicePlaybackError=error?.message||'ElevenLabs voice could not play. Try again.';notifyVanessaSpeech('error',vanessaVoicePlaybackError,request);showVanessaVoiceOrb('error',vanessaVoicePlaybackError);updateVanessaPlaybackControls();toast(vanessaVoicePlaybackError);};
   try{
     const response=await vanessaFetch(vanessaEndpoint('vanessa-speech'),{method:'POST',headers:{'content-type':'application/json','accept':'audio/mpeg'},body:JSON.stringify({text:spokenText,language:currentUser?.language||globalI18n.locale})});
     if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(typeof data.error==='string'?data.error:'ElevenLabs voice is unavailable. Check your sign-in and voice provider settings.');}
     const blob=await response.blob();if(!active())return;
     if(!blob.size||!blob.type.startsWith('audio/'))throw new Error('ElevenLabs returned no playable audio.');
     url=editorResources.createManagedUrl(blob);vanessaCloudAudioUrl=url;audio=vanessaVoicePlayer||(vanessaVoicePlayer=new Audio());audio.src=url;vanessaCloudAudio=audio;audio.preload='auto';audio.playsInline=true;audio.setAttribute?.('playsinline','');
-    audio.onended=()=>{cleanup();if(active()){vanessaVoicePlaybackState='idle';updateVanessaPlaybackControls();resumeListening();}};audio.onerror=()=>fail(new Error('ElevenLabs audio could not play in this browser.'));
-    const play=async()=>{if(!active())return;try{await audio.play();if(!active()){audio.pause();cleanup();return;}vanessaAudioUnlocked=true;vanessaVoicePlaybackState='speaking';updateVanessaPlaybackControls();showVanessaVoiceOrb('speaking','ElevenLabs voice');}catch(error){fail(error);}};vanessaPendingVoicePlay=play;await play();
+    audio.onended=()=>{cleanup();if(active()){vanessaVoicePlaybackState='idle';notifyVanessaSpeech('ended','',request);updateVanessaPlaybackControls();resumeListening();}};audio.onerror=()=>fail(new Error('ElevenLabs audio could not play in this browser.'));
+    const play=async()=>{if(!active())return;try{await audio.play();if(!active()){audio.pause();cleanup();return;}vanessaAudioUnlocked=true;vanessaVoicePlaybackState='speaking';notifyVanessaSpeech('speaking',spokenText,request);updateVanessaPlaybackControls();showVanessaVoiceOrb('speaking','ElevenLabs voice');}catch(error){fail(error);}};vanessaPendingVoicePlay=play;await play();
   }catch(error){fail(error);}
 }
 
@@ -4343,15 +4345,17 @@ function createVanessaText(parameters={}){
   const id=`vanessa-text-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,duration=Math.max(.5,Math.min(Number(parameters.duration)||5,Math.max(.5,state.duration-state.currentTime||5))),track=chooseTrack('text',state.currentTime,duration,true),font=fonts.find(item=>item.id===parameters.fontId)||fonts[0];
   state.clips.push({id,type:'text',name:String(parameters.text||'New title').slice(0,160),start:state.currentTime,duration,track,opacity:100,volume:100,playbackRate:1,fontId:font.id,fontFamily:font.family,fontSize:Math.max(10,Math.min(180,Number(parameters.fontSize)||44)),fontWeight:700,color:/^#[0-9a-f]{6}$/i.test(parameters.color||'')?parameters.color:'#ffffff',align:'center',style:parameters.style||'default',subtitle:'',bottom:20,letterSpacing:'-.045em',background:'transparent',createdByVanessa:true});state.selected=id;return state.clips.at(-1);
 }
-function vanessaActionAdapter(){
+function vanessaActionAdapter({project=state,detached=false}={}){
+  // Director passes use the same tools on staged clips before one live commit.
+  const state=project;
   let undoLength=0,redoBefore=[];
   return {
     state:()=>state,
     resolveClip:action=>action.target==='selected_clip'?state.clips.find(item=>item.id===state.selected):state.clips.find(item=>item.id===action.target),
     capture:()=>({history:ProjectModel.captureHistory(state),undoLength:state.undo.length,redo:state.redo.slice()}),
-    begin(){undoLength=state.undo.length;redoBefore=state.redo.slice();pushHistory();vanessaActionState='executing';mountVanessa();},
-    restore(before){ProjectModel.restoreHistory(state,before.history);state.undo.splice(before.undoLength);state.redo=before.redo;recalculateDuration();render();},
-    commit(){recalculateDuration();syncVideo();render();scheduleProjectSave(0);},
+    begin(){undoLength=state.undo.length;redoBefore=state.redo.slice();if(detached)return;pushHistory();vanessaActionState='executing';mountVanessa();},
+    restore(before){ProjectModel.restoreHistory(state,before.history);state.undo.splice(before.undoLength);state.redo=before.redo;if(detached)return;recalculateDuration();render();},
+    commit(){if(detached)return;recalculateDuration();syncVideo();render();scheduleProjectSave(0);},
     rollback(){state.undo.splice(undoLength);state.redo=redoBefore;},
     async apply(action,clip){
       const p=action.parameters||{},success=message=>({status:VanessaActions.STATUS.SUCCESS,message});
@@ -4601,7 +4605,7 @@ async function handleVanessaReferenceTurn(message){
 // navigator.onLine is only a browser hint. A reachable local/serverless
 // gateway must get the chance to answer, even if that hint is false.
 function vanessaRemoteAvailable(){return isCapacitorNative()||VanessaRouter.remoteAvailable({protocol:location.protocol});}
-function cancelVanessaStream(){window.ZorifiMasterApp?.cancelDirectorCommand?.();vanessaStreamEpoch++;vanessaRequestController?.abort();vanessaRequestController=null;vanessaStreamText='';vanessaStreamFailure='';vanessaBusy=false;vanessaActionState='idle';}
+function cancelVanessaStream(){window.ZorifiVanessaDirector?.cancel?.();window.ZorifiMasterApp?.cancelDirectorCommand?.();vanessaStreamEpoch++;vanessaRequestController?.abort();vanessaRequestController=null;vanessaStreamText='';vanessaStreamFailure='';vanessaBusy=false;vanessaActionState='idle';}
 function renderVanessaStream(){
  const log=document.querySelector('#vanessa-messages');if(!log)return;
  let preview=log.querySelector('[data-stream-preview]');
@@ -4684,6 +4688,7 @@ async function handleVanessaSupportTurn(message){
 async function sendToVanessa(message,{background=false}={}){
   if(vanessaBusy)return;if(!background)vanessaOpen=true;else showVanessaVoiceOrb('thinking','Understanding your request…');syncVanessaHistoryScope();if(vanessaPendingClarification){const resolved=Phase11.resolveFollowUp(vanessaPendingClarification,message);message=`${resolved.originalRequest} User preference: ${resolved.answer}`;vanessaPendingClarification=null;}vanessaHistory.push({role:'user',text:message});saveVanessaHistory();vanessaBusy=true;vanessaActionState='planning';mountVanessa();
   const companyReply=window.ZorifiVanessaIdentity?.companyAnswer(message,{locale:currentUser?.language||globalI18n.locale});if(companyReply)return finishVanessaTurn(companyReply,{actionStatus:'SUCCESS'},VanessaRouter.TYPES.CONVERSATION);
+  if(window.ZorifiDirectorBridge){const owner=currentUser?.id,history=vanessaHistory,epoch=vanessaStreamEpoch;try{const directed=await window.ZorifiDirectorBridge.handleTurn(message);if(owner!==currentUser?.id||history!==vanessaHistory||epoch!==vanessaStreamEpoch)return;if(directed)return finishVanessaTurn(directed.message,{actionStatus:directed.status,items:directed.items||[],preview:directed.preview||[],director:directed.director},VanessaRouter.TYPES.EDITING_COMMAND);}catch(error){if(owner!==currentUser?.id||history!==vanessaHistory||epoch!==vanessaStreamEpoch)return;return finishVanessaTurn(error.message||'The director pass could not finish.',{actionStatus:error.name==='AbortError'?'CANCELLED':'FAILED'},VanessaRouter.TYPES.EDITING_COMMAND);}}
   const studioIntent=window.ZorifiStudioDirector?.classifyIntent(message);if(studioIntent&&studioIntent.kind!=='conversational'&&window.ZorifiMasterApp?.executeDirectorCommand){const owner=currentUser?.id,history=vanessaHistory,epoch=vanessaStreamEpoch,current=()=>owner===currentUser?.id&&history===vanessaHistory&&epoch===vanessaStreamEpoch;try{const directed=await window.ZorifiMasterApp.executeDirectorCommand(message);if(!current())return;return finishVanessaTurn(directed.message,{actionStatus:directed.status,studioDirector:{kind:directed.kind,planner:directed.planner,warning:directed.warning}},VanessaRouter.TYPES.EDITING);}catch(error){if(!current())return;return finishVanessaTurn(error.message||'The studio request could not finish.',{actionStatus:error.name==='AbortError'?'CANCELLED':'FAILED'},VanessaRouter.TYPES.EDITING);}}
   if(AIProvider.isVideoGenerationRequest(message)){await handleVanessaVideoTool(message);return;}
   if(typeof handleZorifiStudioTurn==='function'){try{const studioTurn=await handleZorifiStudioTurn(message);if(studioTurn)return finishVanessaTurn(studioTurn.reply,{actionStatus:studioTurn.status},VanessaRouter.TYPES.EDITING_COMMAND);}catch(error){return finishVanessaTurn(error.message||'That creative action could not finish.',{actionStatus:'FAILED'},VanessaRouter.TYPES.EDITING_COMMAND);}}
