@@ -68,7 +68,8 @@ async function image(input,request){
 }
 export const imageGeneration=handler(image);
 export const speech=handler(async (input,request)=>{
- const key=needed('ELEVENLABS_API_KEY'),voice=needed('VANESSA_VOICE_ID'),value=prompt(input);
+ const key=needed('ELEVENLABS_API_KEY'),voice=needed('VANESSA_VOICE_ID'),value=text(input.text||input.prompt,4000);
+ if(!value)throw new ServiceError('Enter some text for Vanessa to speak.');
  const response=await upstream(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice)}`,{signal:request.signal,method:'POST',headers:{'xi-api-key':key,'content-type':'application/json',accept:'audio/mpeg'},body:JSON.stringify({text:value,model_id:env('VANESSA_VOICE_MODEL')||'eleven_multilingual_v2'})});
  const bytes=await response.arrayBuffer();if(!bytes.byteLength)throw new ServiceError('The voice provider returned no audio.',502);
  return new Response(bytes,{headers:{'content-type':'audio/mpeg','cache-control':'no-store'}});

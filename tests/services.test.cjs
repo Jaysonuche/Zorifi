@@ -3,6 +3,13 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const request=(name,input,headers={})=>new Request(`http://localhost/api/${name}`,{method:'POST',headers:{authorization:'Bearer fixture-token','content-type':'application/json',...headers},body:JSON.stringify(input)});
 async function run(name,input){return (await import(`../netlify/functions/${name}.mjs`)).default(request(name,input));}
+test('authenticated speech accepts short natural replies and rejects empty text without provider calls',async()=>{
+ const savedFetch=global.fetch,savedEnv=global.Netlify;let calls=0;
+ global.Netlify={env:{get:firebaseEnv(key=>({ELEVENLABS_API_KEY:'fixture-voice-key',VANESSA_VOICE_ID:'fixture-voice'})[key]||'')}};
+ global.fetch=firebaseTransport(async(url,options)=>{assert.equal(url,'https://api.elevenlabs.io/v1/text-to-speech/fixture-voice');assert.equal(JSON.parse(options.body).text,'12');assert(options.signal);calls++;return new Response(new Uint8Array([1,2,3]),{headers:{'content-type':'audio/mpeg'}});});
+ try{const {speech}=await import('../netlify/functions/_shared/services.mjs');const response=await speech(request('vanessa-speech',{text:'12'}));assert.equal(response.status,200);assert.equal((await response.arrayBuffer()).byteLength,3);assert.equal((await speech(request('vanessa-speech',{text:'  '}))).status,400);assert.equal(calls,1);}
+ finally{global.fetch=savedFetch;global.Netlify=savedEnv;}
+});
 test('all recovered services fail clearly without credentials and never fabricate media',async()=>{
  const saved=global.Netlify;global.Netlify={env:{get:()=>''}};
  // Use an isolated process environment view so developer credentials cannot cause requests.
