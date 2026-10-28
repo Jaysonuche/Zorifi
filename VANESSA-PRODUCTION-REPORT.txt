@@ -1,9 +1,10 @@
 VANESSA PRODUCTION INTEGRATION — ZORIFI 3.42.0
-27 October 2026
+Updated 28 October 2026
 Workspace: C:\Users\User\Documents\ChatGPT\Zorifi
-Status: Implemented and tested locally. Firebase rules staged but NOT published;
-the application release must follow that permission change. No paid live AI call
-was made during verification.
+Status: Released at https://zorifi.vercel.app. Approved Firebase rules were
+published and verified again after reloading the console. The signed-in live
+Vanessa chat answered the production test correctly. ElevenLabs voice generation
+is blocked by the provider account's exhausted credits; the app reports this.
 
 ACTUAL ARCHITECTURE FOUND (PHASE 1)
 
@@ -94,6 +95,11 @@ Firebase bearer; local provider keys cannot replace that private session route.
 Capacitor builds target Zorifi's fixed HTTPS chat route with authenticated CORS.
 Busy requests are rejected explicitly instead of silently discarded. Request
 controllers/listeners and bridge lifecycle hooks are cleaned up.
+Live verification also exposed a speech validator rejecting short replies such
+as "12". Speech now accepts nonempty short answers. ElevenLabs quota_exceeded
+responses are mapped to a clear voice-credit error, not a credential error.
+The existing verified local voice key was applied to the existing production
+sensitive variable without changing its visibility or environment targets.
 
 ADDITIONAL CHANGED FILES
 
@@ -109,7 +115,7 @@ Unrelated README, src/services and native-project changes were preserved.
 
 VERIFICATION (PHASE 5)
 
-node --test tests/*.test.cjs: 325 passed, 0 failed, 0 skipped.
+node --test tests/*.test.cjs: 327 passed, 0 failed, 0 skipped.
 This includes 15 native timeline tests and 7 production server tests covering
 schemas, replay integrity, per-UID quotas, concurrency, auth and cancellation.
 The desktop private-session relay also verifies its fixed destination, forwarded
@@ -148,18 +154,39 @@ node scripts/check-project.cjs: 305 source files and 277 browser/cache reference
 passed syntax/integrity checks. Release cache is zorifi-v242.
 Evidence/logs are in C:\Users\User\Documents\ChatGPT\Zorifi\artifacts\v5-*.
 
+PRODUCTION RELEASE CHECKS
+
+The Firebase published rules were copied through the console UI after reload and
+matched all 16,254 characters of the tested file (verification hash 1446274130).
+The current published revision was visible and no unpublished changes remained.
+The live HTML loads the v242 bridge and native timeline module. Ten changed public
+assets matched the tested sources after normalizing CRLF. Firebase's public web
+configuration is present for the correct project. The deployed text provider is
+configured as Gemini using its existing server model setting.
+Live GET /api/vanessa/chat returns 405. Anonymous POST returns 401 AUTH_REQUIRED;
+an untrusted Origin returns 403 FORBIDDEN. The legacy route alias also requires
+authentication. All those API responses use Cache-Control: no-store.
+Through the actual signed-in released UI, Vanessa answered "What is 3 x 4?"
+with "12". This exercised Firebase authentication, durable conversation storage
+and the configured live Gemini route. No existing timeline project was modified.
+ElevenLabs credential and voice metadata checks returned 200, while a real speech
+request returned 401 with provider error quota_exceeded. This requires more voice
+credits on the existing ElevenLabs account; no purchase or plan change was made.
+Detailed deployment and asset checks are in artifacts/v5-live-release.json.
+
 REMAINING LIMITATIONS AND DEPLOYMENT
 
-1. Publish approval is required for the staged Firebase rules before deploying the
-   application. The staged text exactly matches tested firestore.rules. Existing
-   published rules were compared with repository HEAD before adding the two new
-   private paths. Production access behavior has not yet been exercised.
+1. The approved release and private-session/quota rules are published. Production
+   authentication, conversation access and anonymous rejection were exercised.
+   Exhaustive hostile-account cases were verified against the emulator and test
+   REST fixtures, not by creating attack accounts in the production service.
 2. Device-only projects have no authoritative server document. The server verifies
    authenticated workspace/session binding; the client checks actual local state.
    It cannot independently verify the provenance of local media or project files.
-3. Provider/auth browser responses were controlled fixtures; no paid live Gemini
-   or ElevenLabs request was made. Credentials, provider availability, quotas and
-   model access can still fail and are surfaced as errors.
+3. Automated provider/auth browser responses use controlled fixtures. A signed-in
+   live Gemini chat check passed. Actual ElevenLabs speech is currently blocked
+   by quota_exceeded. More ElevenLabs credits are required to restore cloud voice.
+   Provider availability, quotas and model access can fail and are reported.
 4. The durable chat route returns complete JSON replies; the legacy SSE endpoint
    remains available. Word-accurate speech alignment is not claimed: the existing
    ElevenLabs response has no word timestamps. Captions track actual speech state.

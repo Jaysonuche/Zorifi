@@ -38,7 +38,10 @@ export function configuration(){
 }
 export async function upstream(url,options={}){
  let response;try{response=await fetch(url,{...options,redirect:'error',signal:options.signal?AbortSignal.any([options.signal,AbortSignal.timeout(120000)]):AbortSignal.timeout(120000)});}catch{if(options.signal?.aborted)throw new ServiceError('The request was cancelled.',499,'CANCELLED');throw new ServiceError('The provider could not be reached. Check its configuration and retry.',502,'PROVIDER_UNAVAILABLE');}
- if(!response.ok)throw new ServiceError(`The provider rejected the request (${response.status}). Check credentials, model access, and account limits.`,response.status===429?429:502,'PROVIDER_REJECTED');
+ if(!response.ok){
+  if(String(url).startsWith('https://api.elevenlabs.io/')){const problem=await response.json().catch(()=>({}));if(problem.detail?.status==='quota_exceeded')throw new ServiceError('ElevenLabs voice credits are used up. Add credits to your ElevenLabs account to restore Vanessa’s voice.',429,'VOICE_QUOTA_EXCEEDED');}
+  throw new ServiceError(`The provider rejected the request (${response.status}). Check credentials, model access, and account limits.`,response.status===429?429:502,'PROVIDER_REJECTED');
+ }
  return response;
 }
 export async function upstreamJson(url,options={}){const response=await upstream(url,options);try{return await response.json();}catch{throw new ServiceError('The provider returned an invalid response.',502,'INVALID_PROVIDER_RESPONSE');}}

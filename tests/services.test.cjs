@@ -10,6 +10,13 @@ test('authenticated speech accepts short natural replies and rejects empty text 
  try{const {speech}=await import('../netlify/functions/_shared/services.mjs');const response=await speech(request('vanessa-speech',{text:'12'}));assert.equal(response.status,200);assert.equal((await response.arrayBuffer()).byteLength,3);assert.equal((await speech(request('vanessa-speech',{text:'  '}))).status,400);assert.equal(calls,1);}
  finally{global.fetch=savedFetch;global.Netlify=savedEnv;}
 });
+test('ElevenLabs quota exhaustion is reported as voice credits instead of a Firebase sign-in or credential error',async()=>{
+ const savedFetch=global.fetch,savedEnv=global.Netlify;
+ global.Netlify={env:{get:firebaseEnv(key=>({ELEVENLABS_API_KEY:'fixture-voice-key',VANESSA_VOICE_ID:'fixture-voice'})[key]||'')}};
+ global.fetch=firebaseTransport(async()=>Response.json({detail:{status:'quota_exceeded',message:'private provider account details'}},{status:401}));
+ try{const {speech}=await import('../netlify/functions/_shared/services.mjs');const response=await speech(request('vanessa-speech',{text:'12'})),data=await response.json();assert.equal(response.status,429);assert.equal(data.code,'VOICE_QUOTA_EXCEEDED');assert.match(data.error,/ElevenLabs voice credits/);assert(!JSON.stringify(data).includes('private provider account details'));}
+ finally{global.fetch=savedFetch;global.Netlify=savedEnv;}
+});
 test('all recovered services fail clearly without credentials and never fabricate media',async()=>{
  const saved=global.Netlify;global.Netlify={env:{get:()=>''}};
  // Use an isolated process environment view so developer credentials cannot cause requests.
