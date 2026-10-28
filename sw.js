@@ -1,5 +1,5 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
-const CACHE = 'zorifi-v242';
+const CACHE = 'zorifi-v243';
 const CORE = [
   "./zorifi-timeline-edit-api.js?v=242",
   "./zorifi-vanessa-production.js?v=242",
@@ -42,7 +42,7 @@ const CORE = [
   "./zorifi-vanessa-orb.css?v=231",
   "./zorifi-device-lab.css?v=1",
   "./zorifi-editor-workbench.css?v=222",
-  "./zorifi-vanessa-chat.css?v=240",
+  "./zorifi-vanessa-chat.css?v=243",
   "./zorifi-music-catalogue.css?v=222",
   "./zorifi-background-cutout.css?v=222",
   "./zorifi-editor-refinements.css?v=240",

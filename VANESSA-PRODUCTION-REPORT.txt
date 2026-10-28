@@ -100,6 +100,11 @@ as "12". Speech now accepts nonempty short answers. ElevenLabs quota_exceeded
 responses are mapped to a clear voice-credit error, not a credential error.
 The existing verified local voice key was applied to the existing production
 sensitive variable without changing its visibility or environment targets.
+A production split test exposed an underspecified model action format. The
+Gemini request now carries a native responseJsonSchema with bounded action
+shapes, alongside strict server/client semantic validation. The live retest passed.
+Compact editor chat now keeps messages and the composer visible during voice
+errors at a 1280x720 viewport; both browser engines verified that layout.
 
 ADDITIONAL CHANGED FILES
 
@@ -108,14 +113,14 @@ netlify/functions/_shared/services.mjs; scripts/dev-server.cjs; firestore.rules;
 zorifi-master-app.js; zorifi-director-integration.js; zorifi-phase8.js;
 electron-main.cjs; scripts/hosted-language-gateway.cjs;
 index.html; sw.js; package.json; vercel.json; .env.example;
-zorifi-app-settings.js; generated zorifi-interface-catalog.json.
+zorifi-app-settings.js; zorifi-vanessa-chat.css; generated zorifi-interface-catalog.json.
 Existing provider/auth tests were migrated to explicit Firebase fixtures.
 New tests/helpers/firebase-provider.cjs is test-only and is never shipped.
 Unrelated README, src/services and native-project changes were preserved.
 
 VERIFICATION (PHASE 5)
 
-node --test tests/*.test.cjs: 327 passed, 0 failed, 0 skipped.
+node --test tests/*.test.cjs: 328 passed, 0 failed, 0 skipped.
 This includes 15 native timeline tests and 7 production server tests covering
 schemas, replay integrity, per-UID quotas, concurrency, auth and cancellation.
 The desktop private-session relay also verifies its fixed destination, forwarded
@@ -151,7 +156,7 @@ reload/token refresh and revoked-token recovery were exercised with REST fixture
 
 node scripts/build-web.cjs: 139 web files plus assets built.
 node scripts/check-project.cjs: 305 source files and 277 browser/cache references
-passed syntax/integrity checks. Release cache is zorifi-v242.
+passed syntax/integrity checks. Release cache is zorifi-v243; editor bridge scripts remain at v242.
 Evidence/logs are in C:\Users\User\Documents\ChatGPT\Zorifi\artifacts\v5-*.
 
 PRODUCTION RELEASE CHECKS
@@ -168,7 +173,13 @@ an untrusted Origin returns 403 FORBIDDEN. The legacy route alias also requires
 authentication. All those API responses use Cache-Control: no-store.
 Through the actual signed-in released UI, Vanessa answered "What is 3 x 4?"
 with "12". This exercised Firebase authentication, durable conversation storage
-and the configured live Gemini route. No existing timeline project was modified.
+and the configured live Gemini route. A separate sample project (Untitled project
+4) was then created from the bundled cinematic-travel.mp4, leaving existing user
+projects unchanged. Live Vanessa proposed a split at 2 seconds, waited for Apply,
+then created real 2.00s and 3.89s segments beside the original ending. Live Undo
+restored the original source clip; live Redo restored both segments. Saving,
+reloading the application and reopening that project retained the media and
+three timeline sources. Undo/Redo runtime stacks correctly reset after refresh.
 ElevenLabs credential and voice metadata checks returned 200, while a real speech
 request returned 401 with provider error quota_exceeded. This requires more voice
 credits on the existing ElevenLabs account; no purchase or plan change was made.

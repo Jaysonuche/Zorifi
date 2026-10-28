@@ -97,3 +97,15 @@ main.app-shell[data-view="editor"] .inspector .vanessa-assistant.inspector-embed
 .vanessa-assistant.inspector-embedded .vanessa-panel form>button{order:2;}
 .vanessa-assistant.inspector-embedded .vanessa-panel form>button[type="submit"]{margin-left:auto;}
 @container vanessa-conversation (max-height:420px){.vanessa-assistant.inspector-embedded :is(.vanessa-suggestions,.vanessa-voice-options){display:none!important;}}
+/* Keep real messages readable when a short editor pane includes a voice error. */
+body:not(.touch-workspace) .vanessa-assistant.inspector-embedded .vanessa-panel{grid-template-rows:auto auto auto auto minmax(80px,1fr) auto auto auto!important;overflow-y:auto;}
+@container vanessa-conversation (max-height:420px){
+ .vanessa-assistant.inspector-embedded .vanessa-panel>header{min-height:48px;padding-block:4px;}
+ .vanessa-assistant.inspector-embedded .vanessa-panel>header small{display:none;}
+ .vanessa-assistant.inspector-embedded .vanessa-session-controls{min-height:30px;padding-block:0;flex-wrap:nowrap;}
+ .vanessa-assistant.inspector-embedded .vanessa-voice-playback{max-height:46px;margin:0 8px 3px;padding:4px 6px;gap:6px;overflow-y:auto;align-items:flex-start;}
+ .vanessa-assistant.inspector-embedded .vanessa-messages{padding-block:6px;}
+ .vanessa-assistant.inspector-embedded .vanessa-panel form{flex-wrap:nowrap;margin-block:2px 4px!important;gap:3px;}
+ .vanessa-assistant.inspector-embedded .vanessa-panel form>input[name="message"]{order:0;flex:1 1 40px!important;width:0;}
+ .vanessa-assistant.inspector-embedded .vanessa-panel form>button{order:0;flex:0 0 28px!important;width:28px!important;min-width:28px!important;height:32px!important;min-height:32px!important;}
+}
