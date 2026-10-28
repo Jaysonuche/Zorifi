@@ -121,7 +121,7 @@ export function handler(run,{multipart=false,rateLimited=false,privateSession=fa
   }catch(error){if(request.signal.aborted)error=callerSignal.aborted?new ServiceError('The request was cancelled.',499,'CANCELLED'):new ServiceError('Vanessa took too long to respond. Please retry.',504,'PROVIDER_TIMEOUT');const response=json({error:error instanceof ServiceError?error.message:'The service could not complete this request.',code:error.code||'SERVICE_FAILED',configured:error.code!=='NOT_CONFIGURED',...(error.expectedSequence?{expectedSequence:error.expectedSequence}:{})},error.status||500);if(error.retryAfter)response.headers.set('Retry-After',String(error.retryAfter));return reply(response);}
  };
 }
-export async function language(prompt,{instructions='',jsonMode=false,preferredLanguage,image,webSearch=false,signal}={}){
+export async function language(prompt,{instructions='',jsonMode=false,responseJsonSchema,preferredLanguage,image,webSearch=false,signal}={}){
  if(usesGemini()){
   if(webSearch)throw new ServiceError('This Gemini integration does not have web search enabled.',400,'UNSUPPORTED_CAPABILITY');
   const parts=[{text:prompt}];
@@ -132,7 +132,7 @@ export async function language(prompt,{instructions='',jsonMode=false,preferredL
   let data;
   for(const [index,model] of models.entries()){
    try{
-    data=await ai.models.generateContent({model,contents:[{role:'user',parts}],config:{...(signal?{abortSignal:signal}:{}),systemInstruction:identity.providerInstructions({preferredLanguage})+'\n'+instructions,maxOutputTokens:8192,...(jsonMode?{responseMimeType:'application/json'}:{})}});
+    data=await ai.models.generateContent({model,contents:[{role:'user',parts}],config:{...(signal?{abortSignal:signal}:{}),systemInstruction:identity.providerInstructions({preferredLanguage})+'\n'+instructions,maxOutputTokens:8192,...(jsonMode?{responseMimeType:'application/json',...(responseJsonSchema?{responseJsonSchema}:{})}:{})}});
     break;
    }catch(error){
     if(signal?.aborted)throw new ServiceError('The creative request was cancelled or took too long. Please retry.',504,'PROVIDER_TIMEOUT');

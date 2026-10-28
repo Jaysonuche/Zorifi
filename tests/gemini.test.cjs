@@ -1,5 +1,12 @@
 const {firebaseTransport,firebaseEnv}=require('./helpers/firebase-provider.cjs');
 const test=require('node:test'),assert=require('node:assert/strict');
+test('Gemini receives the native private-chat proposal schema rather than unrestricted JSON',async()=>{
+ const oldFetch=global.fetch,oldEnv=global.Netlify;let sent;
+ global.Netlify={env:{get:key=>({GEMINI_API_KEY:'fixture-gemini-key',GEMINI_MODEL:'gemini-2.5-flash'})[key]||''}};
+ global.fetch=async(_url,options)=>{sent=JSON.parse(options.body);return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({reply:'Proposed split.',actions:[{command:'clip.split',target:'clip',parameters:{time:2}}]})}]}}]});};
+ try{const {language}=await import('../netlify/functions/_shared/provider.mjs'),{CHAT_SCHEMA}=await import('../netlify/functions/_shared/vanessa-router.mjs');const result=await language('Split clip at 2 seconds.',{jsonMode:true,responseJsonSchema:CHAT_SCHEMA});assert.deepEqual(sent.generationConfig.responseJsonSchema,CHAT_SCHEMA);assert.equal(sent.generationConfig.responseMimeType,'application/json');assert.equal(result.actions[0].command,'clip.split');assert.equal(CHAT_SCHEMA.properties.actions.items.anyOf[0].additionalProperties,false);assert.deepEqual(CHAT_SCHEMA.properties.actions.items.anyOf[0].properties.parameters.required,['time']);}
+ finally{global.fetch=oldFetch;global.Netlify=oldEnv;}
+});
 test('Gemini supports chat/context, JSON planning, metadata and sanitized failures',async()=>{
  const old=global.fetch,oldEnv=global.Netlify;global.Netlify={env:{get:firebaseEnv(k=>({GEMINI_API_KEY:'private-gemini-test',GEMINI_MODEL:'gemini-2.5-flash',AI_PROVIDER_KEY:'other-provider'}[k]||''))}};let payload;
  try{const p=await import('../netlify/functions/_shared/provider.mjs'),s=await import('../netlify/functions/_shared/services.mjs');assert.equal(p.configuration().language.provider,'Gemini');
