@@ -8,7 +8,7 @@
  const ratio=()=>String(state.ratio).replace(/\s/g,'').replace('/',':');
  const catalog=()=>({...vanessaEditorContext().capabilities,effectLibrary:MotionEffects.EFFECTS,fonts:fonts.map(({id,family,name})=>({id,family,name}))});
  function memory(){const account=Bridge().identity();if(scopeUid!==account.uid){accountMemory=new Learning.CreativeLearning({uid:account.uid,storage:localStorage});scopeUid=account.uid;lastResult=null;}return accountMemory;}
- function progress(update){lastProgress=update;const status=document.querySelector('[data-professional-progress]');if(status)status.textContent=update.phase==='paused'?'Paused — your live edit is unchanged.':`${update.phase}${update.total?` ${update.completed||0}/${update.total}`:''}`;}
+ function progress(update){lastProgress=update;const labels={authorizing:'Checking project access…',analysing:'Reviewing decoded project samples…',planning:'Planning from your actual sources…',validating:'Checking native editing steps',saving:'Applying and saving verified adjustments…',review:'Saved — review the result',paused:'Paused — your live edit is unchanged.'},text=(labels[update.phase]||update.phase)+(update.total?` ${update.completed||0}/${update.total}`:''),status=document.querySelector('[data-professional-progress]');if(status)status.textContent=text;global.dispatchEvent(new CustomEvent('zorifi:vanessa-professional-progress',{detail:{...update,text,userId:currentUser?.id,projectId:state.projectId}}));}
  function stage(project){return {...ProjectModel.captureHistory(project),projectId:project.projectId,currentProject:project.currentProject,currentTime:project.currentTime,mediaAssets:project.mediaAssets.map(item=>({...item})),undo:[],redo:[],view:'editor'};}
  function quality(project,options){
   // Match the native automatic-ending rule on the transient draft as well.
@@ -31,18 +31,20 @@
    // Rendering installs native default fields. Verify every staged value and
    // clip identity while allowing those additional native defaults.
    const verified=state.clips.length===pending.draft.clips.length&&pending.draft.clips.every(clip=>matches(clip,state.clips.find(item=>item.id===clip.id)));if(!verified)throw Error('The timeline changed unexpectedly during the professional commit.');
-   lastResult={projectId:state.projectId,uid:Bridge().identity().uid,revision:Bridge().fingerprint(),undoCheckpoint:state.undo.at(-1),quality:pending.quality,proposal:pending.proposal,brief:pending.brief,verified:true,completedAt:Date.now()};
+   const actualQuality=quality(stage(state),{evidence:pending.evidence,brief:pending.brief});if(actualQuality.blockers.length)throw Error('The applied edit failed its technical review and was rolled back.');
+   lastResult={projectId:state.projectId,uid:Bridge().identity().uid,revision:Bridge().fingerprint(),undoCheckpoint:state.undo.at(-1),quality:actualQuality,proposal:pending.proposal,brief:pending.brief,verified:true,completedAt:Date.now()};
    // Editing must not be rolled back just because optional measurement storage
    // is full. A technical pass does not certify creative or rendered quality.
    try{memory().recordOutcome({outcome:'succeeded',verified:true,strategy:pending.proposal.metadata?.strategy||'baseline-v1',quality:pending.quality.summary.errors?'fail':pending.quality.summary.warnings?'partial':'pass',durationSeconds:state.duration});queueSharing();}catch{toast('The edit was saved; optional learning measurements could not be stored.');}
-   return {verified:true,persisted:true};
+   return {verified:true,persisted:true,quality:actualQuality};
   }catch(error){ProjectModel.restoreHistory(state,before.history);state.currentProject=before.name;state.undo=before.undo;state.redo=before.redo;render();try{Bridge().saveVerified();}catch{throw Error('The draft was rolled back, but device storage could not save the restored project. Save it before closing.');}throw error;}
  }
  function getRunner(){return runner||(runner=new ZorifiProfessionalEngine.PlanRunner({tools:Tools,catalog,read:()=>state,capture:()=>Bridge().scope(),assertScope:captured=>Bridge().check(captured),stage,apply,review:quality,commit,progress}));}
- function durationFrom(message){const match=message.match(/\b(\d{1,3})(?:[- ]?second|\s*sec\b|\s*s\b)/i);return match?Math.min(180,Math.max(1,Number(match[1]))):null;}
+ function durationFrom(message){return ZorifiProfessionalEngine.requestedDuration(message);}
  function handles(message){
   if(state.view!=='editor')return false;
   const text=message.trim().replace(/^(?:hey\s+)?vanessa[,!\s]*/i,'');
+  if(ZorifiProfessionalEngine.delegatedRequest(text))return true;
   if(/^(?:what|who|why|when|where|how|explain|tell me|do you|can you explain)\b/i.test(text))return false;
   if(global.ZorifiStudioDirector?.classifyIntent(text)?.kind==='music')return false;
   const requested=isDirectVanessaCommand(text)||/^(?:fix|finish|build|arrange|design|rework|improve|strengthen|match|use|synchronize|sync|grade|polish|tighten)\b/i.test(text)||/^I (?:want|need|would like)\b/i.test(text);
@@ -69,30 +71,42 @@
    const clip=state.clips.find(item=>item.id===state.selected),value=feedback.issue==='transition'?clip?.transition:feedback.issue==='effect'?clip?.effectStack?.at(-1)?.effectId:null;
    if(typeof value==='string')preferences.rememberPreference({dimension:feedback.issue,value,polarity:'avoid',approved:true});
   }
-  active=true;controller=new AbortController();const localController=controller,captured=Bridge().scope();lastProgress={phase:'analysing'};getRunner().stop();
+  const delegated=ZorifiProfessionalEngine.delegatedRequest(message);
+  const selectedDelegation=delegated&&/\b(?:this|selected)\s+clip\b/i.test(message)&&!/\b(?:entire|whole|all)\s+(?:edit|video|project|timeline)\b/i.test(message);
+  if(selectedDelegation&&!state.clips.some(clip=>clip.id===state.selected))return {status:'NEEDS_INPUT',message:'Select the clip you want me to improve. I can then inspect its source and make gentle reversible adjustments.'};
+  active=true;controller=new AbortController();const localController=controller,captured=Bridge().scope();progress({phase:'authorizing'});getRunner().stop();
   try{await Bridge().authorize(localController.signal);Bridge().check(captured);const assets=state.mediaAssets.filter(item=>!item.zorifiEnding&&['video','image','audio'].includes(item.type));if(!assets.length)throw Error('Import real footage or photographs first. I cannot analyse missing media.');
    progress({phase:'analysing'});const evidence=await Review.collectEvidence(assets,{signal:localController.signal,onProgress:update=>progress({phase:update.phase||'analysing',completed:update.assetIndex,total:update.assetCount})});Bridge().check(captured);
    const brief={text:message,duration:durationFrom(message),ratio:ratio()},manifest=Review.understandProject(state,{evidence,brief:message});manifest.mediaAssets=manifest.media.map(item=>({...item,available:item.readability!=='missing-local-source'}));
+   manifest.editingHistory=ZorifiProfessionalEngine.historySummary(state);
    manifest.trackStates=structuredClone(state.trackStates||{});
    manifest.clips=manifest.clips.map(clip=>{const actual=state.clips.find(x=>x.id===clip.id);return {...clip,zorifiEnding:Boolean(actual?.zorifiEnding),autoCaption:Boolean(actual?.autoCaption),effectStack:structuredClone(actual?.effectStack||[]),animations:structuredClone(actual?.animations||[]),keyframes:structuredClone(actual?.keyframes||{})};});
    const technical=quality(stage(state),{evidence,brief});
    if(/^(?:please\s+)?(?:review|evaluate)\b/i.test(message)){lastResult={...lastResult,quality:technical};return {status:technical.blockers.length?'NEEDS_INPUT':'REVIEWED',message:`Technical review: ${technical.summary.errors} errors, ${technical.summary.warnings} warnings. ${technical.issues.slice(0,5).map(x=>x.message).join(' ')} Storytelling, final colour and the rendered audio mix still need playback review.`,quality:technical};}
    progress({phase:'planning'});if(feedback&&['objective-error','creative-preference'].includes(feedback.kind))preferences.recordOutcome({outcome:'corrected',issue:feedback.issue||'other'});
    const contextualPreferences=preferences.providerContext().preferences;if(/\bstyle from (?:my |the )?previous project\b/i.test(message)){const previous=getSavedProjects().filter(item=>item.id!==state.projectId).sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')))[0];if(!previous)throw Error('There is no previous project saved in this account on this device.');contextualPreferences.push({dimension:'style',value:Learning.styleFromTimeline(previous),polarity:'prefer',scope:'this-project-only'});}
-   const response=await Bridge().request({message,context:{manifest,evidence,catalog:catalog(),preferences:contextualPreferences,feedback,previousDirection:lastResult?.projectId===state.projectId?{brief:lastResult.brief?.text,strategy:lastResult.proposal?.strategy}:null,targetDuration:brief.duration||Math.min(180,Math.max(1,state.duration||45)),ratio:ratio(),technicalReview:{issues:technical.issues,unassessed:technical.unassessed}}},{signal:localController.signal,intent:'professional'});Bridge().check(captured);
+   const response=await Bridge().request({message,context:{manifest,evidence,catalog:catalog(),preferences:contextualPreferences,feedback,delegation:delegated?{mode:'safe-reversible-improvements',preserveSources:true,preserveTiming:true,confirmationFor:['destructive','source or timing changes','new content','large visual changes','paid generation','external sharing','export']}:null,previousDirection:lastResult?.projectId===state.projectId?{brief:lastResult.brief?.text,strategy:lastResult.proposal?.strategy}:null,targetDuration:brief.duration||Math.min(180,Math.max(1,state.duration||45)),ratio:ratio(),technicalReview:{issues:technical.issues,unassessed:technical.unassessed}}},{signal:localController.signal,intent:'professional'});Bridge().check(captured);
    if(!response.actions?.length)return {status:'NEEDS_INPUT',message:response.reply};
    const approved=preferences.providerContext().preferences,avoids=approved.filter(item=>item.polarity==='avoid');
    response.actions=response.actions.filter(action=>{const dimension=action.command==='transition.apply'?'transition':action.command==='effect.apply'||action.command==='visual.effect'?'effect':null;const rejected=dimension&&avoids.some(item=>item.dimension===dimension&&item.value===action.parameters?.id);if(rejected)(response.warnings||=[]).push(`Left out ${action.parameters.id} because you previously rejected it.`);return !rejected;});
    const firstWindow=message.match(/\bfirst\s+(five|\d+(?:\.\d+)?)\s+seconds?\b/i),range=firstWindow?[0,firstWindow[1].toLowerCase()==='five'?5:Number(firstWindow[1])]:null;
    if(range)Tools.validateScope(response.actions,state,{range});
+   else if(selectedDelegation)Tools.validateScope(response.actions,state,{targetIds:[state.selected]});
    else if(feedback?.preserveOthers||feedback?.atSeconds!==null&&feedback?.atSeconds!==undefined){const at=feedback.atSeconds,targets=at!==null&&at!==undefined?state.clips.filter(clip=>clip.start<=at&&clip.start+clip.duration>at).map(clip=>clip.id):feedback.targetIds;Tools.validateScope(response.actions,state,{targetIds:targets});}
    if(!response.actions.length)return {status:'NEEDS_INPUT',message:'The proposal used a tool you previously rejected, so I left it out. Your project is unchanged.'};
    const prepared=await getRunner().prepare(response,{scope:captured,signal:localController.signal,evidence,brief});
    const warnings=[...(response.warnings||[]),...prepared.quality.issues.filter(x=>x.severity==='warning').map(x=>x.message)];
-   return {status:'REQUIRES_CONFIRMATION',plan:{professionalProposal:prepared.id},message:`I prepared “${response.title||'your edit'}”: ${response.actions.length} verified draft steps from ${evidence.media.reduce((n,x)=>n+(x.frames?.length||0),0)} decoded frame samples.${warnings.length?' Review: '+warnings.slice(0,4).join(' '):''} Apply this plan? Your timeline is unchanged until you confirm.`,preview:response.actions.slice(0,8).map(action=>({command:action.command,target:action.target||'Project',status:'REQUIRES_CONFIRMATION',after:action.parameters})),quality:prepared.quality,metadata:response.metadata};
+   const safety=delegated?ZorifiProfessionalEngine.delegationSafety(prepared.proposal.actions,state,{beforeReview:technical,afterReview:prepared.quality}):{automatic:false,reasons:[]};
+   if(safety.automatic){
+    progress({phase:'applying',completed:0,total:prepared.proposal.actions.length});
+    const result=await getRunner().execute(prepared.id,{signal:localController.signal});
+    return completed(result,{automatic:true,frames:evidence.media.reduce((n,x)=>n+(x.frames?.length||0),0),warnings});
+   }
+   return {status:'REQUIRES_CONFIRMATION',plan:{professionalProposal:prepared.id},message:`I prepared “${response.title||'your edit'}”: ${response.actions.length} verified draft steps from ${evidence.media.reduce((n,x)=>n+(x.frames?.length||0),0)} decoded frame samples.${warnings.length?' Review: '+warnings.slice(0,4).join(' '):''}${delegated&&safety.reasons.length?' This plan needs your review: '+safety.reasons.slice(0,2).join(' '):''} Apply this plan? Your timeline is unchanged until you confirm.`,preview:response.actions.slice(0,8).map(action=>({command:action.command,target:action.target||'Project',status:'REQUIRES_CONFIRMATION',after:action.parameters})),quality:prepared.quality,metadata:response.metadata};
   }catch(error){if(error.name!=='AbortError'&&captured.uid===currentUser?.cloudUid)try{preferences.recordOutcome({outcome:'failed',quality:'unknown'});queueSharing();}catch{}throw error;}finally{if(controller===localController){active=false;controller=null;}}
  }
- async function execute(plan,{confirmed=false}={}){if(!confirmed)return {status:'REQUIRES_CONFIRMATION',plan,message:'Review the professional draft before applying it.'};const id=plan.professionalProposal;controller=new AbortController();const localController=controller;active=true;try{const result=await getRunner().execute(id,{signal:localController.signal});return {status:'SUCCESS',message:`Applied ${result.items.length} verified steps and saved the project on this device. One Undo restores the previous version. Technical review found ${result.quality.summary.warnings} warnings; play the edit to review storytelling, colour and the final audio mix before exporting.`,...result};}finally{if(controller===localController){active=false;controller=null;}}}
+ function completed(result,{automatic=false,frames=0,warnings=[]}={}){return {status:'SUCCESS',message:`${automatic?`I reviewed ${frames} decoded frame samples and applied ${result.items.length} gentle, reversible adjustments within your request.`:`Applied ${result.items.length} verified steps.`} Saved the project on this device. One Undo restores the previous version. Technical review found ${result.quality.summary.warnings} warnings; play the edit to review storytelling, colour and the final audio mix before exporting.${automatic&&warnings.length?' Sample review: '+warnings.slice(0,2).join(' '):''}`,...result,metadata:result.proposal?.metadata};}
+ async function execute(plan,{confirmed=false}={}){if(!confirmed)return {status:'REQUIRES_CONFIRMATION',plan,message:'Review the professional draft before applying it.'};const id=plan.professionalProposal;controller=new AbortController();const localController=controller;active=true;try{const result=await getRunner().execute(id,{signal:localController.signal});return completed(result);}finally{if(controller===localController){active=false;controller=null;}}}
  function cancel(){controller?.abort();controller=null;runner?.stop();active=false;lastProgress={phase:'stopped'};}
  function pause(){runner?.pause();lastProgress={phase:'paused'};}
  function resume(){runner?.resume();}

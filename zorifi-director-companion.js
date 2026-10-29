@@ -16,7 +16,8 @@
     const win = doc.defaultView;
     const lifecycle = new win.AbortController();
     let disposed = false, currentUser = '', savedPosition = null, drag = null, suppressClick = false;
-    let snapshot = {visible: false, chatOpen: false, caption: '', hint: false, mode: 'companion', status: 'idle'};
+    let snapshot = {visible: false, chatOpen: false, caption: '', hint: false, mode: 'companion', status: 'idle', captionKind: 'message', wordRange: null};
+    let renderedText = '', wordNodes = [], positionFrame = null;
 
     const surface = doc.createElement('section');
     surface.className = 'director-companion';
@@ -28,8 +29,8 @@
       '<span class="director-companion-orbit" aria-hidden="true"></span><img src="assets/vanessa-orb.webp?v=231" alt="" draggable="false">' +
       '<span class="director-companion-status" aria-hidden="true"></span></button>' +
       '<div class="director-companion-notes"><div class="director-companion-caption" data-director-caption hidden>' +
-      '<header><span>Vanessa</span><button type="button" data-director-caption-close aria-label="Dismiss Vanessa’s caption">×</button></header>' +
-      '<p role="status" aria-live="polite" aria-atomic="true" data-director-caption-text></p></div>' +
+      '<header><span class="director-caption-identity"><b>Vanessa</b><small data-director-speaking-status>Creative companion</small></span><span class="director-caption-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><button type="button" data-director-caption-close aria-label="Dismiss Vanessa’s caption">×</button></header>' +
+      '<p role="status" aria-live="polite" aria-atomic="true" data-director-caption-text></p><small class="director-caption-timing" data-director-caption-timing hidden></small></div>' +
       '<div class="director-companion-hint" data-director-hint hidden><span>Find me in the Vanessa tab</span>' +
       '<span class="director-companion-hint-arrow" aria-hidden="true">↘</span><button type="button" data-director-hint-close aria-label="Dismiss Vanessa introduction">×</button></div></div>';
     doc.body.append(surface);
@@ -37,6 +38,8 @@
     const notes = surface.querySelector('.director-companion-notes');
     const caption = surface.querySelector('[data-director-caption]');
     const captionText = surface.querySelector('[data-director-caption-text]');
+    const speakingStatus = surface.querySelector('[data-director-speaking-status]');
+    const timing = surface.querySelector('[data-director-caption-timing]');
     const hint = surface.querySelector('[data-director-hint]');
     const safeProbe = surface.querySelector('.director-companion-safe-area');
 
@@ -67,7 +70,7 @@
       return null;
     }
     function defaultPosition(area, size) {
-      const preview = visibleRect('main[data-view="editor"] .preview-wrap, main[data-view="editor"] .stage, .music-waveform-stage');
+      const preview = visibleRect('main[data-view="editor"] .preview-wrap') || visibleRect('main[data-view="editor"] .stage, .music-waveform-stage');
       if (preview && preview.width >= size + 24 && preview.height >= size + 24) {
         return {x: preview.right - size - 12, y: preview.bottom - size - 12};
       }
@@ -82,6 +85,20 @@
       orb.style.left = left + 'px'; orb.style.top = top + 'px';
       if (remember) {
         savedPosition = {x: (left - area.left) / Math.max(1, area.right - area.left - size), y: (top - area.top) / Math.max(1, area.bottom - area.top - size)};
+      }
+      // Speech stays visible when chat is embedded, within the preview rather
+      // than over the timeline, transport bar, or mobile editing dock.
+      const chat = snapshot.chatOpen && visibleRect('.vanessa-assistant.open .vanessa-messages');
+      const preview = snapshot.captionKind === 'speech' && (snapshot.chatOpen && doc.body.classList.contains('touch-workspace') ? chat : visibleRect('main[data-view="editor"] .preview-wrap') || visibleRect('main[data-view="editor"] .stage, .music-waveform-stage') || chat);
+      if (preview && preview.height >= 60 && snapshot.caption) {
+        const width = Math.max(1, Math.min(420, area.right-area.left, preview.width-20));
+        notes.style.width = width+'px';
+        notes.style.left = clamp(preview.left+(preview.width-width)/2, area.left, area.right-width)+'px';
+        notes.style.maxHeight = Math.max(1, Math.min(180, Math.max(64,preview.height*.52), preview.height-12, area.bottom-area.top))+'px';
+        const height = notes.getBoundingClientRect().height;
+        notes.style.top = clamp(preview.bottom-height-10, Math.max(area.top,preview.top), Math.min(area.bottom-height,preview.bottom-height))+'px';
+        notes.dataset.side = 'preview';
+        return;
       }
       const width = Math.max(1, Math.min(300, area.right - area.left));
       notes.style.width = width + 'px';
@@ -151,7 +168,7 @@
     const observer = win.ResizeObserver ? new win.ResizeObserver(position) : null;
     let observed = [];
     function observeLayout() {
-      const nodes = [...doc.querySelectorAll('.preview-wrap, .stage, .timeline-area, .music-waveform-stage, .mobile-home-nav, .mobile-editor-dock')];
+      const nodes = [notes, ...doc.querySelectorAll('.preview-wrap, .stage, .timeline-area, .music-waveform-stage, .mobile-home-nav, .mobile-editor-dock')];
       if (nodes.length === observed.length && nodes.every((node, index) => node === observed[index])) return;
       observer?.disconnect(); observed = nodes;
       for (const node of nodes) observer?.observe(node);
@@ -164,23 +181,51 @@
         currentUser = owner; savedPosition = owner ? readPosition() : null; drag = null; suppressClick = false;
         // A new account must never inherit a previous account's subtitle.
         if (!Object.prototype.hasOwnProperty.call(value, 'caption')) snapshot.caption = '';
+        if (!Object.prototype.hasOwnProperty.call(value, 'wordRange')) snapshot.wordRange = null;
         if (!Object.prototype.hasOwnProperty.call(value, 'hint')) snapshot.hint = false;
       }
-      surface.hidden = !owner || !snapshot.visible || Boolean(snapshot.chatOpen);
+      const speechVisible = snapshot.captionKind === 'speech' && Boolean(snapshot.caption);
+      surface.hidden = !owner || !snapshot.visible || Boolean(snapshot.chatOpen && !speechVisible);
+      orb.hidden = Boolean(snapshot.chatOpen);
+      surface.dataset.chatOpen = String(Boolean(snapshot.chatOpen));
       surface.dataset.mode = snapshot.mode === 'director' ? 'director' : 'companion';
       surface.dataset.status = statuses.has(snapshot.status) ? snapshot.status : 'idle';
       if (!owner || !snapshot.visible) { snapshot.caption = ''; snapshot.hint = false; }
       const text = String(snapshot.caption || '').trim();
-      if (captionText.textContent !== text) captionText.textContent = text;
+      if (renderedText !== text) {
+        renderedText = text; wordNodes = []; captionText.replaceChildren();
+        let cursor = 0;
+        for (const word of text.matchAll(/\S+/gu)) {
+          if (word.index > cursor) captionText.append(doc.createTextNode(text.slice(cursor,word.index)));
+          const node = doc.createElement('span'); node.className = 'director-caption-word';
+          node.textContent = word[0]; captionText.append(node);
+          wordNodes.push({node,start:word.index,end:word.index+word[0].length});
+          cursor = word.index+word[0].length;
+        }
+        if (cursor < text.length) captionText.append(doc.createTextNode(text.slice(cursor)));
+      }
+      const index = snapshot.wordRange?.charIndex;
+      for (const word of wordNodes) {
+        const active = speechVisible && Number.isInteger(index) && index >= word.start && index < word.end;
+        word.node.classList.toggle('is-current',active);
+        if(active)word.node.setAttribute('aria-current','true');else word.node.removeAttribute('aria-current');
+        if(active){const box=word.node.getBoundingClientRect(),viewport=captionText.getBoundingClientRect();if(box.bottom>viewport.bottom)captionText.scrollTop+=box.bottom-viewport.bottom+4;else if(box.top<viewport.top)captionText.scrollTop-=viewport.top-box.top+4;}
+      }
+      caption.dataset.kind = snapshot.captionKind === 'speech' ? 'speech' : 'message';
+      caption.dataset.timing = snapshot.wordRange ? 'boundary' : 'unavailable';
+      speakingStatus.textContent = speechVisible ? snapshot.status === 'speaking' ? 'Speaking' : snapshot.status === 'error' ? 'Voice unavailable' : 'Preparing voice' : 'Creative companion';
+      timing.hidden = !speechVisible || snapshot.status !== 'speaking' || Boolean(snapshot.wordRange);
+      timing.textContent = timing.hidden ? '' : 'Full spoken text · word timing is not available from this voice yet';
       caption.hidden = !text; hint.hidden = !snapshot.hint;
       orb.title = `${surface.dataset.mode === 'director' ? 'Vanessa Director' : 'Vanessa companion'} · drag to move · Alt + arrow keys to move`;
       observeLayout(); position();
+      win.cancelAnimationFrame(positionFrame);positionFrame=win.requestAnimationFrame(()=>{positionFrame=null;position();});
     }
     const controller = {
       update,
       dispose() {
         if (disposed) return;
-        disposed = true; lifecycle.abort(); observer?.disconnect(); observed = []; drag = null;
+        disposed = true; lifecycle.abort(); observer?.disconnect();win.cancelAnimationFrame(positionFrame); observed = []; drag = null;
         surface.remove();
         if (instances.get(doc) === controller) instances.delete(doc);
       }

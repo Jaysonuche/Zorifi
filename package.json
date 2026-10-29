@@ -1,6 +1,6 @@
 {
   "name": "zorifi-video-editor",
-  "version": "3.43.0",
+  "version": "3.44.0",
   "packageManager": "pnpm@11.25.0",
   "description": "Zorifi cross-platform video editor",
   "desktopName": "Zorifi",
@@ -187,7 +187,9 @@
       "zorifi-vanessa-professional-engine.js",
       "zorifi-vanessa-professional.js",
       "zorifi-vanessa-professional.css",
-      "zorifi-creative-strategies.json"
+      "zorifi-creative-strategies.json",
+      "zorifi-vanessa-voice.js",
+      "zorifi-vanessa-voice.css"
     ],
     "win": {
       "target": "nsis",

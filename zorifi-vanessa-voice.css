@@ -1,0 +1,11 @@
+.vanessa-voice-settings{box-sizing:border-box;width:min(560px,calc(100vw - 24px));max-width:calc(100vw - 24px);max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow:auto;margin:auto;padding:24px;border:1px solid #68528f;border-radius:22px;background:#141222;color:#f3efff;box-shadow:0 30px 100px #03020bd9;font:14px/1.6 system-ui,sans-serif;color-scheme:dark}
+.vanessa-voice-settings::backdrop{background:#050411b8;backdrop-filter:blur(9px)}
+.vanessa-voice-settings h2{margin:0 0 12px;font-size:23px;letter-spacing:-.03em}
+.vanessa-voice-settings p{color:#cdc4e7;margin:12px 0;overflow-wrap:anywhere}
+.vanessa-voice-settings label{display:grid;gap:8px;margin-top:20px;font-weight:650}
+.vanessa-voice-settings select{box-sizing:border-box;min-width:0;width:100%;padding:12px;border:1px solid #5b477e;border-radius:12px;background:#242034;color:#f7f3ff;font:inherit;text-overflow:ellipsis}
+.vanessa-voice-settings-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.vanessa-voice-settings-actions button{padding:11px 16px;border:1px solid #6c538e;border-radius:12px;background:#302344;color:#fbf8ff;font:inherit;cursor:pointer}
+.vanessa-voice-settings-actions button:first-child{background:linear-gradient(115deg,#6942cd,#9451cc);border-color:#ad80f4}
+.vanessa-voice-settings :focus-visible{outline:2px solid #71e1ef;outline-offset:3px}
+@media(max-width:480px){.vanessa-voice-settings{padding:18px;border-radius:18px}.vanessa-voice-settings-actions button{flex:1}}

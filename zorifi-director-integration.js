@@ -1,7 +1,7 @@
 /* One companion, one microphone, and the editor's existing validated tools. */
 (function(global){
   'use strict';
-  let engine=null,owner='',preferences={idleHelp:true,mode:'companion'},caption='',captionStatus='idle',hint=false;
+  let engine=null,owner='',preferences={idleHelp:true,mode:'companion'},caption='',captionStatus='idle',captionKind='message',wordRange=null,hint=false;
   let captionTimer=null,introTimer=null,hintTimer=null,disposed=false,lastMovement=0;
   const lifecycle=new AbortController();
   const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback;}catch{return fallback;}};
@@ -19,17 +19,17 @@
     if(listen&&!vanessaListening)startVanessaVoice();
     else document.querySelector('[data-vanessa-form] [name="message"]')?.focus({preventScroll:true});
   }
-  function clearCaption(){clearTimeout(captionTimer);captionTimer=null;caption='';captionStatus='idle';hint=false;syncSurface();}
+  function clearCaption(){clearTimeout(captionTimer);captionTimer=null;caption='';captionStatus='idle';captionKind='message';wordRange=null;hint=false;syncSurface();}
   const surface=ZorifiDirectorCompanion.create({document,onOpen:()=>openVanessa(),onDismiss:clearCaption,onInteract:()=>engine?.recordInteraction()});
   function syncSurface(){
     if(disposed)return;
     const speaking=captionStatus==='speaking'&&vanessaVoicePlaybackState==='speaking';
     if(captionStatus==='speaking'&&!speaking){caption='';captionStatus='idle';}
-    surface.update({userId:currentUser?.id||'',visible:Boolean(currentUser)&&['home','editor','scenes','ai-video','photos'].includes(state.view)&&!document.getElementById('app')?.inert,chatOpen:vanessaOpen,mode:engine?.currentMode||'companion',status:engine?.busy?'thinking':vanessaListening?'listening':speaking?'speaking':captionStatus,caption,hint});
+    surface.update({userId:currentUser?.id||'',visible:Boolean(currentUser)&&['home','editor','scenes','ai-video','photos'].includes(state.view)&&!document.getElementById('app')?.inert,chatOpen:vanessaOpen,mode:engine?.currentMode||'companion',status:engine?.busy?'thinking':vanessaListening?'listening':speaking?'speaking':captionStatus,caption,captionKind,wordRange,hint});
   }
   function announce(text,{voice=true,duration=12000,introduction=false}={}){
     if(disposed||!currentUser||!String(text||'').trim())return;
-    clearTimeout(captionTimer);caption=String(text);captionStatus='idle';hint=introduction;syncSurface();
+    clearTimeout(captionTimer);caption=String(text);captionStatus='idle';captionKind='message';wordRange=null;hint=introduction;syncSurface();
     const expectedOwner=owner;
     captionTimer=setTimeout(()=>{if(owner===expectedOwner)clearCaption();},duration);
     if(voice&&vanessaVoiceEnabled&&ZorifiPrivacy.consent(localStorage,currentUser.id))void speakAsVanessa(text);
@@ -44,20 +44,20 @@
     introTimer=setTimeout(()=>{
       introTimer=null;if(owner!==expectedOwner||state.view!=='home'||!ready()||vanessaOpen)return;
       try{localStorage.setItem(key('introduced'),'true');}catch{}
-      const text='Hi, I’m Vanessa, your creative co-partner in Zorifi. Open my tab whenever you want guidance, an edit, or a soundtrack. You can also turn on LIVE and say “Hey Vanessa”.';
+      const text='Hi, I’m Vanessa, your creative co-partner in Zorifi. Open my tab whenever you want guidance, an edit, or a soundtrack. You can also enable Hands-Free and say “Hey Vanessa”.';
       announce(text,{introduction:true,duration:16000});clearTimeout(hintTimer);hintTimer=setTimeout(()=>{hint=false;syncSurface();},10000);
     },1500);
   }
   function resetAccount(){
     engine?.dispose();engine=null;global.ZorifiVanessaDirector=null;if(global.ZorifiMasterApp)global.ZorifiMasterApp.directorEngine=null;owner=currentUser?.id||'';
-    clearTimeout(captionTimer);clearTimeout(introTimer);clearTimeout(hintTimer);caption='';captionStatus='idle';hint=false;
+    clearTimeout(captionTimer);clearTimeout(introTimer);clearTimeout(hintTimer);caption='';captionStatus='idle';captionKind='message';wordRange=null;hint=false;
     if(!owner){syncSurface();return;}
     const saved=read(key('preferences'),{});preferences={idleHelp:saved.idleHelp!==false,mode:saved.mode==='director'?'director':'companion'};
     engine=new ZorifiDirectorEngine.ZorifiVanessaDirectorEngine(()=>state,global.ZorifiMasterApp?.aiGateway,{
       getScope:currentScope,isCurrent,canPrompt,
       execute:executePass,guide:provideGuidance,
       converse:async({instruction,checkCurrent})=>{const result=await safeVanessaRequest('vanessa-global',{message:instruction,context:vanessaContext(),preferredLanguage:currentUser?.language||globalI18n.locale});checkCurrent();return {status:result.ok?'SUCCESS':'FAILED',message:result.data?.reply||result.data?.text||'I could not reach the conversation provider. Please try again.'};},
-      onProgress:progress=>{clearTimeout(captionTimer);caption=progress.text;const terminal=['failed','cancelled','complete','awaiting-confirmation'].includes(progress.stage);captionStatus=progress.stage==='failed'?'error':terminal?'idle':'thinking';syncSurface();if(terminal)captionTimer=setTimeout(clearCaption,12000);const status=document.querySelector('[data-vanessa-inline-status]');if(status&&progress.text)status.textContent=progress.text;const thinking=document.querySelector('.vanessa-messages .thinking small');if(thinking&&progress.text)thinking.textContent=progress.text;},
+      onProgress:progress=>{clearTimeout(captionTimer);captionKind='message';wordRange=null;caption=progress.text;const terminal=['failed','cancelled','complete','awaiting-confirmation'].includes(progress.stage);captionStatus=progress.stage==='failed'?'error':terminal?'idle':'thinking';syncSurface();if(terminal)captionTimer=setTimeout(clearCaption,12000);const status=document.querySelector('[data-vanessa-inline-status]');if(status&&progress.text)status.textContent=progress.text;const thinking=document.querySelector('.vanessa-messages .thinking small');if(thinking&&progress.text)thinking.textContent=progress.text;},
       onModeChange:mode=>{preferences.mode=mode;try{localStorage.setItem(key('preferences'),JSON.stringify(preferences));}catch{}decorateControls();syncSurface();},
       onIdle:({analysis})=>announce(analysis.clipCount?'Need a hand with this edit? I can review the timeline, explain a tool, or make a Director pass when you ask.':'Ready to create? Start a new edit, or open Vanessa for a walkthrough.'),
       onSpeak:text=>announce(text),toggleChatPanel:()=>{if(vanessaOpen){vanessaOpen=false;if(inspectorTab==='vanessa')inspectorTab='details';render();}else openVanessa();},openChatAndListen:()=>openVanessa({listen:true})
@@ -140,7 +140,17 @@
   const baseFinish=finishVanessaTurn;finishVanessaTurn=function(reply){const result=baseFinish.apply(this,arguments);if(!vanessaVoiceEnabled)announce(reply,{voice:false});return result;};
   const editorContext=vanessaEditorContext;vanessaEditorContext=function(){const context=editorContext();if(engine)context.director={mode:engine.currentMode,skillHint:engine.userSkillLevel,requiresExplicitRequest:true};return context;};
   const generalContext=vanessaContext;vanessaContext=function(){const context=generalContext();if(engine)context.director={mode:engine.currentMode,skillHint:engine.userSkillLevel};return context;};
-  global.addEventListener('zorifi:vanessa-speech',event=>{const detail=event.detail;if(detail?.userId!==owner||detail.request!==vanessaSpeechRequest)return;clearTimeout(captionTimer);if(detail.status==='ended'){clearCaption();return;}captionStatus=detail.status==='speaking'?'speaking':detail.status==='preparing'?'thinking':detail.status==='error'?'error':'idle';caption=detail.status==='preparing'?'Preparing Vanessa’s voice…':detail.text;syncSurface();},{signal:lifecycle.signal});
+  global.addEventListener('zorifi:vanessa-speech',event=>{
+    const detail=event.detail;if(detail?.userId!==owner||detail.request!==vanessaSpeechRequest)return;
+    clearTimeout(captionTimer);
+    if(['ended','stopped','cancelled','error','blocked','unavailable'].includes(detail.status)){clearCaption();return;}
+    if(!['preparing','speaking','boundary'].includes(detail.status))return;
+    captionKind='speech';caption=String(detail.text||'');hint=false;
+    captionStatus=detail.status==='preparing'?'thinking':'speaking';
+    if(detail.status==='preparing'||detail.status==='speaking')wordRange=null;
+    if(detail.status==='boundary'&&['speech-boundary','provider-boundary'].includes(detail.timingSource)&&Number.isInteger(detail.charIndex)&&detail.charIndex>=0&&detail.charIndex<caption.length&&detail.boundaryType!=='sentence')wordRange={charIndex:detail.charIndex,charLength:detail.charLength||0};
+    syncSurface();
+  },{signal:lifecycle.signal});
   for(const name of ['pointerdown','keydown','wheel','pointermove'])global.addEventListener(name,event=>{if(name==='pointermove'){if(Date.now()-lastMovement<500)return;lastMovement=Date.now();}if(event.isTrusted)engine?.recordInteraction();},{passive:true,signal:lifecycle.signal});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){engine?.cancel();clearCaption();}else{engine?.recordInteraction();sync();}},{signal:lifecycle.signal});
   global.addEventListener('pagehide',event=>{if(!event.persisted)dispose();},{signal:lifecycle.signal});

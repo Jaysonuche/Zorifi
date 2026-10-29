@@ -1,0 +1,140 @@
+ZORIFI 3.44.0 — VANESSA VOICE, HANDS-FREE AND CREATIVE DIRECTION
+29 October 2026
+Workspace: C:\Users\User\Documents\ChatGPT\Zorifi
+
+IMPLEMENTED IN THE EXISTING APPLICATION
+
+Vanessa now uses a dedicated device speech service. Her conversational speech
+never calls ElevenLabs. Unrelated media narration/generation providers and their
+credentials remain available. The conversational panel no longer shows
+ElevenLabs credits, quota warnings or provider retry controls.
+
+The voice service chooses an available feminine English voice by name/language
+heuristics, allows voice preview and selection, and remembers the selection per
+account on this device. Browsers do not expose reliable voice-gender metadata.
+This is not a new trained voice model, and voices differ between devices. A
+provider adapter interface supports a future branded voice without changing chat
+or subtitle consumers. No API credential is added to the browser.
+
+Hands-Free is an explicit switch. Browser permission and recognition start must
+succeed before the opted-in preference is saved. Microphone use is off by default.
+After refresh, the saved preference offers Resume; it does not silently reopen
+microphone sessions. Turning it off also cancels a pending recognizer start.
+
+Once enabled, say Vanessa or Hey Vanessa. Speech is collected across recognizer
+restarts and automatically submitted after a configurable 3.5- or 6-second pause.
+A 45-second followup window follows the response, allowing another instruction
+without another wake phrase. It then returns to wake listening. Recognition is
+suspended during synthesized speech to prevent self-echo. Speech recognition
+may use the browser vendor's online service; it is not claimed wholly on-device.
+
+While work is pending and speech is not playing, Stop, Pause, Cancel and Undo
+route through the actual app cancellation/history functions. Spoken interruption
+is unavailable while recognition is paused for synthesized speech; the mute and
+Hands-Free controls remain immediate. Browser background limits and revoked or
+denied permissions are surfaced. Hidden pages suspend recognition, unfinished
+commands retain their original account/project scope, and obsolete callbacks
+cannot submit to a different account or project.
+
+Open-ended requests such as 'Vanessa, help me with this edit' now use the Stage 2
+actual decoded frame/audio samples, timeline, selection, effects, bounded history
+summary, technical review, approved personal preferences and real tool catalogue.
+The model proposes a multi-step direction; existing strict validation and native
+postconditions still control execution. A conservative client classifier allows
+only gentle reversible existing-clip adjustments within delegated scope to run
+automatically, with progress, one Undo checkpoint and verified persistence.
+Timing/source changes, deletion, new content, strong visual changes and separate
+paid/external workflows require review. Technical quality is checked again after
+the native commit; failed technical checks roll the whole pass back.
+
+The subtitle surface uses dark translucent violet/cyan glass, Vanessa's name,
+speaking status, a decorative waveform, accessible text and reduced-motion rules.
+Subtitles are the actual cleaned text passed to speech. Only real speech boundary
+events highlight words; charLength=0 and long-reply chunk offsets are supported.
+Without timing events, the full spoken text is shown with an explicit timing
+notice. Untrusted text is rendered as DOM text nodes, never HTML. Subtitles remain
+visible with desktop embedded chat and mobile fullscreen chat. Layout keeps them
+inside the preview or chat message area, above the timeline/transport/composer.
+
+Existing Stage 1 Firebase authentication, server-side Gemini credentials, ordered
+conversations, native editor state, Undo/Redo and local-only project/media storage
+are preserved. Stage 2 personal memory, categorical learning and default-off
+sharing remain intact. No Firebase rule or billing change is required.
+
+FILES CHANGED
+
+app.js — device speech integration, lifecycle cancellation, explicit Hands-Free
+controls and permissions, voice status and media-narration labels.
+zorifi-vanessa-voice.js / zorifi-vanessa-voice.css — dedicated service, cancellation,
+voice preference/preview UI and future adapter interface.
+zorifi-vanessa-listening.js — automatic speech capture, followups, interruption
+controls, session restart, error/scope/echo safeguards.
+zorifi-director-companion.js / .css — safe responsive glass subtitles and real
+word highlighting; compact chat and microphone-control layout.
+zorifi-director-integration.js — speech lifecycle/timing events and onboarding.
+zorifi-vanessa-professional.js / zorifi-vanessa-professional-engine.js — delegated
+initiative, safety classifier, real post-commit review and explicit duration
+parsing that does not mistake a title timestamp for the whole video duration.
+netlify/functions/_shared/professional-planner.mjs — evidence-grounded delegated
+creative direction over the existing authenticated Gemini request pipeline.
+zorifi-master-app.js — speech/recognition cleanup with the existing lifecycle.
+index.html, sw.js, package.json, zorifi-app-settings.js and generated
+zorifi-interface-catalog.json and zorifi-interface-language.js — real runtime loading, desktop inclusion, current
+assets and version 3.44.0 / cache v245.
+Tests: voice-playback.test.cjs, vanessa-voice-service.test.cjs,
+vanessa-listening.test.cjs, vanessa-listening-browser.cjs,
+professional-delegation.test.cjs, professional-proactive-browser.cjs,
+director-companion-ui-browser.cjs, vanessa-device-voice-probe.cjs.
+The user's unrelated README.md, tests/src-services.test.cjs and
+src/services/chatController.js changes were preserved.
+
+VERIFICATION
+
+Full unit suite: 412 passed, zero failed/skipped. See artifacts/vanessa-upgrade-unit.log.
+Build: 148 web files plus assets. Integrity: 332 source files and 293 browser/cache
+references passed.
+Hands-Free browser check: complete automatic instruction submission, natural
+followup, restart, six-second setting, echo suspension, spoken Stop, background
+pause, account changes, immediate off during pending start, denied/unsupported
+states and refresh preference without microphone activation passed using
+representative recognizer events. This is not a physical microphone accuracy test.
+
+Chromium and Windows WebKit: real decoded portrait, open-ended two-action native
+pass, visible progress, one Undo checkpoint, Undo/Redo, risky trim confirmation,
+Stop while the model reply is pending, default-off sharing and persisted project
+reopen passed. Auth/model transports are controlled fixtures in these tests.
+Windows WebKit cannot store IndexedDB Blobs here; its fixture uses a persisted
+image data URL. The real image decoder and timeline still run.
+
+Chromium and WebKit: subtitle text safety, actual boundary-event rendering,
+honest no-timing fallback, fullscreen/embedded chat visibility, phone/tablet/
+desktop fit, voice options/preview, account cleanup and reduced-motion styles
+were checked. Existing Stage 1 split/trim/auth/cancellation/persistence and
+Stage 2 45-second composition/memory/regression browser checks passed.
+
+A separate real Windows speech-synthesis probe ran in the actual app with NO
+speech mocks: Microsoft Hazel (English UK, local voice) was selected; speech
+started, real word-boundary events highlighted the matching words, and speech
+ended. See artifacts/vanessa-device-voice-probe.json and
+artifacts/vanessa-real-device-voice.png. Acoustic quality was not independently
+rated, and microphone input was not activated on behalf of the user.
+
+REMAINING LIMITATIONS
+
+Browser/OS recognition support, microphone permission, secure context and an
+active visible page are required for Hands-Free. iOS Safari can limit or stop
+recognition sessions; a website cannot promise system-wide always-on listening.
+No physical iPhone/iPad/Mac/Linux microphone or installed native package was
+verified in this pass. Browser voice quality, accent, gender and word timing
+vary; voice choices can disappear after an OS update. System speech may rely on
+online services even though no ElevenLabs dependency remains for Vanessa.
+
+A 3.5/6-second silence timeout may submit before a longer thinking pause; choose
+6 seconds or use manual dictation when needed. Spoken interruption during
+Vanessa's own speech is deliberately disabled to avoid self-triggering.
+
+Creative analysis is bounded sampled evidence, not full-frame understanding or
+a guarantee of professional storytelling. Gemini availability/latency can fail.
+Strong/destructive/paid operations retain confirmation; all external tools are
+not magically autonomous. Final rendered audio/colour/encode review and broader
+Stage 2 learning evaluation remain as documented in the Stage 2 report.
