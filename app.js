@@ -4218,7 +4218,7 @@ function ensureVanessaListeningEngine(){
     isVisible:()=>document.visibilityState!=='hidden',
     onStart:()=>{rememberVanessaMicrophone();watchVanessaMicrophonePermission();if(vanessaListeningEngine?.snapshot().handsFree){vanessaWakeEnabled=true;vanessaHandsFreeActivated=true;saveVanessaWakePreference();}},
     onState:snapshot=>{
-      if(snapshot.state==='off'&&vanessaHandsFreeActivated){vanessaHandsFreeActivated=false;vanessaRecognitionMessage='Microphone off. Tap Resume Hands-Free to listen in the current project.';}
+      if(snapshot.state==='off'&&snapshot.stopReason==='scope-changed'&&vanessaHandsFreeActivated){vanessaHandsFreeActivated=false;vanessaRecognitionMessage='Microphone off. Tap Resume Hands-Free to listen in the current project.';}
       const before=vanessaListening;vanessaListening=snapshot.capturing&&!['blocked','off','unsupported','paused','speaking'].includes(snapshot.state);vanessaAwaitingCommand=snapshot.capturing;vanessaRecognition=null;vanessaWakeRecognition=snapshot.active&&snapshot.handsFree?vanessaListeningEngine:null;
       if(snapshot.state==='wake')vanessaRecognitionMessage=snapshot.handsFree?'Hands-free is listening. Say “Vanessa” or “Hey Vanessa”.':'Wake is listening while this page is active.';
       else if(snapshot.state==='controls')vanessaRecognitionMessage='Vanessa is working. You can say Stop, Pause, Cancel or Undo.';
@@ -4455,7 +4455,7 @@ async function resolveVanessaConfirmation(apply){
   const owner=currentUser?.id,project=state.projectId,epoch=vanessaStreamEpoch,history=vanessaHistory;
   const current=()=>owner===currentUser?.id&&project===state.projectId&&epoch===vanessaStreamEpoch&&history===vanessaHistory;
   const pendingEntry=[...vanessaHistory].reverse().find(item=>item.actionStatus==='REQUIRES_CONFIRMATION');if(pendingEntry)pendingEntry.actionStatus='REVIEWED';
-  if(!apply){window.ZorifiProfessionalStudio?.reject?.();ZorifiProductionBridge?.cancel();return finishVanessaTurn('Cancelled. I did not change the project.',{actionStatus:'CANCELLED'});}
+  if(!apply){window.ZorifiProfessionalStudio?.reject?.();ZorifiProductionBridge?.cancel();return finishVanessaTurn(plan.alreadyApplied?`Cancelled the pending changes. The ${plan.alreadyApplied} earlier adjustments remain saved; Undo restores the previous version.`:'Cancelled. I did not change the project.',{actionStatus:'CANCELLED'});}
   vanessaBusy=true;vanessaActionState='executing';mountVanessa();
   try{const result=await executeVanessaPlan(plan,{confirmed:true});if(!current())return;
     const running=vanessaWorkflowPlanner?.getNextStep();if(running&&result.status==='SUCCESS')vanessaWorkflowPlanner.markStepComplete(running.id,result.message);else if(running&&result.status!=='REQUIRES_CONFIRMATION')vanessaWorkflowPlanner.markStepFailed(running.id,result.message,{unsupported:result.status==='UNSUPPORTED'});

@@ -28,3 +28,10 @@ test('history context is bounded actual change counts, never full prior project 
  const result=Engine.historySummary({...project,undo:[{clips:[]},{clips:[{...project.clips[0],name:'Private project words'}]}],redo:[{}]});
  assert.deepEqual(result,{undoDepth:2,redoDepth:1,recentChanges:[{added:1,removed:0,modified:0},{added:1,removed:0,modified:1}]});assert(!JSON.stringify(result).includes('Private project words'));
 });
+
+test('independent safe finishing changes can run while stronger adjustments wait for review',()=>{
+ const saturation=action('visual.adjust',{property:'saturation',value:8}),contrast=action('visual.adjust',{property:'contrast',value:5}),scale=action('keyframe.set',{property:'scale',time:0,value:100});
+ const split=Engine.independentDelegatedActions([saturation,contrast,scale],project);assert.deepEqual(split.safe,[contrast]);assert.deepEqual(split.review,[saturation,scale]);
+ assert.equal(Engine.independentDelegatedActions([contrast,action('clip.delete')],project).safe.length,0,'Structural plans cannot be reordered.');
+ assert.equal(Engine.independentDelegatedActions([contrast,action('visual.adjust',{property:'contrast',value:50})],project).safe.length,0,'The same parameter cannot be split into reordered actions.');
+});

@@ -1,4 +1,4 @@
-ZORIFI 3.44.0 — VANESSA VOICE, HANDS-FREE AND CREATIVE DIRECTION
+ZORIFI 3.44.1 — VANESSA VOICE, HANDS-FREE AND CREATIVE DIRECTION
 29 October 2026
 Workspace: C:\Users\User\Documents\ChatGPT\Zorifi
 
@@ -43,6 +43,11 @@ The model proposes a multi-step direction; existing strict validation and native
 postconditions still control execution. A conservative client classifier allows
 only gentle reversible existing-clip adjustments within delegated scope to run
 automatically, with progress, one Undo checkpoint and verified persistence.
+Independent safe finishing changes can proceed while stronger adjustments stay
+unapplied in a separate confirmation proposal. Structural plans are never
+reordered, and operations on the same parameter remain together. Each committed
+approval group has its own Undo checkpoint. The model also receives actual
+current colour/audio effect values, not only effect identifiers.
 Timing/source changes, deletion, new content, strong visual changes and separate
 paid/external workflows require review. Technical quality is checked again after
 the native commit; failed technical checks roll the whole pass back.
@@ -80,7 +85,7 @@ creative direction over the existing authenticated Gemini request pipeline.
 zorifi-master-app.js — speech/recognition cleanup with the existing lifecycle.
 index.html, sw.js, package.json, zorifi-app-settings.js and generated
 zorifi-interface-catalog.json and zorifi-interface-language.js — real runtime loading, desktop inclusion, current
-assets and version 3.44.0 / cache v245.
+assets and version 3.44.1 / cache v246.
 Tests: voice-playback.test.cjs, vanessa-voice-service.test.cjs,
 vanessa-listening.test.cjs, vanessa-listening-browser.cjs,
 professional-delegation.test.cjs, professional-proactive-browser.cjs,
@@ -90,7 +95,7 @@ src/services/chatController.js changes were preserved.
 
 VERIFICATION
 
-Full unit suite: 412 passed, zero failed/skipped. See artifacts/vanessa-upgrade-unit.log.
+Full unit suite: 413 passed, zero failed/skipped. See artifacts/vanessa-upgrade-unit.log.
 Build: 148 web files plus assets. Integrity: 332 source files and 293 browser/cache
 references passed.
 Hands-Free browser check: complete automatic instruction submission, natural

@@ -44,6 +44,15 @@
   if((afterReview?.issues||[]).some(issue=>['error','warning'].includes(issue.severity)&&!previous.has(key(issue))))reasons.push('The proposed pass introduces a technical issue that needs review.');
   return {automatic:reasons.length===0,reasons:[...new Set(reasons)]};
  }
+ function independentDelegatedActions(actions,project){
+  // Do not rearrange plans with structural dependencies. Split only existing-
+  // clip finishing adjustments whose parameter domains are independent.
+  if(!Array.isArray(actions)||actions.length>24||actions.some(action=>/^(?:clip\.|project\.|text\.add|caption\.(?:add|delete)|history\.)/.test(action.command)))return {safe:[],review:actions||[]};
+  const domain=action=>action.target+':'+(action.command.startsWith('keyframe.')?'motion':action.command+':'+(action.parameters?.property||''));
+  const review=actions.filter(action=>!delegationSafety([action],project).automatic),blocked=new Set(review.map(domain));
+  const safe=actions.filter(action=>!review.includes(action)&&!blocked.has(domain(action)));
+  return {safe,review:actions.filter(action=>!safe.includes(action))};
+ }
  class PlanRunner{
   constructor({tools,catalog,read,capture,assertScope,stage,apply,review,commit,progress=()=>{},yieldTask=()=>new Promise(resolve=>setTimeout(resolve,0))}){Object.assign(this,{tools,catalog,read,capture,assertScope,stage,apply,review,commit,progress,yieldTask});this.pending=null;this.running=false;this.paused=false;this.generation=0;}
   check(generation,scope,signal){if(generation!==this.generation||signal?.aborted)throw abort();this.assertScope(scope);}
@@ -78,5 +87,5 @@
   stop(){this.generation++;this.pending=null;this.resume();}
   inspect(){return {running:this.running,paused:this.paused,pending:this.pending?{id:this.pending.id,actions:this.pending.actions.length,quality:clone(this.pending.quality)}:null};}
  }
- return {PlanRunner,delegatedRequest,requestedDuration,historySummary,delegationSafety};
+ return {PlanRunner,delegatedRequest,requestedDuration,historySummary,delegationSafety,independentDelegatedActions};
 });
