@@ -1,6 +1,6 @@
 // Gemini calls delegate to the shared GoogleGenAI SDK provider, which reads GEMINI_MODEL.
 // Vercel Node adapter. Provider keys and upstream destinations stay server-side.
-const services={'vanessa-chat':'chat','vanessa-background':'backgroundCutout','vanessa-director-tools':'directorTools','vanessa-autocut':'autoCutPlan','vanessa-video-tool':'videoTool','account-permissions':'accountPermissions',vanessa:'editor','vanessa-global':'conversation','vanessa-language':'languageStudio','vanessa-scenes':'scenePlan','vanessa-video':'videoPlan','vanessa-image':'imageGeneration','vanessa-scene-image':'imageGeneration','vanessa-motion':'motion','vanessa-music':'music','vanessa-stems':'stems','vanessa-voice':'voiceGeneration','vanessa-speech':'speech','vanessa-captions':'captions','vanessa-provider-test':'providerTest','support-email':'support'};
+const services={'vanessa-creative-feedback':'feedback','vanessa-chat':'chat','vanessa-background':'backgroundCutout','vanessa-director-tools':'directorTools','vanessa-autocut':'autoCutPlan','vanessa-video-tool':'videoTool','account-permissions':'accountPermissions',vanessa:'editor','vanessa-global':'conversation','vanessa-language':'languageStudio','vanessa-scenes':'scenePlan','vanessa-video':'videoPlan','vanessa-image':'imageGeneration','vanessa-scene-image':'imageGeneration','vanessa-motion':'motion','vanessa-music':'music','vanessa-stems':'stems','vanessa-voice':'voiceGeneration','vanessa-speech':'speech','vanessa-captions':'captions','vanessa-provider-test':'providerTest','support-email':'support'};
 module.exports=async function handler(req,res){
  res.setHeader('Cache-Control','no-store');
  const fail=(status,error)=>res.status(status).json({error});
@@ -23,7 +23,7 @@ module.exports=async function handler(req,res){
    if(body.length>4*1024*1024)return fail(413,'Split this upload into smaller chunks.');
   }
   const request=new Request(url,{method:req.method,headers,signal:controller.signal,...(body?{body}: {})});
-  const handlers=service==='vanessa-chat'?await import('../netlify/functions/_shared/vanessa-router.mjs'):service==='vanessa-background'?await import('../netlify/functions/_shared/background-cutout.mjs'):service==='vanessa-director-tools'?await import('../netlify/functions/_shared/director-tools.mjs'):service==='vanessa-autocut'?await import('../netlify/functions/_shared/autocut-planner.mjs'):await import('../netlify/functions/_shared/services.mjs');
+  const handlers=service==='vanessa-creative-feedback'?await import('../netlify/functions/_shared/creative-feedback.mjs'):service==='vanessa-chat'?await import('../netlify/functions/_shared/vanessa-router.mjs'):service==='vanessa-background'?await import('../netlify/functions/_shared/background-cutout.mjs'):service==='vanessa-director-tools'?await import('../netlify/functions/_shared/director-tools.mjs'):service==='vanessa-autocut'?await import('../netlify/functions/_shared/autocut-planner.mjs'):await import('../netlify/functions/_shared/services.mjs');
   const response=await handlers[services[service]](request);
   if(response.headers.get('content-type')?.includes('text/event-stream'))return await require('../netlify/functions/_shared/stream-response.cjs')(response,res);
   for(const [key,value] of response.headers)res.setHeader(key,value);

@@ -1,0 +1,168 @@
+VANESSA STAGE 2B / 2C — CREATIVE MEMORY AND MEASUREMENT
+28 October 2026
+
+Files owned by this change:
+C:\Users\User\Documents\ChatGPT\Zorifi\zorifi-vanessa-creative-learning.js
+C:\Users\User\Documents\ChatGPT\Zorifi\tests\creative-learning.test.cjs
+C:\Users\User\Documents\ChatGPT\Zorifi\docs\STAGE2-LEARNING.txt
+
+EXISTING SYSTEMS REUSED
+
+zorifi-vanessa-memory.js PersonalMemoryStore supplies the same existing memory
+storage, sensitive-value rejection, approved-memory records and CRUD. Stage 2
+records use category creative_preferences and metadata.creativeStage=2. They
+are not a separate editor or AI memory implementation. The existing generic
+memory manager can still inspect these records.
+
+The existing app creates memory stores under currentUser.id, which can be an
+older local namespace rather than the cloud UID. This module requires the real
+authenticated Firebase UID, refuses guest/anonymous default namespaces, and
+checks an injected personalMemoryStore has that exact UID. The caller should
+create the engine only after verified session identity is established and must
+discard its reference on logout/account changes. Existing older memories are not
+silently copied between namespaces.
+
+Existing edit adaptation/execution feedback modules already detect individual
+property corrections and compare state diffs. This module does not bypass those
+editor permissions or create another timeline store. Feedback interpretation is
+data for the real planning/correction pipeline, never executable JavaScript.
+
+CLIENT API
+
+const engine = new ZorifiVanessaCreativeLearning.CreativeLearning({
+  uid: verifiedFirebaseUid,
+  storage: localStorage,
+  personalMemoryStore: optionalExistingUidScopedStore
+});
+
+engine.interpretFeedback(message, {targetIds: selectedClipIds})
+Returns a non-persisted classification: control, objective-error,
+creative-preference, accepted-style or project-instruction; scope; issue;
+polarity; target IDs; reported time; opening/ending/selection; preserveOthers;
+needsClarification. verified:false means a reported technical error has not yet
+been checked against the actual media. A reported error never becomes a personal
+preference. Temporary wording wins over a vague "always". "Stop here" and Pause
+return immediate control instructions, with no memory write.
+
+engine.rememberPreference({dimension:'transition',value:'Short dissolves',
+  polarity:'prefer',approved:true})
+Only an explicit approval can save a typed preference. Supported dimensions:
+pacing, transition, typography, colour, music, effect, brand, export, style.
+Free text is bounded private preference data, credential/code patterns rejected.
+Export preferences have bounded dimensions and allowlisted aspect/fps/format.
+
+engine.captureStyle(actualEditorSnapshot, {verified:true,approved:true})
+Derives pacing from actual shot durations and stores existing transition/effect/
+colour/font identifiers, aspect ratio and duration. It excludes clip/media/project
+IDs, filenames, text content, media URLs and blobs. It does not infer music genre,
+semantic style, subtitle accuracy or artistic success from metadata.
+
+engine.providerContext()
+Supplies approved typed preferences only, bounded to 20 entries. Current project
+instructions take priority. Disabled memory produces no preferences. This is
+private context for the existing authenticated AI request, not a shared payload.
+
+engine.inspect()
+engine.updatePreference(id,{value:'Neutral',polarity:'prefer'})
+engine.deletePreference(id)
+engine.clearPersonalMemory()
+engine.setMemoryEnabled(false)
+These support actual UI controls. Clearing Stage 2 preferences preserves unrelated
+memories. Disabling stops use/new memory writes but preserves records for the
+user to inspect/delete. Device storage is not protection against another person
+controlling that browser; browser/profile device security still applies.
+
+LOCAL PERFORMANCE MEASUREMENT
+
+engine.recordOutcome({strategy:'fashion-v1',style:'fashion',outcome:'succeeded',
+  verified:true,quality:'pass',durationSeconds:45,correctionCount:1,
+  approvalSeconds:90})
+
+The only allowed fields are those shown above. No user/project identifiers,
+messages, asset names, raw texts, timestamps or vectors can enter event payloads.
+A successful operation requires actual editor verification. Caller must supply
+quality:'unknown' for assessments not processed; it must not invent pass results.
+Outcomes: succeeded, failed, accepted, rejected, corrected, undone. Issues:
+none, pacing, transition, effect, colour, audio-sync, audio-level, text, caption,
+media, gap, duration, aspect, story, other.
+
+inspect().metrics reports execution success and acceptance rates with their
+denominators; corrections/undos per execution; measured quality pass rates;
+categorical recurring issues; and coarse time-to-approval bins. A plan can have
+multiple corrections, so correctionsPerExecution is not a probability and may
+exceed one. No named-person or project tracking is needed.
+
+engine.clearMeasurements() clears local counters, recent records and queued
+events. The local queue is bounded to 100, recent outcomes to 40. Storage failure
+throws instead of claiming persistence. Memory/consent is reread before use so
+another tab's disable/revoke is respected on the next operation.
+
+CONSENTED SHARED FEEDBACK
+
+engine.setSharingConsent(true) // defaults false
+engine.sharedBatch()           // maximum 25 events
+engine.acknowledgeShared([eventId, ...]) // after a real backend acceptance
+engine.setSharingConsent(false) // clears pending queue, no further sharing
+
+Consent is prospective: earlier local outcomes are not added retroactively.
+The module never makes network requests or uploads by itself. Shared batches
+carry only random opaque retry IDs and categorical enums/coarse numerical bins.
+Personal memory and raw feedback are never included. The authenticated backend
+must validate this same schema, enforce authenticated consent/rates, deduplicate,
+and record the consent withdrawal/deletion policy. A queued client batch is not
+evidence that a shared backend exists or accepted feedback.
+
+aggregateEvents(events,{distinctUsers:10}) deduplicates retry IDs and produces
+counts/rates only. A cohort below 10 distinct consenting accounts is suppressed;
+the caller must establish that distinct-user count server-side. An individual
+client must not claim its own repeated events came from ten users. This is cohort
+suppression, not a claim of differential privacy or anonymization against all
+auxiliary information.
+
+CONTROLLED STRATEGY EVALUATION
+
+StrategyCatalog accepts an explicit versioned developer manifest. Registered
+strategies describe predefined approaches; feedback cannot add executable tools,
+modify model weights, edit application source or deploy production code.
+
+evaluate(version,{candidate,baseline,regression}) requires both aggregates to
+have >=10 consenting accounts, >=20 measured execution and review samples;
+passing explicit regression/critical checks; no decrease in success, acceptance,
+or measured quality; no increase in corrections/undo; and a measured improvement
+(>=3 percentage points success/acceptance or >=0.05 fewer corrections/execution).
+Unknown quality never passes. These thresholds are a reproducible release gate,
+not proof of statistical significance or professional artistic quality.
+
+promote(version,{reviewed:true}) requires that evaluation against the currently
+active baseline. Evaluation alone never changes the active strategy.
+rollback(previousVersion,{reviewed:true}) requires a previously active version.
+History is bounded and exact rollback state is restored if persistence fails.
+This is a library for a controlled release process. Real deployment/authorization
+must remain in existing trusted developer/backend mechanisms; a user's browser
+must never be allowed to change the platform-wide production strategy.
+
+TESTS
+
+node --test tests/creative-learning.test.cjs
+14 tests: authenticated isolation including full 128-character UIDs; reuse/CRUD/disable/delete; sensitive and code
+rejection; verified non-content style capture; feedback classification; true
+execution requirement; default-off and prospective consent; bounded queue/reload;
+cross-tab revoke/disable; cohort suppression/deduplication; measured strategy gate;
+human review and rollback; storage-failure recovery.
+
+COST / LIMITATIONS
+
+This module itself makes no AI requests: zero inference cost for classification,
+local preference CRUD, categorical measurement, aggregation, or version gating.
+Actual planning/media analysis costs belong to authenticated provider calls and
+must be estimated from the configured model/usage. Personal preferences currently
+persist on this device, isolated by UID; no cross-device cloud memory is claimed.
+Shared upload, consent collection UI, trusted aggregate publishing and admin
+release automation must be wired/verified by the main Stage 2 integration.
+
+Integration update — 29 October 2026
+The main integration now wires Creative memory controls, authenticated consented
+feedback upload/deletion, signed offline aggregation and reviewed strategy release
+commands to the real planner. The baseline runtime manifest remains unchanged.
+New private Firestore rules passed the emulator; production publishing is pending.
+See ../STAGE2-IMPLEMENTATION-REPORT.txt for current status and limitations.

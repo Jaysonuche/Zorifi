@@ -1,8 +1,15 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
-const CACHE = 'zorifi-v243';
+const CACHE = 'zorifi-v244';
 const CORE = [
+  "./zorifi-vanessa-professional-tools.js?v=244",
+  "./zorifi-vanessa-media-review.js?v=244",
+  "./zorifi-vanessa-creative-learning.js?v=244",
+  "./zorifi-vanessa-professional-engine.js?v=244",
+  "./zorifi-vanessa-professional.js?v=244",
+  "./zorifi-vanessa-professional.css?v=244",
+
   "./zorifi-timeline-edit-api.js?v=242",
-  "./zorifi-vanessa-production.js?v=242",
+  "./zorifi-vanessa-production.js?v=244",
   "./zorifi-director-companion.css?v=241",
   "./zorifi-director-engine.js?v=241",
   "./zorifi-director-engine.js",
@@ -67,7 +74,7 @@ const CORE = [
   "./zorifi-firebase.js?v=225",
   "./zorifi-stickers.js?v=170",
   "./zorifi-vanessa-identity.js?v=237",
-  "./zorifi-vanessa-memory.js?v=170",
+  "./zorifi-vanessa-memory.js?v=244",
   "./zorifi-vanessa-memory-manager.js?v=170",
   "./zorifi-vanessa-memory-context.js?v=170",
   "./zorifi-vanessa-conversation-continuity.js?v=170",
@@ -98,7 +105,7 @@ const CORE = [
   "./zorifi-multicam.js?v=1",
   "./zorifi-audio-engine.js?v=238",
   "./zorifi-music-studio.js?v=170&studio=6",
-  "./zorifi-project-model.js?v=170",
+  "./zorifi-project-model.js?v=244",
   "./zorifi-advanced-editing.js?v=170",
   "./zorifi-color-scopes.js?v=1",
   "./zorifi-visual-tools.js?v=170",
@@ -133,8 +140,8 @@ const CORE = [
   "./zorifi-privacy.js?v=1",
   "./zorifi-vanessa-listening.js?v=222",
   "./zorifi-photos.js?v=232",
-  "./app.js?v=242",
-  "./zorifi-app-settings.js?v=242",
+  "./app.js?v=244",
+  "./zorifi-app-settings.js?v=244",
   "./zorifi-google-connections.js?v=225",
   "./zorifi-google-integration.js?v=227",
   "./zorifi-social-creator.js?v=225",
@@ -145,7 +152,7 @@ const CORE = [
   "./zorifi-timeline-interactions.js?v=234",
   "./zorifi-pocket-editor.js?v=236",
   "./zorifi-opening.js?v=231",
-  "./zorifi-master-app.js?v=242",
+  "./zorifi-master-app.js?v=244",
   "./zorifi-privacy-ui.js?v=228"
 ];
 

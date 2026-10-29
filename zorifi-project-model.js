@@ -3,7 +3,7 @@
 
   const CURRENT_SCHEMA_VERSION=4;
   const HISTORY_KEYS=[
-    'clips','hasCaptions','scenePlan','duration','markers','proSettings','smartSettings',
+    'currentProject','clips','hasCaptions','scenePlan','duration','markers','proSettings','smartSettings',
     'captionSettings','trackStates','ratio','frameWidth','frameHeight','frameSourceVideoId',
     'selected','favorite','folder','category','status','lastOpenedAt','creatorSettings'
   ];

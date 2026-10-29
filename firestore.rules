@@ -216,6 +216,38 @@ service cloud.firestore {
           request.resource.data.historyJson == resource.data.historyJson && request.resource.data.resultJson == '' && request.resource.data.resultSignature == '' &&
           (resource.data.status != 'pending' || resource.data.startedAt < request.time - duration.value(130,'s'))));
     }
+    // Optional categorical creative outcomes. No assets, text or preferences.
+    // The collector signs receipts; offline evaluation rejects forged receipts.
+    match /users/{uid}/private/creativeLearning {
+      allow get: if owner(uid);
+      allow list, delete: if false;
+      allow create, update: if owner(uid) &&
+        request.resource.data.keys().hasOnly(['uid','sharedFeedback','updatedAt']) &&
+        request.resource.data.keys().hasAll(['uid','sharedFeedback','updatedAt']) &&
+        request.resource.data.uid == uid && request.resource.data.sharedFeedback is bool &&
+        request.resource.data.updatedAt == request.time;
+    }
+    match /users/{uid}/creativeFeedback/{eventId} {
+      allow get, list, delete: if owner(uid);
+      allow update: if false;
+      allow create: if owner(uid) &&
+        eventId.matches('^([a-fA-F0-9-]{36}|event-[a-zA-Z0-9-]{6,80})$') &&
+        request.resource.data.keys().hasOnly(['id','schema','strategy','style','outcome','issue','quality','duration','turns','elapsed','uid','signature','createdAt']) &&
+        request.resource.data.keys().hasAll(['id','schema','strategy','style','outcome','issue','quality','duration','turns','elapsed','uid','signature','createdAt']) &&
+        request.resource.data.id == eventId && request.resource.data.uid == uid &&
+        request.resource.data.schema == 'zorifi.creative-learning/1' &&
+        request.resource.data.strategy in ['baseline-v1','cinematic-v1','fashion-v1','social-v1','documentary-v1','interview-v1','corporate-v1','music-video-v1'] &&
+        request.resource.data.style in ['general','cinematic','fashion','social','documentary','interview','corporate','music-video'] &&
+        request.resource.data.outcome in ['succeeded','failed','accepted','rejected','corrected','undone'] &&
+        request.resource.data.issue in ['none','pacing','transition','effect','colour','audio-sync','audio-level','text','caption','media','gap','duration','aspect','story','other'] &&
+        request.resource.data.quality in ['pass','fail','partial','unknown'] &&
+        request.resource.data.duration in ['unknown','0-15s','15-30s','30-60s','1-3m','3m+'] &&
+        request.resource.data.turns in ['unknown','0-1','2-4','5+'] &&
+        request.resource.data.elapsed in ['unknown','0-30s','30-120s','2-10m','10m+'] &&
+        request.resource.data.signature is string && request.resource.data.signature.matches('^[a-f0-9]{64}$') &&
+        request.resource.data.createdAt == request.time &&
+        getAfter(/databases/$(database)/documents/users/$(uid)/private/creativeLearning).data.sharedFeedback == true;
+    }
     // Existing billing records remain owner-readable and server-written only.
     match /users/{uid}/private/subscription { allow get: if owner(uid); allow list, write: if false; }
     match /{document=**} { allow read, write: if false; }

@@ -1,0 +1,131 @@
+STAGE 2 TOOL AUDIT — 28 OCTOBER 2026
+Workspace: C:\Users\User\Documents\ChatGPT\Zorifi
+
+Existing architecture
+app.js owns state, render(), snapshot()/pushHistory(), undo()/redo(), native
+vanessaActionAdapter({project,detached}), saveProject()/loadProject(), local
+project/media persistence, and the editor's real tool catalogues. The Stage 2
+registry is a validator/description/postcondition layer; it creates no store.
+
+zorifi-vanessa-professional-tools.js discovers 98 logical tool entries across 21
+categories. 43 actions can run on a staged copy of the real project and be
+verified before one native commit/checkpoint. 55 entries expose existing
+workflows with their implementation and recovery requirements; they are NOT
+advertised as automatic batch actions. The registry does not pretend provider
+configuration or a tool button is proof that a provider job completed.
+
+The existing recipe registry, zorifi-tool-registry.js, describes 13 renderer
+operations plus saved validated data recipes. It is retained. Its captions and
+transitions are AutoCut renderer treatments rather than replacements for the
+editor's native text and transition systems.
+
+Actual tool families and implementation
+
+Timeline/media:
+  app.js vanessaActionAdapter: select, trim, split, delete, ripple delete, move,
+  duplicate, freeze; timeline select/seek/zoom/snapping and import/relink.
+  zorifi-timeline-edit-api.js splitClip/trimClip: actual timing/source bounds,
+  separate nested clip data, retained keyframe windows and source offsets.
+  zorifi-timeline-tracks.js: typed track IDs and unbounded safe layer numbering.
+  zorifi-timeline-interactions.js: native pointer drag/trim/playhead interactions.
+  zorifi-multicam.js: manual multicam synchronization workflow.
+
+Transforms/compositing:
+  app.js clip.set: position, scale, rotation, opacity, crop, rounded corners.
+  app.js visual.mask/visual.chroma: actual renderable mask/chroma fields.
+  zorifi-layer-masks.js and zorifi-mask-painter.js: advanced/manual painted masks.
+  zorifi-composition-workspace.js: compositions, null/camera layers, parenting.
+  zorifi-advanced-editing.js: sourceTiming/speed ramps and pixel frame translation.
+  zorifi-person-cutout.js: people-only local segmentation model workflow.
+  zorifi-background-cutout.js + background integration: actual photo processing.
+
+Colour/filters:
+  zorifi-visual-tools.js: normalize/ensure/setValue/cssFilter, FILTERS,
+  grading/HSL and parseCube. Imported LUTs are approximations, not full 3D LUT
+  interpolation. app.js exposes brightness, contrast, exposure, saturation,
+  temperature, tint, highlights, shadows, blur, vignette and filter intensity.
+  zorifi-color-scopes.js: analyzePixels/ZorifiColorScopesEngine, waveform and
+  vectorscope. These require real pixels; labels/filenames are not analysis.
+
+Effects/animation/transitions:
+  app.js effects/transitions catalogues and native visual.effect/transition.apply.
+  zorifi-motion-effects.js EFFECTS and ANIMATIONS; addEffect/removeEffect/
+  toggleEffect/setParameter/applyAnimation/removeAnimation. Actual effect params
+  and ranges come from EFFECTS, not a model's invented names. Animation presets
+  generate editable absolute-time keyframes. Some effect names represent CSS
+  colour/blur/glow treatments, not the literal physical simulation suggested
+  by their marketing names. The registry exposes implementation identities.
+  zorifi-advanced-editing.js: keyframe insertion/deletion, custom easing and
+  keyframe clipboard; graph editor remains a separate manual workspace.
+
+Titles/captions/graphics:
+  app.js text.add/edit/style/delete, caption.style/delete. Stage 2 creation uses
+  real registered font families and editable native text clips with stable IDs.
+  app.js generateSmartCaptions: actual chunked audio transcription workflow;
+  translateSmartCaptions: authenticated translation preserving supplied timing;
+  importLocalCaptions/exportCaptionSRT: local SRT/VTT workflows.
+  zorifi-phase11.js: kinetic words, collage layout and project versions.
+  zorifi-stickers.js/overlay tools: existing manual graphics and overlay workflow.
+  Collage remains in the separate Photos workspace, not automatically in video.
+
+Audio/music/sound design:
+  zorifi-audio-engine.js normalize/applyPreset/createProcessingChain: clip gain,
+  pan, fades, noise filtering, EQ, compressor, limiter, ducking and mute.
+  Audio presets are signal processing; they do not prove speech/source separation.
+  decodeWaveform/waveformFromChannels: actual decoded media samples; beat marker
+  and Pulse Desk workflows reuse real audio analysis. They require decodable audio.
+  app.js extractAudioFromVideo: real extraction; recording requires explicit mic
+  consent/device permission. zorifi-sfx.js synthesizes original sound-effect PCM.
+  zorifi-music-studio.js and ZorifiVanessaTrueAudioAI.js: existing music generation/
+  cleanup workflows; provider results and media persistence must be checked.
+
+AI generation/enhancement:
+  zorifi-ai-provider.js/zorifi-ai-platform.js generation jobs use authenticated
+  backend wrappers api/vanessa-provider.js and netlify/functions/_shared/services.mjs.
+  Functions: vanessa-image, vanessa-motion/video/video-tool, vanessa-music,
+  vanessa-voice, vanessa-stems, vanessa-background, vanessa-captions, vanessa-language.
+  Every job depends on its actual configured provider/model access, quota and
+  supported cancellation. They are separate workflows, not arbitrary AI scripts.
+
+Export/project/templates:
+  app.js showExport/export pipeline with CreatorPlatform presets. Browser codec
+  and rendering support determine real export capability. Preparing a dialog is
+  not a rendered file. Stage 2 may prepare a review, never claim an export it has
+  not received and verified. saveProject must be read back from device storage.
+  Project duplication copies device media; templates use CreatorPlatform; versions
+  use zorifi-phase11.js checksummed snapshots. Undo/Redo use existing native stacks.
+
+Safe batch action contract
+  {command, target, parameters}; no arbitrary properties, eval, JS or state patch.
+  clip.add: stable id/mediaId/start/duration + optional sourceStart, typed track,
+  volume, playbackRate, fit. Real available source and bounds are required.
+  text.add: stable id/text/start/duration + optional typed track, registered fontId,
+  fontSize/fontWeight/colour/position. Later actions may target the stable ID.
+  120 action upper bound, with per-step structure and live staged-state validation.
+  Reference IDs, parameter types/ranges, tool availability, lock state, automatic
+  endings, source bounds and clip-type compatibility are checked before execution.
+  actionSchema({catalog}) supplies bounded known action shapes for Gemini.
+  validateStructure is server-safe; validateAction adds actual project checks.
+  verifyAction checks the expected native editor state after each operation.
+  Registry metadata requires authenticated project scope and review/checkpoint;
+  the orchestrator must enforce identity, confirmation, cancellation and save.
+  Async/global UI actions cannot run through this staged-batch validator.
+
+Tests owned by this audit
+  node --test tests/professional-tools.test.cjs: 9 passed. Context/window preservation, native split and both
+  trim directions; actual MotionEffects, VisualTools, AdvancedEditing and Audio
+  modules; source bounds, stable clip creation, type/track locks, malformed plans,
+  coercion/prototype input, invalid effect parameters and false-success rejection.
+  Browser/orchestration/provider proof is reported separately by the integration.
+
+Limits
+  Discovery is not proof all provider and manual workflows have been exercised.
+  55 workflow entries require their existing dedicated UI/service execution and
+  result verification. They are intentionally rejected in autonomous batches.
+  The registry costs no AI calls. Actual media analysis/planning/generation cost
+  belongs to the selected providers; no estimated prices are invented here.
+
+Integration update — 29 October 2026
+Transition removal now uses shared app.js clearClipTransition() for both manual
+controls and Vanessa, with a checked transition.remove postcondition. The actual
+app adapter browser regression passed all 43 staged commands.

@@ -22,6 +22,7 @@ const root = __dirname;
 // zorifi-vanessa-creative-pipeline.js. The server admits this bounded family below.
 const functionFiles = new Map([
   ['vanessa-chat', 'vanessa-chat.mjs'],
+  ['vanessa-creative-feedback', 'vanessa-creative-feedback.mjs'],
   ['vanessa-director-tools', 'vanessa-director-tools.mjs'],
   ['vanessa-autocut', 'vanessa-autocut.mjs'],
   ['vanessa', 'vanessa.mjs'],
@@ -189,7 +190,7 @@ async function handleFunction(request,response,name){
         return json(response,music.configured?200:503,music.configured?{connected:true,provider:music.provider,model:music.model,verification:'Local CPU runtime and model files are installed.'}:{error:'Local music runtime is not installed on this computer.'});
       }
     }
-    if((name==='vanessa-chat'||!hasDesktopLanguageKey())&&LANGUAGE_SERVICES.has(name)){
+    if((['vanessa-chat','vanessa-creative-feedback'].includes(name)||!hasDesktopLanguageKey())&&LANGUAGE_SERVICES.has(name)){
       let hostedLanguageRequest=name!=='vanessa-provider-test';
       if(!hostedLanguageRequest){try{hostedLanguageRequest=JSON.parse(body.toString('utf8')).type==='language';}catch{}}
       if(hostedLanguageRequest)return relayHostedLanguage({service:name,request,response,body});

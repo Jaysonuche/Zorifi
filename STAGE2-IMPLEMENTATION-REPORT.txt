@@ -1,0 +1,248 @@
+ZORIFI 3.43.0 — STAGE 2 PROFESSIONAL EDITING FOUNDATION / REVIEW BUILD
+Updated 29 October 2026
+Workspace: C:\Users\User\Documents\ChatGPT\Zorifi
+
+STATUS AND SCOPE
+
+Implemented and tested inside the actual Zorifi application. This build is ready
+for review. It has not been published to Vercel or Firebase yet. The currently
+published release remains 3.42.0 until the new release/rules are approved.
+
+Stage 2 is NOT claimed fully complete. A real Gemini proposal has successfully
+produced a saved 45-second composition. This proves working sampled-media
+planning and native execution, not consistently professional artistic judgment,
+full coverage of every source frame, autonomous use of every external provider,
+or measured improvement across real Zorifi users.
+
+Stage 1 remains the base: the same vanilla JS app.js state, FirebaseGateway,
+authenticated /api/vanessa/chat, native Undo/Redo and local project persistence.
+The orb, conversations, onboarding, optional wake/microphone, speech and subtitles
+remain intact. There is no duplicate live editor store or standalone editor demo.
+
+STAGE 2A — PROFESSIONAL EDITING FOUNDATION
+
+Discovered 98 real capabilities. The registry distinguishes 43 safely staged
+editor commands from 55 separate workflows. All entries name their permissions,
+parameter schemas, verification and recovery mechanisms. See
+docs/STAGE2-TOOL-AUDIT.txt for the inventory and implementation locations.
+
+The 43 batch commands cover media arrangement/creation, split/trim/move/delete,
+text and caption styling, filters/colour, effects/animation, keyframes, mixing,
+audio fades/presets/dynamics, transitions and project settings. New clips have
+stable IDs so later actions in the same proposal can target them. Parameters,
+source windows, element kinds, locks, endings and actual catalogue IDs are checked
+on the server and again against the live editor's real data before execution.
+
+The other workflows include provider generation, recording, captions/transcription,
+media import/relink, extraction, compositing tools, project/template operations
+and export. The tool browser links supported workflows to their existing controls.
+It does not pretend that opening controls generated media or completed an export.
+They are not silently executed as synchronous timeline batch actions. Fully
+autonomous orchestration of all 55 asynchronous/manual workflows remains open.
+
+Actual footage analysis reuses ZorifiAutoCutDirector and AutoCutMedia decoders:
+up to 16 sources, 48 compact sampled frames, and 48 seconds of bounded audio.
+It records source timestamps, actual pixel metrics, PCM levels and estimated
+transient timings. Large originals are not uploaded wholesale or converted to
+base64. Large/long audio sources have explicit decode guards and limitations.
+Only compact analysis samples are sent to Gemini after existing optional AI consent.
+Samples are sparse evidence; strongest-moment pixel scoring is an exposure/detail
+heuristic, not semantic proof of narrative value or a verified musical beat grid.
+
+The authenticated chat route now accepts intent:professional. Gemini receives the
+real project manifest, selected clip/playhead, sampled media and approved creative
+preferences. Its native JSON schema restricts tools and observation timestamps.
+Arbitrary JavaScript and arbitrary state patches are never executed. The server
+uses the existing durable per-UID quota, ordered private sessions, request hashes,
+signed replay protection and abort signals. Transient provider failures have one
+bounded retry within the request deadline. Failed plans never become live edits.
+
+Plans are executed against a transient draft using the existing native action
+adapter and shared renderer data modules. Each action has a checked postcondition.
+Technical review runs before confirmation. Apply rechecks authentication, project,
+selection and timeline revision, then creates one native history checkpoint,
+commits the verified state, saves and reads it back. Save failure restores the
+previous state; failure to persist a rollback is reported explicitly.
+
+Pause holds an uncommitted draft; Resume continues it. Stop aborts work and expires
+pending drafts, including while authentication is pending. Already committed
+synchronous edits are reversed with native Undo. Closing/hiding the page cancels
+pending work; master lifecycle disposal clears new listeners and sharing timers.
+Model narration is never treated as an execution receipt. The application creates
+its own pending/applied/saved messages from verified state.
+
+Demonstrations:
+* Chromium and WebKit: actual portrait files plus a WAV asset produce a 45-second
+  native composition, visible clips/titles/grade/transitions/keyframes/audio,
+  confirmation, single Undo/Redo checkpoint, correction and refresh restoration.
+* All 43 registered batch commands passed against the actual app.js adapter and
+  shared motion, colour, audio and timeline implementations.
+* A separate live Gemini 3.6 Flash test produced 16 valid actions and seven native
+  timeline clips, including titles and a soundtrack, at exactly 45 seconds.
+  It used bundled portrait photographs and an original test tone. Authentication
+  was a controlled Firebase REST fixture in this representative browser test;
+  this is not a claim of a new signed-in production Stage 2 deployment.
+
+Evidence: artifacts/stage2-live-gemini-plan.json,
+artifacts/stage2-live-editor-result.json, artifacts/stage2-live-gemini-editor.png (original live run),
+artifacts/stage2-gemini-replay.png (current UI replay of that verified plan),
+artifacts/stage2-browser.log and artifacts/stage2-native-tools.log.
+
+STAGE 2B — ADAPTIVE PERSONAL INTELLIGENCE
+
+Reuses the existing PersonalMemoryStore, under the full authenticated Firebase UID.
+Full 128-character UID separation is tested. Creative preferences cover pacing,
+transitions, typography, colour, music, effects, brand requirements, export and
+verified style snapshots. Current project instructions take priority.
+
+Feedback is classified as control, objective error, creative preference, accepted
+style or temporary project instruction. Exact timeline time, selection and scope
+are supplied to planning. "Keep everything else unchanged" constrains targets;
+known rejected transition/effect IDs are filtered from future proposals. A saved
+previous project can provide a temporary style reference without creating a new
+permanent preference. Undo/Redo requests can cover bounded counts of native steps.
+
+"This is perfect. Remember this style" requires a verified current edit before
+storing its actual pacing, filter/effect/transition/font data. Other preferences
+need explicit approval. Creative memory provides real inspection, add/edit/delete,
+disable and clear controls. Disabling memory stops its influence. These preferences
+persist on this device; cross-device creative-memory sync is not implemented.
+No model weights are changed and memory is not represented as model training.
+
+STAGE 2C — COLLECTIVE INTELLIGENCE
+
+Sharing is OFF by default and prospective. Opt-in categorical events contain
+random retry IDs, strategy/style/outcome enums, coarse duration/turn/time buckets,
+technical quality categories and issue categories. They exclude assets, names,
+project IDs, conversation text, exact timeline data and personal preference text.
+Account identity is retained privately for consent, deduplication and deletion;
+this is not a claim that collection is anonymous against the service itself.
+
+Authenticated vanessa-creative-feedback implements explicit server consent,
+bounded signed receipts, idempotent retries, quotas and revocation/deletion.
+A queued share cannot restore withdrawn consent. Batches compare-and-set the
+consent record atomically with event creation. Privacy deletion remains available
+after generation quota exhaustion. Optional measurement failure does not undo a
+successfully saved edit. Raw feedback never changes production code or weights.
+
+New Firebase paths:
+  /users/{uid}/private/creativeLearning
+  /users/{uid}/creativeFeedback/{eventId}
+Rules restrict access to the account owner, enforce exact categorical fields,
+immutable receipts, server timestamps and consent. Direct owner writes cannot
+prove server provenance: offline evaluation verifies the server HMAC receipt.
+The contents remain user-reported outcomes, not independently attested artwork.
+
+scripts/evaluate-creative-strategies.cjs verifies exported receipts, privately
+counts distinct accounts and suppresses aggregates below ten consenting accounts.
+It excludes account IDs and retry IDs from output. Strategy evaluation requires
+adequate baseline/candidate samples, passing regression/critical checks, no
+regression and a specified measured improvement. Unknown quality cannot pass.
+These are engineering release gates, not a claim of statistical significance.
+
+zorifi-creative-strategies.json is a tracked, reviewed runtime manifest used by
+the real Gemini planner. scripts/release-creative-strategy.cjs can prepare a
+reviewed promotion or rollback of a registered version; it never deploys itself.
+Normal Git review, regression testing and deployment remain required. The active
+strategy remains baseline-v1. No real user cohort has been collected or evaluated,
+and no cross-platform improvement has been claimed or promoted from fixture data.
+
+STAGE 2D — PROFESSIONAL QUALITY ASSURANCE
+
+Checks actual source availability/bounds, clip identities/timing, keyframe bounds,
+track visibility, visible timeline gaps/overlaps, sampled PCM peaks and gain
+headroom, title length/readability estimates, brief duration and aspect ratio.
+Estimated transient alignment and source brightness variation are labelled as
+measurements/heuristics. Automatic-ending placement and known rejected-tool
+removal are bounded deterministic refinements before review.
+
+The review UI explicitly lists unassessed storytelling, final cut continuity,
+rendered colour, subtitle transcript accuracy, final summed mix and codec encode.
+It does not certify professional artistic quality or final loudness from sparse
+source samples. Export opens the existing real renderer only after technical
+blockers are resolved. Quality telemetry refers to deterministic technical checks,
+alongside explicit user acceptance and native checkpoint Undo observations.
+
+TEST RESULTS
+
+node --test tests/*.test.cjs: 388 passed, zero failures/skips.
+Official Firestore emulator: 3 new feedback rules tests + 4 private-session tests
+and 22 existing Social rules tests passed (29 total).
+professional-native-tools-browser.cjs: all 43 native batch commands passed.
+professional-stage2-browser.cjs: Chromium and Windows WebKit passed real timeline
+workflow, confirmation, Undo/Redo, saving, corrections, ordinary-question/music routing, stale guards, Pause/Resume,
+Stop during pending authentication, invalid-source refusal, memory isolation,
+reload and fitted dialogs at 320/390/768/1440 pixels.
+vanessa-production-browser.cjs: Stage 1 split/trim/auth/cancellation/persistence
+and ordinary-conversation regressions passed on both engines.
+director-companion-ui-browser.cjs: orb/onboarding/opt-in voice/subtitle/lifecycle
+regressions passed. Chromium played real WAV audio; WebKit truthfully reported
+unavailable audio rather than simulating playback.
+media-review-browser.cjs: Chromium decoded actual MP4 and PCM WAV samples. This
+Windows WebKit build lacks the fixture H264/audio codecs; its real image-analysis
+path passed and the missing codecs were explicitly reported.
+Build and source/cache integrity checks passed; detailed logs are in artifacts/.
+
+ESTIMATED AI OPERATING COSTS
+
+Stage 2A: one planning call per proposal, plus at most one transient retry. The
+successful live example used 18,903 input tokens, 985 output tokens and 2,454
+thinking tokens: estimated US$0.0270735 (about 2.7 cents) for that response.
+At checked Gemini 3.6 Flash standard list prices through 31 December 2026,
+estimate = input tokens * $0.75 / 1,000,000 + (output + thinking tokens) * $3.75 /
+1,000,000. A representative 10k input / 5k output+thinking call is about $0.02625.
+Actual token usage varies with samples, project size and plan length. Failed or
+retried calls may also incur charges; this estimate is not the account invoice.
+The published rates double from 1 January 2027; the estimator accounts for that
+date. Other configured models return an unavailable estimate until priced.
+Official pricing checked 28 October 2026:
+https://ai.google.dev/gemini-api/docs/pricing#gemini-3.6-flash
+
+Stage 2B: local classification, memory CRUD and style capture use no AI inference.
+An AI correction/revision costs another bounded planning call as in 2A.
+Stage 2C: categorical collection/aggregation/release gates use no model inference.
+Firestore reads/writes, hosting and operational storage may incur normal project
+charges; no billing plan was changed and no extra model was purchased.
+Stage 2D: deterministic checks run locally without inference charges. Additional
+AI revisions would have planning costs; final encoding uses device resources.
+Image/video/music generation and ElevenLabs have their own provider pricing and
+quotas. No new paid media generation or credit purchase was performed here.
+
+CHANGED IMPLEMENTATION FILES
+
+New modules: zorifi-vanessa-professional-tools.js,
+zorifi-vanessa-professional-engine.js, zorifi-vanessa-professional.js,
+zorifi-vanessa-professional.css, zorifi-vanessa-media-review.js,
+zorifi-vanessa-creative-learning.js, zorifi-creative-strategies.json.
+New backend: netlify/functions/_shared/professional-planner.mjs,
+netlify/functions/_shared/creative-feedback.mjs,
+netlify/functions/vanessa-creative-feedback.mjs.
+New tooling: scripts/evaluate-creative-strategies.cjs,
+scripts/release-creative-strategy.cjs.
+Updated: app.js, zorifi-vanessa-production.js, zorifi-project-model.js,
+zorifi-vanessa-memory.js, zorifi-master-app.js, api/vanessa-provider.js,
+netlify/functions/_shared/vanessa-router.mjs, scripts/dev-server.cjs,
+scripts/hosted-language-gateway.cjs, electron-main.cjs, firestore.rules,
+index.html, sw.js, package.json, vercel.json, zorifi-app-settings.js and generated
+zorifi-interface-catalog.json. New focused tests and three audit documents are
+under tests/ and docs/. Unrelated README/src/services user changes were preserved.
+
+REMAINING LIMITATIONS / RELEASE DECISION
+
+1. Publishing the new private feedback access rules and 3.43.0 review build remains
+   pending. Until then the production website still runs the previous release.
+2. Full autonomous orchestration of all asynchronous/provider/manual workflows is
+   not complete. Provider availability/credits and device codecs can still fail.
+3. Sparse sampled analysis does not prove full-source understanding, accurate
+   transcripts, complete action boundaries or professional storytelling quality.
+   The live test is a working photo-based composition, not an approved client
+   fashion campaign. Final rendered mix/colour/encode certification is not added.
+4. Shared improvement needs real consenting users, independent quality review,
+   evaluated cohorts and controlled release. Fixture aggregates are tests only.
+5. Projects/media remain on device, except compact opt-in AI samples and private
+   chat proposal metadata. The server verifies Firebase identity/session binding;
+   it cannot independently attest ownership of device-only project files.
+6. Runtime Undo stacks do not survive refresh; edited project contents do.
+   Creative preferences are account-isolated device storage, not cloud sync.
+7. ElevenLabs cloud voice still requires credits on the existing provider account.
+   No physical iPhone/iPad or installed native package was verified in this pass.

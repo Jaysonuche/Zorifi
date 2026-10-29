@@ -3,14 +3,14 @@
   "outputDirectory": "web-dist",
   "functions": {
     "api/vanessa-provider.js": {
-      "includeFiles": "{netlify/functions/**,zorifi-vanessa-identity.js,zorifi-interface-language.js,zorifi-interface-catalog.json,zorifi-phase10.js,zorifi-tool-registry.js,zorifi-sfx.js,zorifi-background-cutout.js}",
+      "includeFiles": "{netlify/functions/**,zorifi-vanessa-identity.js,zorifi-interface-language.js,zorifi-interface-catalog.json,zorifi-phase10.js,zorifi-tool-registry.js,zorifi-sfx.js,zorifi-background-cutout.js,zorifi-vanessa-professional-tools.js,zorifi-vanessa-media-review.js,zorifi-vanessa-creative-learning.js,zorifi-vanessa-memory.js,zorifi-autocut.js,zorifi-autocut-director.js,zorifi-timeline-tracks.js,zorifi-motion-effects.js,zorifi-visual-tools.js,zorifi-audio-engine.js,zorifi-creative-strategies.json}",
       "maxDuration": 120
     },
     "api/ai-settings.js": {
       "includeFiles": "{netlify/functions/**,zorifi-vanessa-identity.js,zorifi-tool-registry.js,zorifi-sfx.js,zorifi-background-cutout.js}"
     },
     "api/vanessa/chat.js": {
-      "includeFiles": "{netlify/functions/**,zorifi-vanessa-identity.js,zorifi-interface-language.js,zorifi-interface-catalog.json,zorifi-phase10.js,zorifi-tool-registry.js,zorifi-sfx.js,zorifi-background-cutout.js}",
+      "includeFiles": "{netlify/functions/**,zorifi-vanessa-identity.js,zorifi-interface-language.js,zorifi-interface-catalog.json,zorifi-phase10.js,zorifi-tool-registry.js,zorifi-sfx.js,zorifi-background-cutout.js,zorifi-vanessa-professional-tools.js,zorifi-vanessa-media-review.js,zorifi-vanessa-creative-learning.js,zorifi-vanessa-memory.js,zorifi-autocut.js,zorifi-autocut-director.js,zorifi-timeline-tracks.js,zorifi-motion-effects.js,zorifi-visual-tools.js,zorifi-audio-engine.js,zorifi-creative-strategies.json}",
       "maxDuration": 120
     }
   },

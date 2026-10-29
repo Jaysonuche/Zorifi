@@ -1,6 +1,6 @@
 {
   "name": "zorifi-video-editor",
-  "version": "3.42.0",
+  "version": "3.43.0",
   "packageManager": "pnpm@11.25.0",
   "description": "Zorifi cross-platform video editor",
   "desktopName": "Zorifi",
@@ -180,7 +180,14 @@
       "zorifi-keyframe-workspace.css",
       "zorifi-mask-painter.js",
       "zorifi-timeline-edit-api.js",
-      "zorifi-vanessa-production.js"
+      "zorifi-vanessa-production.js",
+      "zorifi-vanessa-professional-tools.js",
+      "zorifi-vanessa-media-review.js",
+      "zorifi-vanessa-creative-learning.js",
+      "zorifi-vanessa-professional-engine.js",
+      "zorifi-vanessa-professional.js",
+      "zorifi-vanessa-professional.css",
+      "zorifi-creative-strategies.json"
     ],
     "win": {
       "target": "nsis",

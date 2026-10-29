@@ -21,7 +21,7 @@
 
   class PersonalMemoryStore{
     constructor({storage=null,userId='guest',namespace='zorifi-vanessa-personal-memory-v1',categories=[]}={}){
-      this.storage=storage;this.userId=clean(userId,100)||'guest';this.namespace=clean(namespace,120)||'zorifi-vanessa-personal-memory-v1';this.categories=new Set([...CATEGORIES,...categories.map(item=>clean(item,60)).filter(item=>/^[a-z][a-z0-9_:-]*$/.test(item))]);this.key=`${this.namespace}:${encodeURIComponent(this.userId)}`;const state=this.read();this.memories=state.memories;this.candidates=state.candidates;
+      this.storage=storage;this.userId=clean(userId,128)||'guest';this.namespace=clean(namespace,120)||'zorifi-vanessa-personal-memory-v1';this.categories=new Set([...CATEGORIES,...categories.map(item=>clean(item,60)).filter(item=>/^[a-z][a-z0-9_:-]*$/.test(item))]);this.key=`${this.namespace}:${encodeURIComponent(this.userId)}`;const state=this.read();this.memories=state.memories;this.candidates=state.candidates;
     }
     read(){try{const value=JSON.parse(this.storage?.getItem(this.key)||'{}');return {memories:Array.isArray(value.memories)?value.memories.slice(-250):[],candidates:Array.isArray(value.candidates)?value.candidates.slice(-100):[]};}catch{return {memories:[],candidates:[]};}}
     save(){this.storage?.setItem(this.key,JSON.stringify({schema:'zorifi.vanessa-memory/1',userId:this.userId,memories:this.memories.slice(-250),candidates:this.candidates.slice(-100)}));}

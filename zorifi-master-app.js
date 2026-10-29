@@ -179,7 +179,7 @@
         snapshot();state.mediaAssets.unshift(result);url=null;render();scheduleProjectSave(0);return result;
       }finally{if(url)revokeManagedUrl(url);if(context&&context.state!=='closed')await context.close().catch(()=>{});this.pending.delete(controller);this.audioBusy=false;}
     }
-    dispose(){if(this.closed)return;this.closed=true;global.ZorifiProductionBridge?.dispose();this.studioDirector?.dispose();for(const task of this.pending){if(task.abort)task.abort();else if(task.cancel)void task.cancel();else if(task.dispose)void task.dispose();}this.pending.clear();}
+    dispose(){if(this.closed)return;this.closed=true;global.ZorifiProfessionalStudio?.dispose();global.ZorifiProductionBridge?.dispose();this.studioDirector?.dispose();for(const task of this.pending){if(task.abort)task.abort();else if(task.cancel)void task.cancel();else if(task.dispose)void task.dispose();}this.pending.clear();}
   }
   global.ZorifiApp=ZorifiApp;
   function boot(){if(global.ZorifiMasterApp)return;global.ZorifiMasterApp=new ZorifiApp();

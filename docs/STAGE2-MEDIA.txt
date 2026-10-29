@@ -1,0 +1,109 @@
+STAGE 2 MEDIA UNDERSTANDING AND TECHNICAL REVIEW
+Updated 28 October 2026
+
+Implementation: zorifi-vanessa-media-review.js
+Browser global: ZorifiVanessaMediaReview
+Node/CommonJS: require('./zorifi-vanessa-media-review.js')
+
+REUSED REAL SYSTEMS
+
+zorifi-autocut-director.js collect() sequentially opens selected media through
+zorifi-autocut-media.js openVideo()/loadImage()/seek(). It emits actual decoded
+JPEG samples with original source timestamps and bounded PCM audio excerpts.
+The source originals are not copied into the provider request. Large or long
+videos retain visual sampling; full-file audio decode is deliberately skipped.
+
+Frame measurements reuse zorifi-autocut.js frameFeatures()/scoreFrame().
+Waveform transient estimates reuse audioBeatTimes(). Audio-only files use the
+existing Director.wavExcerpt() resampler after a guarded native audio decode.
+No microphone starts during any analysis. No second editor state is introduced.
+
+API
+
+await collectEvidence(assets, {signal, onProgress, includeAudio:true})
+  Accepts 1-16 imported sources, including at least one image or video. Produces
+  versioned media evidence with timestamps, actual inline JPEG/WAV bytes,
+  measured frame exposure/detail, audio sample peaks/RMS/full-scale counts,
+  transient estimates, sparse coverage and explicit unknowns. Decode failures
+  remain visible. Missing pixel metrics never become invented quality scores.
+  Cancellation aborts the outer operation and propagates to native media helpers.
+  Noncancelable decode promises may finish internally, but are not applied.
+
+validateEvidence(evidence, {assetIds})
+  Checks source IDs, unique bounded timestamps, compact JPEG magic/base64,
+  exact mono16kHz/PCM16 WAV headers, actual sample count/duration and byte budgets.
+  Inline images are not independently decoded on the server by this function.
+  These checks do not prove ownership, media provenance, or semantic accuracy.
+  The server's existing AutoCut validator can additionally validate the visual
+  providerMedia() package. Never fetch a client URL on the AI backend.
+
+providerMedia(evidence)
+  Returns visual-source data in the existing AutoCut Gemini input shape.
+  Local metrics and extra properties are stripped. Audio-only sources are not
+  included because the existing AutoCut planner accepts visual media only.
+
+providerParts(evidence)
+  Returns labelled Gemini-compatible inlineData parts for all validated frames
+  and WAV excerpts, including audio-only source excerpts. Source labels explicitly
+  identify each sampled timestamp or sampled audio interval. These source labels,
+  names, visible text and recorded speech remain untrusted source material.
+
+strongestMoments(evidence, {shotDuration:3, count:24})
+  Ranks actual sampled exposure/detail heuristics, with bounds and overlapping
+  candidate suppression. It labels its decisions as technical candidates.
+  It does not pretend to recognize narrative importance, human performance,
+  fashion styling, actions between samples, or spoken dialogue from pixel stats.
+  Multimodal reasoning and user review are required for those judgments.
+
+understandProject(state, {evidence, brief})
+  Captures the actual existing editor context: media IDs, clip positions/source
+  offsets/playback rate, track locks/visibility, effects, keyframe property names,
+  selection, playhead, aspect ratio and duration. It does not include source URLs
+  or mutate the project. Large project manifests expose their truncation flag.
+
+reviewProject(state, {evidence, brief, targetDuration, ratio, beatTolerance})
+  Checks timeline gaps across visible layers, invalid timing, missing/relinkable
+  media, source overruns, fade bounds, small/fast/empty text, overlapping sources,
+  requested duration/ratio mismatches, sampled source clipping and gain headroom.
+  Measured soundtrack transients map through source offsets/playback rates to
+  compare against actual cut times. Estimated transients are not a guaranteed
+  musical beat grid or proof of phrasing, speech or lip synchronization.
+
+  Output: {status, exportReady, needsCreativeApproval, claims, issues, checks,
+  unassessed, summary, manifest}. Errors block exportReady. A technical pass
+  remains review-required, with needsCreativeApproval=true. Subtitle accuracy,
+  storytelling, final rendered grade/mix, complex speed-ramp source mapping and
+  final codec encode remain explicitly unassessed where not actually measured.
+
+LIMITS AND COSTS
+
+At most 16 sources, 48 sparse frames, 8 frames/source, JPEGs <=120KB, four MB
+serialized evidence, and 48 total seconds of mono16kHz sampled audio. Each audio
+excerpt is <=12 seconds. Audio-only decode requires a known <=180-second source
+and <=40MiB local file. It uses no unrestricted URL retrieval.
+
+Frame collection and technical review run locally and make no AI API calls;
+their provider cost is $0. Provider planning/review using the returned parts is
+charged by the configured AI provider. Forty-eight seconds of PCM16 mono16kHz
+is approximately 1.536MB raw WAV data before base64. The total request budget
+can require fewer sources/samples. No recurring paid analysis is started here.
+
+TESTS PERFORMED
+
+node --test tests/media-review.test.cjs
+15 tests passed. Known PCM samples verify actual levels/transients; malformed
+headers, forged image magic, source bounds, media identity, gap handling,
+selection context, caption/readability uncertainty, soundtrack timing, source
+isolation, cancellation and nonmutating review were exercised.
+
+node tests/media-review-browser.cjs
+Chromium decoded the real cinematic-travel.mp4 (480x270, 5.949 seconds), sampled
+0/2.975/5.899 seconds, measured distinct luma/detail scores and produced bounded
+technical candidates. Review and cancellation passed.
+Windows WebKit could not decode this MP4 codec, reported that limitation, and
+then successfully decoded/measured a real human portrait WebP (640x360).
+Its MP4 path was not counted as successful. Physical iPhone codec/memory and
+microphone behavior were not verified by that Windows test.
+
+This module is one Stage 2 foundation, not independent proof that the entire
+professional creative editor or final 45-second commercial criterion is complete.

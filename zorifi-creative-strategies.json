@@ -1,0 +1,15 @@
+{
+  "schema": "zorifi.creative-strategies/1",
+  "active": "baseline-v1",
+  "versions": [
+    {"version": "baseline-v1", "strategy": "baseline-v1"},
+    {"version": "cinematic-v1", "strategy": "cinematic-v1"},
+    {"version": "fashion-v1", "strategy": "fashion-v1"},
+    {"version": "social-v1", "strategy": "social-v1"},
+    {"version": "documentary-v1", "strategy": "documentary-v1"},
+    {"version": "interview-v1", "strategy": "interview-v1"},
+    {"version": "corporate-v1", "strategy": "corporate-v1"},
+    {"version": "music-video-v1", "strategy": "music-video-v1"}
+  ],
+  "history": []
+}

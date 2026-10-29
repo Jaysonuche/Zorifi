@@ -2718,7 +2718,7 @@ function bindEvents() {
   document.querySelector('[data-filter-search]')?.addEventListener('input',event=>{filterLibraryQuery=event.target.value;clearTimeout(event.target._timer);event.target._timer=setTimeout(render,120);});
   document.querySelectorAll('[data-filter-category]').forEach(el=>el.addEventListener('click',()=>{filterLibraryCategory=el.dataset.filterCategory;render();}));
   document.querySelector('[data-filter-intensity]')?.addEventListener('input',event=>updateFilterIntensity(Number(event.target.value)));
-  document.querySelector('[data-clear-transition]')?.addEventListener('click',()=>{const clip=state.clips.find(item=>item.id===state.selected&&item.type==='video');if(!clip)return;snapshot();clip.transition=null;delete clip.transitionDuration;render();toast('Transition removed');});
+  document.querySelector('[data-clear-transition]')?.addEventListener('click',()=>{const clip=state.clips.find(item=>item.id===state.selected&&item.type==='video');if(!clip)return;snapshot();clearClipTransition(clip);render();toast('Transition removed');});
   document.querySelectorAll('[data-quality-action]').forEach(el=>el.addEventListener('click',()=>runQualityAction(el.dataset.qualityAction)));
   document.querySelectorAll('[data-caption-setting]').forEach(el=>el.addEventListener('change',()=>{state.captionSettings[el.dataset.captionSetting]=el.value;saveProject();}));
   document.querySelectorAll('[data-caption-template]').forEach(el=>{el.addEventListener('click',()=>{state.captionSettings.template=el.dataset.captionTemplate;render();});el.addEventListener('dragstart',event=>libraryDrag(event,'caption-template',el.dataset.captionTemplate));});
@@ -4193,6 +4193,7 @@ function mountVanessa(){
   updateVanessaPlaybackControls();
   mountVanessaVoiceOrb();
   updateVanessaListeningUI();
+  globalThis.ZorifiProfessionalStudio?.mount(shell);
   if(!mobileVanessa)queueMicrotask(autoStartVanessaWakeWord);
 }
 async function startVanessaVoice(){
@@ -4339,6 +4340,7 @@ function createVanessaText(parameters={}){
   const id=`vanessa-text-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,duration=Math.max(.5,Math.min(Number(parameters.duration)||5,Math.max(.5,state.duration-state.currentTime||5))),track=chooseTrack('text',state.currentTime,duration,true),font=fonts.find(item=>item.id===parameters.fontId)||fonts[0];
   state.clips.push({id,type:'text',name:String(parameters.text||'New title').slice(0,160),start:state.currentTime,duration,track,opacity:100,volume:100,playbackRate:1,fontId:font.id,fontFamily:font.family,fontSize:Math.max(10,Math.min(180,Number(parameters.fontSize)||44)),fontWeight:700,color:/^#[0-9a-f]{6}$/i.test(parameters.color||'')?parameters.color:'#ffffff',align:'center',style:parameters.style||'default',subtitle:'',bottom:20,letterSpacing:'-.045em',background:'transparent',createdByVanessa:true});state.selected=id;return state.clips.at(-1);
 }
+function clearClipTransition(clip){clip.transition=null;delete clip.transitionDuration;return clip;}
 function vanessaActionAdapter({project=state,detached=false}={}){
   // Director passes use the same tools on staged clips before one live commit.
   const state=project;
@@ -4394,6 +4396,7 @@ function vanessaActionAdapter({project=state,detached=false}={}){
       if(action.command==='caption.open'){state.activePanel='captions';return success('Opened caption tools.');}
       if(action.command==='caption.generate'){const before=state.clips.filter(item=>item.autoCaption).length;await generateSmartCaptions();const after=state.clips.filter(item=>item.autoCaption).length;if(after<=before)throw new Error('Captions were not generated. Check the selected media and AI connection.');return success(`Generated ${after-before} editable captions from the selected media.`);}
       if(action.command==='caption.delete'){const captions=state.clips.filter(item=>item.autoCaption);if(!captions.length)throw new Error('There are no generated captions to delete.');state.clips=state.clips.filter(item=>!item.autoCaption);return success(`Deleted ${captions.length} generated captions.`);}
+      if(action.command==='transition.remove'){clearClipTransition(clip);return success(`Removed the transition from ${clip.name}.`);}
       if(action.command==='transition.apply'){const transition=transitions.find(item=>item.id===p.id);if(!transition)throw new Error('That transition is unavailable.');clip.transition=transition.id;clip.transitionDuration=Math.max(.1,Math.min(3,Number(p.duration)||.6));return success(`Applied ${transition.name} to ${clip.name}.`);}
       if(action.command==='project.save'){if(saveProject()!==true)throw Error('The project could not be saved.');return success('Saved the project on this device.');}
       if(action.command==='project.rename'){const name=String(p.name||'').trim().slice(0,80);if(!name)throw new Error('Project name cannot be empty.');state.currentProject=name;return success(`Renamed the project to ${name}.`);}
@@ -4416,6 +4419,7 @@ function vanessaActionAdapter({project=state,detached=false}={}){
 }
 async function executeVanessaPlan(plan,{confirmed=false}={}){
   if(state.view!=='editor')return {status:VanessaActions.STATUS.FAILED,message:'Open a project first, then I can perform that edit.',items:[]};
+  if(plan.professionalProposal&&window.ZorifiProfessionalStudio){try{return await ZorifiProfessionalStudio.execute(plan,{confirmed});}catch(error){return {status:error.name==='AbortError'?'CANCELLED':'FAILED',message:error.message,items:[]};}}
   if(window.ZorifiProductionBridge&&plan.actions?.length&&plan.actions.every(action=>ZorifiProductionBridge.initial.has(action.command))){try{const result=await ZorifiProductionBridge.execute(plan,{confirmed});vanessaPendingPlan=result.status===VanessaActions.STATUS.REQUIRES_CONFIRMATION?result.plan:null;return result;}catch(error){vanessaPendingPlan=null;return {status:error.name==='AbortError'?'CANCELLED':'FAILED',message:error.message,items:[]};}}
   vanessaActionState='validating';mountVanessa();const context=vanessaEditorContext(),result=await VanessaActions.execute(plan,context,vanessaActionAdapter(),{confirmed});
   if(result.status===VanessaActions.STATUS.REQUIRES_CONFIRMATION)vanessaPendingPlan=result.plan;else vanessaPendingPlan=null;
@@ -4426,7 +4430,7 @@ async function resolveVanessaConfirmation(apply){
   const owner=currentUser?.id,project=state.projectId,epoch=vanessaStreamEpoch,history=vanessaHistory;
   const current=()=>owner===currentUser?.id&&project===state.projectId&&epoch===vanessaStreamEpoch&&history===vanessaHistory;
   const pendingEntry=[...vanessaHistory].reverse().find(item=>item.actionStatus==='REQUIRES_CONFIRMATION');if(pendingEntry)pendingEntry.actionStatus='REVIEWED';
-  if(!apply){ZorifiProductionBridge?.cancel();return finishVanessaTurn('Cancelled. I did not change the project.',{actionStatus:'CANCELLED'});}
+  if(!apply){window.ZorifiProfessionalStudio?.reject?.();ZorifiProductionBridge?.cancel();return finishVanessaTurn('Cancelled. I did not change the project.',{actionStatus:'CANCELLED'});}
   vanessaBusy=true;vanessaActionState='executing';mountVanessa();
   try{const result=await executeVanessaPlan(plan,{confirmed:true});if(!current())return;
     const running=vanessaWorkflowPlanner?.getNextStep();if(running&&result.status==='SUCCESS')vanessaWorkflowPlanner.markStepComplete(running.id,result.message);else if(running&&result.status!=='REQUIRES_CONFIRMATION')vanessaWorkflowPlanner.markStepFailed(running.id,result.message,{unsupported:result.status==='UNSUPPORTED'});
@@ -4609,7 +4613,7 @@ async function handleVanessaReferenceTurn(message){
 // navigator.onLine is only a browser hint. A reachable local/serverless
 // gateway must get the chance to answer, even if that hint is false.
 function vanessaRemoteAvailable(){return isCapacitorNative()||VanessaRouter.remoteAvailable({protocol:location.protocol});}
-function cancelVanessaStream(){vanessaPendingPlan=null;window.ZorifiProductionBridge?.cancel?.();window.ZorifiVanessaDirector?.cancel?.();window.ZorifiMasterApp?.cancelDirectorCommand?.();vanessaStreamEpoch++;vanessaRequestController?.abort();vanessaRequestController=null;vanessaStreamText='';vanessaStreamFailure='';vanessaBusy=false;vanessaActionState='idle';}
+function cancelVanessaStream(){vanessaPendingPlan=null;window.ZorifiProfessionalStudio?.cancel?.();window.ZorifiProductionBridge?.cancel?.();window.ZorifiVanessaDirector?.cancel?.();window.ZorifiMasterApp?.cancelDirectorCommand?.();vanessaStreamEpoch++;vanessaRequestController?.abort();vanessaRequestController=null;vanessaStreamText='';vanessaStreamFailure='';vanessaBusy=false;vanessaActionState='idle';}
 function renderVanessaStream(){
  const log=document.querySelector('#vanessa-messages');if(!log)return;
  let preview=log.querySelector('[data-stream-preview]');
@@ -4641,6 +4645,7 @@ function ensureVanessaCore(){
   vanessaCoreEngine=new VanessaCore.Core({router:VanessaRouter,conversation,editor});return vanessaCoreEngine;
 }
 function finishVanessaTurn(reply,entry={},requestType=VanessaRouter.TYPES.CONVERSATION){
+  if(entry.actionStatus==='REQUIRES_CONFIRMATION')for(const item of vanessaHistory)if(item.actionStatus==='REQUIRES_CONFIRMATION')item.actionStatus='REVIEWED';
   const clean=VanessaRouter.containsRawNetworkError(reply)?VanessaRouter.safeMessage(null,{type:requestType,projectAvailable:state.view==='editor'}):String(reply||'I’m listening.');
   if(state.view==='editor'&&entry.actionStatus==='SUCCESS'&&!entry.taskOrchestration&&requestType===VanessaRouter.TYPES.EDITING_COMMAND){const userMessage=[...vanessaHistory].reverse().find(item=>item.role==='user')?.text||'';vanessaTaskContinuity?.observeResult({message:userMessage,status:'COMPLETED',editorState:vanessaEditorContext(),userVisibleResult:clean});entry.taskContinuity=vanessaTaskContinuity.inspect();}
   vanessaStreamText='';vanessaHistory.push({role:'assistant',text:clean,...entry});vanessaResponsePlanner?.observeAssistant(clean,entry);saveVanessaHistory();vanessaBusy=false;vanessaActionState='idle';vanessaAttachments=[];mountVanessa();if(vanessaVoiceEnabled)speakAsVanessa(clean);else{showVanessaVoiceOrb('listening',clean);hideVanessaVoiceOrb(3200);}return clean;
@@ -4691,6 +4696,9 @@ async function handleVanessaSupportTurn(message){
 }
 async function sendToVanessa(message,{background=false}={}){
   if(vanessaBusy){toast('Vanessa is finishing the previous request. Your current draft is kept.');return {status:'BUSY'};}syncVanessaAccountPreferences();syncVanessaHistoryScope();const turnOwner=currentUser?.id,turnProject=state.projectId,turnEpoch=vanessaStreamEpoch,currentTurn=()=>turnOwner===currentUser?.id&&turnProject===state.projectId&&turnEpoch===vanessaStreamEpoch;if(!background)vanessaOpen=true;else showVanessaVoiceOrb('thinking','Understanding your request…');syncVanessaHistoryScope();if(vanessaPendingClarification){const resolved=Phase11.resolveFollowUp(vanessaPendingClarification,message);message=`${resolved.originalRequest} User preference: ${resolved.answer}`;vanessaPendingClarification=null;}vanessaHistory.push({role:'user',text:message});saveVanessaHistory();vanessaBusy=true;vanessaActionState='planning';mountVanessa();
+  if(vanessaPendingPlan&&/^(?:yes|confirm|apply|apply it|apply changes|do it|go ahead)[.!]?$/i.test(message.trim()))return resolveVanessaConfirmation(true);
+  if(vanessaPendingPlan&&/^(?:no|cancel|stop(?: here)?)[.!]?$/i.test(message.trim()))return resolveVanessaConfirmation(false);
+  if(window.ZorifiProfessionalStudio){try{const result=await ZorifiProfessionalStudio.turn(message);if(!currentTurn())return;if(result){vanessaPendingPlan=result.status==='REQUIRES_CONFIRMATION'?result.plan:null;return finishVanessaTurn(result.message,{actionStatus:result.status,preview:result.preview||[],items:result.items||[],professionalQuality:result.quality,professionalMetadata:result.metadata},VanessaRouter.TYPES.EDITING_COMMAND);}}catch(error){if(currentTurn())return finishVanessaTurn(error.message||'The professional draft could not finish.',{actionStatus:error.name==='AbortError'?'CANCELLED':'FAILED'},VanessaRouter.TYPES.EDITING_COMMAND);return;}}
   if(window.ZorifiProductionBridge){try{const result=await ZorifiProductionBridge.turn(message);if(!currentTurn())return;if(result){vanessaPendingPlan=result.status==='REQUIRES_CONFIRMATION'?result.plan:null;return finishVanessaTurn(result.message,{actionStatus:result.status,preview:result.preview||[],items:result.items||[]},VanessaRouter.TYPES.EDITING_COMMAND);}}catch(error){if(currentTurn())return finishVanessaTurn(error.message||'The edit request could not finish.',{actionStatus:error.name==='AbortError'?'CANCELLED':'FAILED'},VanessaRouter.TYPES.EDITING_COMMAND);return;}}
   const companyReply=window.ZorifiVanessaIdentity?.companyAnswer(message,{locale:currentUser?.language||globalI18n.locale});if(companyReply)return finishVanessaTurn(companyReply,{actionStatus:'SUCCESS'},VanessaRouter.TYPES.CONVERSATION);
   if(window.ZorifiDirectorBridge){const owner=currentUser?.id,history=vanessaHistory,epoch=vanessaStreamEpoch;try{const directed=await window.ZorifiDirectorBridge.handleTurn(message);if(owner!==currentUser?.id||history!==vanessaHistory||epoch!==vanessaStreamEpoch)return;if(directed)return finishVanessaTurn(directed.message,{actionStatus:directed.status,items:directed.items||[],preview:directed.preview||[],director:directed.director},VanessaRouter.TYPES.EDITING_COMMAND);}catch(error){if(owner!==currentUser?.id||history!==vanessaHistory||epoch!==vanessaStreamEpoch)return;return finishVanessaTurn(error.message||'The director pass could not finish.',{actionStatus:error.name==='AbortError'?'CANCELLED':'FAILED'},VanessaRouter.TYPES.EDITING_COMMAND);}}
