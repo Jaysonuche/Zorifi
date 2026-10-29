@@ -4,9 +4,10 @@ Workspace: C:\Users\User\Documents\ChatGPT\Zorifi
 
 STATUS AND SCOPE
 
-Implemented and tested inside the actual Zorifi application. This build is ready
-for review. It has not been published to Vercel or Firebase yet. The currently
-published release remains 3.42.0 until the new release/rules are approved.
+Implemented and tested inside the actual Zorifi application. The user approved
+publication and Zorifi 3.43.0 is now live at https://zorifi.vercel.app/ as a Stage 2
+foundation preview. The private optional-feedback Firebase rules were published,
+reloaded and compared exactly with the tested source on 29 October 2026.
 
 Stage 2 is NOT claimed fully complete. A real Gemini proposal has successfully
 produced a saved 45-second composition. This proves working sampled-media
@@ -166,6 +167,9 @@ alongside explicit user acceptance and native checkpoint Undo observations.
 TEST RESULTS
 
 node --test tests/*.test.cjs: 388 passed, zero failures/skips.
+Two additional deployment configuration checks passed after fixing Vercel's
+256-character includeFiles limit. Both chat entry points include all recursively
+discovered local planner/provider dependencies.
 Official Firestore emulator: 3 new feedback rules tests + 4 private-session tests
 and 22 existing Social rules tests passed (29 total).
 professional-native-tools-browser.cjs: all 43 native batch commands passed.
@@ -182,6 +186,37 @@ media-review-browser.cjs: Chromium decoded actual MP4 and PCM WAV samples. This
 Windows WebKit build lacks the fixture H264/audio codecs; its real image-analysis
 path passed and the missing codecs were explicitly reported.
 Build and source/cache integrity checks passed; detailed logs are in artifacts/.
+
+PUBLISHED RELEASE VERIFICATION — 29 OCTOBER 2026
+
+Vercel accepted code commit b559813b805d65506a11e7a9a0b8861b27d3ab81 after
+the deployment includeFiles pattern was shortened without omitting dependencies.
+Production deployment: dpl_5wwLMwBUkQgioHHR8HkKf52B5FQc (READY).
+Fifteen live public source files matched the tested local source. Firebase public
+configuration and the server-only Gemini provider configuration were present.
+Live chat GET returned 405; anonymous chat and feedback returned 401; untrusted
+Origin returned 403. Responses used no-store. See artifacts/stage2-live-release.json.
+
+In the signed-in production UI, an isolated sample project (Untitled project 5)
+was created from the repository's public park-portrait.webp asset. Real Gemini
+proposed visual.filter and text.add from one decoded image sample. Confirmation
+applied both actions through the native editor, added a visible T1 title layer,
+and reported a verified save. One native Undo removed the added title and
+treatment; Redo restored them. Reloading the app and reopening the sample retained
+the visible title and three clips. Existing user projects were not edited.
+Creative memory still showed shared learning OFF, with one successful execution
+and one observed Undo. No shared outcome upload was triggered.
+UI evidence: artifacts/stage2-production-editor.png,
+artifacts/stage2-production-reopened.png, artifacts/stage2-production-final.png,
+and the corresponding production applied/undo/redo/reopened text snapshots.
+
+An initial draft was interrupted by the browser session restarting. Its old chat
+confirmation controls remained visible after reload but could not resume the
+in-memory draft. A fresh request replaced them and completed normally. Pending
+draft restoration/expiry presentation needs improvement. A title-only timing
+instruction also produced an overly broad duration warning; the applied fresh
+request preserved the original 7.4-second sequence. These are preview limitations,
+not evidence of completed reliable understanding of every natural-language brief.
 
 ESTIMATED AI OPERATING COSTS
 
@@ -229,8 +264,9 @@ under tests/ and docs/. Unrelated README/src/services user changes were preserve
 
 REMAINING LIMITATIONS / RELEASE DECISION
 
-1. Publishing the new private feedback access rules and 3.43.0 review build remains
-   pending. Until then the production website still runs the previous release.
+1. This is a published Stage 2 preview, with the remaining scope below explicitly
+   open. The active creative strategy stays baseline-v1 until reviewed evidence
+   supports a separate promotion. Shared learning remains off by default.
 2. Full autonomous orchestration of all asynchronous/provider/manual workflows is
    not complete. Provider availability/credits and device codecs can still fail.
 3. Sparse sampled analysis does not prove full-source understanding, accurate
