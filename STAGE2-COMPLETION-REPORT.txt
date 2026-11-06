@@ -1,0 +1,265 @@
+ZORIFI 3.45.0 — VANESSA STAGE 2 BETA IMPLEMENTATION REPORT
+6 November 2026
+Workspace: C:\Users\User\Documents\ChatGPT\Zorifi
+
+RELEASE ASSESSMENT
+
+The verified native editing workflow is suitable for a controlled beta. Stage 2
+is NOT fully complete across every provider, platform, creative genre and tool.
+In particular, the manual/asynchronous workflows described below are not yet
+general autonomous jobs, sparse preview measurements do not certify professional
+artistic quality, and no physical mobile microphone testing has occurred.
+Release verification is recorded in artifacts/stage2-complete-live-release.json
+when publishing is complete. No Firebase rules or billing changes are required
+for this update; the existing authenticated services and consent rules are reused.
+
+ACTUAL APPLICATION ARCHITECTURE REUSED
+
+app.js is the existing vanilla-JavaScript application and sole live editor state.
+vanessaActionAdapter({project,detached}) invokes native editing implementations.
+snapshot()/undo()/redo() and ZorifiProjectModel.captureHistory/restoreHistory
+remain the actual native history APIs. saveProject()/loadProject() use account-
+scoped device project records and IndexedDB media; Studio footage is not uploaded
+to Firestore by this implementation.
+
+zorifi-vanessa-production.js supplies the existing Firebase-session checks,
+authenticated ordered /api/vanessa/chat requests, project/account/state scope
+guards, structured action handling and saved-project readback. The authenticated
+backend is api/vanessa/chat.js with netlify/functions/_shared services. Credentials
+remain server-side. Representative browser tests use explicit transport/session
+fixtures; no mock authentication fallback was added to the application.
+
+NEW OR EXTENDED WORKING CAPABILITIES
+
+1. Complete source-informed native editing proposals
+   Open-ended professional-edit instructions now request a coherent multi-tool
+   strategy rather than only a few cosmetic adjustments. The existing pipeline
+   samples actual source pixels and decoded audio, sends bounded evidence through
+   the authenticated Gemini planner, validates known action schemas, stages each
+   step through native APIs, reviews technical blockers, obtains review where
+   required, commits one Undo group, saves and verifies device readback.
+   Gentle independent improvements may still run within conservative delegation;
+   structural edits, new content and stronger changes require a reviewed plan.
+
+2. Expanded verified tool registry
+   100 discovered capabilities: 46 staged native commands and 54 separate existing
+   UI/asynchronous workflows. Added HSL, zoned grading and native speed-ramp control;
+   extended validated transform/mask/keyframe ranges and actual postconditions.
+   The real adapter browser regression executes all 46 staged commands. These
+   reuse the application's existing renderer: CSS grading is not colour-managed
+   mastering, and discovering a provider workflow does not prove it completed.
+   Paid generation metadata requires cost approval; this update does not launch
+   paid image/video/music generation automatically or merely by opening controls.
+
+3. Rendered output review
+   Native composition rendering supplies up to eight actual measured preview
+   images. Review checks displays these images, technical scores and unknowns.
+   Where supported, the opening twelve seconds of an offline PCM mix use the
+   native audio processing chain. Checks include gaps, missing media/source
+   bounds, caption overlap, estimated text safe bounds, upscaling, transitions,
+   shot durations, level risk, aspect ratio and explicit deliverable duration.
+   A user can request a refinement proposal using the actual rendered samples.
+   Scores are technical evidence; artistic quality and full-program verification
+   remain explicitly unknown. Refinement is bounded and user-requested.
+
+4. Creative brief safeguards
+   An explicit total duration is a blocking constraint. The server forecasts
+   duration/visual coverage and permits one bounded Gemini revision before any
+   native edit if the proposal misses it. A second mismatch fails without live
+   edits. The client independently validates the actual staged timeline.
+   Ungrounded seasonal/collection/availability title claims are replaced with
+   neutral editorial wording and a visible warning. This is a bounded safeguard,
+   not a guarantee that every generated marketing statement is semantically true.
+
+5. Durable drafts, checkpoints and recovery
+   New zorifi-vanessa-workflow-recovery.js stores a local account/project-scoped
+   journal for up to seven days, bounded to 900,000 JSON characters. It includes
+   native checkpoint data, a bounded brief and supported proposed actions; it
+   excludes tokens, source media bytes and sampled image/audio payloads.
+   Recovery reauthenticates, checks unchanged project content, re-decodes sources,
+   revalidates actions and requires review. Nothing applies on refresh by itself.
+   A saved proposal resumes without another model call. A pre-proposal interruption
+   may need a new model request. The most recent verified coordinated checkpoint
+   can restore native Undo after refresh or roll back if no later content changed.
+   Malformed/expired records are rejected. Later settings, captions, source-ID and
+   organization changes are protected from accidental overwrite. Native loading
+   now preserves an explicitly saved null frame-source selection and resets
+   cross-project Undo/Redo history. The complete historical Undo stack is not
+   persisted; the journal restores only the latest eligible workflow checkpoint.
+
+6. Contextual correction and personal memory
+   Feedback resolves against actual selected clips, time windows and verified
+   actions. Rejecting a selected transition removes only that transition and
+   saves through native history. An explicitly requested lasting lesson stores
+   the actual typed tool preference; objective mistakes and temporary directions
+   do not become permanent style preferences. Repeated approval is deduplicated.
+   Creative memory supports inspect/edit/delete/disable/clear. It stays local to
+   the authenticated account on this device. Account changes clear private active
+   result references and pending work. No cross-device preference sync is claimed.
+
+7. Privacy-protected shared learning infrastructure
+   Sharing remains opt-in and categorical, using the existing authenticated
+   consent/withdrawal/deletion endpoints and signed receipts. No footage, names,
+   conversations, project IDs or preference text enters shared event payloads.
+   Offline analysis now requires at least ten distinct consenting accounts for
+   EACH recurring issue; one account cannot create a published issue by repetition.
+   Ephemeral salted identity digests count cohorts and are omitted from reports.
+   Strategy promotion also needs measured quality samples, regression results and
+   explicit developer review. Versioned rollback remains available. Production
+   code/model weights never change automatically. No real cross-user improvement
+   dataset or measured community benefit was produced or claimed by this work.
+
+VOICE VERIFICATION AND LIMITS
+
+The existing modular device-voice adapter is retained, including future adapter
+replacement support. ElevenLabs remains disconnected from Vanessa conversation.
+Actual installed Windows Edge speech synthesis selected Microsoft Hazel English
+(UK), completed speech, emitted boundary events matching highlighted subtitle
+words, retained the voice after service recreation and page refresh, and made
+zero cloud speech requests. This is real device speech output, not an acoustic
+microphone test or a guarantee of the same voice on every operating system.
+
+Hands-Free browser tests inject representative recognition events to verify the
+actual UI/controller: explicit activation, wake phrase, pause-to-submit, follow-up,
+recognizer restart, speech echo suspension, spoken Stop/Pause/Cancel, hidden-page
+pause, account changes, denied/unsupported permissions, immediate Off and stored
+preference without activating a microphone after refresh. Spoken Pause now holds
+pending planning work; Cancel aborts pending requests and discards uncommitted
+execution. Saved edits remain available through Undo/checkpoint recovery.
+
+Subtitle UI tests cover boundary-driven highlights, honest timing fallback, safe
+text nodes, stop/cleanup, reduced motion and phone/tablet/desktop fitting. No
+physical iPhone/iPad/Android microphone, wake accuracy, installed Mac/Linux speech
+or branded custom voice has been verified. A device's API/autoplay/voice inventory
+can limit the experience. Provider failures cannot be made impossible.
+
+TESTS AND EVIDENCE
+
+Automated suite: node --test tests/*.test.cjs. 442 tests passed with zero failures; results are in
+artifacts/stage2-complete-all-unit.log. New tests cover recovery corruption and
+scope protection, contextual learning, actual-pixel QA, rendered planner input,
+exact duration, bounded revision, usage accounting and cancellation. All provider
+revision tests use the actual SDK with a mocked transport and zero paid calls.
+Signed feedback tests also cover per-issue independent account suppression.
+
+node tests/stage2-complete-browser.cjs:
+  Three real locally generated portrait-motion video files, original rhythmic
+  PCM, an actual supplied Zorifi logo, editable text and transitions. The complete
+  45-second instruction produces 45 coordinated native actions and twelve clips,
+  one Undo group, actual source sampling, eight native rendered samples and a
+  twelve-second metered PCM mix. Tests interrupt/reload/revalidate a draft with
+  no second model call, apply it, correct a selected transition, remember typed
+  preferences, Undo/Redo, reload saved media, restore Undo and roll back a durable
+  checkpoint. Responsive rendered-review checks cover 320/768/1440px widths.
+  Auth and model responses are representative fixtures, explicitly labelled.
+
+ZORIFI_STAGE2_LIVE=1 node tests/stage2-complete-browser.cjs:
+  Actual Gemini source-informed proposal: sixteen validated native actions,
+  eight resulting clips, exactly 45 seconds, one Undo group, saved readback,
+  draft recovery and eight actual rendered samples passed. Original sources
+  were generated portrait-motion test videos, not commissioned fashion footage.
+  Audio mix review was unassessed when silent MP4 audio could not decode.
+  The local test uses an explicit authentication fixture, not a live signed-in
+  production Firebase account. It is a real model/editor test, not a real-user
+  authentication acceptance test or proof of artistic commercial quality.
+  During development a live plan invented a seasonal collection title and a
+  later plan ran short. Those failures led to tested title and duration guards.
+
+ZORIFI_STAGE2_EXPORT=1 node tests/stage2-complete-browser.cjs:
+  Actual browser WebM export downloaded and decoded: 480x270, duration 45.513s,
+  nonblack sampled pixels and nonzero decoded audio; audio peak 0.067878.
+  Browser real-time recorder duration has normal encode/timing tolerance. This
+  does not establish every codec, resolution, long project or platform export.
+
+Other actual browser regressions:
+  professional-native-tools-browser.cjs: all 46 staged native commands.
+  professional-stage2-browser.cjs: Chromium/Windows WebKit project editing,
+    native effects/audio/text/keyframes, review, scope guards, memory and save.
+  professional-proactive-browser.cjs: Chromium/Windows WebKit safe coordinated
+    pass, stronger-change review, pending Stop, native Undo/Redo and reload.
+  vanessa-production-browser.cjs: Chromium/Windows WebKit real split/visible
+    timeline, review, Undo/Redo, save/reload, stale scope, Stop, ordinary replies,
+    opt-in microphone and account isolation with authenticated transport fixtures.
+  hosted-auth-browser.cjs: actual UI with mocked Firebase transport, migration,
+    session guards, account sign-in, Vanessa bearer, reload and revoked recovery.
+  vanessa-listening-browser.cjs: representative recognition-event UI cases above.
+  vanessa-device-voice-probe.cjs: actual installed Windows speech and persistence.
+  Existing subtitle UI regression: Chromium/Windows WebKit responsive captions.
+
+Windows WebKit cannot decode some MP4s or store IndexedDB Blobs in this test
+environment; its passing project tests use decodable photos/WAV/data URLs. The
+three-video commercial/export proof is Chromium. No physical mobile test is
+inferred from a Windows engine or resized viewport.
+
+Project integrity: node scripts/check-project.cjs. Web packaging:
+node scripts/build-web.cjs. The new recovery module is included in web, service
+worker and desktop packaging. Release version 3.45.0 uses service-worker cache 247.
+Build/check logs and screenshots are under artifacts/stage2-complete-*.
+
+COSTS
+
+Local pixel sampling, waveform analysis, drafts, memory, aggregation, device speech
+and automated fixtures make no AI inference calls. They use local CPU/GPU/memory.
+Real Gemini planning/refinement is billed separately. On 6 November 2026 the
+official Gemini Developer API pricing lists Gemini 3.6 Flash standard introductory
+rates of $0.75/million input and $3.75/million output including thinking, through
+31 December2026. Source: https://ai.google.dev/gemini-api/docs/pricing
+The implementation accounts for the published 2027 rate change in this estimate.
+
+Three observed live responses had token-based estimates of $0.051846,
+$0.054858 and $0.05198175: approximately $0.1587 combined. These are estimates,
+not an invoice; failed/retried requests without reported usage may add cost.
+The bounded revision can incur a second model call, and reports combined returned
+token usage. No paid music/image/video generation was executed by this upgrade.
+Firestore/Vercel plan costs depend on existing deployment usage and billing.
+
+FILES MODIFIED OR ADDED FOR THIS UPDATE
+
+All paths below are under C:\Users\User\Documents\ChatGPT\Zorifi\:
+  app.js
+  index.html
+  package.json
+  sw.js
+  zorifi-app-settings.js
+  zorifi-interface-catalog.json (generated shipped interface allowlist)
+  zorifi-motion-effects.js
+  zorifi-vanessa-creative-learning.js
+  zorifi-vanessa-media-review.js
+  zorifi-vanessa-professional-engine.js
+  zorifi-vanessa-professional-tools.js
+  zorifi-vanessa-professional.js
+  zorifi-vanessa-workflow-recovery.js (new)
+  netlify\functions\_shared\professional-planner.mjs
+  scripts\evaluate-creative-strategies.cjs
+  tests\creative-feedback.test.cjs
+  tests\creative-learning.test.cjs
+  tests\professional-native-tools-browser.cjs
+  tests\professional-stage2-browser.cjs
+  tests\vanessa-device-voice-probe.cjs
+  tests\vanessa-listening-browser.cjs
+  tests\stage2-complete-browser.cjs (new)
+  tests\stage2-contextual-learning.test.cjs (new)
+  tests\stage2-planner-revision.test.cjs (new)
+  tests\stage2-quality.test.cjs (new)
+  tests\stage2-recovery.test.cjs (new)
+  tests\stage2-rendered-planner.test.cjs (new)
+  docs\STAGE2-TOOL-AUDIT.txt
+  docs\STAGE2-MEDIA.txt
+  docs\STAGE2-LEARNING.txt
+  STAGE2-COMPLETION-REPORT.txt (this report)
+
+Pre-existing user edits to README.md, tests\src-services.test.cjs and the new
+src\services\chatController.js were preserved and excluded from this release.
+
+REMAINING WORK BEFORE AN UNQUALIFIED STAGE 2 COMPLETION CLAIM
+
+The 54 external/manual workflows need individual asynchronous job contracts,
+paid-cost quotes, result verification, cancellation and undo/recovery before
+general autonomous orchestration. Full-program audio/codec checking, robust
+variable-speed/large-source review, true colour-managed grading, semantic
+subtitle/speech alignment, human creative benchmarks across real productions,
+physical mobile testing, actual consented community evaluation and cross-device
+memory are not established here. Shared strategy infrastructure is tested but no
+production strategy was promoted from invented performance data. The available
+beta is a functional native multi-tool editor with measured review and recovery;
+it is not a promise of flawless, universally professional autonomous editing.

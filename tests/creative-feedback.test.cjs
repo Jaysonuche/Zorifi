@@ -70,3 +70,10 @@ test('offline CLI verifies receipts, counts distinct accounts privately, suppres
   const {prepareRelease}=require('../scripts/release-creative-strategy.cjs');await assert.rejects(prepareRelease({manifest:input.manifest,operation:'promote',version:'cinematic-1.1',input,project,signingKey}),/review/);const promoted=await prepareRelease({manifest:input.manifest,operation:'promote',version:'cinematic-1.1',input,project,signingKey,reviewed:true});assert.equal(promoted.active,'cinematic-1.1');assert.equal((await prepareRelease({manifest:promoted,operation:'rollback',version:'baseline-v1',reviewed:true})).active,'baseline-v1');await assert.rejects(evaluateExport({...input,candidateStrategy:'baseline-v1'},{project,signingKey}),/registered candidate/);
   const small=await evaluateExport(evaluationInput(9),{project,signingKey});assert.equal(small.aggregates['cinematic-v1'].suppressed,true);assert.equal(small.evaluation.eligible,false);const forged=structuredClone(input);forged.documents[0].fields.signature.stringValue='a'.repeat(64);await assert.rejects(evaluateExport(forged,{project,signingKey}),/signature/);
 });
+
+test('recurring failure reports require independent consented accounts for each issue',async()=>{
+ const {evaluateExport}=require('../scripts/evaluate-creative-strategies.cjs'),input=evaluationInput(10);let index=10000;
+ for(let account=0;account<10;account++)input.documents.push(exportedRecord(`private-account-${account}`,event(index++,{outcome:'corrected',issue:'transition'})));
+ for(let repeat=0;repeat<30;repeat++)input.documents.push(exportedRecord('private-account-0',event(index++,{outcome:'corrected',issue:'text'})));
+ const report=await evaluateExport(input,{project,signingKey}),recurring=report.recurringFailures['cinematic-v1'];assert.equal(recurring.suppressed,false);assert(recurring.recurring.some(item=>item.issue==='transition'));assert(!recurring.recurring.some(item=>item.issue==='text'),'One account cannot create a published recurring issue through repetition.');assert(!JSON.stringify(report).includes('private-account-'));
+});

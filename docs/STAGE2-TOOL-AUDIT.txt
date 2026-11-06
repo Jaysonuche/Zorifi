@@ -1,4 +1,4 @@
-STAGE 2 TOOL AUDIT — 28 OCTOBER 2026
+STAGE 2 TOOL AUDIT — UPDATED 5 NOVEMBER 2026
 Workspace: C:\Users\User\Documents\ChatGPT\Zorifi
 
 Existing architecture
@@ -7,9 +7,9 @@ vanessaActionAdapter({project,detached}), saveProject()/loadProject(), local
 project/media persistence, and the editor's real tool catalogues. The Stage 2
 registry is a validator/description/postcondition layer; it creates no store.
 
-zorifi-vanessa-professional-tools.js discovers 98 logical tool entries across 21
-categories. 43 actions can run on a staged copy of the real project and be
-verified before one native commit/checkpoint. 55 entries expose existing
+zorifi-vanessa-professional-tools.js discovers 100 logical tool entries across 21
+categories. 46 actions can run on a staged copy of the real project and be
+verified before one native commit/checkpoint. 54 entries expose existing
 workflows with their implementation and recovery requirements; they are NOT
 advertised as automatic batch actions. The registry does not pretend provider
 configuration or a tool button is proof that a provider job completed.
@@ -120,7 +120,7 @@ Tests owned by this audit
 
 Limits
   Discovery is not proof all provider and manual workflows have been exercised.
-  55 workflow entries require their existing dedicated UI/service execution and
+  54 workflow entries require their existing dedicated UI/service execution and
   result verification. They are intentionally rejected in autonomous batches.
   The registry costs no AI calls. Actual media analysis/planning/generation cost
   belongs to the selected providers; no estimated prices are invented here.
@@ -129,3 +129,12 @@ Integration update — 29 October 2026
 Transition removal now uses shared app.js clearClipTransition() for both manual
 controls and Vanessa, with a checked transition.remove postcondition. The actual
 app adapter browser regression passed all 43 staged commands.
+
+Integration update — 5 November 2026
+The real native adapter browser regression now passes 46 staged commands,
+including visual.hsl, visual.grade and speed.ramp. Existing grading and ramp
+rendering behavior is reused; CSS grading is not colour-managed film mastering.
+Workflow metadata explicitly distinguishes opening existing controls from a
+completed provider operation, and identifies cost approval for paid generation.
+All 54 manual/asynchronous workflows remain outside autonomous batch execution.
+See ../STAGE2-COMPLETION-REPORT.txt for current verification and limitations.

@@ -166,3 +166,21 @@ feedback upload/deletion, signed offline aggregation and reviewed strategy relea
 commands to the real planner. The baseline runtime manifest remains unchanged.
 New private Firestore rules passed the emulator; production publishing is pending.
 See ../STAGE2-IMPLEMENTATION-REPORT.txt for current status and limitations.
+
+Integration update — 5 November 2026
+resolveFeedback now relates criticism to actual selected clips, time ranges and
+verified tool operations. rememberFeedback persists typed, explicitly requested
+lessons; objective mistakes and temporary instructions do not become permanent
+style preferences. Repeated approval of one result does not inflate outcomes.
+The tested transition correction removes only the rejected real transition,
+saves it through native history, and remembers that tool preference when asked.
+Account changes discard active/private result references and pending work.
+
+Trusted offline evaluation now reports recurring issue categories with at least
+ten distinct accounts PER ISSUE, counted with ephemeral salted identifiers that
+are omitted from reports. Promotion also requires twenty measured quality
+outcomes. Human release review and rollback remain mandatory; runtime strategy
+and production weights were not changed by these measurements. Tests verify the
+infrastructure; no real cross-user improvement or statistical benefit is claimed.
+Personal memory remains on-device and sharing remains off by default.
+See ../STAGE2-COMPLETION-REPORT.txt for the authoritative current results.

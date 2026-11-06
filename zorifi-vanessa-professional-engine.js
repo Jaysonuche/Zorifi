@@ -17,7 +17,7 @@
   return match?Math.min(180,Math.max(1,Number(match[1]))):null;
  }
  function historySummary(project){
-  const snapshots=(project.undo||[]).slice(-5),versions=[...snapshots,{clips:project.clips||[]}],changes=[];
+  const snapshots=(project.undo||[]).slice(-5).map(value=>{if(typeof value!=='string')return value;try{return JSON.parse(value);}catch{return null;}}).filter(value=>value&&Array.isArray(value.clips)),versions=[...snapshots,{clips:project.clips||[]}],changes=[];
   for(let index=0;index<versions.length-1;index++){const before=new Map((versions[index]?.clips||[]).map(clip=>[clip.id,clip])),after=new Map((versions[index+1]?.clips||[]).map(clip=>[clip.id,clip]));let added=0,removed=0,modified=0;for(const [id,clip]of after){if(!before.has(id))added++;else if(JSON.stringify(clip)!==JSON.stringify(before.get(id)))modified++;}for(const id of before.keys())if(!after.has(id))removed++;changes.push({added,removed,modified});}
   return {undoDepth:project.undo?.length||0,redoDepth:project.redo?.length||0,recentChanges:changes};
  }

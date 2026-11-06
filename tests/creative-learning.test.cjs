@@ -76,7 +76,7 @@ test('aggregation suppresses small cohorts, deduplicates random events and expos
   assert.equal(Learning.aggregateEvents(events,{distinctUsers:9}).suppressed,true);assert.throws(()=>Learning.aggregateEvents(events,{distinctUsers:20,minimumCohort:1}),/cohort/);const aggregate=Learning.aggregateEvents(events,{distinctUsers:10});assert.equal(aggregate.samples,30);assert.equal(aggregate.metrics.executionSuccessRate,1);assert.equal(aggregate.metrics.qualityPassRate,1);assert(!('events' in aggregate));assert(!JSON.stringify(aggregate).includes(events[0].id));
 });
 
-function evidence({acceptance=.8,success=.9,corrections=.2,undos=.1,quality=.9}={}){return {suppressed:false,distinctUsers:10,samples:100,metrics:{executions:50,reviews:50,executionSuccessRate:success,acceptanceRate:acceptance,qualityPassRate:quality,correctionsPerExecution:corrections,undosPerExecution:undos}};}
+function evidence({acceptance=.8,success=.9,corrections=.2,undos=.1,quality=.9}={}){return {suppressed:false,distinctUsers:10,samples:100,metrics:{executions:50,reviews:50,qualityMeasurements:50,executionSuccessRate:success,acceptanceRate:acceptance,qualityPassRate:quality,correctionsPerExecution:corrections,undosPerExecution:undos}};}
 function strategyCatalog(storage=null){return new Learning.StrategyCatalog({storage,manifest:{schema:'zorifi.creative-strategies/1',active:'baseline-v1',versions:[{version:'baseline-v1',strategy:'baseline-v1'},{version:'cinematic-1.1',strategy:'cinematic-v1'}],history:[]}});}
 const regression={total:328,passed:328,criticalChecksPassed:true};
 test('versioned strategy changes require cohort evidence, measurable improvement, regressions and explicit review; rollback is available',()=>{

@@ -107,3 +107,24 @@ microphone behavior were not verified by that Windows test.
 
 This module is one Stage 2 foundation, not independent proof that the entire
 professional creative editor or final 45-second commercial criterion is complete.
+
+Integration update — 5 November 2026
+collectRenderedReview now requests actual pixels from the native composition
+renderer at up to eight bounded timeline timestamps. It measures luma/detail and
+black/white sample warnings and can meter a bounded PCM audio mix. Review checks
+shows those composition images, limitations and a user-requested refinement
+action which sends the measured samples to the authenticated planner. No live
+editor store is replaced during rendering. Sparse samples are not a full encode.
+
+Technical checks now include estimated text safe bounds, overlapping captions,
+source upscaling, shot-duration distribution, summed gain risk, transition bounds
+and solo/hidden-layer coverage. An explicit total duration is a blocking condition.
+Scores distinguish measured technical checks from unknown artistic quality.
+
+The representative 45-second workflow decoded three locally generated motion
+videos and original PCM music, applied 45 actions, sampled eight actual rendered
+frames and metered twelve seconds of the mix. A separate actual browser WebM
+export decoded at 480x270, 45.513 seconds with audible nonzero PCM. The live
+Gemini plan also saved at 45 seconds and rendered eight samples. Its audio mix
+was unassessed because silent video audio could not decode; this was not counted
+as successful full-mix review. See ../STAGE2-COMPLETION-REPORT.txt.
