@@ -1,32 +1,32 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
-const CACHE = 'zorifi-v247';
+const CACHE = 'zorifi-v248';
 const CORE = [
-  "./zorifi-vanessa-voice.js?v=247",
-  "./zorifi-vanessa-voice.css?v=247",
-  "./zorifi-vanessa-professional-tools.js?v=247",
-  "./zorifi-vanessa-media-review.js?v=247",
-  "./zorifi-vanessa-creative-learning.js?v=247",
-  "./zorifi-vanessa-professional-engine.js?v=247",
-  "./zorifi-vanessa-workflow-recovery.js?v=247",
-  "./zorifi-vanessa-professional.js?v=247",
+  "./zorifi-vanessa-voice.js?v=248",
+  "./zorifi-vanessa-voice.css?v=248",
+  "./zorifi-vanessa-professional-tools.js?v=248",
+  "./zorifi-vanessa-media-review.js?v=248",
+  "./zorifi-vanessa-creative-learning.js?v=248",
+  "./zorifi-vanessa-professional-engine.js?v=248",
+  "./zorifi-vanessa-workflow-recovery.js?v=248",
+  "./zorifi-vanessa-professional.js?v=248",
   "./zorifi-vanessa-professional.css?v=244",
 
   "./zorifi-timeline-edit-api.js?v=242",
-  "./zorifi-vanessa-production.js?v=244",
-  "./zorifi-director-companion.css?v=247",
+  "./zorifi-vanessa-production.js?v=248",
+  "./zorifi-director-companion.css?v=248",
   "./zorifi-director-engine.js?v=241",
   "./zorifi-director-engine.js",
   "./ZorifiVanessaDirectorEngine.js",
   "./zorifi-director-timeline.js?v=241",
-  "./zorifi-director-companion.js?v=247",
-  "./zorifi-director-integration.js?v=247",
+  "./zorifi-director-companion.js?v=248",
+  "./zorifi-director-integration.js?v=248",
   "./zorifi-studio-director.js?v=239",
   "./zorifi-studio-director.js",
   "./ZorifiVanessaStudioDirector.js",
   "./ZorifiVanessaStudioCore.js",
   "./zorifi-audio-worker.js?v=238",
-  "./zorifi-interface-language.js?v=247",
-  "./zorifi-interface-catalog.json?v=247",
+  "./zorifi-interface-language.js?v=248",
+  "./zorifi-interface-catalog.json?v=248",
   "./zorifi-keyframe-workspace.css?v=236",
   "./assets/tool-previews/city-walk.webp",
   "./assets/tool-previews/park-portrait.webp",
@@ -52,7 +52,7 @@ const CORE = [
   "./zorifi-vanessa-orb.css?v=231",
   "./zorifi-device-lab.css?v=1",
   "./zorifi-editor-workbench.css?v=222",
-  "./zorifi-vanessa-chat.css?v=243",
+  "./zorifi-vanessa-chat.css?v=248",
   "./zorifi-music-catalogue.css?v=222",
   "./zorifi-background-cutout.css?v=222",
   "./zorifi-editor-refinements.css?v=240",
@@ -102,8 +102,8 @@ const CORE = [
   "./zorifi-vanessa-creative-conversation.js?v=170",
   "./zorifi-vanessa-creative-verification.js?v=170",
   "./zorifi-vanessa-creative-pipeline.js?v=170",
-  "./zorifi-vanessa-router.js?v=208",
-  "./zorifi-vanessa-core.js?v=206",
+  "./zorifi-vanessa-router.js?v=248",
+  "./zorifi-vanessa-core.js?v=248",
   "./zorifi-optimization.js?v=238",
   "./zorifi-multicam.js?v=1",
   "./zorifi-audio-engine.js?v=238",
@@ -112,7 +112,7 @@ const CORE = [
   "./zorifi-advanced-editing.js?v=170",
   "./zorifi-color-scopes.js?v=1",
   "./zorifi-visual-tools.js?v=170",
-  "./zorifi-motion-effects.js?v=247",
+  "./zorifi-motion-effects.js?v=248",
   "./zorifi-compute-engine.js?v=170",
   "./zorifi-ai-provider.js?v=208",
   "./zorifi-local-companion.js?v=1",
@@ -141,10 +141,10 @@ const CORE = [
   "./zorifi-editor-workbench.js?v=222",
   "./zorifi-editor-overhaul.js?v=229",
   "./zorifi-privacy.js?v=1",
-  "./zorifi-vanessa-listening.js?v=247",
+  "./zorifi-vanessa-listening.js?v=248",
   "./zorifi-photos.js?v=232",
-  "./app.js?v=247",
-  "./zorifi-app-settings.js?v=247",
+  "./app.js?v=248",
+  "./zorifi-app-settings.js?v=248",
   "./zorifi-google-connections.js?v=225",
   "./zorifi-google-integration.js?v=227",
   "./zorifi-social-creator.js?v=225",
@@ -155,18 +155,32 @@ const CORE = [
   "./zorifi-timeline-interactions.js?v=234",
   "./zorifi-pocket-editor.js?v=236",
   "./zorifi-opening.js?v=231",
-  "./zorifi-master-app.js?v=247",
+  "./zorifi-master-app.js?v=248",
   "./zorifi-privacy-ui.js?v=228"
 ];
 
+function usableAsset(request,response){
+  if(!response?.ok)return false;
+  const type=response.headers.get('content-type')||'',path=new URL(request.url).pathname;
+  if(request.destination==='script'||/\.js$/.test(path))return /(?:javascript|ecmascript)/i.test(type);
+  if(request.destination==='style'||/\.css$/.test(path))return /text\/css/i.test(type);
+  if(/\.(?:json|webmanifest)$/.test(path))return /(?:json|manifest)/i.test(type);
+  return true;
+}
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(async cache => {
-    for(let index=0;index<CORE.length;index+=8)await cache.addAll(CORE.slice(index,index+8));
+    for(let index=0;index<CORE.length;index+=8)await Promise.all(CORE.slice(index,index+8).map(async asset=>{
+      const request=new Request(new URL(asset,self.location.href),{cache:'reload'}),response=await fetch(request);
+      if(!usableAsset(request,response))throw Error('An application asset could not be verified.');
+      await cache.put(request,response);
+    }));
   }).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+  // Keep the previous shell for already-open installed windows; never delete
+  // unrelated device caches or substitute one release's HTML for JavaScript.
+  event.waitUntil(caches.keys().then(keys => {const previous=keys.filter(key=>/^zorifi-v\d+$/.test(key)&&key!==CACHE).sort((a,b)=>Number(b.slice(8))-Number(a.slice(8)))[0];return Promise.all(keys.filter(key=>/^zorifi-v\d+$/.test(key)&&key!==CACHE&&key!==previous).map(key=>caches.delete(key)));}).then(() => self.clients.claim()));
 });
 
 self.addEventListener('fetch', event => {
@@ -179,15 +193,16 @@ self.addEventListener('fetch', event => {
     event.respondWith(fetch(event.request).then(response => {
       if (response.ok) {
         const copy = response.clone();
-        caches.open(CACHE).then(cache => cache.put(event.request, copy));
+        event.waitUntil(caches.open(CACHE).then(cache => cache.put(event.request, copy)));
       }
       return response;
-    }).catch(() => caches.match(event.request).then(cached => cached || caches.match('./index.html'))));
+    }).catch(async()=>{const cache=await caches.open(CACHE);return await cache.match(event.request)||await cache.match(new URL('./index.html',self.location.href))||Response.error();}));
     return;
   }
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-    const copy = response.clone();
-    caches.open(CACHE).then(cache => cache.put(event.request, copy));
-    return response;
-  }).catch(() => caches.match('./index.html'))));
+  event.respondWith((async()=>{
+    const cached=await caches.match(event.request);if(usableAsset(event.request,cached))return cached;
+    try{const response=await fetch(event.request);if(!usableAsset(event.request,response))return new Response('Application asset unavailable. Reconnect and reload.',{status:503,headers:{'content-type':'text/plain','cache-control':'no-store'}});
+      if(response.status!==206&&!event.request.headers.has('range')){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put(event.request,copy)));}return response;
+    }catch{return Response.error();}
+  })());
 });

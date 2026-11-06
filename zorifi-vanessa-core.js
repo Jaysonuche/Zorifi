@@ -86,7 +86,7 @@
           if(remote?.error?.kind==='cancelled')return {status:STATUS.FAILED,text:'Request cancelled.',provider:'cancelled'};
           if(remote?.ok&&text(remote.data?.text)){const result=cleanResult(remote.data);this.context.commit(message,result.text);return {...result,status:STATUS.SUCCESS,provider:remote.data?.metadata?.provider||'configured',contextTurns:contextHistory.length};}
           failure=remote?.error||{kind:'service',code:'INVALID_PROVIDER_RESPONSE',message:'No complete answer was returned.'};status=remote?.status||0;
-        }catch(error){this.onInternalError(error);failure=this.router.internalError(error);}
+        }catch(error){this.onInternalError(error);failure=this.router.internalError(error);status=Number(error?.status)||0;}
         if(failure?.kind==='cancelled')return {status:STATUS.FAILED,text:'Request cancelled.',provider:'cancelled'};
         return {status:STATUS.FAILED,text:this.router.conversationErrorMessage(failure,status),provider:'unavailable',error:{...failure,status},contextTurns:contextHistory.length};
       }

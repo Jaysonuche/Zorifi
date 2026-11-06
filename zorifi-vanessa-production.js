@@ -1,7 +1,7 @@
 /* Authenticated conversation and proposal execution over the ONE running editor. */
 (function(global){
  'use strict';
- const initial=new Set(['clip.split','clip.trim','history.undo','history.redo','project.save']),proposals=new Map(),controllers=new Set();let epoch=0,requestActive=false;
+ const initial=new Set(['clip.split','clip.trim','history.undo','history.redo','project.save']),proposals=new Map(),controllers=new Set(),executing=new Set();let epoch=0,requestActive=false,activeIntent=null;
  const endpoint=()=>isCapacitorNative()?'https://zorifi.vercel.app/api/vanessa/chat':'/api/vanessa/chat';
  const fail=message=>{throw new Error(message);};
  function identity(){if(!firebaseGateway.configured()||!currentUser?.cloudUid||firebaseGateway.session?.uid!==currentUser.cloudUid)fail('Sign in to your Firebase account before using Vanessa.');return {uid:currentUser.cloudUid,localId:currentUser.id,session:firebaseGateway.session,projectId:state.projectId};}
@@ -21,7 +21,7 @@
   if(!pending){const normalized=normalize(plan);pending={plan:normalized,scope:scope()};}
   check(pending.scope);const action=pending.plan.actions[0];
   if(!confirmed&&action.command.startsWith('clip.')){proposals.clear();const id=crypto.randomUUID();proposals.set(id,pending);const clip=state.clips.find(item=>item.id===action.target);return {status:'REQUIRES_CONFIRMATION',message:'Review the proposed change, then choose Apply changes.',plan:{...pending.plan,productionProposal:id},preview:[{command:action.command,target:clip.name,status:'REQUIRES_CONFIRMATION',before:{start:clip.start,duration:clip.duration,sourceStart:clip.sourceStart||0},after:action.parameters}]};}
-  const controller=new AbortController(),capturedEpoch=epoch;controllers.add(controller);
+  const controller=new AbortController(),capturedEpoch=epoch;controllers.add(controller);executing.add(controller);
   try{await authorize(controller.signal);if(capturedEpoch!==epoch||controller.signal.aborted)throw new DOMException('Vanessa request cancelled.','AbortError');check(pending.scope);if(plan.productionProposal)proposals.delete(plan.productionProposal);
    const before={history:ProjectModel.captureHistory(state),undo:[...state.undo],redo:[...state.redo]},oldCount=state.clips.length;
    try{
@@ -31,10 +31,10 @@
     if(action.command==='history.redo'){if(!state.redo.length)fail('There is no edit to redo.');redo();if(state.redo.length!==before.redo.length-1)fail('The editor did not confirm Redo.');}
     recalculateDuration();render();saveVerified();const label={'clip.split':'Split applied','clip.trim':'Trim applied','history.undo':'Undo completed','history.redo':'Redo completed','project.save':'Project saved'}[action.command];return {status:'SUCCESS',message:`${label}. Verified in the editor and saved on this device.`,items:[{status:'SUCCESS',command:action.command,message:label}],persisted:true};
    }catch(error){ProjectModel.restoreHistory(state,before.history);state.undo=before.undo;state.redo=before.redo;render();if(!savedMatches()){const restored=saveProject();if(restored===false||!savedMatches())throw new Error('The edit was rolled back in the editor, but device storage could not save the restored version. Free storage and save before closing.');}throw error;}
-  }finally{controllers.delete(controller);}
+  }finally{controllers.delete(controller);executing.delete(controller);}
  }
  async function request(input,{signal,intent='conversation'}={}){
-  if(requestActive)fail('Vanessa is finishing the previous request. Please wait or press Stop.');requestActive=true;
+  if(requestActive)fail('Vanessa is finishing the previous request. Please wait or press Stop.');requestActive=true;activeIntent=intent;
   const startingProject=state.projectId,startingView=state.view,startingRevision=['editing','professional'].includes(intent)?fingerprint():null;
   const controller=new AbortController(),cancel=()=>controller.abort(signal.reason);if(signal?.aborted)cancel();else signal?.addEventListener('abort',cancel,{once:true});controllers.add(controller);const turnEpoch=epoch;
   try{if(!ZorifiPrivacy.consent(localStorage,currentUser?.id||'guest'))fail('Enable optional AI processing in Privacy & data before asking Vanessa.');const account=await authorize(controller.signal);if(startingProject!==state.projectId||startingView!==state.view||startingRevision&&startingRevision!==fingerprint())fail('The project changed before this request was sent.');const project=state.view==='editor'?{id:state.projectId,ownerUid:account.uid}:null,key=`zorifi-vanessa-cloud-session-v1:${account.uid}:${project?.id||'home'}`;let session;try{session=JSON.parse(localStorage.getItem(key)||'null');}catch{}if(!session?.id)session={id:crypto.randomUUID(),sequence:0};const requestId=crypto.randomUUID(),capturedProject=state.projectId,capturedView=state.view,capturedRevision=['editing','professional'].includes(intent)?fingerprint():null;let sequence=session.sequence+1;
@@ -44,9 +44,9 @@
     if(!response.ok){if(data.code==='SEQUENCE_CONFLICT'&&data.expectedSequence&&attempt===0){sequence=data.expectedSequence;continue;}throw Object.assign(new Error(data.error||'Vanessa could not complete this request.'),{status:response.status,code:data.code});}
     if(data.requestId!==requestId||data.sessionId!==session.id||data.sequence!==sequence)fail('Vanessa returned a reply for a different conversation turn.');return data;
    }
-  }finally{signal?.removeEventListener('abort',cancel);controllers.delete(controller);if(turnEpoch===epoch)requestActive=false;}
+  }finally{signal?.removeEventListener('abort',cancel);controllers.delete(controller);if(turnEpoch===epoch){requestActive=false;activeIntent=null;}}
  }
- function cancel(){epoch++;requestActive=false;for(const controller of controllers)controller.abort();controllers.clear();proposals.clear();}
+ function cancel(reason='Vanessa request stopped.'){epoch++;requestActive=false;activeIntent=null;for(const controller of controllers)controller.abort(new DOMException(reason,'AbortError'));controllers.clear();executing.clear();proposals.clear();}
  async function clearConversation(){const account=identity(),key=`zorifi-vanessa-cloud-session-v1:${account.uid}:${state.view==='editor'?state.projectId:'home'}`;let session;try{session=JSON.parse(localStorage.getItem(key)||'null');}catch{}if(session?.id){const response=await firebaseGateway.authenticatedFetch(endpoint(),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({operation:'clear',sessionId:session.id})});if(!response.ok)throw Error('Cloud conversation removal failed. Your conversation is kept so you can retry.');}localStorage.removeItem(key);}
  async function turn(message){if(!isDirectVanessaCommand(message))return null;const local=state.view==='editor'?VanessaActions.parseNaturalLanguage(message,vanessaEditorContext()):{actions:[]};if(/^\s*(?:please\s+)?undo\b/i.test(message))local.actions=[{command:'history.undo',parameters:{}}];if(/^\s*(?:please\s+)?redo\b/i.test(message))local.actions=[{command:'history.redo',parameters:{}}];if(!local.actions.length||!local.actions.every(action=>initial.has(action.command)))return null;
   const response=await request({message,context:vanessaEditorContext()},{intent:'editing'});if(!response.actions?.length)return {status:'NEEDS_INPUT',message:response.reply};return execute({actions:response.actions});
@@ -54,5 +54,5 @@
  const lifecycle=new AbortController();function dispose(){cancel();lifecycle.abort();}
  global.ZorifiProductionBridge={initial,execute,request,cancel,clearConversation,turn,authorize,savedMatches,dispose,identity,scope,check,fingerprint,saveVerified};
  global.ZorifiEditorStore=Object.freeze({getState:()=>state,splitActiveClip:(time)=>execute({actions:[{command:'clip.split',target:state.selected,parameters:{time}}]}),trimClip:(clipId,duration,from='end')=>execute({actions:[{command:'clip.trim',target:clipId,parameters:{duration,from}}]}),undo:()=>execute({actions:[{command:'history.undo',parameters:{}}]},{confirmed:true}),redo:()=>execute({actions:[{command:'history.redo',parameters:{}}]},{confirmed:true}),saveProject:()=>execute({actions:[{command:'project.save',parameters:{}}]},{confirmed:true})});
- global.addEventListener('pagehide',cancel,{signal:lifecycle.signal});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')cancel();},{signal:lifecycle.signal});
+ global.addEventListener('pagehide',()=>cancel('The workspace was closed. Pending work stopped.'),{signal:lifecycle.signal});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&(activeIntent==='editing'||activeIntent==='professional'||executing.size))cancel('The editing workspace was hidden. Pending changes were stopped.');},{signal:lifecycle.signal});
 })(window);

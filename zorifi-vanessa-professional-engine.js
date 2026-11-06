@@ -5,8 +5,9 @@
  const abort=()=>Object.assign(new Error('Professional edit stopped. No pending draft was committed.'),{name:'AbortError'});
  const instruction=message=>String(message||'').trim().replace(/^(?:hey\s+)?vanessa\b[,!\s]*/i,'').replace(/^please\s+/i,'');
  function delegatedRequest(message){
-  const text=instruction(message).replace(/^(?:can|could|would) you\s+(?:please\s+)?/i,'');
+  const text=instruction(message).replace(/^(?:can|could|would) you\s+(?:please\s+)?/i,'').replace(/^wrok\b/i,'work');
   if(/\b(?:explain|teach|tutorial|how (?:do|can|to)|what (?:could|would)|only suggest|just suggest|do not (?:apply|change|edit)|don['’]?t (?:apply|change|edit)|ask (?:me )?(?:before|first))\b/i.test(text))return false;
+  if(/^(?:work\s+on|edit)\s+(?:this|my|the|our)\s+(?:video|edit|project|clip|timeline)\b/i.test(text))return true;
   return /^(?:help(?: me)?(?: (?:to|with))?\s+(?:(?:improve|polish|finish|fix|edit|refine|make)\s+)?(?:this|my|the|our)\s+(?:video|edit|project|clip|timeline)\b|(?:improve|polish|refine|finish|fix|tighten|enhance)\s+(?:this|my|the|our)\s+(?:video|edit|project|clip|timeline)\b|make\s+(?:this|my|the|our)\s+(?:video|edit|project|clip|timeline)\s+(?:better|more professional)\b|take (?:the lead|creative control)\s+(?:on|of)\s+(?:this|my|the|our)\s+(?:video|edit|project)\b)/i.test(text);
  }
  function requestedDuration(message){

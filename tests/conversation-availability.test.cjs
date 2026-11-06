@@ -154,3 +154,10 @@ test('thrown privacy consent failures preserve their code and show a safe action
   assert.match(result.text, /privacy|optional AI|AI processing/i);
   assert(!result.text.includes('PRIVATE_ERROR_DETAIL'));
 });
+
+test('authenticated transport exceptions preserve HTTP status and distinguish storage from provider failures',async()=>{
+ for(const [status,code,expected]of [[401,'TOKEN_EXPIRED',/sign in again/i],[503,'SESSION_STORAGE_UNAVAILABLE',/private conversation storage/i],[429,'RATE_LIMITED',/usage limit/i],[409,'REQUEST_PENDING',/previous conversation turn/i]]){
+  const engine=new VanessaCore.ConversationEngine({router:Router,isOnline:()=>true,transport:async()=>{throw Object.assign(Error('PRIVATE_UPSTREAM_DETAIL'),{status,code});},fallback:()=>{throw Error('No fake answer');}});
+  const result=await engine.respond({message:'Hello'});assert.equal(result.status,VanessaCore.STATUS.FAILED);assert.equal(result.error.status,status);assert.equal(result.error.code,code);assert.match(result.text,expected);assert(!result.text.includes('PRIVATE_UPSTREAM_DETAIL'));
+ }
+});

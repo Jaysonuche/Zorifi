@@ -3847,8 +3847,15 @@ window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();def
 window.addEventListener('appinstalled',()=>{runtimeMode.installed=true;detectRuntimeMode();toast(`${capitalize(runtimeMode.platform)} version installed`);});
 window.addEventListener('resize',()=>{const previous=runtimeMode.platform;detectRuntimeMode();if(previous!==runtimeMode.platform)render();});
 window.addEventListener('online',updateAiDeviceStatus);window.addEventListener('offline',updateAiDeviceStatus);
+function offerApplicationUpdate(){
+  if(document.querySelector('[data-app-update]'))return;
+  const notice=document.createElement('aside'),label=document.createElement('span'),reload=document.createElement('button');notice.dataset.appUpdate='';notice.setAttribute('role','status');notice.className='zorifi-update-notice';label.textContent='A Zorifi update is ready.';reload.type='button';reload.textContent='Save and reload';
+  reload.onclick=()=>{if(vanessaBusy||window.ZorifiMasterApp?.chatSubmitting||window.ZorifiProfessionalStudio?.inspect().active){toast('Finish or stop Vanessa’s current request before reloading.');return;}if(state.view==='editor'&&state.projectId){if(state.mediaAssets.some(asset=>asset.localFile&&!asset.persisted)){toast('Finish saving your imported media before reloading.');return;}if(saveProject()===false){toast('Save this project successfully before reloading.');return;}}reload.disabled=true;location.reload();};notice.append(label,reload);document.body.append(notice);
+}
 if('serviceWorker' in navigator){
-  const registerWorker=()=>navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  const hadController=Boolean(navigator.serviceWorker.controller);
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadController)offerApplicationUpdate();});
+  const registerWorker=()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>{if(registration.waiting&&hadController)offerApplicationUpdate();registration.addEventListener('updatefound',()=>{const worker=registration.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&hadController)offerApplicationUpdate();});});}).catch(()=>console.warn('Zorifi offline update registration could not finish; saved device projects were not changed.'));
   if(document.readyState==='complete')registerWorker();
   else window.addEventListener('load',registerWorker,{once:true});
 }

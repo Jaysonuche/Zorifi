@@ -1,0 +1,196 @@
+VANESSA 3.45.1 — REGRESSION INVESTIGATION AND HOTFIX
+6 November 2026
+Repository: C:\Users\User\Documents\ChatGPT\Zorifi
+Compared: 247748d (3.44.1) and 74237eb (3.45.0).
+
+WHAT WAS REPRODUCED
+
+1. A blank, unusable Vanessa inspector at ordinary laptop/window widths.
+   In the actual installed Zorifi window (approximately 1040px wide), the Vanessa
+   tab was selected and accessibility exposed its messages and input, but the
+   whole conversation area was visually blank. The local browser reproduced
+   height 0 for #editor-inspector-content, .vanessa-inspector-host and .vanessa-panel
+   at 1024/1040px. At 1440px it had positive height and worked.
+
+   Cause: styles.css only supplies display:grid to the desktop inspector above
+   1100px. The Vanessa-specific rule in zorifi-vanessa-chat.css specified grid
+   rows but did not enable grid. Its absolutely positioned conversation collapsed
+   inside a zero-height container. The rule predates 3.45.0 (87243dc); it was not
+   newly introduced by 74237eb. Earlier 1440px browser checks missed this defect.
+
+   Fix: explicitly apply display:grid to the active desktop Vanessa inspector.
+   Regression: actual Send/reply and dimensions at 1024/1040/1100/1440px, both
+   Chromium and Windows WebKit, with safely reported storage failures.
+
+2. An open installed app running stale JavaScript after deployment.
+   The installed app lacked Recover workflow and showed receipt wording from the
+   older implementation, despite the public 3.45.0 files matching the new source.
+   A worker can claim an already-open page without replacing its in-memory JS.
+   The application previously had no update/controllerchange notice.
+
+   Fix: new worker installations/controller changes offer Save and reload. This
+   never auto-refreshes a running edit; it refuses reload during an active Vanessa
+   request, unfinished imported-media persistence or a failed project save. Device
+   projects and IndexedDB are preserved. An already-open pre-fix app still needs
+   one manual refresh to load the new notice and corrected client.
+
+3. Unsafe release-cache behavior and HTML returned for failed scripts.
+   sw.js deleted every previous/unrelated cache on activation and used index.html
+   as a fallback for any failed asset fetch. A missing JavaScript resource could
+   therefore become HTML and raise an Unexpected token '<' import error. Retaining
+   an old cache also exposed an offline-navigation issue: global caches.match
+   selected the older index instead of the newly installed shell.
+
+   Fix: verify script/CSS/JSON response types, refuse invalid precache responses,
+   cache successful complete resources only, keep one previous release for open
+   clients, preserve unrelated caches, and restrict offline HTML navigation to the
+   current release cache. APIs/auth remain uncached. Failed assets fail honestly.
+   A real Chromium worker-install/update/offline test verifies the old running
+   release remains usable and offline reload chooses the complete new shell.
+
+4. Background cancellation of ordinary replies.
+   zorifi-vanessa-production.js previously cancelled ALL requests on hidden-page
+   events, including plain conversation. The existing installed conversation
+   contained the raw failure 'signal is aborted without reason'. That message is
+   consistent with the old cancellation path, but its original request was not
+   available to prove exactly which event caused it.
+
+   Fix: ordinary text replies may finish while a window is backgrounded. Pending
+   editing/professional operations still cancel when hidden; explicit Stop,
+   workspace closing and account/scope changes remain guarded. Cancellation now
+   has a useful reason. Microphone/Hands-Free hidden-page suspension is unchanged.
+
+5. Authenticated transport errors lost HTTP status in the conversation layer.
+   ZorifiProductionBridge throws an Error carrying status/code for a failed
+   authenticated request. ConversationEngine caught it but discarded status,
+   so an expired session/rate response could be reduced to the generic
+   'online AI service could not answer this request'. Storage/order errors also
+   lacked useful user-facing distinctions.
+
+   Fix: retain status and code, with safe specific messages for private storage,
+   pending turns and invalid conversation signatures. No raw upstream details,
+   tokens or fake offline-success responses are shown.
+
+6. Unnecessary clarification for the actual typed request 'wrok on this project'.
+   That request fell outside the verified professional delegation recognizer.
+   'Work on this project' and 'Edit this video' now reach the existing evidence-
+   based, authorized professional pipeline; the observed typo is normalized.
+   Questions and review-only/no-edit instructions remain excluded. The real
+   proactive-edit browser regression now exercises that exact typed request.
+
+WHAT WAS NOT PROVEN / CONNECTION DIAGNOSIS
+
+The user reported an approximate 'cannot reach the AI service' message. The exact
+failing request, HTTP response and user-account session were not available.
+It would be inaccurate to claim a newly broken Gemini key, Firebase rules,
+production server import or total backend outage was identified.
+
+The backend gateway, authentication, Firestore conversation implementation,
+provider runtime and deployment configuration were unchanged between the two
+compared releases. Live anonymous guards loaded correctly and Gemini remained
+configured. More importantly, actual paid language requests succeeded; these
+were not configuration-only health checks:
+
+  - Actual server-side Gemini plain response: 'Two plus two is four.'
+  - Actual Gemini request using the deployed chat JSON schema: reply plus []actions.
+  - Actual production /api/vanessa/chat with a new real Firebase test account:
+    HTTP 200, correlated reply, followed by a second HTTP 200 reply using private
+    saved conversation history ('Four multiplied by three is twelve.').
+  - A request claiming another account's project was refused with 403 PROJECT_MISMATCH.
+  - The test conversation and temporary Firebase account were cleaned up.
+
+The first full production reply took approximately 40 seconds. This is not a claim
+of low provider latency or guaranteed uptime. These tests establish that the
+real authenticated backend can work; they do not prove the user's particular
+session/network never fails. No existing user's private project was accessed or
+uploaded by those synthetic tests. Existing published security rules were not
+weakened or replaced. Public deployment receipt and post-release test results
+are stored under artifacts/vanessa-3451-*.
+
+ACTUAL USER-WINDOW VERIFICATION LIMIT
+
+The installed window was inspected read-only and its existing All changes saved
+state was checked. A subsequent refresh was rejected by automatic computer-use
+approval review because the browser URL could not be verified with sufficient
+confidence. Further input to that window stopped. No browser profile, cookies,
+Firebase token, localStorage or IndexedDB was cleared. The release must be opened
+or refreshed by the user; a persistent error then needs its exact new message.
+
+TESTS
+
+452 automated tests passed, zero failures (artifacts/vanessa-3451-all-unit.log).
+New deterministic cases exercise typed HTTP failures, request visibility/Stop/
+pagehide safety, exact old-resource retention, current offline navigation,
+poisoned/missing JavaScript, unrelated-cache retention and API bypass.
+
+New actual browser tests:
+  tests/vanessa-inspector-layout-browser.cjs — positive fitted panel dimensions
+    and real input/Send/reply across four widths in Chromium and WebKit; private
+    storage errors remain specific and do not fabricate success.
+  tests/service-worker-browser.cjs — actual service worker allowed, not blocked;
+    install, controller transition, previous-open-client fetch, offline missing
+    script and offline new-shell reload.
+  tests/application-update-browser.cjs — one responsive update notice; active
+    Vanessa/import guards; real native project save before browser reload.
+
+Existing regressions exercised after changes:
+  tests/vanessa-production-browser.cjs — Chromium/WebKit actual split and visible
+    timeline, confirmation, Undo/Redo, source persistence/reload, Stop, ordinary
+    replies, opt-in microphone and account isolation (authenticated fixtures).
+  tests/professional-proactive-browser.cjs — Chromium/WebKit actual image evidence,
+    exact observed 'wrok' instruction, coordinated safe edits, stronger-change
+    review, Stop and persisted reload.
+  tests/stage2-complete-browser.cjs — real decoded local motion videos and PCM,
+    45-second multi-tool edit, 8 rendered samples, contextual correction/memory,
+    interrupted-draft recovery, native Undo/Redo and checkpoint rollback.
+  tests/vanessa-listening-browser.cjs — representative recognition events for
+    wake/follow-up, automatic silence submission, Stop/Pause/Cancel, privacy and
+    permission states. These are not physical-microphone acoustic tests.
+  tests/vanessa-device-voice-probe.cjs — actual installed Windows female device
+    voice, boundaries/subtitles, completion/persistence and no cloud speech calls.
+  tests/director-companion-ui-browser.cjs — subtitle/onboarding/positioning checks.
+
+Browser auth/provider fixtures are labelled as such. The separate production API
+test uses real Firebase/Firestore/Gemini without mocked authentication. No new
+physical iPhone/iPad/Android microphone test is claimed; Windows WebKit has known
+codec/Blob limitations. ElevenLabs remains disconnected from Vanessa speech.
+
+FILES CHANGED
+
+Paths below are relative to C:\Users\User\Documents\ChatGPT\Zorifi\:
+  app.js — guarded save/reload update handling.
+  sw.js — validated assets, safe caches, current offline shell.
+  zorifi-vanessa-chat.css — positive-height embedded inspector and update notice.
+  zorifi-vanessa-core.js — authenticated exception status preservation.
+  zorifi-vanessa-router.js — truthful actionable conversation failure messages.
+  zorifi-vanessa-production.js — ordinary-background reply lifecycle; safe editing
+    cancellation and explicit reasons.
+  zorifi-vanessa-professional-engine.js — actual request delegation recognition.
+  index.html, package.json, zorifi-app-settings.js — version 3.45.1/cache 248 references.
+  zorifi-interface-catalog.json — generated interface allowlist.
+  tests/conversation-availability.test.cjs
+  tests/professional-delegation.test.cjs
+  tests/professional-proactive-browser.cjs
+  tests/director-companion-ui-browser.cjs — wait for the browser's asynchronous
+    dialog-close event before asserting voice cleanup.
+  tests/vanessa-request-lifecycle.test.cjs (new)
+  tests/service-worker-update.test.cjs (new)
+  tests/vanessa-inspector-layout-browser.cjs (new)
+  tests/service-worker-browser.cjs (new)
+  tests/application-update-browser.cjs (new)
+  VANESSA-3.45.1-REGRESSION-REPORT.txt (this report)
+
+The user's existing README.md, tests/src-services.test.cjs and untracked
+src/services/chatController.js were preserved and are excluded from this release.
+
+STAGE 2 STATUS
+
+No Stage 3 or unrelated creative feature was added. Intelligence, 46 staged tools,
+native editing APIs, memory, voice, subtitles and secure provider authentication
+remain. The preceding Stage 2 beta limitations still apply, including manual/
+asynchronous provider jobs, full-program artistic/audio verification and physical
+mobile testing. No paid media-generation job was run by this hotfix. Four real
+language tests were run before release; further post-deployment language tests
+are recorded separately. The wrapper does not return token accounting, so this
+report does not invent a final API bill. Expansion remains secondary to confirming
+the user's observed connection failure is gone in the updated installed client.

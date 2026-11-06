@@ -74,9 +74,10 @@ body.touch-workspace .vanessa-assistant .vanessa-panel>footer{padding-bottom:max
 @media(prefers-reduced-motion:reduce){.vanessa-assistant .vanessa-panel{animation:none!important;scroll-behavior:auto!important}}
 
 /* The editor's Vanessa tab shares the live conversation without another column. */
-body:not(.touch-workspace) main.app-shell[data-view="editor"] .inspector.vanessa-inspector-active{grid-template-rows:49px minmax(0,1fr);}
+body:not(.touch-workspace) main.app-shell[data-view="editor"] .inspector.vanessa-inspector-active{display:grid;grid-template-rows:49px minmax(0,1fr);}
 body:not(.touch-workspace) main.app-shell[data-view="editor"] .inspector-vanessa-content{min-width:0;min-height:0;padding:0!important;overflow:hidden!important;scrollbar-gutter:auto;}
 .vanessa-inspector-host{width:100%;height:100%;min-width:0;min-height:0;}
+.zorifi-update-notice{position:fixed;z-index:12000;inset:auto max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) auto;display:flex;align-items:center;flex-wrap:wrap;gap:10px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:12px 16px;border:1px solid #a481db;border-radius:14px;background:var(--panel,#191b28);color:var(--text,#f0ecff);box-shadow:0 10px 35px #0006;font:500 13px/1.4 system-ui}.zorifi-update-notice button{border:0;border-radius:9px;padding:9px 12px;background:#7954d9;color:#fff;font:inherit;cursor:pointer}
 body:not(.touch-workspace) .vanessa-inspector-host>.vanessa-assistant.inspector-embedded.open{display:block!important;position:relative!important;inset:auto!important;width:100%!important;height:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:0!important;z-index:auto;}
 body:not(.touch-workspace) .vanessa-inspector-host .vanessa-assistant.inspector-embedded .vanessa-panel{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;transform:none!important;}
 .vanessa-assistant.inspector-embedded :is(.vanessa-launch,[data-vanessa-resize],[data-vanessa-minimize],.vanessa-context,footer){display:none!important;}

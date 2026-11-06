@@ -78,6 +78,9 @@
     if(error.code==='PRIVACY_CONSENT_REQUIRED')return 'Enable optional AI processing in Privacy & data to let Vanessa answer with Gemini.';
     if(status===401||error.code==='AUTH_REQUIRED'||/sign in|cloud session/i.test(error.message||''))return 'Sign in again to connect Vanessa to the online AI service.';
     if(status===429)return 'Vanessa’s AI provider has reached its usage limit. Please try again later.';
+    if(error.code==='SESSION_STORAGE_UNAVAILABLE')return 'Vanessa could not access your private conversation storage. Your project is safe. Retry; if this continues, check the Firebase conversation permissions.';
+    if(error.code==='REQUEST_PENDING')return 'The previous conversation turn is still being released. Wait briefly, then retry. No new edit was applied.';
+    if(error.code==='INVALID_SESSION_SIGNATURE')return 'This conversation could not be verified. Start a new Vanessa conversation; your project and creative preferences are kept.';
     if(error.code==='PROVIDER_BUSY')return 'Gemini is temporarily busy. Please try again shortly.';
     if(error.code==='PROVIDER_RATE_LIMIT')return 'Gemini has reached its current usage limit. Please try again later.';
     if(error.code==='PROVIDER_TIMEOUT')return 'Gemini took too long to respond. Please try again.';

@@ -3,7 +3,7 @@ const Engine=require('../zorifi-vanessa-professional-engine.js');
 const project={clips:[{id:'shot',type:'video',start:0,duration:8,track:0,keyframes:{}},{id:'ending',type:'video',start:8,duration:2.4,track:0,zorifiEnding:true}],trackStates:{},undo:[],redo:[]};
 const action=(command,parameters={},target='shot')=>({command,target,parameters});
 test('open-ended creative delegation is recognized without treating questions or review-only instructions as permission',()=>{
- for(const text of ['Vanessa, help me with this edit','Hey Vanessa help me improve this video','Could you help me polish my project?','Improve this video','Make this edit more professional','Take the lead on this video'])assert.equal(Engine.delegatedRequest(text),true,text);
+ for(const text of ['Vanessa, help me with this edit','Hey Vanessa help me improve this video','Could you help me polish my project?','Improve this video','Make this edit more professional','Take the lead on this video','Work on this project','wrok on this project','Edit this video'])assert.equal(Engine.delegatedRequest(text),true,text);
  for(const text of ['What is a cinematic edit?','How can you improve this video?','Explain how to improve this video','Improve this video but only suggest changes','Improve this video; ask me first','Make cinematic music','Add a title','Help with my account'])assert.equal(Engine.delegatedRequest(text),false,text);
 });
 test('title ranges and local section timing cannot become the whole project duration',()=>{
