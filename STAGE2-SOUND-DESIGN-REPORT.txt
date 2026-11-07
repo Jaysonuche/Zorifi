@@ -140,8 +140,32 @@ node scripts/build-web.cjs
 node scripts/check-project.cjs
   Passed syntax of348 source files and295 browser/cache asset references.
 
-Public asset hashes and authenticated production diagnostic results are recorded
-below after deployment verification.
+PRODUCTION RELEASE VERIFICATION
+
+Published code commit836a118e97b0d1e0ca9125955d85cbf47ab49dc0 to main.
+https://zorifi.vercel.app/?release=249 serves3.46.0. All17 checked public runtime
+assets matched local source SHA-256 after newline normalization. HTML references
+cache249; public Firebase configuration targets zorifi and Gemini is configured.
+Method/auth/origin guards returned405/401/403 as expected and private endpoints
+returned no-store. Evidence: artifacts/vanessa-3460-live-release.json.
+
+Isolated installed-Edge browser context against the actual deployed app:
+  Temporary real Firebase account/token, actual deployed Gemini API, real imported
+  portrait/WAV, actual native timeline/source materialization and device save.
+  No model/API/authentication response mocks. The diagnostic injects the temporary
+  authenticated session into the app; it does not test the visual sign-in form.
+  Two requested cues on separate audio layers, duration10s, saved readback,
+  nonzero stereo PCM and bounded rendered mix, Undo depth1: PASSED.
+  Test conversation cleared200; temporary account deleted200. No existing user
+  project or media was accessed. Evidence: artifacts/professional-sfx-production-
+  result.json, production-plan.json and production-cleanup.json.
+
+Separate actual production authentication/chat diagnostic:
+  Real Firebase signup200, ordinary Gemini answer200 (3.259s), remembered numeric
+  follow-up200, foreign-project access403 PROJECT_MISMATCH, conversation cleanup
+  and account deletion200. PASSED. This verifies actual private conversation
+  storage without accessing another user's session. Evidence:
+  artifacts/vanessa-3460-authenticated-production.json.
 
 FILES CHANGED
 
