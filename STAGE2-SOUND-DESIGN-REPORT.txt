@@ -1,0 +1,172 @@
+ZORIFI 3.46.0 — VANESSA STAGE 2 SOUND-DESIGN BETA
+7 November 2026
+Workspace: C:\Users\User\Documents\ChatGPT\Zorifi
+
+RESULT AND SCOPE
+
+Vanessa can now propose original sound cues as part of the real native editing
+workflow, then create audible stereo sources and editable audio clips after
+review. This continues Stage 2 after the repaired 3.45.1 release. It does not
+declare every Stage 2 provider workflow, platform or artistic criterion complete.
+The existing chat, memory, voice, authentication and single live editor store
+remain in use. Studio projects and source media stay on the device.
+
+ACTUAL APPLICATION INTEGRATION
+
+app.js owns the live state, native vanessaActionAdapter, snapshot/undo/redo,
+rendering, saveProject/loadProject, device records and IndexedDB media. The
+professional PlanRunner uses transient validated drafts and one native commit;
+there is no duplicate live editor store or arbitrary model-generated mutation.
+
+zorifi-vanessa-professional-tools.js exposes audio.sfx as one reviewed staged
+creation command. Its eight allowlisted original cues come from zorifi-sfx.js:
+Soft Whoosh, Pulse Impact, Tension Rise, Reverse Lift, Precision Tick, Sub Drop,
+Airy Shimmer and Room Air. Planning stages metadata only. Validation checks the
+actual visual interval, source duration, bounded gain, unique clip/source IDs,
+canonical source identity and unlocked typed audio tracks. Default placement
+uses an available audio layer and reuses it when cues do not overlap.
+
+zorifi-vanessa-professional.js materializes actual deterministic stereo WAVs
+through the existing managed-resource lifecycle only after authentication and
+review. It merges approved sources, commits native history, verifies the live
+timeline and saved readback, and checks technical quality. Failure restores
+clips, sources, history and the saved project and revokes new URLs. Reusing a
+renamed built-in source preserves the name and releases its replaced URL only
+after successful save. Normal Undo retains sources in the media library, as the
+native editor already does. loadProject regenerates built-in audio on reopening.
+
+zorifi-vanessa-professional-engine.js keeps plans with sound-source creation
+together for review instead of applying a finishing subset ahead of new cues.
+An approved coordinated sound pass creates one native Undo checkpoint.
+
+netlify/functions/_shared/professional-planner.mjs intersects actual client/server
+capabilities and supplies real unlocked typed audio IDs to the model schema.
+Track2 is text; additional audio layers are100/101, not consecutive indexes2/3.
+Automatic native allocation remains available by omitting track. An older open
+client without supportedCommands receives the frozen 46-command baseline and
+cannot receive audio.sfx. Empty/unknown-only capability lists fail before a
+provider call. Server forecasting and validation account for new source metadata.
+No AI credentials are added to the client; actual authenticated APIs are reused.
+
+LEARNING AND CORRECTION
+
+Creative-learning feedback resolves a rejected sound against its actual selected
+clip and canonical source. A precise rejection removes only that cue through
+native history/save. An explicit request to avoid it can store the typed,
+allowlisted sfx:<id> preference on-device. Future proposals filter that cue and
+actions depending on the omitted new clip. Existing account-scoped memory
+controls allow editing, disabling and deletion. No new shared feedback data or
+Firestore rules are required. Objective audio mistakes, temporary instructions,
+raw criticism, media names and private content are not permanent style lessons.
+New-content placement timestamps are distinguished from actual criticism times;
+bounded selection/time-window protection remains enforced.
+
+INVESTIGATION FINDINGS FROM REAL PROVIDER TESTING
+
+The first real-provider attempt failed native validation because a destination
+track had the wrong kind. The schema now derives valid audio IDs from real
+tracks/locks and prevents audio.sfx from requesting text-track numbers.
+A subsequent four-action model proposal exposed a new creation command missing
+from the independent-finishing guard. It produced separate checkpoints. The
+guard now keeps sound-creation plans atomic. A focused regression covers a cue,
+music fades and contrast together. No failure was presented as successful.
+
+TESTS AND RESULTS
+
+node --test tests/*.test.cjs
+  478 passed, zero failed. Includes sound-source creation/identity, all cue PCM
+  durations, typed layers/locks, bounds, long cue sequences, capability filtering,
+  source postconditions, contextual memory, placement-vs-criticism scope and
+  atomic coordinated review. Existing auth, voice, cancellation and save tests
+  remain in the suite. See artifacts/stage2-sfx-all-unit.log.
+
+node tests/professional-native-tools-browser.cjs
+  All47 staged commands passed against the actual app adapter/data modules.
+  53 catalogued manual/asynchronous workflows remain separate.
+
+node tests/professional-sound-design-browser.cjs
+  Actual browser/app with explicitly labelled authentication/model fixtures:
+  imported human portrait + real10s original PCM music, two real stereo cues,
+  music fades, grade and title; separate editable audio layers; nonzero bounded
+  rendered mix; zero synthesis before approval; Stop invalidates the draft;
+  one native Undo/Redo checkpoint; failed-save source/history/URL rollback;
+  precise local rejection without another model call; exact typed memory;
+  rejected-cue/dependent-action filtering; renamed-source reuse and URL cleanup;
+  saved reopening regenerates both WAVs; Undo/Redo after refresh. Passed.
+  Evidence: artifacts/professional-sfx-browser-result.json and editor screenshot.
+
+ZORIFI_SFX_LIVE=1 node tests/professional-sound-design-browser.cjs
+  Actual Gemini response, representative local authentication fixture, actual
+  source image/audio evidence and native editing: final successful proposal added
+  Soft Whoosh at2s and Precision Tick at6s on tracks100/101. Both decoded as
+  nonzero stereo PCM. Timeline stayed10s, saved readback matched, Undo depth1.
+  Bounded rendered mix: peak0.049, RMS-36.626dBFS, zero clipped samples. Passed.
+  The successful model selected gemini-3.5-flash-lite and reported21,038 input /
+  328 output tokens; no verified price estimate was available. Earlier diagnostic
+  attempts incurred additional planning usage; no total-cost claim is made.
+  Evidence: artifacts/professional-sfx-live-plan.json and live-result.json.
+
+node tests/vanessa-production-browser.cjs
+  Chromium + WebKit: native split/visible timeline, confirmation, Undo/Redo,
+  device-media save/reload, stale guard, Stop, ordinary reply, opt-in mic and
+  account isolation passed. Authentication/model are representative fixtures.
+
+node tests/professional-stage2-browser.cjs
+  Chromium + WebKit: representative45s composition, actual portrait/WAV samples,
+  titles/grade/transitions/keyframes/audio, corrections, checkpoint/save/reload,
+  confirmation/stale guards, Pause/Resume/Stop and memory isolation passed.
+
+node tests/professional-proactive-browser.cjs
+  Chromium + WebKit: real image analysis, safe two-action finishing pass, one
+  checkpoint, Undo/Redo, risky-trim confirmation/Stop and saved reload passed.
+
+node tests/vanessa-device-voice-probe.cjs
+  Actual installed Windows Edge, Microsoft Hazel female device voice: speech
+  finished; subtitle words followed real speech boundary events; selected voice
+  survived refresh; zero cloud speech requests. No physical mic was tested.
+
+node tests/vanessa-chat-browser.cjs
+  Passed320/390/768px chat layouts, reduced keyboard viewport, visible orb,
+  safe Markdown and retained drafts. Updated the old cloud-playback expectation
+  to exercise the current device-service permission rejection/retry fixture;
+  zero cloud synthesis calls. Actual device speech was tested separately above.
+
+node tests/vanessa-inspector-layout-browser.cjs
+  Chromium + WebKit: visible fitted inspector and actual Send/reply at
+  1024/1040/1100/1440px; private storage errors remain specific. Passed.
+
+node scripts/build-web.cjs
+  Passed149 web files plus assets; regenerated12,337 interface strings.
+node scripts/check-project.cjs
+  Passed syntax of348 source files and295 browser/cache asset references.
+
+Public asset hashes and authenticated production diagnostic results are recorded
+below after deployment verification.
+
+FILES CHANGED
+
+Runtime: zorifi-vanessa-professional-tools.js, zorifi-vanessa-professional.js,
+zorifi-vanessa-professional-engine.js, zorifi-vanessa-creative-learning.js,
+netlify/functions/_shared/professional-planner.mjs.
+Release: package.json, index.html, sw.js, zorifi-app-settings.js,
+zorifi-interface-catalog.json (generated); version3.46.0/cache249.
+Tests: professional-engine.test.cjs, professional-native-tools-browser.cjs,
+professional-sound-design.test.cjs, professional-sound-memory.test.cjs,
+professional-sound-planner.test.cjs, professional-sound-design-browser.cjs,
+vanessa-chat-browser.cjs (current device-voice test expectation).
+Documentation: docs/STAGE2-TOOL-AUDIT.txt, STAGE2-MEDIA.txt, STAGE2-LEARNING.txt,
+and this report. Pre-existing README.md, tests/src-services.test.cjs and
+src/services/chatController.js user changes are preserved outside this release.
+
+REMAINING LIMITATIONS
+
+The cue library is eight original synthetic effects, not licensed chart music
+or arbitrary sound generation.53 manual/provider workflows have not become
+general autonomous jobs. Provider calls can still fail or run out of quota;
+errors remain explicit. Preview audio measurement is bounded to12s/eight audible
+sources and does not certify a full encoded export or professional artistic
+quality. Physical iPhone/Android microphone, codec and memory behavior was not
+tested here. Personal preferences remain device-local. Specific SFX avoidance
+can be changed through Creative memory controls; a complete per-project natural
+language override UI is not claimed. The release does not upgrade billing,
+change auth providers or publish new Firestore rules.

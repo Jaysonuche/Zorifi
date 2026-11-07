@@ -184,3 +184,13 @@ and production weights were not changed by these measurements. Tests verify the
 infrastructure; no real cross-user improvement or statistical benefit is claimed.
 Personal memory remains on-device and sharing remains off by default.
 See ../STAGE2-COMPLETION-REPORT.txt for the authoritative current results.
+
+Integration update — 7 November 2026
+Verified sound-cue rejection resolves the actual selected sound clip and canonical
+source, removes only that cue, saves one native Undo checkpoint, and can remember
+an explicitly requested allowlisted sfx:<cue> preference. Raw criticism, filenames,
+private content and objective clipping mistakes are not lasting style memory.
+Future proposals omit rejected cues and actions depending on those omitted clips.
+New-content placement timestamps are distinguished from actual criticism times;
+first-five-second and preserve-other-work scopes remain enforced. The existing
+account-scoped Creative memory controls can edit, disable or delete a lesson.

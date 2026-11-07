@@ -128,3 +128,13 @@ export decoded at 480x270, 45.513 seconds with audible nonzero PCM. The live
 Gemini plan also saved at 45 seconds and rendered eight samples. Its audio mix
 was unassessed because silent video audio could not decode; this was not counted
 as successful full-mix review. See ../STAGE2-COMPLETION-REPORT.txt.
+
+Integration update — 7 November 2026
+Native audio.sfx now stages original local sound metadata and synthesizes actual
+stereo WAV only after review. Bounded rendered-audio measurement decodes the new
+source bytes. The 10-second browser fixture verifies two cues, music fades, grade
+and a title; cancellation, failed-save rollback and reopening regenerate/retain
+the correct sources. A separate real Gemini plan added two requested cues on
+tracks100/101, saved at exactly10 seconds and metered nonzero unclipped PCM.
+This is representative project evidence, not professional artistic certification
+or a claim that every provider workflow has been exercised.

@@ -1,8 +1,8 @@
 (function(root,factory){
   const commonJs=typeof module==='object'&&module.exports&&typeof require==='function';
-  const api=factory(commonJs?require('./zorifi-vanessa-memory.js'):root.ZorifiVanessaMemory);
+  const api=factory(commonJs?require('./zorifi-vanessa-memory.js'):root.ZorifiVanessaMemory,commonJs?require('./zorifi-sfx.js'):root.ZorifiSFX);
   if(commonJs)module.exports=api;else root.ZorifiVanessaCreativeLearning=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(Memory){
+})(typeof globalThis!=='undefined'?globalThis:this,function(Memory,SFX){
   'use strict';
 
   const SCHEMA='zorifi.creative-learning/1';
@@ -34,6 +34,7 @@
       if(!Object.keys(result).length)throw new TypeError('Export preferences need a setting.');return result;
     }
     if(dimension==='style')return validateStyle(value);
+    if(dimension==='effect'&&typeof value==='string'&&value.startsWith('sfx:')&&!SFX?.byId(value.slice(4)))throw new TypeError('Choose an existing original sound effect for this creative preference.');
     return safeText(value);
   }
   function validateStyle(value){
@@ -62,7 +63,7 @@
     if(/\b(?:subtitle|caption)\b/i.test(text))return 'caption';
     if(/\b(?:font|title|text|typography)\b/i.test(text))return 'text';
     if(/\b(?:transitions?)\b/i.test(text))return 'transition';
-    if(/\b(?:effects?|glow|blur|shake)\b/i.test(text))return 'effect';
+    if(/\b(?:effects?|sfx|(?:this|that) sound|glow|blur|shake)\b/i.test(text))return 'effect';
     if(/\b(?:colou?r|grading|grade|saturation|cinematic)\b/i.test(text))return 'colour';
     if(/\b(?:pacing|slow|fast|rhythm|opening)\b/i.test(text))return 'pacing';
     if(/\b(?:gap|black frame)\b/i.test(text))return 'gap';
@@ -70,20 +71,32 @@
     if(/\b(?:aspect|ratio|vertical|widescreen)\b/i.test(text))return 'aspect';
     return 'other';
   }
+  function feedbackTime(text){
+    // New-content placement is an instruction to the planner, not the location
+    // of an earlier mistake. Keep separately reported criticism timestamps.
+    for(const match of text.matchAll(/\b(?:at|around)\s+(\d+(?:\.\d+)?)\s*(?:seconds?|secs?|s)\b/gi)){
+      const before=text.slice(0,match.index).toLowerCase(),start=Math.max(before.lastIndexOf('. '),before.lastIndexOf(';'),before.lastIndexOf('!'),before.lastIndexOf('?'))+1,clause=before.slice(start);
+      const placement=/\b(?:add|place|insert|create)\b[^.!?;]{0,180}\b(?:sounds?|sfx|whoosh|tick|titles?|text|captions?|overlays?|stickers?|logos?|images?|photos?|clips?|videos?)\b/.test(clause),criticism=/\b(?:wrong|mistake|error|dislike|hate|bad|too loud|too quiet|out of sync|not right|don['’]?t like|do not like)\b/.test(clause);
+      if(!placement||criticism)return match;
+    }
+    return null;
+  }
   function classifyFeedback(message,context={}){
     const text=clean(message,1000),lower=text.toLowerCase();if(!text)return null;
     if(/^(?:hey\s+)?(?:vanessa[, ]+)?(?:stop(?:\s+(?:here|there))?|cancel|pause)(?:\s+(?:now|editing|this))?[.!]?$/i.test(text))return {kind:'control',control:/\bpause\b/i.test(text)?'pause':'stop',scope:'operation',persist:false};
-    const negative=/\b(?:don['’]?t|do not|never|hate|dislike|cheap|wrong|mistake|bad|too much|not right)\b/i.test(lower),positive=/\b(?:perfect|love|great|excellent|keep this|this is good)\b/i.test(lower),lasting=/\b(?:remember|always|never|again|from now on|going forward|in future|every project)\b/i.test(lower),temporary=/\b(?:this project|this edit|this time|for now|just here|this section|keep everything else|first \w+ seconds?)\b/i.test(lower),objective=/\b(?:out of sync|missing (?:clip|media|footage)|broken (?:clip|media)|black frame|timeline gap|clipping|wrong (?:subtitle|caption|aspect|duration))\b/i.test(lower),time=text.match(/\b(?:at|around)\s+(\d+(?:\.\d+)?)\s*(?:seconds?|secs?|s)\b/i),section=/\b(?:opening|first (?:five|5) seconds)\b/i.test(lower)?'opening':/\b(?:ending|outro)\b/i.test(lower)?'ending':'selection';
-    const kind=objective||/\b(?:mistake|error)\b/i.test(lower)?'objective-error':positive?'accepted-style':negative?'creative-preference':'project-instruction',issue=feedbackIssue(lower),scope=lasting&&!temporary?'personal':'project';
+    const negative=/\b(?:don['’]?t|do not|never|hate|dislike|cheap|wrong|mistake|bad|too much|not right)\b/i.test(lower),positive=/\b(?:perfect|love|great|excellent|keep this|this is good)\b/i.test(lower),lasting=/\b(?:remember|always|never|again|from now on|going forward|in future|every project)\b/i.test(lower),temporary=/\b(?:this project|this edit|this time|for now|just here|this section|keep everything else|first \w+ seconds?)\b/i.test(lower),objective=/\b(?:out of sync|missing (?:clip|media|footage)|broken (?:clip|media)|black frame|timeline gap|clipping|wrong (?:subtitle|caption|aspect|duration))\b/i.test(lower),time=feedbackTime(text),section=/\b(?:opening|first (?:five|5) seconds)\b/i.test(lower)?'opening':/\b(?:ending|outro)\b/i.test(lower)?'ending':'selection';
+    const request=lower.replace(/^(?:hey\s+)?vanessa\b[,!\s]*/,'').replace(/^(?:can|could|would) you\s+(?:please\s+)?/,'').replace(/^please\s+/,''),imperative=/^(?:improve|work\b|edit|create|make|build|add|place|insert|arrange|design|polish|refine|finish|assemble|apply)\b/.test(request),criticism=/\b(?:hate|dislike|cheap|wrong|mistake|error|bad|too much|too loud|too quiet|not right|don['’]?t\s+(?:really\s+)?like|do not\s+(?:really\s+)?like)\b/.test(lower),lastingAvoid=lasting&&/\b(?:never|don['’]?t|do not)\s+(?:\w+\s+){0,3}use\b/.test(lower),projectRequest=imperative&&!objective&&!criticism&&!lastingAvoid;
+    const kind=objective||/\b(?:mistake|error)\b/i.test(lower)?'objective-error':projectRequest?'project-instruction':positive?'accepted-style':negative?'creative-preference':'project-instruction',issue=feedbackIssue(lower),scope=!projectRequest&&lasting&&!temporary?'personal':'project';
     const targetIds=Array.isArray(context.targetIds)?context.targetIds.filter(item=>typeof item==='string'&&item.length<=120).slice(0,20):[];
-    return {kind,scope,issue,polarity:negative?'avoid':positive?'prefer':'adjust',persist:scope==='personal'&&kind!=='objective-error',requiresApproval:scope==='personal',atSeconds:time?Number(time[1]):null,section,preserveOthers:/\bkeep everything else(?:\s+(?:unchanged|the same))?\b/i.test(lower),targetIds,needsClarification:kind==='creative-preference'&&issue==='other'&&!targetIds.length,verified:false};
+    return {kind,scope,issue,polarity:projectRequest?'adjust':negative?'avoid':positive?'prefer':'adjust',persist:scope==='personal'&&kind!=='objective-error',requiresApproval:scope==='personal',atSeconds:time?Number(time[1]):null,section,preserveOthers:/\bkeep everything else(?:\s+(?:unchanged|the same))?\b/i.test(lower),targetIds,needsClarification:kind==='creative-preference'&&issue==='other'&&!targetIds.length,verified:false};
   }
-  const commandIssue=command=>/^transition\./.test(command)?'transition':/^(?:effect|animation)\.|^visual\.(?:effect|remove_effect)/.test(command)?'effect':/^visual\./.test(command)?'colour':/^audio\./.test(command)?'audio-level':/^caption\./.test(command)?'caption':/^text\./.test(command)?'text':/^clip\.(?:trim|split|move|set)/.test(command)?'pacing':'other';
+  const commandIssue=command=>/^transition\./.test(command)?'transition':command==='audio.sfx'||/^(?:effect|animation)\.|^visual\.(?:effect|remove_effect)/.test(command)?'effect':/^visual\./.test(command)?'colour':/^audio\./.test(command)?'audio-level':/^caption\./.test(command)?'caption':/^text\./.test(command)?'text':/^clip\.(?:trim|split|move|set)/.test(command)?'pacing':'other';
   function operationSummary(input){
     if(!input||typeof input.command!=='string'||!/^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$/.test(input.command))return null;
-    const target=typeof input.target==='string'&&input.target.length<=160?input.target:null,p=input.parameters&&typeof input.parameters==='object'?input.parameters:{},parameters={};
+    const p=input.parameters&&typeof input.parameters==='object'?input.parameters:{},createdSound=input.command==='audio.sfx',target=createdSound?(typeof p.id==='string'&&/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,159}$/.test(p.id)?p.id:null):typeof input.target==='string'&&input.target.length<=160?input.target:null,parameters={};
     for(const key of ['id','instanceId','property','fontId','preset'])if(typeof p[key]==='string'&&/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,159}$/.test(p[key]))parameters[key]=p[key];
     for(const key of ['value','duration','start','time','intensity','size','position'])if(typeof p[key]==='number'&&Number.isFinite(p[key])&&Math.abs(p[key])<=86400)parameters[key]=p[key];
+    if(createdSound&&typeof p.soundId==='string'&&SFX?.byId(p.soundId))parameters.soundId=p.soundId;
     return {command:input.command,target,parameters};
   }
   function lessonForOperation(operation,polarity){
@@ -93,12 +106,14 @@
     else if(command==='visual.adjust'&&p.property!==undefined&&p.value!==undefined){dimension='colour';value=`${p.property}: ${p.value}`;}
     else if(['effect.apply','visual.effect','animation.apply'].includes(command)){dimension='effect';value=command==='animation.apply'&&p.id?`animation:${p.id}`:p.id;}
     else if(command==='text.style'||command==='caption.style'){dimension='typography';value=p.fontId;}
+    else if(command==='audio.sfx'&&SFX?.byId(p.soundId)){dimension='effect';value='sfx:'+p.soundId;}
     if(!dimension||!value)return null;try{return {dimension,value:preferenceValue(dimension,value),polarity};}catch{return null;}
   }
   function resolveFeedback(message,context={}){
     const feedback=classifyFeedback(message,context);if(!feedback||feedback.kind==='control')return feedback;
     const timeline=context.timeline,clips=Array.isArray(timeline?.clips)?timeline.clips.filter(clip=>clip&&typeof clip.id==='string'&&Number.isFinite(clip.start)&&Number.isFinite(clip.duration)&&clip.duration>0):[],byId=new Map(clips.map(clip=>[clip.id,clip]));
-    const operations=(Array.isArray(context.operations)?context.operations:[]).slice(0,120).map(operationSummary).filter(Boolean),specific=feedback.issue!=='other',matching=operations.filter(operation=>!specific||commandIssue(operation.command)===feedback.issue||feedback.issue==='audio-sync'&&operation.command.startsWith('audio.'));
+    const validSound=operation=>{if(operation.command!=='audio.sfx')return true;const cue=SFX?.byId(operation.parameters.soundId),clip=byId.get(operation.target),asset=cue&&timeline?.mediaAssets?.find(item=>item.id==='zorifi-sfx-'+cue.id);return Boolean(cue&&clip?.type==='audio'&&clip.soundEffect===true&&clip.sfxId===cue.id&&clip.mediaId===asset?.id&&asset?.type==='audio'&&asset.builtin===true&&asset.audioTrackId===cue.id&&asset.sfxId===cue.id&&asset.duration===cue.duration);};
+    const soundOnly=/\b(?:sound effects?|sfx|(?:this|that) sound)\b/i.test(clean(message,1000)),operations=(Array.isArray(context.operations)?context.operations:[]).slice(0,120).map(operationSummary).filter(operation=>operation&&validSound(operation)),specific=feedback.issue!=='other',matching=operations.filter(operation=>(!soundOnly||operation.command==='audio.sfx')&&(!specific||commandIssue(operation.command)===feedback.issue||feedback.issue==='audio-sync'&&operation.command.startsWith('audio.')));
     let range=null,targetIds=feedback.targetIds.filter(target=>!clips.length||byId.has(target));
     if(feedback.atSeconds!==null&&Number.isFinite(feedback.atSeconds))range={start:Math.max(0,feedback.atSeconds),end:Math.max(0,feedback.atSeconds)+.001};
     else if(feedback.section==='opening'&&clips.length)range={start:0,end:Math.min(5,Math.max(...clips.map(clip=>clip.start+clip.duration)))};

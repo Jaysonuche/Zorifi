@@ -48,7 +48,7 @@
  function independentDelegatedActions(actions,project){
   // Do not rearrange plans with structural dependencies. Split only existing-
   // clip finishing adjustments whose parameter domains are independent.
-  if(!Array.isArray(actions)||actions.length>24||actions.some(action=>/^(?:clip\.|project\.|text\.add|caption\.(?:add|delete)|history\.)/.test(action.command)))return {safe:[],review:actions||[]};
+  if(!Array.isArray(actions)||actions.length>24||actions.some(action=>/^(?:clip\.|project\.|text\.add|audio\.sfx|caption\.(?:add|delete)|history\.)/.test(action.command)))return {safe:[],review:actions||[]};
   const domain=action=>action.target+':'+(action.command.startsWith('keyframe.')?'motion':action.command+':'+(action.parameters?.property||''));
   const review=actions.filter(action=>!delegationSafety([action],project).automatic),blocked=new Set(review.map(domain));
   const safe=actions.filter(action=>!review.includes(action)&&!blocked.has(domain(action)));

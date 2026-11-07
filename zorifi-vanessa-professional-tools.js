@@ -1,6 +1,6 @@
 /* Strict tool descriptions and postconditions over Zorifi's existing editor API.
  * No editor store, network access, dynamic code, or ownership bypass lives here. */
-(function(root,factory){const api=factory(root,typeof module==='object'&&module.exports?require('./zorifi-timeline-tracks.js'):root.ZorifiTimelineTracks);if(typeof module==='object'&&module.exports)module.exports=api;else root.ZorifiProfessionalTools=api;})(typeof globalThis!=='undefined'?globalThis:this,function(root,Tracks){
+(function(root,factory){const common=typeof module==='object'&&module.exports,api=factory(root,common?require('./zorifi-timeline-tracks.js'):root.ZorifiTimelineTracks,common?require('./zorifi-sfx.js'):root.ZorifiSFX);if(common)module.exports=api;else root.ZorifiProfessionalTools=api;})(typeof globalThis!=='undefined'?globalThis:this,function(root,Tracks,SFX){
   'use strict';
   const VERSION=1,MAX_ACTIONS=120,MAX_TIME=86400;
   const plain=x=>x!==null&&typeof x==='object'&&!Array.isArray(x)&&(Object.getPrototypeOf(x)===Object.prototype||Object.getPrototypeOf(x)===null);
@@ -24,6 +24,7 @@
   function add(command,category,parameters={},options={}){definitions[command]={command,category,parameters,execution:'editor',permission:'authenticated-project',confirmation:'review-plan',undo:'project-checkpoint',verification:'editor-state-postcondition',...options};}
   const targeted=(command,category,params,options={})=>add(command,category,params,{target:true,...options});
   add('clip.add','timeline',{id:id(true),mediaId:id(true),start:num(0,MAX_TIME,true),duration:num(.05,MAX_TIME,true),sourceStart:num(0,MAX_TIME),track:track(),volume:num(0,200),playbackRate:num(.1,8),fit:choose(['contain','cover','crop'])},{creation:true});
+  add('audio.sfx','audio',{id:id(true),soundId:choose((SFX?.CATALOG||[]).map(cue=>cue.id),true),start:num(0,MAX_TIME,true),duration:num(.05,4),volume:num(5,45),track:track()},{creation:true,implementation:'zorifi-sfx.js deterministic original PCM; native audio clips',requiresCostApproval:false});
   targeted('clip.select','timeline',{}, {undo:'not-required'});
   targeted('clip.trim','timeline',{duration:num(.05,MAX_TIME,true),from:choose(['start','end'])});
   targeted('clip.split','timeline',{time:num(0,MAX_TIME,true)});
@@ -77,7 +78,7 @@
     ['timeline.seek','timeline','app.js seekProject'],['timeline.select_track','timeline','app.js vanessaSelectedTrack'],['timeline.zoom','timeline','app.js state.zoom'],['timeline.snapping','timeline','app.js state.snapping'],
     ['caption.open','captions','app.js captionsPanel'],['caption.generate','captions','app.js generateSmartCaptions; authenticated speech provider'],['caption.translate','captions','app.js translateSmartCaptions; authenticated language provider'],['caption.import','captions','app.js importLocalCaptions; SRT/VTT parser'],['caption.export','captions','app.js exportCaptionSRT'],
     ['colour.lut','colour','zorifi-visual-tools.js parseCube; approximate LUT filter'],['colour.scopes','colour','zorifi-color-scopes.js analyzePixels/ZorifiColorScopesEngine'],
-    ['audio.beats','audio','zorifi-audio-engine.js real decoded audio; zorifi-device-lab.js Pulse Desk'],['audio.waveform','audio','zorifi-audio-engine.js decodeWaveform'],['audio.extract','audio','app.js extractAudio'],['audio.record','audio','app.js microphone recording; user gesture/permission'],['audio.stems','audio','netlify/functions/vanessa-stems.mjs'],['audio.sfx','audio','zorifi-sfx.js synthesize'],['audio.music_generate','generation','zorifi-music-studio.js; netlify/functions/vanessa-music.mjs'],
+    ['audio.beats','audio','zorifi-audio-engine.js real decoded audio; zorifi-device-lab.js Pulse Desk'],['audio.waveform','audio','zorifi-audio-engine.js decodeWaveform'],['audio.extract','audio','app.js extractAudio'],['audio.record','audio','app.js microphone recording; user gesture/permission'],['audio.stems','audio','netlify/functions/vanessa-stems.mjs'],['audio.music_generate','generation','zorifi-music-studio.js; netlify/functions/vanessa-music.mjs'],
     ['ai.image','generation','netlify/functions/vanessa-image.mjs'],['ai.video','generation','netlify/functions/vanessa-motion.mjs and vanessa-video.mjs'],['ai.voice','generation','netlify/functions/vanessa-voice.mjs'],['ai.background','compositing','zorifi-background-cutout.js and vanessa-background.mjs'],['ai.person_cutout','compositing','zorifi-person-cutout.js; local model download'],['ai.video_enhance','generation','netlify/functions/vanessa-video-tool.mjs; configured media job'],
     ['media.import','media','app.js importFiles; device file chooser'],['media.relink','media','app.js restore/relink local files'],['overlay.layout','compositing','app.js overlay layouts'],['layer.mask_paint','compositing','zorifi-mask-painter.js'],['layer.motion_track','compositing','zorifi-advanced-editing.js estimateFrameTranslation/trackingKeyframes'],['layer.multicam','timeline','zorifi-multicam.js'],['layer.precompose','compositing','zorifi-composition-workspace.js'],['layer.null_camera','compositing','zorifi-composition-workspace.js'],
     ['project.save','project','app.js saveProject + localStorage/IndexedDB readback'],['project.duplicate','project','app.js copyProjectMedia'],['project.info','project','app.js vanessaActionAdapter'],['project.open_recent','project','app.js loadProject'],['project.versions','project','zorifi-phase11.js addVersion/validateVersion'],['history.undo','history','app.js undo'],['history.redo','history','app.js redo'],
@@ -88,12 +89,14 @@
   for(const [command,category,implementation] of workflows)add(command,category,{}, {execution:'workflow',implementation,automation:'existing-controls-only',requiresCostApproval:providerWorkflows.has(command),estimatedCost:providerWorkflows.has(command)?'provider quote required before generation':'no provider generation in this action',permission:command==='audio.record'?'explicit-microphone-consent':'authenticated-project',verification:'workflow-specific-result; opening controls is not completion',undo:command==='export.render'?'cancel-if-supported; retain project':'workflow-specific-checkpoint'});
   Object.values(definitions).forEach(Object.freeze);Object.freeze(definitions);
   function defaultCatalog(){return {filters:Object.keys(root.ZorifiVisualTools?.FILTERS||{}),elementEffects:(root.ZorifiMotionEffects?.EFFECTS||[]).map(x=>x.id),effectLibrary:root.ZorifiMotionEffects?.EFFECTS||[],animations:(root.ZorifiMotionEffects?.ANIMATIONS||[]).map(x=>x.id),audioPresets:Object.keys(root.ZorifiAudioEngine?.PRESETS||{})};}
-  function catalogFor(options={}){return {...defaultCatalog(),...(options.catalog||options.capabilities||{})};}
+  function catalogFor(options={}){const catalog={...defaultCatalog(),...(options.catalog||options.capabilities||{})};if(catalog.supportedCommands!==undefined&&(!Array.isArray(catalog.supportedCommands)||catalog.supportedCommands.length>200||catalog.supportedCommands.some(command=>typeof command!=='string')))fail('Invalid advertised editing commands.');return catalog;}
+  const advertised=(definition,catalog)=>definition.execution!=='editor'||catalog.supportedCommands===undefined||catalog.supportedCommands.includes(definition.command);
   function schemaRule(rule){const out={...rule};delete out.required;return out;}
   function schemaForDefinition(definition,catalog){
     const params=Object.fromEntries(Object.entries(definition.parameters).map(([key,value])=>[key,schemaRule(value)]));
     if(definition.catalogue&&Array.isArray(catalog[definition.catalogue])&&catalog[definition.catalogue].length)params.id={type:'string',enum:catalog[definition.catalogue]};
     if(definition.command==='effect.apply')params.params={type:'object',properties:{},additionalProperties:{type:'number'},description:'Only exact numeric parameter names/ranges from the selected effect definition; unknown names rejected.'};
+    if(definition.command==='audio.sfx'&&Array.isArray(catalog.audioTrackIds)&&catalog.audioTrackIds.length)params.track={...params.track,enum:catalog.audioTrackIds.filter(value=>Number.isSafeInteger(value)&&value>=0&&Tracks.kind(value)==='audio'),description:'Optional typed audio-layer ID. Omit to allocate a free layer automatically; track2 is text, not a second audio layer.'};
     return {
       type:'object',additionalProperties:false,required:['command','target','parameters'],
       properties:{
@@ -103,8 +106,8 @@
       }
     };
   }
-  function catalogue(options={}){const catalog=catalogFor(options);return Object.values(definitions).map(definition=>({...copy(definition),schema:schemaForDefinition(definition,catalog)}));}
-  function actionSchema(options={}){const catalog=catalogFor(options);return {anyOf:Object.values(definitions).filter(d=>d.execution==='editor').map(d=>schemaForDefinition(d,catalog))};}
+  function catalogue(options={}){const catalog=catalogFor(options);return Object.values(definitions).filter(definition=>advertised(definition,catalog)).map(definition=>({...copy(definition),schema:schemaForDefinition(definition,catalog)}));}
+  function actionSchema(options={}){const catalog=catalogFor(options);return {anyOf:Object.values(definitions).filter(d=>d.execution==='editor'&&advertised(d,catalog)).map(d=>schemaForDefinition(d,catalog))};}
   function checkValue(value,rule,label){
     if(rule.type==='object'){if(!plain(value)||Object.keys(value).length>16)fail(`Invalid ${label}.`);for(const [key,item] of Object.entries(value)){if(!/^[a-zA-Z][a-zA-Z0-9]{0,47}$/.test(key)||typeof item!=='number'||!Number.isFinite(item))fail(`Invalid ${label}.${key}.`);}return;}
     if(rule.type==='number'||rule.type==='integer'){if(typeof value!=='number'||!Number.isFinite(value)||rule.type==='integer'&&!Number.isSafeInteger(value)||value<rule.minimum||value>rule.maximum)fail(`Invalid ${label}.`);return;}
@@ -116,10 +119,20 @@
   function visual(clip){return ['video','image','text','shape','solid'].includes(clip?.type);}
   function range(value,limits,label){if(!limits||typeof value!=='number'||value<limits[0]||value>limits[1])fail(`Invalid ${label}.`);}
   function libraryItem(catalog,key,value){const list=catalog[key];return Array.isArray(list)&&list.find(item=>(typeof item==='string'?item:item.id)===value);}
+  function soundEffectAsset(soundId){const cue=SFX?.byId(soundId);if(!cue)fail('The requested original sound effect is unavailable.');return {id:'zorifi-sfx-'+cue.id,name:cue.name,type:'audio',duration:cue.duration,kind:'audio',builtin:true,audioTrackId:cue.id,sfxId:cue.id,available:true};}
+  const matchingSoundAsset=(asset,expected)=>Boolean(asset)&&['id','type','duration','builtin','audioTrackId','sfxId'].every(key=>asset[key]===expected[key]);
+  function soundTrack(project,start,duration){const tracks=[...new Set([Tracks.id('audio',1),...project.clips.map(clip=>clip.track),...Object.keys(project.trackStates||{}).map(Number)])].filter(track=>Number.isSafeInteger(track)&&track>=0),candidates=tracks.filter(track=>Tracks.kind(track)==='audio').sort((a,b)=>Tracks.number(a)-Tracks.number(b));for(const track of candidates)if(!locked(project,track)&&!project.clips.some(clip=>clip.track===track&&start<clip.start+clip.duration-.000001&&start+duration>clip.start+.000001))return track;return Tracks.next(tracks.map(track=>({track})),'audio');}
+  function soundPlacement(project,p){
+    const asset=soundEffectAsset(p.soundId),visuals=project.clips.filter(clip=>['video','image','shape','solid'].includes(clip.type)&&Number.isFinite(clip.start)&&clip.start>=0&&Number.isFinite(clip.duration)&&clip.duration>0&&!project.trackStates?.[clip.track]?.hidden&&Number(clip.opacity??100)>0),end=Math.max(0,...visuals.map(clip=>clip.start+clip.duration));
+    if(!visuals.some(clip=>p.start>=clip.start&&p.start<clip.start+clip.duration))fail('Place the sound effect inside visible project footage.');
+    const duration=p.duration??Math.min(asset.duration,end-p.start);if(!Number.isFinite(duration)||duration<.05||duration>asset.duration+.000001||p.start+duration>end+.000001)fail('The sound effect exceeds its source or visual project duration.');
+    return {asset,duration,track:p.track??soundTrack(project,p.start,duration),volume:p.volume??20};
+  }
   function validateStructure(input,options={}){
     if(!plain(input)||Object.keys(input).some(key=>!['command','target','parameters'].includes(key))||typeof input.command!=='string'||!plain(input.parameters))fail('Malformed professional editing action.');
     const definition=definitions[input.command];if(!definition||definition.execution!=='editor')fail('This tool requires its separate verified workflow.');
     const action=copy(input),p=action.parameters,catalog=catalogFor(options);
+    if(!advertised(definition,catalog))fail('This editing command was not advertised by the running editor.');
     if(Object.keys(p).some(key=>!Object.hasOwn(definition.parameters,key)))fail(`Unknown ${action.command} parameter.`);
     for(const [key,rule] of Object.entries(definition.parameters)){if(p[key]===undefined){if(rule.required)fail(`Missing ${action.command}.${key}.`);}else checkValue(p[key],rule,`${action.command}.${key}`);}
     if(action.target!==undefined&&action.target!==null)checkValue(action.target,id(),`${action.command}.target`);
@@ -137,7 +150,7 @@
     if(definition.target&&!clip)fail('The target clip does not exist.');
     if(clip&&action.command!=='clip.select'&&(locked(project,clip.track)||clip.zorifiEnding))fail('The target clip is locked or is the automatic ending.');
     if(/^visual\.|^transition\.|^effect\.|^animation\./.test(action.command)&&!visual(clip))fail('This tool requires a visual clip.');
-    if(/^audio\./.test(action.command)&&!['audio','video'].includes(clip.type))fail('This tool requires video or audio media.');
+    if(/^audio\./.test(action.command)&&!definition.creation&&!['audio','video'].includes(clip.type))fail('This tool requires video or audio media.');
     if(/^text\.(?!add)/.test(action.command)&&clip.type!=='text')fail('This tool requires a text clip.');
     if(definition.catalogue&&!libraryItem(catalog,definition.catalogue,p.id))fail(`The requested ${definition.catalogue} ID is unavailable.`);
     if(['clip.set','visual.adjust','audio.set','keyframe.set'].includes(action.command))range(p.value,(action.command==='visual.adjust'?VISUAL_RANGES:action.command==='audio.set'?AUDIO_RANGES:action.command==='keyframe.set'?KEYFRAME_RANGES:CLIP_RANGES)[p.property],p.property);
@@ -163,8 +176,9 @@
     if((action.command==='text.style'||action.command==='caption.style')&&!Object.keys(p).length)fail('Choose at least one text style property.');
     if(['text.add','text.style','caption.style'].includes(action.command)&&p.fontId&&!libraryItem(catalog,'fonts',p.fontId))fail('The requested font is unavailable.');
     if(action.command==='caption.style'||action.command==='caption.delete'){const targets=project.clips.filter(x=>x.autoCaption);if(!targets.length||targets.some(x=>locked(project,x.track)))fail('Generated captions are unavailable or locked.');}
-    if(definition.creation){if(project.clips.some(x=>x.id===p.id))fail('New clip IDs must be unique.');const kind=action.command==='text.add'?'text':project.mediaAssets.find(x=>x.id===p.mediaId)?.type==='audio'?'audio':'video';if(p.track!==undefined&&(locked(project,p.track)||Tracks.kind(p.track)!==kind))fail('The destination track is locked or has the wrong kind.');
+    if(definition.creation){if(project.clips.some(x=>x.id===p.id))fail('New clip IDs must be unique.');const kind=action.command==='text.add'?'text':action.command==='audio.sfx'||project.mediaAssets.find(x=>x.id===p.mediaId)?.type==='audio'?'audio':'video';if(p.track!==undefined&&(locked(project,p.track)||Tracks.kind(p.track)!==kind))fail('The destination track is locked or has the wrong kind.');
       if(action.command==='clip.add'){const asset=project.mediaAssets.find(x=>x.id===p.mediaId);if(!asset||!['video','image','audio'].includes(asset.type)||!(asset.url||asset.builtin||asset.available===true))fail('The source media is unavailable.');if(asset.type==='image'&&((p.sourceStart||0)!==0||(p.playbackRate??1)!==1))fail('Still images use source start zero and normal playback speed.');if(asset.type!=='image'&&(!Number.isFinite(asset.duration)||asset.duration<=0||(p.sourceStart||0)+p.duration*(p.playbackRate||1)>asset.duration+.025))fail('The clip exceeds its source media.');}
+      if(action.command==='audio.sfx'){const placement=soundPlacement(project,p),assets=project.mediaAssets.filter(asset=>asset.id===placement.asset.id);if(locked(project,placement.track)||Tracks.kind(placement.track)!=='audio')fail('The destination audio track is locked or has the wrong kind.');if(assets.length>1||assets.length===1&&!matchingSoundAsset(assets[0],placement.asset))fail('A conflicting source occupies the original sound-effect identity.');Object.assign(p,{duration:placement.duration,track:placement.track,volume:placement.volume});}
     }
     if(action.command==='clip.set'&&p.property==='playbackRate'||action.command==='audio.set'&&p.property==='playbackRate'){const asset=project.mediaAssets.find(x=>x.id===clip.mediaId);if(asset&&asset.type!=='image'&&clip.duration*p.value+(clip.sourceStart||0)>asset.duration+.025)fail('This speed would exceed the available source.');}
     return action;
@@ -172,6 +186,7 @@
   function validatePlan(actions,project,options={}){if(!Array.isArray(actions)||!actions.length||actions.length>(options.maxActions||MAX_ACTIONS))fail(`Use between 1 and ${options.maxActions||MAX_ACTIONS} actions.`);return actions.map(action=>validateStructure(action,options));}
   function applyCreation(project,input,options={}){
     const action=validateAction(input,project,options),p=action.parameters;if(!definitions[action.command].creation)fail('This is not a clip creation action.');
+    if(action.command==='audio.sfx'){const expected=soundEffectAsset(p.soundId),asset=project.mediaAssets.find(item=>item.id===expected.id)||expected;if(!project.mediaAssets.includes(asset))project.mediaAssets.push(asset);const clip={id:p.id,type:'audio',name:asset.name||expected.name,mediaId:asset.id,start:p.start,duration:p.duration,track:p.track,sourceStart:0,playbackRate:1,volume:p.volume,opacity:100,audioFadeIn:Math.min(.01,p.duration/4),audioFadeOut:Math.min(.12,p.duration/4),soundEffect:true,sfxId:p.soundId,audioEffects:{role:'sfx'},createdByVanessa:true};project.clips.push(clip);project.selected=clip.id;return {status:'SUCCESS',clipId:clip.id,mediaId:asset.id,message:`Added ${clip.name} as an editable sound-effect clip.`};}
     const catalog=catalogFor(options),asset=action.command==='clip.add'?project.mediaAssets.find(x=>x.id===p.mediaId):null,type=asset?.type==='audio'?'audio':asset?'video':'text';
     const trackId=p.track??Tracks.id(type==='text'?'text':type==='audio'?'audio':'video',1);if(locked(project,trackId))fail('The destination track is locked.');
     const clip={id:p.id,type,name:asset?.name||p.text,start:p.start,duration:p.duration,track:trackId,opacity:100,volume:p.volume??(asset?.type==='image'?0:100),playbackRate:p.playbackRate??1,createdByVanessa:true};
@@ -183,6 +198,7 @@
   function verifyAction(action,before,after,options={}){
     const p=action.parameters||{},old=resolveClip(before,action),clip=resolveClip(after,action),command=action.command;
     const yes=condition=>{if(!condition)fail(`The editor did not verify ${command}.`);return true;};
+    if(command==='audio.sfx'){const expected=soundPlacement(before,p),added=after.clips.find(item=>item.id===p.id),asset=after.mediaAssets.find(item=>item.id===expected.asset.id),hadSource=before.mediaAssets.some(item=>item.id===expected.asset.id);return yes(!before.clips.some(item=>item.id===p.id)&&after.clips.length===before.clips.length+1&&before.clips.every(item=>same(item,after.clips.find(next=>next.id===item.id)))&&after.mediaAssets.length===before.mediaAssets.length+(hadSource?0:1)&&before.mediaAssets.every(item=>same(item,after.mediaAssets.find(next=>next.id===item.id)))&&matchingSoundAsset(asset,expected.asset)&&added?.type==='audio'&&added.name===(asset.name||expected.asset.name)&&added.mediaId===expected.asset.id&&added.soundEffect===true&&added.sfxId===p.soundId&&added.audioEffects?.role==='sfx'&&near(added.start,p.start)&&near(added.duration,expected.duration)&&added.track===expected.track&&near(added.volume,expected.volume)&&near(added.sourceStart,0)&&near(added.playbackRate,1)&&near(added.audioFadeIn,Math.min(.01,expected.duration/4))&&near(added.audioFadeOut,Math.min(.12,expected.duration/4))&&after.selected===p.id);}
     if(definitions[command]?.creation){const added=after.clips.find(x=>x.id===p.id);return yes(!before.clips.some(x=>x.id===p.id)&&after.clips.length===before.clips.length+1&&added&&near(added.start,p.start)&&near(added.duration,p.duration)&&(command==='text.add'?added.name===p.text:added.mediaId===p.mediaId));}
     if(command==='clip.select')return yes(after.selected===old?.id);
     if(command==='clip.delete'||command==='text.delete'||command==='clip.ripple_delete')return yes(old&&!after.clips.some(x=>x.id===old.id)&&after.clips.length===before.clips.length-1);
@@ -229,7 +245,7 @@
     if(targets&&!targets.size)fail('Select the section to fix, or give a timeline time containing media.');
     const inside=clip=>!range||clip.start>=range[0]-.001&&clip.start+clip.duration<=range[1]+.001;
     for(const action of actions){const definition=definitions[action.command],p=action.parameters,clip=clips.get(action.target);
-      if(definition?.creation){if(targets||!inside({start:p.start,duration:p.duration}))fail('The proposal adds material outside the requested section.');clips.set(p.id,{id:p.id,start:p.start,duration:p.duration});continue;}
+      if(definition?.creation){const placement=action.command==='audio.sfx'?soundPlacement({...project,clips:[...clips.values()]},p):null,duration=placement?.duration??p.duration;if(targets||!inside({start:p.start,duration}))fail('The proposal adds material outside the requested section.');const type=action.command==='audio.sfx'?'audio':action.command==='text.add'?'text':project.mediaAssets?.find(asset=>asset.id===p.mediaId)?.type==='audio'?'audio':'video';clips.set(p.id,{id:p.id,type,start:p.start,duration,track:p.track??placement?.track??Tracks.id(type,1)});continue;}
       if(!definition?.target||!clip||targets&&!targets.has(clip.id))fail('The proposal changes material outside the requested section.');
       if(action.command==='clip.split'&&range&&Math.abs(p.time-range[1])<.001&&clip.start>=range[0]&&clip.start<range[1]&&clip.start+clip.duration>range[1]){clip.duration=p.time-clip.start;continue;}
       if(action.command==='clip.select'&&range&&clip.start<range[1]&&clip.start+clip.duration>range[0])continue;
@@ -239,5 +255,5 @@
       if(['clip.delete','clip.ripple_delete','text.delete'].includes(action.command)){if(action.command==='clip.ripple_delete')fail('Ripple deletion could move material outside the requested section.');clips.delete(clip.id);}
     }return true;
   }
-  return Object.freeze({VERSION,MAX_ACTIONS,DEFINITIONS:definitions,CLIP_RANGES,VISUAL_RANGES,AUDIO_RANGES,KEYFRAME_RANGES,catalogue,actionSchema,validateStructure,validateAction,validatePlan,applyCreation,verifyAction,resolveClip,validateScope});
+  return Object.freeze({VERSION,MAX_ACTIONS,DEFINITIONS:definitions,CLIP_RANGES,VISUAL_RANGES,AUDIO_RANGES,KEYFRAME_RANGES,catalogue,actionSchema,validateStructure,validateAction,validatePlan,applyCreation,verifyAction,resolveClip,validateScope,soundEffectAsset});
 });
