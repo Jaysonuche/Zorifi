@@ -5,7 +5,7 @@ const action=(parameters={})=>({command:'audio.sfx',target:null,parameters:{id:'
 
 test('original SFX are one reviewed staged command with a fixed sound catalogue, not a paid workflow',()=>{
  const catalogue=Tools.catalogue(),staged=catalogue.filter(item=>item.execution==='editor'),workflow=catalogue.filter(item=>item.execution==='workflow'),tool=staged.find(item=>item.command==='audio.sfx');
- assert.equal(catalogue.length,100);assert.equal(staged.length,47);assert.equal(workflow.length,53);assert.equal(tool.creation,true);assert.equal(tool.requiresCostApproval,false);assert.equal(tool.confirmation,'review-plan');assert.equal(tool.undo,'project-checkpoint');assert.deepEqual(tool.parameters.soundId.enum,SFX.CATALOG.map(cue=>cue.id));
+ assert.equal(catalogue.length,104);assert.equal(staged.length,51);assert.equal(workflow.length,53);assert.equal(tool.creation,true);assert.equal(tool.requiresCostApproval,false);assert.equal(tool.confirmation,'review-plan');assert.equal(tool.undo,'project-checkpoint');assert.deepEqual(tool.parameters.soundId.enum,SFX.CATALOG.map(cue=>cue.id));
  const schema=Tools.actionSchema().anyOf.find(item=>item.properties.command.enum[0]==='audio.sfx');assert.equal(schema.properties.parameters.additionalProperties,false);assert.deepEqual(schema.properties.parameters.required,['id','soundId','start']);
 });
 
@@ -53,7 +53,7 @@ test('SFX verification refuses false success, incorrect gain/source/track and co
 
 test('advertised supported commands restrict schemas, discovery and execution without changing separate workflows',()=>{
  const supportedCommands=['clip.add','audio.sfx'],options={catalog:{supportedCommands}},catalogue=Tools.catalogue(options);assert.deepEqual(catalogue.filter(item=>item.execution==='editor').map(item=>item.command),supportedCommands);assert.equal(catalogue.filter(item=>item.execution==='workflow').length,53);assert.equal(Tools.actionSchema(options).anyOf.length,2);assert.doesNotThrow(()=>Tools.validateStructure(action(),options));assert.throws(()=>Tools.validateStructure({command:'project.rename',target:null,parameters:{name:'No'}},options),/not advertised/);
- const older=Tools.catalogue().filter(item=>item.execution==='editor'&&item.command!=='audio.sfx').map(item=>item.command);assert.equal(Tools.actionSchema({catalog:{supportedCommands:older}}).anyOf.length,46);assert.throws(()=>Tools.validateStructure(action(),{catalog:{supportedCommands:older}}),/not advertised/);assert.equal(Tools.actionSchema({catalog:{supportedCommands:[]}}).anyOf.length,0);for(const supportedCommands of ['audio.sfx',[1],Array(201).fill('clip.add')])assert.throws(()=>Tools.catalogue({catalog:{supportedCommands}}),/advertised/);
+ const older=Tools.catalogue().filter(item=>item.execution==='editor'&&item.command!=='audio.sfx').map(item=>item.command);assert.equal(Tools.actionSchema({catalog:{supportedCommands:older}}).anyOf.length,50);assert.throws(()=>Tools.validateStructure(action(),{catalog:{supportedCommands:older}}),/not advertised/);assert.equal(Tools.actionSchema({catalog:{supportedCommands:[]}}).anyOf.length,0);for(const supportedCommands of ['audio.sfx',[1],Array(201).fill('clip.add')])assert.throws(()=>Tools.catalogue({catalog:{supportedCommands}}),/advertised/);
 });
 
 test('scoped sound additions respect the requested section with resolved default duration',()=>{

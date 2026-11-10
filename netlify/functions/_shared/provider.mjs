@@ -1,3 +1,6 @@
+import {openAIResponse,responseAllowance,outputTokenLimit} from './openai-responses.mjs';
+import {backendPrompt} from './vanessa-prompts.mjs';
+import {localFirebase} from './firebase-local.mjs';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const identity=require('../../../zorifi-vanessa-identity.js');
@@ -7,6 +10,8 @@ export const json=(value,status=200)=>new Response(JSON.stringify(value),{status
 export function text(value,max=1500){return String(value??'').trim().slice(0,max);}
 export function needed(name){const value=env(name);if(!value)throw new ServiceError(`Configure ${name} before using this service.`,503,'NOT_CONFIGURED');return value;}
 export const usesGemini=()=>Boolean(env('GEMINI_API_KEY'));
+export function languageProvider(){const selected=env('VANESSA_LANGUAGE_PROVIDER').trim().toLowerCase();if(selected&&!['auto','openai','gemini','openrouter'].includes(selected))throw new ServiceError('Configure a supported language provider.',503,'NOT_CONFIGURED');const hosted=Boolean(env('VERCEL')||env('NETLIFY')||env('NODE_ENV')==='production'),autoOpenAI=env('OPENAI_API_KEY')&&(!hosted||env('OPENAI_HOSTED_ENABLED')==='true');return selected&&selected!=='auto'?selected:autoOpenAI?'openai':usesGemini()?'gemini':usesOpenRouter()?'openrouter':'openai';}
+export const newOpenAI=()=>languageProvider()==='openai'&&Boolean(env('OPENAI_API_KEY')||env('VANESSA_LANGUAGE_PROVIDER')==='openai');
 export const usesOpenRouter=()=>Boolean(env('AI_PROVIDER_KEY'));
 function geminiModels(){
  // Dashboard environment values can acquire a trailing newline when pasted.
@@ -29,14 +34,18 @@ function geminiFailure(error,{aborted=false}={}){
 }
 export function configuration(){
  return {
-  language:usesGemini()?{provider:'Gemini',model:geminiModels()[0],configured:true}:usesOpenRouter()?{provider:'OpenRouter',model:env('AI_PROVIDER_MODEL')||'openrouter/free',configured:true}:{provider:'OpenAI',model:env('VANESSA_MODEL')||'gpt-5-nano',configured:Boolean(env('OPENAI_LANGUAGE_API_KEY')||env('OPENAI_API_KEY'))},
+  language:newOpenAI()?{provider:'OpenAI',model:env('OPENAI_RESPONSES_MODEL')||env('VANESSA_MODEL')||'gpt-5-nano',configured:Boolean(env('OPENAI_API_KEY'))}:usesGemini()?{provider:'Gemini',model:geminiModels()[0],configured:true}:usesOpenRouter()?{provider:'OpenRouter',model:env('AI_PROVIDER_MODEL')||'openrouter/free',configured:true}:{provider:'OpenAI',model:env('VANESSA_MODEL')||'gpt-5-nano',configured:Boolean(env('OPENAI_LANGUAGE_API_KEY')||env('OPENAI_API_KEY'))},
   image:usesGemini()?{provider:'Gemini',model:env('GEMINI_IMAGE_MODEL')||'gemini-nano-banana-2.1',configured:true,supported:['prompt-to-image','reference edits','1K image']}:{provider:'OpenAI',model:env('VANESSA_IMAGE_MODEL')||'gpt-image-2',configured:Boolean(env('OPENAI_IMAGE_API_KEY')||env('OPENAI_API_KEY'))},
   video:env('REPLICATE_API_TOKEN')?{provider:'Replicate',model:'wan-video/wan-2.1-1.3b',configured:true}: {provider:env('VANESSA_GPU_URL')?'Vanessa GPU':'xAI',model:env('VANESSA_VIDEO_MODEL')||'grok-imagine-video-1.5',configured:Boolean(env('VANESSA_GPU_URL')&&env('VANESSA_GPU_KEY')||env('XAI_API_KEY'))},
   music:usesGemini()?{provider:'Gemini Lyria',model:env('GEMINI_MUSIC_MODEL')||'lyria-3-clip-preview',configured:true,supported:['prompt-to-music','30-second MP3']}:{provider:'Compatible music provider',model:env('VANESSA_MUSIC_MODEL'),configured:Boolean(env('VANESSA_MUSIC_URL')&&env('VANESSA_MUSIC_KEY'))},
-  voice:{provider:'ElevenLabs',model:env('VANESSA_VOICE_MODEL')||'eleven_multilingual_v2',configured:Boolean(env('ELEVENLABS_API_KEY')&&env('VANESSA_VOICE_ID'))}
+  voice:usesGemini()?{provider:'Gemini',model:env('GEMINI_TTS_MODEL')||'gemini-2.5-flash-preview-tts',configured:true,supported:['editable audio generation','prebuilt voices','timeline speed0.7–1.3']}:{provider:'ElevenLabs',model:env('VANESSA_VOICE_MODEL')||'eleven_multilingual_v2',configured:Boolean(env('ELEVENLABS_API_KEY')&&env('VANESSA_VOICE_ID'))}
  };
 }
 export async function upstream(url,options={}){
+ if(String(url).startsWith('https://api.openai.com/')){const {accountedOpenAI}=await import('./openai-runtime.mjs');let reservation=10000;if(new URL(url).pathname==='/v1/responses'&&typeof options.body==='string'){let payload;try{payload=JSON.parse(options.body);}catch{throw new ServiceError('Invalid provider request.');}payload.max_output_tokens=outputTokenLimit(Number(payload.max_output_tokens)||6000);options={...options,body:JSON.stringify(payload)};reservation=Buffer.byteLength(options.body)+payload.max_output_tokens+4096;}return accountedOpenAI('provider-'+new URL(url).pathname.replace(/[^a-zA-Z0-9/-]/g,''),reservation,()=>untrackedUpstream(url,options));}
+ return untrackedUpstream(url,options);
+}
+async function untrackedUpstream(url,options={}){
  let response;try{response=await fetch(url,{...options,redirect:'error',signal:options.signal?AbortSignal.any([options.signal,AbortSignal.timeout(120000)]):AbortSignal.timeout(120000)});}catch{if(options.signal?.aborted)throw new ServiceError('The request was cancelled.',499,'CANCELLED');throw new ServiceError('The provider could not be reached. Check its configuration and retry.',502,'PROVIDER_UNAVAILABLE');}
  if(!response.ok){
   if(String(url).startsWith('https://api.elevenlabs.io/')){const problem=await response.json().catch(()=>({}));if(problem.detail?.status==='quota_exceeded')throw new ServiceError('ElevenLabs voice credits are used up. Add credits to your ElevenLabs account to restore Vanessa’s voice.',429,'VOICE_QUOTA_EXCEEDED');}
@@ -62,17 +71,26 @@ export async function verifiedAccount(request){
  const promise=(async()=>{
   let response,data;
   try{
-   response=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key='+encodeURIComponent(apiKey),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({idToken:token}),signal:AbortSignal.any([request.signal,AbortSignal.timeout(10000)])});
+   const emulator=localFirebase(request);
+   if(emulator){let claims;try{claims=JSON.parse(Buffer.from(token.split('.')[1]||'','base64url').toString());}catch{}if(claims?.aud!==emulator.project||claims?.iss!=='https://securetoken.google.com/'+emulator.project)throw new ServiceError('Use an account from this Firebase demo emulator.',401,'AUTH_REQUIRED');}
+   response=await fetch((emulator?emulator.auth+'/identitytoolkit.googleapis.com':'https://identitytoolkit.googleapis.com')+'/v1/accounts:lookup?key='+encodeURIComponent(apiKey),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({idToken:token}),signal:AbortSignal.any([request.signal,AbortSignal.timeout(10000)])});
    if([400,401].includes(response.status))throw new ServiceError('Your online session expired. Sign in again.',401,'AUTH_REQUIRED');
    if(!response.ok)throw new ServiceError('Account verification is temporarily unavailable. Please retry.',503,'AUTH_UNAVAILABLE');
    data=await response.json();
   }catch(error){
    if(request.signal.aborted)throw new ServiceError('The request was cancelled.',499,'CANCELLED');
-   if(error instanceof ServiceError)throw error;
+   if(error instanceof ServiceError||error.code==='UNSAFE_EMULATOR_CONFIG')throw error;
    throw new ServiceError('Account verification is temporarily unavailable. Please retry.',503,'AUTH_UNAVAILABLE');
   }
   const account=data?.users?.[0];
   if(!account?.localId||typeof account.localId!=='string'||account.disabled)throw new ServiceError('Your online session could not be verified. Sign in again.',401,'AUTH_REQUIRED');
+  // Decode claims only after Firebase has verified this exact bearer token.
+  // Refreshing an old session changes iat, not auth_time, so compare the latter.
+  if(account.validSince!==undefined){
+   let claims;try{claims=JSON.parse(Buffer.from(token.split('.')[1]||'','base64url').toString());}catch{}
+   const validSince=Number(account.validSince),authTime=claims?.auth_time;
+   if(!Number.isSafeInteger(validSince)||validSince<0||!Number.isSafeInteger(authTime)||authTime<validSince)throw new ServiceError('Your online session was revoked. Sign in again.',401,'AUTH_REQUIRED');
+  }
   return Object.freeze({uid:account.localId});
  })();
  requestIdentity.set(request,{token,apiKey,promise});
@@ -108,7 +126,7 @@ export function handler(run,{multipart=false,rateLimited=false,privateSession=fa
   // Reserve time inside the 120-second host limit to finalize cancelled sessions.
   if(rateLimited)request=new Request(request,{signal:AbortSignal.any([callerSignal,AbortSignal.timeout(105000)])});
   const origin=request.headers.get('origin'),allowed=[new URL(request.url).origin,'https://localhost','http://localhost','capacitor://localhost',...env('ZORIFI_ALLOWED_ORIGINS').split(',').map(value=>value.trim()).filter(Boolean)];
-  const reply=response=>{if(origin&&allowed.includes(origin)){response.headers.set('access-control-allow-origin',origin);response.headers.set('vary','Origin');response.headers.set('access-control-allow-methods','POST, OPTIONS');response.headers.set('access-control-allow-headers','content-type, authorization');}return response;};
+  const reply=response=>{if(origin&&allowed.includes(origin)){response.headers.set('access-control-allow-origin',origin);response.headers.set('vary','Origin');response.headers.set('access-control-allow-methods','POST, OPTIONS');response.headers.set('access-control-allow-headers','content-type, authorization, x-firebase-appcheck');}return response;};
   try{
    if(origin&&!allowed.includes(origin))throw new ServiceError('Origin is not allowed.',403,'FORBIDDEN');
    if(request.method==='OPTIONS')return reply(new Response(null,{status:204}));
@@ -117,11 +135,12 @@ export function handler(run,{multipart=false,rateLimited=false,privateSession=fa
    await authorize(request);
    let input;if(multipart)input=await request.formData();else{const raw=await request.text();if(raw.length>12*1024*1024)throw new ServiceError('Request is too large.',413);try{input=JSON.parse(raw||'{}');}catch{throw new ServiceError('Request must contain valid JSON.');}if(!input||Array.isArray(input)||typeof input!=='object')throw new ServiceError('A JSON object is required.');}
    if(rateLimited&&!(privateSession&&input.operation==='clear')){const {storeFor}=await import('./chat-session-store.mjs');const {uid}=await verifiedAccount(request);await storeFor(request,uid).limit(request.signal);}
-   const result=await run(input,request);return reply(result instanceof Response?result:json(result));
+   const {withOpenAIScope}=await import('./openai-runtime.mjs'),{uid}=await verifiedAccount(request);const result=await withOpenAIScope(request,uid,()=>run(input,request));return reply(result instanceof Response?result:json(result));
   }catch(error){if(request.signal.aborted)error=callerSignal.aborted?new ServiceError('The request was cancelled.',499,'CANCELLED'):new ServiceError('Vanessa took too long to respond. Please retry.',504,'PROVIDER_TIMEOUT');const response=json({error:error instanceof ServiceError?error.message:'The service could not complete this request.',code:error.code||'SERVICE_FAILED',configured:error.code!=='NOT_CONFIGURED',...(error.expectedSequence?{expectedSequence:error.expectedSequence}:{})},error.status||500);if(error.retryAfter)response.headers.set('Retry-After',String(error.retryAfter));return reply(response);}
  };
 }
 export async function language(prompt,{instructions='',jsonMode=false,responseJsonSchema,preferredLanguage,image,webSearch=false,signal}={}){
+ if(newOpenAI()){const {accountedOpenAI}=await import('./openai-runtime.mjs');try{const result=await accountedOpenAI('responses',responseAllowance({prompt,instructions:backendPrompt('chat',{preferredLanguage,extra:instructions}),responseJsonSchema,images:image?[image]:[]}),onUsage=>openAIResponse({prompt,instructions:backendPrompt('chat',{preferredLanguage,extra:instructions+(jsonMode?'\nReturn a JSON object.':'')}),jsonMode,responseJsonSchema,images:image?[image]:[],tools:webSearch?[{type:'web_search'}]:undefined,signal,onUsage}));return jsonMode?result.json:result.text;}catch(error){const failure=new ServiceError(error.message,error.status||502,error.code||'OPENAI_UNAVAILABLE');if(error.retryAfter)failure.retryAfter=error.retryAfter;throw failure;}}
  if(usesGemini()){
   if(webSearch)throw new ServiceError('This Gemini integration does not have web search enabled.',400,'UNSUPPORTED_CAPABILITY');
   const parts=[{text:prompt}];
@@ -176,6 +195,7 @@ export function normalizeMedia(data,kind){
 
 // SSE is opt-in; complete JSON plans continue through language().
 export function languageStreamResponse(prompt,{instructions='',preferredLanguage,signal}={}){
+ if(newOpenAI())return (async()=>{const output=await language(prompt,{instructions,preferredLanguage,signal});return new Response('data: '+JSON.stringify({text:output})+'\n\ndata: [DONE]\n\n',{headers:{'content-type':'text/event-stream; charset=utf-8','cache-control':'no-store, no-transform','x-accel-buffering':'no'}});})();
  if(!usesGemini())throw new ServiceError('Streaming requires the Gemini language provider.',400,'STREAM_UNSUPPORTED');
  const models=geminiModels();
  const abort=new AbortController(),encoder=new TextEncoder();let cancelled=false;

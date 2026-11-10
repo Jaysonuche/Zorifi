@@ -12,6 +12,10 @@
     "api/vanessa/chat.js": {
       "includeFiles": "{netlify/functions/**,zorifi-*.js,zorifi-interface-catalog.json,zorifi-creative-strategies.json}",
       "maxDuration": 120
+    },
+    "api/vanessa/openai.js": {
+      "includeFiles": "{netlify/functions/**,zorifi-*.js,zorifi-interface-catalog.json,zorifi-creative-strategies.json}",
+      "maxDuration": 120
     }
   },
   "routes": [

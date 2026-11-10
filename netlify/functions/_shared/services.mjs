@@ -1,7 +1,8 @@
 import {renderVideo,planVideoTool} from './replicate-video.mjs';
 import {generateGeminiImage,generateGeminiMusic} from './gemini-media.mjs';
 import {translateInterface} from './interface-translation.mjs';
-import {accountRole,requireAdmin,handler,languageStreamResponse,env,needed,text,language,upstream,upstreamJson,httpsUrl,normalizeMedia,configuration,subscription,ServiceError} from './provider.mjs';
+import {generateEditorSpeech,speechCapabilities,transcribeGemini} from './editor-speech.mjs';
+import {accountRole,requireAdmin,handler,newOpenAI,languageStreamResponse,env,needed,text,language,upstream,upstreamJson,httpsUrl,normalizeMedia,configuration,subscription,ServiceError} from './provider.mjs';
 const post=(key,body)=>({method:'POST',headers:{authorization:`Bearer ${key}`,'content-type':'application/json'},body:JSON.stringify(body)});
 const prompt=input=>{const value=text(input.prompt||input.topic||input.text,4000);if(value.length<3)throw new ServiceError('Describe the request in at least 3 characters.');return value;};
 const jobId=input=>{const id=text(input.requestId,200);if(!/^[\w.-]{1,200}$/.test(id))throw new ServiceError('A valid generation request ID is required.');return encodeURIComponent(id);};
@@ -50,7 +51,7 @@ async function image(input,request){
  const description=prompt({...input,prompt:input.visualPrompt||input.prompt});
  if(env('GEMINI_API_KEY')){
   if(!['localhost','127.0.0.1','[::1]'].includes(new URL(request.url).hostname))await requireAdmin(request);
-  return generateGeminiImage(input,description);
+  return generateGeminiImage(input,description,{signal:request.signal});
  }
  const key=env('OPENAI_IMAGE_API_KEY')||env('OPENAI_API_KEY');if(!key)throw new ServiceError('Configure the image provider in Vanessa settings.',503,'NOT_CONFIGURED');
  const size=input.ratio==='16:9'?'1536x1024':input.ratio==='9:16'?'1024x1536':'1024x1024';
@@ -75,6 +76,8 @@ export const speech=handler(async (input,request)=>{
  return new Response(bytes,{headers:{'content-type':'audio/mpeg','cache-control':'no-store'}});
 });
 export const voiceGeneration=handler(async(input,request)=>{
+ if(input.action==='voices')return speechCapabilities();
+ if(env('GEMINI_API_KEY'))return generateEditorSpeech(input,request);
  const result=await speech(new Request(request.url,{method:'POST',headers:request.headers,body:JSON.stringify(input),signal:request.signal}));if(!result.ok)return result;
  return {status:'complete',audioData:Buffer.from(await result.arrayBuffer()).toString('base64'),mimeType:'audio/mpeg'};
 });
@@ -115,7 +118,7 @@ const LANGUAGE_CODES={English:'en',Spanish:'es',French:'fr',German:'de',Italian:
 export const captions=handler(async(form,request)=>{
  const file=form.get('file');if(!file||typeof file.arrayBuffer!=='function'||!file.size)throw new ServiceError('Upload a nonempty audio or video file.');if(file.size>23*1024*1024)throw new ServiceError('Split this upload into smaller audio chunks.',413);
  const auth=await subscription(request);if(!auth.pro&&Number(form.get('duration'))>60)throw new ServiceError('Free captions are limited to 60 seconds.',403);
- const key=env('OPENAI_LANGUAGE_API_KEY')||env('OPENAI_API_KEY');if(!key)throw new ServiceError('Configure the language provider before transcribing.',503,'NOT_CONFIGURED');
+ const key=env('OPENAI_LANGUAGE_API_KEY')||env('OPENAI_API_KEY');if(!key&&env('GEMINI_API_KEY'))return transcribeGemini(file,{duration:Number(form.get('duration')),language:String(form.get('language')||''),signal:request.signal});if(!key)throw new ServiceError('Configure Gemini or an audio-transcription provider before transcribing.',503,'NOT_CONFIGURED');
  const upstreamForm=new FormData();upstreamForm.set('file',file,file.name);upstreamForm.set('model','whisper-1');upstreamForm.set('response_format','verbose_json');upstreamForm.append('timestamp_granularities[]','segment');
  const choice=String(form.get('language')||'');const code=LANGUAGE_CODES[choice]||(/^[a-z]{2}$/.test(choice)?choice:'');if(code)upstreamForm.set('language',code);
  const data=await upstreamJson('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{authorization:`Bearer ${key}`},body:upstreamForm});
@@ -127,6 +130,9 @@ export const accountPermissions=handler(async (input,request)=>accountRole(reque
 export const providerTest=handler(async (input,request)=>{
  if(!['localhost','127.0.0.1','[::1]'].includes(new URL(request.url).hostname))await requireAdmin(request);
  const type=text(input.type,30),config=configuration()[type];if(!config)throw new ServiceError('Unknown provider type.');if(!config.configured)throw new ServiceError('This provider is not configured.',503,'NOT_CONFIGURED');
+ if(type==='language'&&config.provider==='OpenAI'&&newOpenAI()){
+  const {openAIResponse}=await import('./openai-responses.mjs'),{accountedOpenAI}=await import('./openai-runtime.mjs');const result=await accountedOpenAI('connection.test',1024,onUsage=>openAIResponse({prompt:'Reply with exactly: Zorifi OpenAI connection OK',instructions:'Answer this public connection test concisely.',maxOutputTokens:512,signal:request.signal,onUsage}));return {connected:true,provider:'OpenAI',model:result.model,usage:result.usage,verification:'One actual Responses request completed. Other capabilities have not been tested.'};
+ }
  if(type==='language'&&config.provider==='Gemini'){
   const model=await upstreamJson('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(config.model),{headers:{'x-goog-api-key':needed('GEMINI_API_KEY')}});
   if(!model.supportedGenerationMethods?.includes('generateContent'))throw new ServiceError('The configured Gemini model does not support content generation.',503,'MODEL_UNAVAILABLE');

@@ -173,6 +173,22 @@ service cloud.firestore {
       allow get: if signedIn() && resource.data.reporter == request.auth.uid;
       allow list, update, delete: if false;
     }
+    // Server-signed OpenAI usage/resource records. No project media or API keys.
+    // A forged signature can only block the caller's own account; the backend
+    // verifies HMAC + uid + monotonic version before trusting any record.
+    match /users/{uid}/openaiState/runtime {
+      allow get: if owner(uid);
+      allow list, delete: if false;
+      function validOpenAIState() {
+        let d = request.resource.data;
+        return owner(uid) && d.keys().hasOnly(['uid','version','stateJson','signature','updatedAt']) &&
+          d.uid == uid && d.version is int && d.version > 0 &&
+          d.stateJson is string && d.stateJson.size() <= 800000 &&
+          d.signature is string && d.signature.matches('^[a-f0-9]{64}$') && d.updatedAt == request.time;
+      }
+      allow create: if validOpenAIState() && request.resource.data.version == 1;
+      allow update: if validOpenAIState() && request.resource.data.version == resource.data.version + 1;
+    }
     // Private Vanessa sessions contain chat turns and project IDs, never Studio files.
     match /users/{uid}/vanessaLimits/chat {
       allow get: if owner(uid);

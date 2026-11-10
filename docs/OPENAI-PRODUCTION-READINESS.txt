@@ -1,0 +1,244 @@
+VANESSA / ZORIFI — PRODUCTION READINESS
+10 November 2026 | Development branch: codex/vanessa-openai-production
+
+DECISION AND CURRENT STATUS
+Keep the existing Vercel website and same-origin Node API, Firebase Auth and
+bounded Firestore state. This avoids a second backend, cross-origin credentials,
+and a Firebase billing upgrade solely to use OpenAI. This is prepared for an
+allowlisted private preview, not certified for an unrestricted public launch.
+No push, deployment, production secret change, rules publication, Firebase
+upgrade or new paid-service enablement was performed in this preparation.
+The successful local live connection test did not configure a hosted secret.
+The final scan found and removed a credential-only line in the untracked
+ConnectVanessa.cmd launcher before staging. The credential was not committed.
+Revoke that exposed credential and use a replacement for the approved rollout.
+
+REAL ARCHITECTURE / FILES
+Frontend: index.html, app.js and the existing native zorifi-* modules. There is
+one editor state. zorifi-timeline-edit-api.js exposes native editing operations;
+zorifi-vanessa-production.js and zorifi-vanessa-professional.js use reviewed,
+validated actions, verify the actual state, and preserve history and saving.
+zorifi-project-model.js and app.js retain account-scoped projects and IndexedDB
+media on the device. No Studio project/media upload to Firebase was introduced.
+
+Authentication: zorifi-firebase.js FirebaseGateway and provider.mjs
+verifiedAccount. Every backend request verifies the bearer token through Firebase
+accounts:lookup, rejects disabled users, and compares verified-token auth_time
+with validSince when Firebase supplies that boundary. Identity verification is
+shared only within the same request. Emulator authentication is accepted only
+on loopback demo-* projects and rejected in production.
+
+Hosting: vercel.json builds web-dist via scripts/build-web.cjs. Node wrappers
+api/vanessa/chat.js and api/vanessa/openai.js delegate through
+api/vanessa-provider.js to netlify/functions/_shared/vanessa-router.mjs and
+openai-capabilities.mjs. Existing Netlify wrappers remain available. Backend
+prompts are in vanessa-prompts.mjs; no hosted prompt permission is required.
+
+OpenAI: openai-responses.mjs calls the Responses API at a fixed HTTPS origin;
+openai-professional.mjs adapts the existing professional planner. Strict JSON
+schemas and native tool validation prevent arbitrary model state mutation.
+OpenAI text is currently buffered; token-by-token streaming is incomplete.
+
+State: chat-session-store.mjs preserves signed, ordered Firestore conversations.
+openai-runtime.mjs provides a local SQLite ledger; openai-firestore-state.mjs
+provides durable signed per-account Firestore records for stateless hosting.
+CAS writes, monotonic versions, server signatures and ownership validation
+prevent quota reset/replay through a forged record. A damaged record fails
+closed and requires operator recovery. The new rules are emulator-tested only.
+No Firebase Admin credential or paid Functions deployment is needed for this
+design. Accounts can access only their own bounded records under the rules.
+
+CHANGES PREPARED IN THIS TASK
+- openai-policy.mjs: default-off hosted gate, exact verified-UID pilot allowlist,
+  mandatory stable signing secret, shared strict quotas for new and legacy
+  OpenAI provider paths, and optional backend App Check verification.
+- openai-app-check.mjs: RSA/JWKS App Check validation of signature, issuer,
+  audience, app identity, expiry and JWT type; fails closed when enabled.
+- Existing Responses/runtime/provider adapters: output cap, conservative
+  input/schema/image/output reservations, atomic pending leases, nonrefunded
+  reservations, legacy-path accounting and safe hosted provider selection.
+- openai-capabilities.mjs: awaited durable resource handles for every modality,
+  capacity precheck, owned vector status/delete and best-effort orphan cleanup.
+- scripts/check-openai-production.cjs and
+  config/vanessa-openai-production.example.json: secret-free deployment plan
+  and read-only configuration assessment; no deployment authorization implied.
+- scripts/test-openai-modality.cjs and Start-ZorifiOpenAI.ps1: individual hidden
+  key-entry live-test launchers, fixed public inputs and sanitized receipts.
+- Backend, quota, authorization, modality, Vercel wrapper and packaging tests.
+Earlier uncommitted editor/motion/audio dependencies are preserved with this
+integration so the committed branch can run without missing native tools.
+
+DEFAULT COST / ABUSE CONTROLS
+OPENAI_HOSTED_ENABLED=false: inserting a key alone cannot enable hosted calls.
+OPENAI_ALLOWED_USER_UIDS: exact Firebase UID list; no wildcard or email trust.
+OPENAI_STATE_SIGNING_KEY: stable server-only secret, minimum 32 characters.
+OPENAI_STATE_BACKEND=firestore: serverless quotas must not use temporary SQLite.
+OPENAI_REQUESTS_PER_MINUTE=20 (separate existing chat 20/min quota also applies).
+OPENAI_MAX_REQUESTS_PER_DAY=100 over the retained rolling 24-hour window.
+OPENAI_MAX_CONCURRENT_REQUESTS=1; pending lease horizon 130 seconds.
+OPENAI_DAILY_TOKEN_LIMIT=50000 conservative allowance units per account.
+OPENAI_MAX_OUTPUT_TOKENS=6000; validated configuration range 128–20000.
+Daily creation limits default 1 for voice/image/video/realtime/file/vector.
+All six optional capability flags default false; optional operations require
+an exact media UID allowlist and explicit consent. Legacy audio/image paths
+share the corresponding daily creation counters rather than bypassing them.
+Hosted Realtime is blocked even if its flag is true: an ephemeral credential's
+expiry does not cap an active session's spending.
+
+Reservations charge at least the reserved allowance, including failed requests;
+higher provider-reported usage is retained. This is intentionally conservative
+and requires calibration for large professional plans. It is not an accurate
+dollar meter or organization-wide hard spending cap. Provider-reported usage
+may be absent for media/failed transports. Many new accounts can multiply an
+individual limit; keep the pilot allowlist small. Before public rollout add
+verified client App Check, stronger global abuse controls and a tested aggregate
+spend boundary. Account bans/device-proof security are not claimed.
+
+Requests have cancellation, timeouts, bounded input/output and sanitized errors.
+No automatic paid retry occurs. Stop prevents local pending edits; an upstream
+generation already accepted can still finish and be billed. Cleanup is best
+effort during network/storage failure. A host env change applies only to a new
+deployment, so the hosted flag is not an instant emergency switch. Emergency
+operations may require host traffic blocking or upstream key revocation.
+
+SECURE HOST CONFIGURATION — PLAN ONLY, AFTER APPROVAL
+In Vercel Dashboard, select Zorifi -> Settings -> Environment Variables.
+Use the protected Value field for OPENAI_API_KEY and a separately generated
+OPENAI_STATE_SIGNING_KEY; mark Sensitive where available. Do not enter values
+in chat, source, command arguments, public-prefixed variables, frontend Firebase
+config, vercel.json or Git. Do not pull/export production secrets locally.
+Start with a branch-scoped Preview environment, not Production or All.
+
+Backend names to configure for that preview:
+  FIREBASE_WEB_API_KEY / FIREBASE_PROJECT_ID: existing Firebase project config
+  OPENAI_API_KEY / OPENAI_STATE_SIGNING_KEY: backend secrets
+  OPENAI_STATE_BACKEND=firestore
+  VANESSA_LANGUAGE_PROVIDER=openai
+  OPENAI_RESPONSES_MODEL: accessible evaluated model (see lifecycle note)
+  OPENAI_HOSTED_ENABLED=true: only for the explicitly approved private preview
+  OPENAI_ALLOWED_USER_UIDS: approved test account UID(s)
+  quota names above: start at defaults or lower; no optional media flags enabled
+  ZORIFI_FIREBASE_EMULATORS: unset/false, never true on a host
+App Check needs FIREBASE_APP_ID and FIREBASE_PROJECT_NUMBER plus client tokens.
+Keep OPENAI_REQUIRE_APP_CHECK=false only for the private allowlisted preview;
+its client initialization is not integrated or live verified by this task.
+
+Do not select a different language provider for production yet. Existing Gemini
+remains the hosted auto selection until the OpenAI gate is explicitly enabled.
+The Vercel plan, exact runtime, secret presence and account model access are not
+verified from local configuration. Select a supported Node 22/24 runtime and
+validate it during preview. The Firestore path needs the reviewed rules published
+with separate authorization before hosted use; otherwise requests fail closed.
+
+CONNECTION AND DEPLOYMENT VALIDATION
+Read-only deployed GET checks: homepage 200, ai-settings 200, existing chat 405
+(POST-only route present), new openai route 404 (not deployed).
+Receipt: artifacts/openai-production-live-readonly.json. No live AI POST was
+sent to production. The local Vercel adapter tests verify both POST wrappers,
+Firebase bearer handling, correlated chat proposals and Responses metadata.
+Packaging tests check every local dependency of all three function entrypoints.
+Real Auth/Firestore emulators plus the actual browser/editor verify the local
+frontend/backend contract. They do not prove the not-yet-deployed hosted route.
+
+After explicit approval, the next controlled step is a protected Vercel preview
+with a small account allowlist and the approved rules/secrets. Verify logged-out
+401; wrong-account403; one short authenticated reply; real confirmed split;
+Undo/Redo; save/refresh; cancellation; quota rejections; and a usage receipt.
+Review Vercel/OpenAI/Firebase dashboards for billed usage and sanitized errors.
+Only after these pass request separate approval to promote to production.
+Rollback preserves the old Vercel deployment and stable signing secret; no
+project/media migration is needed. Do not push this branch without approval,
+because Git integration can create automatic Vercel deployments.
+
+INDIVIDUAL OPTIONAL LIVE TESTS — PREPARED, NOT RUN
+Use existing local demo Auth/Firestore emulators, never production:
+  npm run openai:emulators
+Then one test at a time in another PowerShell window at the repository root:
+  .\scripts\Start-ZorifiOpenAI.ps1 -Mode LiveModalityTest -Capability files
+Replace files with voice, image, video, retrieval or realtime for that one test.
+The launcher uses Read-Host -AsSecureString, passes the secret only through a
+temporary child environment and clears its addition. It never prints/writes
+the key; local OS administrators can still inspect process memory. Each live
+test can incur OpenAI credits and needs its own explicit test authorization.
+
+voice: one bounded WAV synthesis; validates container, not voice quality/sync.
+image: one PNG; validates bytes, not creative quality or timeline import.
+video: one 4-second 720p creation + one status call; may remain pending/billable.
+files: tiny public text upload/read/delete with exact-content verification.
+retrieval: same public text, private expiring vector store, bounded indexing
+polls/search, verified evidence and finally cleanup of store/file where possible.
+realtime: local ephemeral session creation only; token never printed/persisted.
+No microphone/WebRTC conversation or actual session duration is tested by it.
+Mocked runner tests verify bounded call order, no implicit generation retries,
+cleanup and truthful pending/error states. Existing device/Gemini voice remains.
+
+RESULTS / WHAT REMAINS
+One earlier live Responses test passed on gpt-5-nano-2025-08-07:
+946 input +181 output = 1127 tokens. Its receipt matches the private usage ledger.
+No new live modality calls or production mutations were made in this task.
+Final unit/emulator/browser/build receipts are in ignored artifacts; final Git
+commits and counts are reported in the task response.
+Final unit suite: 583 passed, 0 failed, 0 skipped. Build: 158 web files plus
+assets. Integrity: 397 source files and 314 browser/cache references passed.
+Chromium + WebKit verify real split, visible timeline, confirmation, Undo/Redo,
+save/refresh, Stop, stale proposals, opt-in mic and account isolation. Windows
+WebKit used a data URL because its IndexedDB cannot store Blobs in this setup.
+Auth+Firestore emulators verify real tokens/rules, signed state tampering,
+ordered conversations, isolation, quota and actual browser/native editing.
+OpenAI interpretation is mocked in these regression tests.
+Production OpenAI, optional live modalities, physical-device voice, broader
+App Check rollout and hosted realtime/client usage reconciliation remain
+unverified/incomplete. This is not a claim that all modalities now work live.
+
+FIREBASE BLAZE / COST ESTIMATE (USD, BEFORE TAX)
+Recommended Vercel API + Firebase Auth/Firestore Spark needs NO Blaze upgrade
+solely for OpenAI. OpenAI usage is billed separately from Firebase and ChatGPT.
+Firestore free quota is 1 GiB, 50k reads/day, 20k writes/day, 10 GiB egress/month.
+The current happy chat+OpenAI ledger uses approximately 6 reads + 6 writes/turn;
+contention, security-rule reads, Social and other app traffic add usage. Spark
+quota exhaustion can interrupt service. Monitor total project use before scale.
+
+Blaze is required if choosing Firebase Cloud Functions, Firebase App Hosting/
+Cloud Run, Cloud Storage for Firebase, or Firestore beyond free capacity/paid
+features. Cloud Storage's billing requirement began 3 February 2026. None is
+required/enabled by this plan. Blaze is pay-as-you-go with eligible free quotas,
+not a fixed monthly fee; exact regional compute/storage/egress costs need a
+workload estimate. No such workload or account bill has been verified here.
+
+Vercel Hobby is for personal/noncommercial use; commercial Zorifi should budget
+Pro at $20/month, including $20 eligible usage credit, plus tax/overages. Actual
+current plan is unknown. Do not upgrade without authorization.
+The tested GPT-5 nano rate is $0.05/M input and $0.40/M output:
+- The 1127-token test costs approximately $0.0001197 at those rates.
+- 10,000 identical calls approximately $1.20.
+- 10,000 turns averaging 4000 input + 1000 output tokens approximately $6/month.
+An illustrative commercial pilot total is $20 Vercel + $6 OpenAI + $0 Firebase
+within free quotas = approximately $26/month, excluding existing bills, tax,
+overages and every media/Realtime/storage cost. This is arithmetic, not a quote.
+If already on Pro, its existing base charge may not be an incremental expense.
+
+Official OpenAI documentation currently marks the tested GPT-5 nano snapshot
+deprecated. It was preserved, not silently replaced. Evaluate an available
+replacement before long-term production use and update the cost estimate.
+The optional legacy Speech API adapter also needs lifecycle review before its
+documented 6 January 2027 retirement. Hosted Realtime remains blocked meanwhile.
+
+EXACT NEXT ACTION
+Review this plan and choose the private preview account/model. Then explicitly
+authorize preview-only secrets/rules publication and deployment with a bounded
+live chat test. Production promotion and optional media tests remain separate.
+No further Firebase billing decision is needed for the recommended architecture.
+
+PRIMARY SOURCES CHECKED
+https://developers.openai.com/api/docs/models/gpt-5-nano
+https://developers.openai.com/api/docs/guides/production-best-practices
+https://developers.openai.com/api/docs/guides/text-to-speech
+https://vercel.com/pricing
+https://vercel.com/docs/plans/hobby
+https://vercel.com/docs/environment-variables/managing-environment-variables
+https://firebase.google.com/docs/firestore/quotas
+https://firebase.google.com/pricing/
+https://firebase.google.com/docs/projects/billing/firebase-pricing-plans
+https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024
+https://firebase.google.com/docs/auth/admin/manage-sessions
+https://firebase.google.com/docs/app-check/custom-resource-backend

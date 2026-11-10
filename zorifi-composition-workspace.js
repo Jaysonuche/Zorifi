@@ -24,7 +24,7 @@
     if(heads&&!heads.querySelector('.composition-column-head')){const top=document.createElement('div');top.className='composition-column-head';top.textContent='LAYERS / SOURCE NAME';heads.prepend(top);}
     shell.querySelectorAll('[data-track-head]').forEach(head=>{
       const track=Number(head.dataset.trackHead),lane=shell.querySelector(`[data-track-lane="${track}"]`);if(!lane)return;
-      const clips=state.clips.filter(c=>c.track===track).sort((a,b)=>a.start-b.start),switches=head.querySelector('.track-switches');
+      const clips=state.clips.filter(c=>c.track===track&&(!state.creatorSettings.hideShy||!c.shy)).sort((a,b)=>a.start-b.start),switches=head.querySelector('.track-switches');
       head.querySelectorAll(':scope > b,:scope > .composition-sources,:scope > .composition-track-label').forEach(n=>n.remove());
       lane.querySelectorAll('.composition-channel-lane').forEach(n=>n.remove());
       const heading=document.createElement('div');heading.className='composition-track-label';heading.innerHTML=`<b>${esc(trackState(track).name||trackLabel(track))}</b><small>${clips.length} ${clips.length===1?'source':'sources'}</small>`;if(switches)heading.append(switches);head.prepend(heading);

@@ -10,10 +10,10 @@ export function geminiMediaModel(type){
  return model;
 }
 
-async function interact(kind,body){
+async function interact(kind,body,{signal}={}){
  let response;
- try{response=await fetch(ENDPOINT,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':needed('GEMINI_API_KEY')},body:JSON.stringify(body),signal:AbortSignal.timeout(115000)});}
- catch{throw new ServiceError(`Gemini ${kind} generation could not be reached or timed out. Please retry.`,502,'PROVIDER_UNAVAILABLE');}
+ try{response=await fetch(ENDPOINT,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':needed('GEMINI_API_KEY')},body:JSON.stringify(body),signal:AbortSignal.any([AbortSignal.timeout(115000),signal].filter(Boolean))});}
+ catch{if(signal?.aborted)throw new ServiceError('Media generation request stopped.',499,'CANCELLED');throw new ServiceError(`Gemini ${kind} generation could not be reached or timed out. Please retry.`,502,'PROVIDER_UNAVAILABLE');}
  if(!response.ok){
   // Never return Google's raw error: it may contain credentials or user input.
   if(response.status===429)throw new ServiceError(`Gemini ${kind} generation reached its quota. Check paid-tier access and limits.`,429,'PROVIDER_RATE_LIMIT');
@@ -41,7 +41,7 @@ function outputBlock(data,type,mimes){
  throw new ServiceError(`Gemini returned no ${type} file. Try another prompt.`,502,'INVALID_PROVIDER_RESPONSE');
 }
 
-export async function generateGeminiImage(input,description){
+export async function generateGeminiImage(input,description,{signal}={}){
  const ratio=['1:1','16:9','9:16','4:5'].includes(input.ratio)?input.ratio:'1:1';
  const instructions=[description,text(input.characterGuide,2000),input.style?`Style: ${text(input.style,80)}`:''].filter(Boolean).join('\n');
  const parts=[{type:'text',text:instructions}];
@@ -52,7 +52,7 @@ export async function generateGeminiImage(input,description){
   if(Buffer.from(match[2],'base64').length>2_500_000)throw new ServiceError('The reference image must be smaller than 2.5 MB.',413);
   parts.push({type:'image',mime_type:match[1],data:match[2]});
  }
- const data=await interact('image',{model:geminiMediaModel('image'),input:parts,response_format:{type:'image',aspect_ratio:ratio,image_size:'1K'}});
+ const data=await interact('image',{model:geminiMediaModel('image'),input:parts,response_format:{type:'image',aspect_ratio:ratio,image_size:'1K'}},{signal});
  const result=outputBlock(data,'image',['image/png','image/jpeg','image/webp']);
  return {status:'complete',url:result.url,imageUrl:result.url,mimeType:result.mimeType,metadata:{provider:'Gemini',model:geminiMediaModel('image')}};
 }

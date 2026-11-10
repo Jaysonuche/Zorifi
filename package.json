@@ -27,7 +27,11 @@
     "generate:assets": "node scripts/generate-assets.cjs",
     "test:browser": "node tests/browser-smoke.cjs",
     "test:desktop": "node tests/desktop-smoke.cjs",
-    "check": "node scripts/check-project.cjs"
+    "check": "node scripts/check-project.cjs",
+    "openai:emulators": "node scripts/firebase-emulators.cjs",
+    "test:openai:emulators": "node scripts/firebase-emulators.cjs --exec",
+    "openai:mock": "node scripts/vanessa-openai-local.cjs --serve-mock",
+    "openai:production:check": "node scripts/check-openai-production.cjs"
   },
   "build": {
     "appId": "com.zorifi.editor",
@@ -77,6 +81,15 @@
       "zorifi-advanced-editing.js",
       "zorifi-visual-tools.js",
       "zorifi-motion-effects.js",
+      "zorifi-parallax-workflow.js",
+      "zorifi-editor-workflow-bridge.js",
+      "zorifi-editor-audio-workflows.css",
+      "zorifi-editor-audio-workflows.js",
+      "zorifi-motion-workspace.css",
+      "zorifi-motion-workspace.js",
+      "zorifi-motion-packs.js",
+      "zorifi-motion-renderer.js",
+      "zorifi-motion-graph.js",
       "zorifi-compute-engine.js",
       "zorifi-ai-provider.js",
       "zorifi-ai-platform.js",

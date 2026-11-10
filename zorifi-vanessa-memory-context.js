@@ -18,7 +18,9 @@
   const CATEGORY_HINTS=Object.freeze({projects:['project'],ongoing_context:['project','work'],progress:['project','goal'],goals:['goal','project'],creative_preferences:['video','audio'],working_style:['work'],communication_preferences:['communication'],preferences:['work','video','audio'],interests:[]});
   const CONTRASTS=Object.freeze([['short','long'],['fast','slow'],['dark','bright'],['warm','cool'],['casual','formal'],['brief','detailed'],['concise','detailed'],['portrait','landscape'],['mobile','desktop']]);
   const CONTRADICTION=/\b(?:no longer|not anymore|stopped|quit|gave up|don['’]?t|do not|doesn['’]?t|changed|switched|instead|used to)\b/i;
-  const FORGET=/^(?:please\s+)?(?:forget|delete|remove)(?:\s+(?:the\s+)?memory)?(?:\s+(?:that|about))?\s*(.*)$/i;
+  // Delete/remove are editor verbs too. They become memory operations only
+  // with an explicit memory noun; "remove background" must never delete memory.
+  const FORGET=/^(?:please\s+)?(?:forget(?:\s+(?:the\s+)?memory)?|(?:delete|remove)\s+(?:(?:the|my|your|saved|approved)\s+)*memor(?:y|ies))(?:\s+(?:that|about))?\s*(.*)$/i;
   const DONT_REMEMBER=/^(?:i\s+)?don['’]?t\s+want\s+you\s+(?:to\s+)?remember(?:ing)?\s*(.*)$/i;
   const CORRECTION=/^(?:that['’]?s\s+not\s+true\s+anymore|i\s+don['’]?t\s+do\s+that\s+anymore|i(?:['’]ve|\s+have)\s+changed\s+my\s+goal|update\s+that)[.!]?$/i;
 

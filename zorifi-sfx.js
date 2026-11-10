@@ -10,7 +10,11 @@
     {id:'ui-tick',name:'Precision Tick',category:'ASMR',duration:.16,mood:'Quiet title accent',color:'#2dd4bf'},
     {id:'sub-drop',name:'Sub Drop',category:'Trending',duration:1.6,mood:'Deep final accent',color:'#818cf8'},
     {id:'airy-shimmer',name:'Airy Shimmer',category:'Music Clip',duration:1.8,mood:'Gentle closing detail',color:'#e879f9'},
-    {id:'room-air',name:'Room Air',category:'ASMR',duration:4,mood:'Neutral synthetic ambience',color:'#94a3b8'}
+    {id:'room-air',name:'Room Air',category:'ASMR',duration:4,mood:'Neutral synthetic ambience',color:'#94a3b8'},
+    {id:'footstep-wood',name:'Wooden Footstep',category:'Footsteps',duration:.48,mood:'Original synthetic shoe impact',color:'#b99170'},
+    {id:'footsteps-walk',name:'Measured Footsteps',category:'Footsteps',duration:2.4,mood:'Four synthesized walking steps',color:'#bd987a'},
+    {id:'cinematic-explosion',name:'Cinematic Explosion',category:'Explosions',duration:2.8,mood:'Original synthetic debris and low boom',color:'#ef815d'},
+    {id:'tactile-click',name:'Tactile Click',category:'Clicks',duration:.12,mood:'Short mechanical UI accent',color:'#2dd4bf'}
   ].map(value=>Object.freeze({...value,artist:'Zorifi Sound Design',bpm:0,key:0,soundEffect:value.id,original:true})));
   const byId=id=>CATALOG.find(item=>item.id===id)||null;
   function synthesize(id,{sampleRate=32000}={}){
@@ -30,6 +34,9 @@
       else if(id==='ui-tick')v=(Math.sin(2*Math.PI*1800*t)*.22+high*.12)*Math.exp(-t*65);
       else if(id==='sub-drop'){phase+=2*Math.PI*(30+65*Math.exp(-t*4))/sampleRate;v=Math.sin(phase)*Math.exp(-t*2.9)*.6+low*.12*Math.exp(-t*16);}
       else if(id==='airy-shimmer')v=(Math.sin(2*Math.PI*880*t)+Math.sin(2*Math.PI*1320*t)*.7+Math.sin(2*Math.PI*1761*t)*.35)*.11*Math.exp(-t*2.4)*Math.min(1,t/.035);
+      else if(id==='footstep-wood'||id==='footsteps-walk'){const hit=id==='footstep-wood'?t:t%.58;v=(Math.sin(2*Math.PI*(135-50*Math.min(1,hit*8))*hit)*.25+low*.9+high*.055)*Math.exp(-hit*22);}
+      else if(id==='cinematic-explosion'){phase+=2*Math.PI*(28+100*Math.exp(-t*9))/sampleRate;v=(Math.sin(phase)*.5+low*1.5+high*.055)*Math.exp(-t*1.8);}
+      else if(id==='tactile-click')v=(Math.sin(2*Math.PI*2200*t)*.26+high*.17)*Math.exp(-t*95);
       else v=low*.12*(.65+.35*Math.sin(Math.PI*p));
       v=Math.max(-.85,Math.min(.85,v*edge));left[i]=v;right[i]=v*(.94+.06*Math.sin(p*Math.PI*2))+(id.includes('whoosh')||id==='room-air'?low*.018*edge:0);
     }

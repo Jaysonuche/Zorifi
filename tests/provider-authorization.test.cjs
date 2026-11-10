@@ -46,6 +46,19 @@ test('revoked, disabled, malformed and unavailable identity checks fail closed',
  }finally{global.fetch=originalFetch;if(key===undefined)delete process.env.FIREBASE_WEB_API_KEY;else process.env.FIREBASE_WEB_API_KEY=key;}
 });
 
+test('a refreshed token from a revoked sign-in cannot pass the account validSince boundary',async()=>{
+ const {authorize}=await import('../netlify/functions/_shared/provider.mjs'),originalFetch=global.fetch,key=process.env.FIREBASE_WEB_API_KEY;
+ process.env.FIREBASE_WEB_API_KEY='public-test-key';
+ const bearer=claims=>'Bearer fixture.'+Buffer.from(JSON.stringify(claims)).toString('base64url')+'.verified-upstream';
+ try{
+  global.fetch=async()=>Response.json({users:[{localId:'member',validSince:'200'}]});
+  await assert.rejects(authorize(hosted({authorization:bearer({auth_time:199,iat:300})})),error=>error.status===401);
+  for(const auth_time of [200,201])assert.deepEqual(await authorize(hosted({authorization:bearer({auth_time,iat:300})})),{uid:'member'});
+  for(const auth_time of [undefined,'201',null])await assert.rejects(authorize(hosted({authorization:bearer({auth_time})})),error=>error.status===401);
+  global.fetch=async()=>Response.json({users:[{localId:'member',validSince:'bad'}]});await assert.rejects(authorize(hosted({authorization:bearer({auth_time:201})})),error=>error.status===401);
+ }finally{global.fetch=originalFetch;if(key===undefined)delete process.env.FIREBASE_WEB_API_KEY;else process.env.FIREBASE_WEB_API_KEY=key;}
+});
+
 test('paid checks read only the verified UID and never trust another user or a denied billing record',async()=>{
  const {authorize,subscription}=await import('../netlify/functions/_shared/provider.mjs');
  const originalFetch=global.fetch,key=process.env.FIREBASE_WEB_API_KEY,project=process.env.FIREBASE_PROJECT_ID;

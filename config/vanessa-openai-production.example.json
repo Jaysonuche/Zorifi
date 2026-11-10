@@ -1,0 +1,15 @@
+{
+  "purpose": "Configuration plan only. No credential values, account identifiers or deployment authorization.",
+  "secretsToEnterInHostSecretManager": ["OPENAI_API_KEY", "OPENAI_STATE_SIGNING_KEY"],
+  "backendConfigurationNames": ["FIREBASE_WEB_API_KEY", "FIREBASE_PROJECT_ID", "OPENAI_STATE_BACKEND", "OPENAI_RESPONSES_MODEL"],
+  "hostedGate": {"OPENAI_HOSTED_ENABLED": false, "exactUidAllowlistName": "OPENAI_ALLOWED_USER_UIDS"},
+  "quotaNames": ["OPENAI_REQUESTS_PER_MINUTE", "OPENAI_MAX_CONCURRENT_REQUESTS", "OPENAI_MAX_REQUESTS_PER_DAY", "OPENAI_DAILY_TOKEN_LIMIT", "OPENAI_MAX_OUTPUT_TOKENS"],
+  "operationQuotaNames": ["OPENAI_DAILY_VOICE_LIMIT", "OPENAI_DAILY_IMAGE_LIMIT", "OPENAI_DAILY_VIDEO_LIMIT", "OPENAI_DAILY_REALTIME_LIMIT", "OPENAI_DAILY_FILE_LIMIT", "OPENAI_DAILY_VECTOR_LIMIT"],
+  "optionalFlags": {"OPENAI_ENABLE_VOICE": false, "OPENAI_ENABLE_REALTIME": false, "OPENAI_ENABLE_IMAGES": false, "OPENAI_ENABLE_VIDEO": false, "OPENAI_ENABLE_FILES": false, "OPENAI_ENABLE_RETRIEVAL": false},
+  "optionalMediaUidAllowlistName": "OPENAI_ALLOWED_MEDIA_UIDS",
+  "broaderRolloutAppCheckName": "OPENAI_REQUIRE_APP_CHECK",
+  "publicAppCheckConfigurationNames": ["FIREBASE_APP_ID", "FIREBASE_PROJECT_NUMBER"],
+  "deploymentAuthorized": false,
+  "productionVerified": false,
+  "notes": ["Preserve the tested model until a replacement is separately evaluated; the tested GPT-5 nano snapshot is currently deprecated.", "Review and publish tested Firebase rules only with explicit approval.", "Hosted Realtime remains blocked even if its flag is enabled; session lifecycle and usage reconciliation require separate implementation and verification.", "A passing configuration assessment is not a live integration test or deployment approval."]
+}

@@ -2,7 +2,7 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const {firebaseTransport}=require('./helpers/firebase-provider.cjs');
 async function fixture(run){
  const oldFetch=global.fetch,oldEnv=global.Netlify;let generation=0,answer={reply:'Here is the proposed split.',actions:[{command:'clip.split',target:'clip',parameters:{time:2}}]};
- const config={FIREBASE_WEB_API_KEY:'public-test-key',FIREBASE_PROJECT_ID:'fixture-project',OPENAI_LANGUAGE_API_KEY:'private-fixture-key',VANESSA_SESSION_SIGNING_KEY:'private-test-signing-key'};
+ const config={OPENAI_HOSTED_ENABLED:'true',OPENAI_ALLOWED_USER_UIDS:'fixture-user',OPENAI_STATE_SIGNING_KEY:'test-only-stable-state-signing-key-0001',OPENAI_DAILY_TOKEN_LIMIT:'1000000',FIREBASE_WEB_API_KEY:'public-test-key',FIREBASE_PROJECT_ID:'fixture-project',OPENAI_LANGUAGE_API_KEY:'private-fixture-key',VANESSA_SESSION_SIGNING_KEY:'private-test-signing-key'};
  global.Netlify={env:{get:key=>config[key]||''}};
  global.fetch=firebaseTransport(async(url,init)=>{assert.equal(url,'https://api.openai.com/v1/responses');assert(init.signal);generation++;return Response.json({status:'completed',output:[{content:[{type:'output_text',text:JSON.stringify(answer)}]}]});});
  const input={sessionId:'session',requestId:'request-1',sequence:1,project:{id:'project',ownerUid:'fixture-user'},message:'Split at two seconds',intent:'editing',context:{clips:[{id:'clip',start:0,duration:5}]}};

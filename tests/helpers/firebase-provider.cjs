@@ -21,5 +21,5 @@ function firebaseTransport(provider,{uid='fixture-user'}={}){
   return provider(url,options);
  };
 }
-function firebaseEnv(get){return key=>get(key)||({FIREBASE_WEB_API_KEY:'public-fixture-key',FIREBASE_PROJECT_ID:'fixture-project'})[key]||'';}
+function firebaseEnv(get){return key=>get(key)||({FIREBASE_WEB_API_KEY:'public-fixture-key',FIREBASE_PROJECT_ID:'fixture-project',OPENAI_HOSTED_ENABLED:'true',OPENAI_ALLOWED_USER_UIDS:'fixture-user',OPENAI_STATE_SIGNING_KEY:'test-only-stable-state-signing-key-0001',OPENAI_STATE_BACKEND:'firestore',OPENAI_DAILY_TOKEN_LIMIT:'1000000'})[key]||'';}
 module.exports={firebaseTransport,firebaseEnv};

@@ -23,3 +23,4 @@ body.timeline-library-drag .timeline-content{outline:2px dashed #b786f0;outline-
 .timeline-touch-drag-grip{display:none}
 body.touch-workspace :is([data-media-id],[data-text-preset],[data-text-template],[data-effect],[data-audio-track]){position:relative}
 body.touch-workspace .timeline-touch-drag-grip{position:absolute;right:4px;bottom:3px;z-index:8;display:grid;place-items:center;min-width:32px;min-height:30px;padding:3px 7px;border-radius:7px;background:#291f3ee8;color:#e9d6ff;font-size:23px;line-height:1;touch-action:none!important;-webkit-user-select:none;user-select:none}
+.toast{pointer-events:none}

@@ -22,7 +22,7 @@
     const normalized={...(clip||{})};
     normalized.id=String(normalized.id||`clip-${Date.now()}-${index}`);
     normalized.type=['video','audio','text','effect'].includes(normalized.type)?normalized.type:'video';
-    normalized.name=String(normalized.name||'Untitled clip');
+    normalized.name=String(normalized.name||'Untitled clip');if(normalized.type==='text'&&Object.hasOwn(normalized,'text'))normalized.text=normalized.name;
     normalized.start=Math.max(0,finite(normalized.start,0));
     normalized.duration=Math.max(.05,finite(normalized.duration,1));
     normalized.track=finite(normalized.track,normalized.type==='audio'?1:0);
@@ -36,6 +36,7 @@
       const legacySpeed=parseFloat(String(normalized.speed||'1').replace('×','').replace('x',''));
       normalized.playbackRate=Number.isFinite(legacySpeed)?legacySpeed:1;
     }else normalized.playbackRate=Math.max(.05,Number(normalized.playbackRate));
+    if(normalized.composition&&Array.isArray(normalized.composition.clips))normalized.composition.clips=normalized.composition.clips.map(normalizeClip);
     return normalized;
   }
 

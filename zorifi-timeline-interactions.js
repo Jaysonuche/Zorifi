@@ -9,17 +9,17 @@
   function movedClip(clip,start,track=clip.track){
     const next=copy(clip),delta=Math.max(0,start)-number(clip.start);next.start=Math.max(0,start);next.track=track;
     for(const frames of Object.values(next.keyframes||{}))for(const frame of frames)frame.time=Math.max(0,number(frame.time)+delta);
-    for(const word of next.kineticWords||[]) {if(Number.isFinite(word.start))word.start+=delta;if(Number.isFinite(word.end))word.end+=delta;}
+    for(const point of next.motion?.spatialPath?.points||[])point.time+=delta;for(const field of ['captionWords','kineticWords'])for(const word of next[field]||[]) {if(Number.isFinite(word.start))word.start+=delta;if(Number.isFinite(word.end))word.end+=delta;}
     return next;
   }
   function trimmedClip(clip,asset,{side,time,fps=30}){
-    const next=copy(clip),frame=1/Math.max(1,fps),minimum=2*frame,start=number(clip.start),end=start+number(clip.duration),rate=Math.max(.01,number(clip.playbackRate,1)),source=number(clip.sourceStart),bounded=['audio','video'].includes(asset?.type),snap=value=>Math.round(value/frame)*frame;
+    const next=copy(clip),frame=1/Math.max(1,fps),minimum=Math.max(.05,2*frame),start=number(clip.start),end=start+number(clip.duration),rate=Math.max(.01,number(clip.playbackRate,1)),source=number(clip.sourceStart),bounded=['audio','video'].includes(asset?.type),snap=value=>Math.round(value/frame)*frame;
     if(side==='left'){
-      const earliest=bounded?Math.max(0,start-source/rate):0;
+      const variable=clip.speedRamp||clip.keyframes?.playbackRate?.length||clip.keyframes?.sourceTime?.length,earliest=variable?start:bounded?Math.max(0,start-source/rate):0;
       next.start=Math.max(earliest,Math.min(end-minimum,snap(time)));next.duration=end-next.start;
       if(bounded)next.sourceStart=Math.max(0,source+(next.start-start)*rate);
     }else if(side==='right'){
-      const latest=bounded&&number(asset.duration)>0?start+(asset.duration-source)/rate:Infinity;
+      const variable=clip.speedRamp||clip.keyframes?.playbackRate?.length||clip.keyframes?.sourceTime?.length,latest=variable?end:bounded&&number(asset.duration)>0?start+(asset.duration-source)/rate:Infinity;
       next.duration=Math.max(minimum,Math.min(latest,Math.max(start+minimum,snap(time)))-start);
     }else throw new Error('Choose the start or end trim handle.');
     return next;
@@ -122,7 +122,7 @@
       gesture(event,element,{move:update,cancel:same=>{cleanup();if(same){Object.assign(clip,original);render();}},finish:()=>{
         cleanup();
         if(activated&&!side&&!target?.valid){Object.assign(clip,original);suppressClickUntil=Date.now()+400;render();if(target?.locked)toast(`Unlock ${trackLabel(target.track)} first`);return;}
-        if(changed){pushHistory({clips:state.clips.map(item=>item.id===clip.id?original:item)});if(newTrack)clip.track=nextTrack(trackKind(original.track));if(clip.zorifiEnding)clip.endingAutoPlaced=false;state.selected=clip.id;recalculateDuration();scheduleProjectSave(0);suppressClickUntil=Date.now()+400;render();}
+        if(changed){const before=state.clips.map(item=>item.id===clip.id?original:copy(item));if(!side&&!clip.zorifiEnding&&root.ZorifiTimelineEditAPI){const draft={...state,clips:copy(before)};try{root.ZorifiTimelineEditAPI.placeClip(draft,{clipId:clip.id,start:clip.start,track:newTrack?nextTrack(trackKind(original.track)):clip.track,mode:newTrack?'gap':state.creatorSettings.timelinePlacement||'gap'});}catch(error){Object.assign(clip,original);render();toast(error.message);return;}pushHistory({clips:before});state.clips=draft.clips;}else{if(side&&root.ZorifiTimelineEditAPI){try{Object.assign(clip,root.ZorifiTimelineEditAPI.trimToBounds(original,clip));}catch(error){Object.assign(clip,original);render();toast(error.message);return;}}pushHistory({clips:before});if(newTrack)clip.track=nextTrack(trackKind(original.track));root.ZorifiPhase8?.syncLinkedCaptions?.(before,state.clips);}if(clip.zorifiEnding)clip.endingAutoPlaced=false;state.selected=clip.id;recalculateDuration();scheduleProjectSave(0);suppressClickUntil=Date.now()+400;render();}
       }});
     }
     const oldDrag=dragTimelineClip;

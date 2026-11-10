@@ -1,0 +1,258 @@
+VANESSA OPENAI BACKEND — IMPLEMENTATION / VERIFICATION
+Updated10 November2026 | Repository: C:/Users/User/Documents/ChatGPT/Zorifi
+
+STATUS
+Implemented locally. One real OpenAI Responses connection test is now verified.
+No deployment, Firebase Spark upgrade, production-rule publication or paid
+infrastructure provisioning was performed.
+The live test accepted a credential through the hidden local prompt. No key
+was copied into tool commands, written to files, printed, or committed. No protected OpenAI key-entry tool is exposed in this
+Codex session; a hidden-input PowerShell launcher is the available local method.
+
+ARCHITECTURE FOUND AND PRESERVED
+- Frontend: vanilla index.html/app.js plus existing zorifi-* modules. There is
+  one native editor state, not a second OpenAI-specific timeline/store.
+- Authentication: zorifi-firebase.js FirebaseGateway. Backend provider.mjs
+  verifiedAccount checks bearer ID tokens using Firebase accounts:lookup,
+  rejects disabled/invalid accounts, and shares verification within one request.
+- Routing: api/vanessa/chat.js and api/vanessa-provider.js adapt HTTP to
+  netlify/functions/_shared/vanessa-router.mjs and services.mjs. Local routing
+  is scripts/dev-server.cjs. Both existing hosting adapters remain available.
+- Sessions: chat-session-store.mjs has per-UID Firestore sessions, ordered turns,
+  pending locks, request hashes, HMAC-signed replay, and a 20-request/minute quota.
+- Editing: zorifi-timeline-edit-api.js supplies actual split/trim/move/place/
+  delete. zorifi-vanessa-professional-tools.js validates native action schemas.
+  professional-planner.mjs validates source bounds, locks, dependencies, actual
+  supported tools and motion graph operations. Client ProductionBridge/
+  ProfessionalStudio handle review, commit verification, Undo/Redo and saving.
+- Projects remain account-scoped device metadata and IndexedDB media. Backend
+  receives supplied context/evidence, not access to another account's device.
+  A supplied ownerUid must match Firebase identity; no new cloud project store
+  is fabricated. Shared cloud records are namespaced by verified Firebase UID.
+
+COMPLETED OPENAI INTEGRATION
+1. openai-responses.mjs uses the OpenAI Responses API at a fixed HTTPS origin.
+   OPENAI_API_KEY is read only on the backend. Redirects are disallowed, input/
+   response sizes and output tokens are bounded, cancellation propagates,
+   provider error bodies are never returned/logged, and no automatic paid retry
+   is performed. Incomplete/refused/malformed output cannot become a valid edit.
+2. Structured JSON output uses text.format json_schema with strict schemas.
+   Optional values are represented compatibly and normalized before native
+   validation. Models cannot send arbitrary mutations or executable code.
+3. Vanessa chat/editing uses the existing authenticated /api/vanessa/chat route.
+   Professional OpenAI plans use the same server tool catalogue and validators,
+   then the same native client execution path. parametersJson is parsed as data
+   and validated; it is never evaluated. History and source references remain.
+4. vanessa-prompts.mjs stores versioned backend prompts for personality, ordinary
+   conversation, editing, professional planning, Realtime and retrieval. No
+   hosted prompt-management permission or remote prompt ID is required.
+5. Locally, a configured OPENAI_API_KEY permits auto selection of OpenAI.
+   Hosted auto selection preserves Gemini until OPENAI_HOSTED_ENABLED=true.
+   VANESSA_LANGUAGE_PROVIDER explicitly selects openai/gemini/openrouter/auto.
+   Existing Gemini image/music/speech and native device voice features remain.
+   Existing legacy provider-specific keys remain supported by their old paths.
+6. OpenAI professional planning consumes validated sampled images and measured
+   metadata. Audio excerpts are explicitly omitted from this text/vision route;
+   it does not claim to hear recordings. Maximum 32 sampled images per request.
+7. OpenAI text over the existing SSE interface is currently buffered into a
+   complete response. Token-by-token OpenAI streaming is not implemented.
+
+AUTHORIZATION, RATE LIMITING AND USAGE
+- Existing private Firestore chat quota and ordered session handling remain.
+- openai-runtime.mjs binds provider calls to the authenticated request with
+  AsyncLocalStorage. Additional per-account rate and daily allowance reservations
+  occur before upstream requests; errors/cancellation retain honest receipts.
+- Provider-reported input/output/total tokens and response/model identifiers are
+  retained. Missing usage remains unknown; it is not reported as zero or as an
+  invoice. Failed/incomplete responses with reported usage retain that usage.
+- Hosted/serverless runtime uses OpenAIFirestoreState. Firestore records contain
+  signed usage and opaque resource mappings, not project media or API keys.
+  HMAC binds record contents, account, path and monotonic version. Compare-and-set
+  writes protect concurrent requests. Replayed/forged state fails closed before
+  another OpenAI request. A tampered account record requires operator repair.
+- The added firestore.rules block permits only the owning account to read/write
+  the bounded versioned record; no list/delete or other-user access. The backend
+  validates signatures before trusting data. These rules were emulator-tested
+  only and have NOT been published to the real Firebase project.
+- A server-private SQLite alternative is available for local/stateful Node use.
+  Its transactions and UID-scoped resource mappings persist across reopen.
+  SQLite requires Node 22+ with node:sqlite support; this environment is Node 24.
+  Serverless hosts never use temporary SQLite storage as a durable quota store.
+- Production policy and all current limits are documented in
+  docs/OPENAI-PRODUCTION-READINESS.txt, which supersedes this phase-one report.
+- Defaults:20 OpenAI requests/minute/account and50000 daily allowance units.
+  Chat's existing Firestore quota also caps 20 requests/minute. Allowances reserve
+  conservative estimated tokens; image/video/audio charges are not accurately
+  represented by token counts. This is NOT a guaranteed monetary spending cap.
+  Check the OpenAI project's actual billing/limits. Firestore retains a bounded
+  rolling ledger (512 requests/24h and 128 resource mappings per account).
+- Hosted OpenAI now requires a stable OPENAI_STATE_SIGNING_KEY of32+ characters.
+  Local development also supports VANESSA_SESSION_SIGNING_KEY. Local fallback
+  signs with OPENAI_API_KEY; rotating that key without a stable signing secret
+  invalidates previous signed state and requires explicit operator recovery.
+
+PREPARED OPTIONAL CAPABILITIES — MOCK-TESTED BACKEND ADAPTERS
+Canonical local/Vercel endpoint: POST /api/vanessa/openai.
+Netlify function: /.netlify/functions/vanessa-openai.
+Every request uses Firebase authentication. Optional capabilities additionally
+require their environment flag, an allowed exact Firebase UID, and consent:true.
+All flags default off; configuring a key does not automatically enable them.
+
+operation                 Prepared behavior
+capabilities              Safe model/configuration metadata; no secrets
+usage                     Current authenticated account's retained usage
+connection.test           One small actual Responses request, when invoked
+voice.generate            Bounded WAV speech adapter, available voice/speed
+realtime.create           GA short-lived client-secret creation; no editor tools
+images.generate           One bounded PNG generation request
+video.create              Async 4s 720p generation; opaque owner-bound job handle
+video.status/download     Owner-bound job state and bounded completed MP4 download
+files.upload/read/delete  Explicit 1MB document upload, owned download/deletion
+vector.create/attach      Private expiring store + ownership-checked file attachment
+vector.status/delete      Owned indexing status and verified provider deletion
+vector.search             Bounded semantic search of an owned store
+
+Resource requests accept opaque account-scoped handles, not arbitrary provider
+file/vector/video IDs. No organization-wide resource listing, arbitrary URL
+proxy, remote filesystem access or automatic project upload was introduced.
+Retrieved text is untrusted evidence, never executable instructions.
+
+LIVE VERIFICATION / REMAINING LIMITS
+- The one-request Responses connection test returned HTTP200, connected:true,
+  model gpt-5-nano-2025-08-07. Reported usage:946 input +181 output =1127 tokens.
+  artifacts/openai-live-test.json matches a completed durable private usage
+  record by response ID; no error code was recorded.
+- Voice, image, video, Realtime, file and vector capabilities remain mock-tested
+  only. Their permissions, model access and live results are not verified.
+- Optional adapters are backend preparation. A complete OpenAI WebRTC client,
+  continuous voice UI, live audio transcription/subtitle alignment and integrated
+  media-generation/import controls are not implemented or claimed by this work.
+  Existing device/Gemini voice and editor workflows were preserved.
+- Realtime's 60s secret expiry limits new connections, not active session duration.
+  A client can reuse the credential until expiry and override session settings.
+  It is not a strong spend-control boundary. Keep disabled until client session
+  lifecycle, usage reconciliation and project billing limits are configured.
+- Existing Speech API models, including gpt-4o-mini-tts, are scheduled to retire
+  on 6 January 2027. The prepared legacy WAV adapter is opt-in; migrate the audio
+  client to the documented Realtime workflow before that retirement.
+- Large provider files/results are intentionally bounded. Video polling returns
+  job state; Stop of a local request cannot guarantee cancellation/refund of a
+  provider job already accepted. No fake generation progress/success is returned.
+- No new claims of professional creative quality, physical-device microphone
+  behavior or universal format/model support are made from mock tests.
+
+EXACT LOCAL KEY ENTRY / ONE LIVE CONNECTION TEST
+Run these in ordinary PowerShell terminals at the repository root. Do not type
+the key as a command argument, paste it in chat, or save it in an env/source file.
+
+Terminal1:
+  npm run openai:emulators
+
+Terminal2:
+  .\scripts\Start-ZorifiOpenAI.ps1 -Mode LiveTest
+
+The PowerShell script calls Read-Host -AsSecureString. Type the key into that
+hidden prompt. It converts it in memory, passes OPENAI_API_KEY through the child
+process environment, and clears the added environment value and BSTR afterward.
+It never writes the key to disk, command history, stdout, a command argument,
+the browser, logs, or Git. Normal OS administrators can inspect process memory;
+environment secrets are not protection against a compromised local machine.
+
+LiveTest creates a disposable local Auth emulator account, verifies it through
+the actual backend, and requests only a public fixed connection phrase from
+Responses. It prints sanitized status/model/response ID/token usage and exits.
+The test can consume OpenAI API credits, but provisions no Firebase paid service.
+Other modality flags stay off. A200 connected:true verifies only that connection
+and chosen model; it does not verify the optional media/Realtime/retrieval paths.
+
+For a local UI using mocked AI, no key is needed:
+  npm run openai:emulators
+  npm run openai:mock
+  Open http://127.0.0.1:4175 and sign up with a disposable demo account.
+For an explicitly live local UI, use -Mode LiveServer instead of -Mode LiveTest.
+
+LOCAL TOOLING
+The emulator helper reuses the isolated cached firebase-tools 14.24.2 CLI and the
+available local Java 21 JRE. If the CLI is missing:
+  npm exec --yes --package=firebase-tools@14.24.2 -- firebase --version
+On another machine, install Java 21 and set JAVA_HOME; or set FIREBASE_CLI_PATH to
+an installed firebase-tools/lib/bin/firebase.js. No app runtime dependency was
+added just to run emulators. Emulator mode requires a loopback demo-* project
+and is rejected on production hosts or for a real Firebase project.
+
+TESTS / EVIDENCE
+- artifacts/openai-all-unit.log:552 tests passed, 0 failed/0 skipped at checkpoint.
+- tests/openai-backend.test.cjs: Responses request shape, server-only secret,
+  strict schemas, real native plan validation, auth/project failure, signed
+  idempotent reply, usage, sanitized provider failures, malformed/incomplete
+  results, cancellation, durable SQLite and signed Firestore state tampering.
+- tests/openai-capabilities.test.cjs: default-off/consent, opaque owned handles,
+  bounded multipart documents, confirmed deletion, vector isolation, GA session
+  configuration and bounded modality API requests; provider responses mocked.
+- npm run test:openai:emulators: actual Firebase Auth + Firestore emulators,
+  actual rules, actual browser signup and bearer verification, private sessions,
+  signed state tampering rejection,20-request quota, usage/account isolation,
+  native split confirmation/visible timeline/Undo/Redo and device refresh.
+  OpenAI is mocked and nonlocal network access is blocked in this test.
+- artifacts/openai-emulators.json/log and openai-emulator-editor.png are receipts.
+- Existing Vanessa browser, build/integrity results are recorded separately in
+  artifacts/openai-existing-vanessa-browser.log, openai-build.log, openai-check.log.
+
+CONFIGURATION STILL REQUIRED FOR HOSTED USE (NOT PERFORMED)
+1. Enter OPENAI_API_KEY in the host's server-side environment secret manager.
+   Select openai or auto and an accessible OPENAI_RESPONSES_MODEL.
+2. Set a stable signing secret; review allowance/retention settings.
+3. Review/publish the tested OpenAI state rules to the existing Firebase project
+   before hosted use. Otherwise new OpenAI usage requests fail closed.
+4. Optional modalities need explicit flags + OPENAI_ALLOWED_MEDIA_UIDS, model
+   access/credits and subsequent live modality/client verification.
+5. Deploy only under separate authorization. No Firebase Functions deployment,
+   Firebase billing upgrade, production changes or release was made here.
+
+FILES ADDED
+netlify/functions/_shared/openai-responses.mjs
+netlify/functions/_shared/vanessa-prompts.mjs
+netlify/functions/_shared/openai-runtime.mjs
+netlify/functions/_shared/openai-firestore-state.mjs
+netlify/functions/_shared/openai-professional.mjs
+netlify/functions/_shared/openai-capabilities.mjs
+netlify/functions/_shared/firebase-local.mjs
+netlify/functions/vanessa-openai.mjs
+api/vanessa/openai.js
+scripts/Start-ZorifiOpenAI.ps1
+scripts/vanessa-openai-local.cjs
+scripts/firebase-emulators.cjs
+scripts/test-openai-emulators.cjs
+tests/openai-backend.test.cjs
+tests/openai-capabilities.test.cjs
+firebase.local.json
+docs/OPENAI-INTEGRATION.txt
+
+EXISTING FILES EXTENDED
+netlify/functions/_shared/provider.mjs, vanessa-router.mjs,
+professional-planner.mjs, chat-session-store.mjs, services.mjs;
+api/vanessa-provider.js; scripts/dev-server.cjs; zorifi-firebase.js;
+firestore.rules; .env.example; package.json; vercel.json; index.html; sw.js.
+The interface catalogue is regenerated by the existing build.
+Pre-existing user changes were not overwritten. The subsequent production
+readiness report records the local development commits and deployment boundary.
+
+PRIMARY DOCUMENTATION CHECKED
+https://developers.openai.com/api/reference/responses/overview
+https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses
+https://developers.openai.com/api/docs/guides/function-calling
+https://developers.openai.com/api/reference/resources/realtime/subresources/client_secrets/methods/create
+https://developers.openai.com/api/reference/resources/images/methods/generate
+https://developers.openai.com/api/reference/resources/videos/methods/create
+https://developers.openai.com/api/reference/resources/vector_stores/methods/search
+https://developers.openai.com/api/docs/guides/text-to-speech
+https://firebase.google.com/docs/emulator-suite/connect_auth
+
+LIVE TEST CHECKPOINT —10 NOVEMBER2026
+The live receipt and private usage ledger were checked without reading a key.
+The script holds OPENAI_API_KEY only in the test child process and clears the
+value it added afterward. Successful testing does not configure a permanent
+secret or connect the deployed app. Hosted configuration/rule publication and
+deployment remain unperformed. For a live local development session, use
+scripts/Start-ZorifiOpenAI.ps1 -Mode LiveServer with hidden key entry and leave
+that terminal open; it uses the demo Firebase emulators, not the production app.

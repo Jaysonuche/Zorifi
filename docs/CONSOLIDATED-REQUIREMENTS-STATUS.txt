@@ -1,0 +1,272 @@
+ZORIFI — CONSOLIDATED IMPLEMENTATION AND VERIFICATION REPORT
+9 November 2026. Source: user's final consolidated requirements 1–10 (8 November).
+LOCAL WORKING TREE ONLY. Published package remains 3.46.0. No deployment, push,
+release, billing change, or cloud-rule change was made for this implementation.
+
+STATUS CONTRACT
+Implemented means actual native code and discoverable controls exist. Verified
+means the specific checks below passed. It does not certify all media, devices,
+creative outcomes, or every tutorial detail. The overall upgrade remains PARTIAL.
+README.md, tests/src-services.test.cjs and src/services/chatController.js contain
+pre-existing user changes and were not edited as part of this work.
+
+ACTUAL APPLICATION / SHARED API MAP
+- Vanilla HTML/CSS/JavaScript: index.html and app.js; one native state object.
+- Native transactions/history/save/load: app.js snapshot/pushHistory, undo/redo,
+  saveProject/loadProject; zorifi-project-model.js history/normalization helpers.
+- Account/session: existing Firebase gateway/currentUser; authenticated server
+  requests retain bearer-token/ownership validation. Browser tests label fixtures.
+- Projects remain account-scoped local metadata; original media blobs stay in
+  IndexedDB under user/project/asset keys. No Studio media cloud migration.
+- Timeline: zorifi-timeline-edit-api.js splitClip, trimClip, trimToBounds,
+  placeClip, moveClip, deleteClip. Native drag/drop and Vanessa share these APIs.
+- Animation/source timing: zorifi-advanced-editing.js sourceTiming,
+  sourceTimeToTimeline, bakeSourceTime, retimeClip, setSpeedRamp and easing APIs.
+- Editable scenes: zorifi-motion-graph.js apply/evaluate/validate, actual native
+  clips and composition.clips. No second live editor-state store or eval.
+- Manual Motion Scenes UI: zorifi-motion-workspace.js/.css. Its commit path uses
+  the same native snapshots, project save, renderer and rollback semantics.
+- Preview/export: zorifi-motion-renderer.js, native playback/audio graph and
+  app.js recorder/export paths. Nested original media uses per-layer decoders.
+- Vanessa: zorifi-vanessa-professional-tools.js validated motion.edit + native
+  commands; zorifi-vanessa-professional.js staged execution/verification;
+  zorifi-vanessa-production.js actual account/project/fingerprint/save guards.
+- Reviewed paid/asynchronous workflows: zorifi-editor-workflow-bridge.js,
+  zorifi-editor-audio-workflows.js and zorifi-parallax-workflow.js.
+- Backend: netlify/functions/_shared/services.mjs, professional-planner.mjs,
+  provider.mjs, gemini-media.mjs and editor-speech.mjs; credentials stay server-side.
+
+REQUIREMENT1 — PROFESSIONAL EDITING TOOL INTEGRATION
+IMPLEMENTED CORE / PARTIALLY VERIFIED AS A COMPLETE CREATIVE WORKFLOW.
+Native layered video/image/text/audio, transforms/crop/grades, matrices/parenting,
+editable shapes/effects/masks/cameras/nested scenes and original sound design
+share the actual project. Manual Motion Scenes and reviewed Vanessa motion.edit
+operate the same layers. Actual provider-authored motion data passed validation
+and native-UI replay; representative multi-step plans support review, one Undo,
+Redo, Stop/stale-result protection and exact reopening. Broader cinematic quality
+across documentaries/fashion/music/commercial source sets is not certified.
+
+REQUIREMENT2 — UNIFIED BACKGROUND TOOL / REMOVAL REPAIR
+IMPLEMENTED AND VERIFIED FOR DOCUMENTED SUPPORTED PATHS.
+Background offers automatic even-colour removal, opt-in local person model,
+reviewed Gemini object outlines, editable brush erase/restore, feather/invert,
+reset and chroma colour/tolerance/softness/spill/shadow. Original media retained.
+Manual/Vanessa background requests edit the matte, never assistant memory.
+Tests cover real brush pointer input, nested target refinement, exact reopen,
+Undo/Redo and decoded exported matte pixels. A real downloaded/pinned local person
+model changed matte pixels on different video frames without source upload.
+Limits: fine hair/clothing edges vary. Static painted/outline video mattes do not
+track arbitrary subject motion. Local person processing is bounded to720px.
+
+REQUIREMENT3 — AUDIO/TEXT ORGANISATION, TTS AND CAPTIONS
+IMPLEMENTED CORE; PROVIDER TIMING/DEVICE LIMITS REMAIN.
+Audio contains Beats, measured markers, alignment, original Sound Effects and
+editable loops. Text contains renderable TTS with available Gemini voices,
+voice/style/speed/source text retained, playback preview and saved WAV media.
+Actual Gemini speech generated a2.811s/134970-byte recording from a public test
+phrase. Device conversational synthesis remains distinct from exported narration.
+Captions are editable text with corrections/timestamps/style and source binding.
+Move/split/trim/uniform speed/ramp/time-remap changes use actual forward/inverse
+source clocks for captions and word timings. Stop, changed-source guards and
+save-failure rollback passed. Locked linked captions reject supported timing
+transactions atomically. Provider transcripts use estimated segment timing;
+manual corrections are authoritative. TTS speed changes pitch with duration.
+
+REQUIREMENT4 — MULTIPLE CLIPS ON A TRACK
+IMPLEMENTED / VERIFIED NATIVE OPERATIONS.
+Sequential image/video additions retain the main track. Gap/append/insert/
+overwrite are explicit; intentional overlay/new-track drops remain supported.
+Moves reject unintended collision. Source-window splits preserve keys/captions;
+source-linked dependent rows move once. Editable shapes can move without fake
+media. Tests cover three sequential clips, overlays, locks, dependencies,
+variable-speed split/trim, actual native adapter history and reopening.
+Nested compositions have their own local time/tracks, not extra root projects.
+
+REQUIREMENT5 — SOUND EFFECTS SYSTEM
+IMPLEMENTED / VERIFIED SUPPORTED LIBRARY AND RENDER PATHS.
+12 original deterministic cues include whoosh, impact, riser, boom, ambience,
+footsteps, click and explosion categories; actual search/preview/import and native
+audio placements, gain/pan/fades/rate/keys/loops/beat alignment. No commercial
+trending-song catalogue or third-party music licence is fabricated.
+Small actual MP4 exports decoded audible original SFX/nested audio. The library
+is intentionally bounded; missing sounds require import or supported generation.
+
+REQUIREMENT6 — CINEMATIC PARALLAX /2.5D SCENE BUILDER
+IMPLEMENTED EDITABLE WORKFLOW; LIVE BACKGROUND RECONSTRUCTION BLOCKED.
+Motion Scenes -> Cinematic Parallax builds editable foreground/clean background,
+retained subject matte, actual planar depth/perspective camera and keyed motion.
+Independent effects/transforms, original sources and editable camera survive
+Undo/Redo/save/reopen. Clean-plate overscan/depth scaling prevents tested holes
+at three camera positions. Imported clean plates and reviewed provider-fixture
+plates work. A real Gemini clean-background request returned HTTP429,
+PROVIDER_RATE_LIMIT (quota/paid-tier access). No generated-plate quality claim.
+No billing increase or workaround was attempted. Full geometric3D reconstruction,
+automatic midground discovery, and guaranteed hidden-content accuracy are absent.
+
+REQUIREMENT7 — EDITABLE MOTION GRAPHICS / CAMERA ANIMATION
+IMPLEMENTED NATIVE BENCHMARK / PARTIAL FULL ACCEPTANCE.
+Benchmark4oNTuPmhgx0: editable scale-in logo, character/word/line text selectors,
+subtle circles, nested background,35mm perspective camera/null controllers.
+Native shapes/groups, pivots, hierarchy/reparent, spatial paths, temporal Bezier
+curves, keys/copy/retime/delete, effects/glow and planar3D transforms are editable.
+Composition duration, work area and output range are distinct. Export supports
+filename/download and supported destination picker. Actual H.264 MP4 at small
+resolution24fps passed decoded video/audio/duration checks, including a2s scene
+and a0.35s nested range. Initial blank-video/audio-only MP4 regression repaired.
+60fps composition metadata works; sustained1920x1080/60fps recorder output on all
+hardware is not certified. Motion blur samples transform shutter positions;
+it does not synthesize optical-flow frames. Nested children are edited in Motion
+Scenes; a complete expanded child timeline/After Effects workspace is not present.
+
+REQUIREMENT8 — CREATIVE PACKS / TEMPLATES / ADVANCED TRANSITIONS
+IMPLEMENTED NATIVE PACKS / PARTIAL SHOWCASE EQUIVALENCE.
+BenchmarkuzvIh65Tvi4; duplicated upload remains one requirement.
+13 native editable packs cover warp-in/out, zoom/shake, rotational blur, bounce,
+twitch, bars in three directions, halftone, lens soften, directional/tile motion.
+Separate effect properties/keys, effect copying, animated numerical text,
+adjustment layers, reusable combinations and account-local project templates.
+Manual and Vanessa save/apply the same native combinations at captured playhead;
+stale library/project changes reject. Explicit saved names outrank pack keywords.
+Actual integrated speed curves, source-time remap/holds and source-span retiming
+are editable; this is not Twixtor/optical-flow frame interpolation. AEP/FFX and
+third-party plugin execution/import are not advertised or implemented.
+
+REQUIREMENT9 — APPLE-STYLE SHAPE MORPHING / EXPRESSIONS
+IMPLEMENTED EDITABLE BENCHMARK; NOT PIXEL-IDENTICAL CERTIFICATION.
+BenchmarkcpQzSKuEAkM creates1920x1080,10s,60fps editable circle/arrow -> title pill
+-> product card/Pay -> Track Order. Geometry Size differs from Scale. Paths,
+round corners, fill/stroke, named groups, independent opacity, text selectors,
+delayed property links, controller chains, safe typed bounce/oscillation/links,
+spatial handles, temporal curves and explicit stationary holds are editable.
+Actual pointer pen drawing/handle changes, masks, keys, parenting, manual/Vanessa
+native packs, reuse/history and render snapshots passed. User artwork can replace
+benchmark art; test portraits are not the tutorial's supplied product artwork.
+Typed expression data is inspectable, bounded and non-executable; arbitrary
+After Effects JavaScript expressions are unsupported. Pay labels do not transact.
+
+REQUIREMENT10 — UI ANIMATION / MATTES / MASKS / COORDINATED MOTION
+IMPLEMENTED EDITABLE BENCHMARK; PARTIAL FULL TUTORIAL ACCEPTANCE.
+BenchmarkYXOSnWXWo_I: search/results/selected city/navigation/grid/pin/location
+label built from editable nested layers and replaceable art. Independent matte
+sources, clean clipping apart from shadow/glow, masks, controller parenting,
+text selectors, spatial Bezier points/handles, rounded cursor paths, sweeps with
+edge intensity, glow, grid and Shy rows are supported. Mattes/shadows and container
+opacity composite correctly; independently timed copies of one video source
+render different decoded frames. Shy hides rows without removing rendered content.
+Benchmark renders and editable-state/history checks passed; the result is an
+original native reconstruction, not universal reproduction of all tutorial frames.
+No live search/GPS/booking is implied. Full external Flow/Deep Glow plugins absent.
+
+VERIFICATION EVIDENCE (artifacts directory; tests contain fixture disclosures)
+- consolidated-unit.log: 535 tests passed, 0 failed, 0 skipped.
+- consolidated-native-tools.log:51/51 staged tools against actual app adapter.
+- consolidated-professional-motion.log: authenticated fixture proposal -> actual
+  native scene/render -> one Undo/Redo -> exact save/reopen -> Stop delayed result.
+- consolidated-live-motion.log / plan.json: actual Gemini structured scene plan;
+  consolidated-gemini-motion-replay.log verifies that saved plan through native UI.
+- consolidated-stage2-regression.log: Chromium/WebKit existing editing, correction,
+  stale proposals, Pause/Resume/Stop, memory isolation, source checks and refresh.
+- consolidated-motion-workspace.log / motion-controls.log / motion-benchmarks.log:
+  real controls, pen/masks/curves, packs, pixels, theme contrast,320–1440px bounds.
+- consolidated-background-browser.log / person-video.log / background-provider.log:
+  native mattes/refinement/export, actual local person model, mocked outline review.
+- consolidated-editor-workflows-browser.log: TTS/captions/Stop/stale/save rollback.
+- consolidated-parallax-workflow.log: reviewed synthetic plate and editable depth.
+- consolidated-nested-media.log: decoded red/blue windows, audible nested MP4,
+  explicit output range, actual duration and original media reopening.
+- consolidated-real-speech.json/.wav: actual public-phrase Gemini recording.
+- consolidated-real-plate.json: actual provider429; reconstruction remains blocked.
+- consolidated-source-clock.log/.json: integrated real decoded video scrubbing,
+  native retiming/captions, manual Source speed form, Undo/Redo/exact reopening,
+  held nested frame with master clock advancing, and actual decoded MP4 export.
+  Three runs passed, including the final same-track collision guard. Fixed decoder readiness/seek event race.
+- consolidated-build.log / consolidated-check.log: 158-file web build and
+  source/asset checks; desktop and service-worker asset lists include new modules.
+
+REMAINING ACCEPTANCE / RELEASE LIMITS
+No full-upgrade completion or production-readiness claim. Resolve live image
+provider quota to verify generated clean plates; extend remaining full-manual
+benchmark/creative-quality coverage. Physical iPhone/iPad, installed desktop,
+real microphone permission/wake-word, large4K projects,60fps/high-resolution
+encoder throughput and all browser/device combinations are not certified by
+headless viewport tests. AI output, device voices and network services can fail;
+errors remain visible and failed/stopped jobs cannot claim an edit succeeded.
+No deployment is authorized merely by completion of local implementation.
+
+LATEST CHECKPOINT
+The 51 native staged-tool checks, audio/text workflows, background workflows,
+parallax workflow, representative Vanessa motion plan, existing 45-second
+Stage 2 commercial regression, motion controls, responsive motion workspace and
+nested media/MP4 regressions passed. Source-clock split/trim/locks/source remap
+regressions pass within the full 535-test suite. The decoder repair and final same-track retiming protection were verified
+successfully; provider clean-plate quota remains the concrete external blocker.
+
+SOURCE CHANGES IN THIS LOCAL IMPLEMENTATION
+Repository: C:/Users/User/Documents/ChatGPT/Zorifi
+- app.js
+- index.html
+- netlify/functions/_shared/gemini-media.mjs
+- netlify/functions/_shared/professional-planner.mjs
+- netlify/functions/_shared/provider.mjs
+- netlify/functions/_shared/services.mjs
+- package.json
+- sw.js
+- tests/background-cutout-browser.cjs
+- tests/media-review.test.cjs
+- tests/professional-native-tools-browser.cjs
+- tests/professional-sound-design.test.cjs
+- zorifi-advanced-editing.js
+- zorifi-background-cutout.css
+- zorifi-background-cutout.js
+- zorifi-background-integration.js
+- zorifi-composition-workspace.js
+- zorifi-creator-platform.js
+- zorifi-interface-catalog.json
+- zorifi-layer-masks.js
+- zorifi-mask-painter.js
+- zorifi-phase8.js
+- zorifi-project-model.js
+- zorifi-sfx.js
+- zorifi-timeline-edit-api.js
+- zorifi-timeline-interactions.css
+- zorifi-timeline-interactions.js
+- zorifi-vanessa-media-review.js
+- zorifi-vanessa-memory-context.js
+- zorifi-vanessa-production.js
+- zorifi-vanessa-professional-tools.js
+- zorifi-vanessa-professional.js
+- docs/CONSOLIDATED-REQUIREMENTS-STATUS.txt
+- netlify/functions/_shared/editor-speech.mjs
+- tests/background-memory-routing.test.cjs
+- tests/background-workflows-browser.cjs
+- tests/chroma-shadow.test.cjs
+- tests/editor-audio-workflows.test.cjs
+- tests/editor-speech.test.cjs
+- tests/editor-workflows-browser.cjs
+- tests/motion-benchmarks-browser.cjs
+- tests/motion-controls-browser.cjs
+- tests/motion-graph.test.cjs
+- tests/motion-nested-media-browser.cjs
+- tests/motion-packs.test.cjs
+- tests/motion-source-clock.test.cjs
+- tests/motion-template-references.test.cjs
+- tests/motion-workspace-browser.cjs
+- tests/parallax-workflows-browser.cjs
+- tests/person-video-cutout-browser.cjs
+- tests/professional-motion-browser.cjs
+- tests/source-clock-browser.cjs
+- tests/source-clock.test.cjs
+- tests/timeline-placement.test.cjs
+- zorifi-editor-audio-workflows.css
+- zorifi-editor-audio-workflows.js
+- zorifi-editor-workflow-bridge.js
+- zorifi-motion-graph.js
+- zorifi-motion-packs.js
+- zorifi-motion-renderer.js
+- zorifi-motion-workspace.css
+- zorifi-motion-workspace.js
+- zorifi-parallax-workflow.js
+
+Packaging: index.html, sw.js and package.json include new runtime modules in
+web/offline/desktop bundles; changed runtime references use local cache token
+249-consolidated2. No application release version was advanced.

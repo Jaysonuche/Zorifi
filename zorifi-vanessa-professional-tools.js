@@ -31,6 +31,8 @@
   targeted('clip.delete','timeline',{}, {destructive:true});
   targeted('clip.ripple_delete','timeline',{}, {destructive:true});
   targeted('clip.move','timeline',{start:num(0,MAX_TIME,true),track:{...track(),required:true}});
+  targeted('clip.place','timeline',{start:num(0,MAX_TIME,true),track:{...track(),required:true},mode:choose(['gap','insert','overwrite','append'],true)});
+  add('motion.edit','motion-graphics',{operation:choose(['scene.benchmark','scene.parallax','preset.apply','preset.custom','layer.create','source.retime','layer.set','layer.parent','layer.delete','layer.duplicate','shape.set','shape.group','background.copy','shape.to_path','shape.vertices','expression.set','expression.remove','animation.keyframe','animation.delete_key','animation.spatial_path','animation.retime','animation.copy','text.animator','text.number','effect.copy','effect.add','effect.set','effect.remove','matte.set','mask.set','camera.set','composition.precompose','composition.settings'],true),dataJson:str(48000,true)},{implementation:'zorifi-motion-graph.js validated native editable graph',confirmation:'review-plan'});
   targeted('clip.set','transform',{property:choose(Object.keys(CLIP_RANGES),true),value:num(-360,500,true)});
   targeted('visual.adjust','colour',{property:choose(Object.keys(VISUAL_RANGES),true),value:num(-100,200,true)});
   targeted('visual.hsl','colour',{hue:num(-180,180),saturation:num(-100,100),lightness:num(-100,100)});
@@ -40,7 +42,9 @@
   targeted('visual.remove_filter','colour',{});
   targeted('visual.effect','effects',{id:id(true)},{catalogue:'effects'});
   targeted('visual.remove_effect','effects',{id:id(true)});
-  targeted('visual.chroma','compositing',{enabled:bool(),color:color(),tolerance:num(0,100),softness:num(0,100),spill:num(0,100)});
+  targeted('visual.chroma','compositing',{enabled:bool(),color:color(),tolerance:num(0,100),softness:num(0,100),spill:num(0,100),shadow:num(0,100)});
+  targeted('background.configure','compositing',{maskFeather:num(0,50),maskInvert:bool(),threshold:num(.05,.95),softness:num(.01,.4)});
+  targeted('background.reset','compositing',{});
   targeted('visual.mask','compositing',{shape:choose(['none','circle','rectangle','triangle'],true),scale:num(5,200),x:num(-100,100),y:num(-100,100),feather:num(0,100)});
   targeted('effect.apply','effects',{id:id(true),params:{type:'object',additionalProperties:{type:'number'}}},{catalogue:'elementEffects'});
   targeted('effect.remove','effects',{instanceId:id(true)});
@@ -97,6 +101,7 @@
     if(definition.catalogue&&Array.isArray(catalog[definition.catalogue])&&catalog[definition.catalogue].length)params.id={type:'string',enum:catalog[definition.catalogue]};
     if(definition.command==='effect.apply')params.params={type:'object',properties:{},additionalProperties:{type:'number'},description:'Only exact numeric parameter names/ranges from the selected effect definition; unknown names rejected.'};
     if(definition.command==='audio.sfx'&&Array.isArray(catalog.audioTrackIds)&&catalog.audioTrackIds.length)params.track={...params.track,enum:catalog.audioTrackIds.filter(value=>Number.isSafeInteger(value)&&value>=0&&Tracks.kind(value)==='audio'),description:'Optional typed audio-layer ID. Omit to allocate a free layer automatically; track2 is text, not a second audio layer.'};
+    if(definition.command==='audio.sfx'&&Array.isArray(catalog.soundEffects))params.soundId={...params.soundId,enum:params.soundId.enum.filter(id=>catalog.soundEffects.some(cue=>(typeof cue==='string'?cue:cue.id)===id))};
     return {
       type:'object',additionalProperties:false,required:['command','target','parameters'],
       properties:{
@@ -133,6 +138,7 @@
     const definition=definitions[input.command];if(!definition||definition.execution!=='editor')fail('This tool requires its separate verified workflow.');
     const action=copy(input),p=action.parameters,catalog=catalogFor(options);
     if(!advertised(definition,catalog))fail('This editing command was not advertised by the running editor.');
+    if(action.command==='audio.sfx'&&Array.isArray(catalog.soundEffects)&&!catalog.soundEffects.some(cue=>(typeof cue==='string'?cue:cue.id)===p.soundId))fail('This sound cue was not advertised by the running editor.');
     if(Object.keys(p).some(key=>!Object.hasOwn(definition.parameters,key)))fail(`Unknown ${action.command} parameter.`);
     for(const [key,rule] of Object.entries(definition.parameters)){if(p[key]===undefined){if(rule.required)fail(`Missing ${action.command}.${key}.`);}else checkValue(p[key],rule,`${action.command}.${key}`);}
     if(action.target!==undefined&&action.target!==null)checkValue(action.target,id(),`${action.command}.target`);
@@ -146,6 +152,7 @@
   function validateAction(input,project,options={}){
     const action=validateStructure(input,options),p=action.parameters,definition=definitions[action.command],catalog=catalogFor(options);
     if(!Array.isArray(project?.clips)||!Array.isArray(project?.mediaAssets))fail('A real editor project is required.');
+    if(action.command==='motion.edit'){const graph=root.ZorifiMotionGraph||(typeof require==='function'?require('./zorifi-motion-graph.js'):null);if(!graph)fail('The motion evaluator is unavailable.');let data;try{data=JSON.parse(p.dataJson);}catch{fail('Motion operation parameters must be valid JSON data.');}graph.apply(copy(project),{command:p.operation,target:action.target,parameters:data});return action;}
     const clip=definition.target?resolveClip(project,action):null;
     if(definition.target&&!clip)fail('The target clip does not exist.');
     if(clip&&action.command!=='clip.select'&&(locked(project,clip.track)||clip.zorifiEnding))fail('The target clip is locked or is the automatic ending.');
@@ -160,6 +167,8 @@
     if(action.command==='clip.trim'&&(p.duration>clip.duration||p.duration===clip.duration))fail('Trim duration must shorten the selected clip.');
     if(action.command==='clip.split'&&(p.time<=clip.start+.05||p.time>=clip.start+clip.duration-.05))fail('Split time must be inside the clip.');
     if(action.command==='clip.move'&&(locked(project,p.track)||Tracks.kind(p.track)!==Tracks.kind(clip.track)))fail('The destination track is locked or has the wrong kind.');
+    if(action.command==='clip.place'){const api=root.ZorifiTimelineEditAPI||(typeof require==='function'?require('./zorifi-timeline-edit-api.js'):null);if(!api)fail('The native placement service is unavailable.');api.placeClip(copy(project),{clipId:clip.id,...p});}
+    if(action.command.startsWith('background.')){const api=root.ZorifiBackgroundCutout||(typeof require==='function'?require('./zorifi-background-cutout.js'):null);if(!api)fail('The native background service is unavailable.');if(action.command==='background.configure'){if(!Object.keys(p).length)fail('Choose background refinement settings.');api.configure(copy(clip),p);}else api.reset(copy(clip));}
     if(action.command==='audio.fade'&&(!Object.keys(p).length||(p.in||0)>clip.duration||(p.out||0)>clip.duration))fail('Audio fades must fit the selected clip.');
     if(action.command==='transition.apply'&&(p.duration??.6)>clip.duration)fail('The transition is longer than the selected clip.');
     if(action.command==='animation.apply'&&p.duration!==undefined&&p.duration>clip.duration)fail('The animation is longer than the selected clip.');
@@ -180,7 +189,7 @@
       if(action.command==='clip.add'){const asset=project.mediaAssets.find(x=>x.id===p.mediaId);if(!asset||!['video','image','audio'].includes(asset.type)||!(asset.url||asset.builtin||asset.available===true))fail('The source media is unavailable.');if(asset.type==='image'&&((p.sourceStart||0)!==0||(p.playbackRate??1)!==1))fail('Still images use source start zero and normal playback speed.');if(asset.type!=='image'&&(!Number.isFinite(asset.duration)||asset.duration<=0||(p.sourceStart||0)+p.duration*(p.playbackRate||1)>asset.duration+.025))fail('The clip exceeds its source media.');}
       if(action.command==='audio.sfx'){const placement=soundPlacement(project,p),assets=project.mediaAssets.filter(asset=>asset.id===placement.asset.id);if(locked(project,placement.track)||Tracks.kind(placement.track)!=='audio')fail('The destination audio track is locked or has the wrong kind.');if(assets.length>1||assets.length===1&&!matchingSoundAsset(assets[0],placement.asset))fail('A conflicting source occupies the original sound-effect identity.');Object.assign(p,{duration:placement.duration,track:placement.track,volume:placement.volume});}
     }
-    if(action.command==='clip.set'&&p.property==='playbackRate'||action.command==='audio.set'&&p.property==='playbackRate'){const asset=project.mediaAssets.find(x=>x.id===clip.mediaId);if(asset&&asset.type!=='image'&&clip.duration*p.value+(clip.sourceStart||0)>asset.duration+.025)fail('This speed would exceed the available source.');}
+    if((action.command==='clip.set'||action.command==='audio.set')&&p.property==='playbackRate'){const graph=root.ZorifiMotionGraph||(typeof require==='function'?require('./zorifi-motion-graph.js'):null);graph.apply(copy(project),{command:'layer.set',target:clip.id,parameters:{playbackRate:p.value}});}
     return action;
   }
   function validatePlan(actions,project,options={}){if(!Array.isArray(actions)||!actions.length||actions.length>(options.maxActions||MAX_ACTIONS))fail(`Use between 1 and ${options.maxActions||MAX_ACTIONS} actions.`);return actions.map(action=>validateStructure(action,options));}
@@ -198,23 +207,26 @@
   function verifyAction(action,before,after,options={}){
     const p=action.parameters||{},old=resolveClip(before,action),clip=resolveClip(after,action),command=action.command;
     const yes=condition=>{if(!condition)fail(`The editor did not verify ${command}.`);return true;};
+    if(command==='motion.edit'){const graph=root.ZorifiMotionGraph||(typeof require==='function'?require('./zorifi-motion-graph.js'):null),expected=copy(before);graph.apply(expected,{command:p.operation,target:action.target,parameters:JSON.parse(p.dataJson)});return yes(same(expected.clips,after.clips)&&expected.selected===after.selected);}
     if(command==='audio.sfx'){const expected=soundPlacement(before,p),added=after.clips.find(item=>item.id===p.id),asset=after.mediaAssets.find(item=>item.id===expected.asset.id),hadSource=before.mediaAssets.some(item=>item.id===expected.asset.id);return yes(!before.clips.some(item=>item.id===p.id)&&after.clips.length===before.clips.length+1&&before.clips.every(item=>same(item,after.clips.find(next=>next.id===item.id)))&&after.mediaAssets.length===before.mediaAssets.length+(hadSource?0:1)&&before.mediaAssets.every(item=>same(item,after.mediaAssets.find(next=>next.id===item.id)))&&matchingSoundAsset(asset,expected.asset)&&added?.type==='audio'&&added.name===(asset.name||expected.asset.name)&&added.mediaId===expected.asset.id&&added.soundEffect===true&&added.sfxId===p.soundId&&added.audioEffects?.role==='sfx'&&near(added.start,p.start)&&near(added.duration,expected.duration)&&added.track===expected.track&&near(added.volume,expected.volume)&&near(added.sourceStart,0)&&near(added.playbackRate,1)&&near(added.audioFadeIn,Math.min(.01,expected.duration/4))&&near(added.audioFadeOut,Math.min(.12,expected.duration/4))&&after.selected===p.id);}
     if(definitions[command]?.creation){const added=after.clips.find(x=>x.id===p.id);return yes(!before.clips.some(x=>x.id===p.id)&&after.clips.length===before.clips.length+1&&added&&near(added.start,p.start)&&near(added.duration,p.duration)&&(command==='text.add'?added.name===p.text:added.mediaId===p.mediaId));}
     if(command==='clip.select')return yes(after.selected===old?.id);
-    if(command==='clip.delete'||command==='text.delete'||command==='clip.ripple_delete')return yes(old&&!after.clips.some(x=>x.id===old.id)&&after.clips.length===before.clips.length-1);
-    if(command==='clip.split'){const pieces=after.clips.filter(x=>x.id===old.id||!before.clips.some(y=>y.id===x.id));return yes(after.clips.length===before.clips.length+1&&pieces.length===2&&pieces.some(x=>near(x.start,p.time))&&near(pieces.reduce((n,x)=>n+x.duration,0),old.duration));}
-    if(command==='clip.trim')return yes(clip&&near(clip.duration,p.duration)&&near(clip.start,old.start)&&near(clip.sourceStart||0,(old.sourceStart||0)+(p.from==='start'?(old.duration-p.duration)*(old.playbackRate||1):0)));
-    if(command==='clip.move')return yes(clip&&near(clip.start,p.start)&&clip.track===p.track);
-    if(command==='clip.set'||command==='audio.set')return yes(clip&&near(clip[p.property],p.value));
+    if(command==='clip.delete'||command==='clip.ripple_delete'){const expected=copy(before),api=root.ZorifiTimelineEditAPI||(typeof require==='function'?require('./zorifi-timeline-edit-api.js'):null);api.deleteClip(expected,{clipId:old.id,ripple:command==='clip.ripple_delete'});return yes(same(expected.clips,after.clips));}if(command==='text.delete')return yes(old&&!after.clips.some(x=>x.id===old.id)&&after.clips.length===before.clips.length-1);
+    if(command==='clip.split'){const right=after.clips.find(x=>x.type===old.type&&x.mediaId===old.mediaId&&!before.clips.some(y=>y.id===x.id)&&near(x.start,p.time)),expected=copy(before),api=root.ZorifiTimelineEditAPI||(typeof require==='function'?require('./zorifi-timeline-edit-api.js'):null);if(!right)return yes(false);api.splitClip(expected,{clipId:old.id,time:p.time,id:right.id});return yes(same(expected.clips,after.clips));}
+    if(command==='clip.trim'){const expected=copy(before),api=root.ZorifiTimelineEditAPI||(typeof require==='function'?require('./zorifi-timeline-edit-api.js'):null);api.trimClip(expected,{clipId:old.id,...p});return yes(same(expected.clips,after.clips));}
+    if(command==='clip.move'){const expected=copy(before),api=root.ZorifiTimelineEditAPI||(typeof require==='function'?require('./zorifi-timeline-edit-api.js'):null);api.moveClip(expected,{clipId:old.id,...p});return yes(same(expected.clips,after.clips));}
+    if(command==='clip.place'){const expected=copy(before),api=root.ZorifiTimelineEditAPI||(typeof require==='function'?require('./zorifi-timeline-edit-api.js'):null);api.placeClip(expected,{clipId:old.id,...p});return yes(same(expected.clips,after.clips)&&after.selected===old.id);}
+    if(command.startsWith('background.')){const expected=copy(old),api=root.ZorifiBackgroundCutout||(typeof require==='function'?require('./zorifi-background-cutout.js'):null);command==='background.configure'?api.configure(expected,p):api.reset(expected);return yes(same(expected,clip));}
+    if(command==='clip.set'||command==='audio.set'){if(p.property==='playbackRate'){const graph=root.ZorifiMotionGraph||(typeof require==='function'?require('./zorifi-motion-graph.js'):null),expected=copy(before);graph.apply(expected,{command:'layer.set',target:old.id,parameters:{playbackRate:p.value}});const actual=copy(after.clips);for(const c of actual)if(c.id===old.id)delete c.speed;return yes(same(expected.clips.map(c=>{delete c.speed;return c;}),actual));}return yes(clip&&near(clip[p.property],p.value));}
     if(command==='visual.adjust')return yes(near(clip?.visualEffects?.adjustments?.[p.property],p.value));
     if(command==='visual.hsl')return yes(clip&&Object.entries(p).every(([key,value])=>near(clip.visualEffects?.hsl?.[key],value)));
     if(command==='visual.grade')return yes(clip?.visualEffects?.grading?.[p.zone]?.color===p.color&&near(clip.visualEffects.grading[p.zone].intensity,p.intensity));
-    if(command==='speed.ramp')return yes(clip&&(p.preset==='none'?!clip.speedRamp:clip.speedRamp===p.preset));
+    if(command==='speed.ramp'){const expected=copy(before),A=root.ZorifiAdvancedEditing||(typeof require==='function'?(require('./zorifi-advanced-editing.js'),root.ZorifiAdvancedEditing):null),captions=root.ZorifiPhase8||(typeof require==='function'?require('./zorifi-phase8.js'):null);A.setSpeedRamp(expected.clips.find(c=>c.id===old.id),p.preset);captions.syncLinkedCaptions(before.clips,expected.clips);return yes(same(expected.clips,after.clips));}
     if(command==='visual.filter')return yes(clip?.visualEffects?.filter?.id===p.id&&near(clip.visualEffects.filter.intensity,p.intensity??100));
     if(command==='visual.remove_filter')return yes(clip?.visualEffects?.filter?.id==='none');
     if(command==='visual.effect')return yes(clip?.clipEffects?.includes(p.id));
     if(command==='visual.remove_effect')return yes(clip&&!clip.clipEffects?.includes(p.id));
-    if(command==='visual.chroma')return yes(clip&&clip.chromaKey===(p.enabled!==false)&&clip.chromaColor===(p.color||old.chromaColor||'#00ff00')&&near(clip.chromaTolerance,p.tolerance??38)&&near(clip.chromaSoftness,p.softness??18)&&near(clip.chromaSpill,p.spill??45));
+    if(command==='visual.chroma')return yes(clip&&clip.chromaKey===(p.enabled!==false)&&clip.chromaColor===(p.color||old.chromaColor||'#00ff00')&&near(clip.chromaTolerance,p.tolerance??38)&&near(clip.chromaSoftness,p.softness??18)&&near(clip.chromaSpill,p.spill??45)&&near(clip.chromaShadow??0,p.shadow??old.chromaShadow??0));
     if(command==='visual.mask')return yes(clip?.maskShape===p.shape&&near(clip.maskScale,p.scale??100)&&near(clip.maskX,p.x??0)&&near(clip.maskY,p.y??0)&&near(clip.maskFeather,p.feather??0));
     if(command==='effect.apply'){const added=(clip?.effectStack||[]).filter(x=>!(old.effectStack||[]).some(y=>y.id===x.id));return yes(added.length===1&&added[0].effectId===p.id&&Object.entries(p.params||{}).every(([key,v])=>near(added[0].params[key],v)));}
     if(command==='effect.remove')return yes(clip&&!(clip.effectStack||[]).some(x=>x.id===p.instanceId));
@@ -245,6 +257,8 @@
     if(targets&&!targets.size)fail('Select the section to fix, or give a timeline time containing media.');
     const inside=clip=>!range||clip.start>=range[0]-.001&&clip.start+clip.duration<=range[1]+.001;
     for(const action of actions){const definition=definitions[action.command],p=action.parameters,clip=clips.get(action.target);
+      if(action.command==='motion.edit'){const graph=root.ZorifiMotionGraph||(typeof require==='function'?require('./zorifi-motion-graph.js'):null),trial={...project,clips:[...clips.values()].map(copy)};graph.apply(trial,{command:p.operation,target:action.target,parameters:JSON.parse(p.dataJson)});const changed=[...clips.values()].filter(old=>!same(old,trial.clips.find(next=>next.id===old.id)));if(changed.some(old=>!inside(old)||targets&&!targets.has(old.id))||trial.clips.some(next=>!clips.has(next.id)&&(targets||!inside(next))))fail('The motion edit changes layers outside the requested section.');clips.clear();for(const next of trial.clips)clips.set(next.id,next);continue;}
+      if(action.command==='clip.place'){const trial={...project,clips:[...clips.values()].map(copy)},api=root.ZorifiTimelineEditAPI||(typeof require==='function'?require('./zorifi-timeline-edit-api.js'):null);api.placeClip(trial,{clipId:clip?.id,...p});const changed=[...clips.values()].filter(old=>!same(old,trial.clips.find(next=>next.id===old.id)));if(changed.some(old=>!inside(old)||targets&&!targets.has(old.id))||trial.clips.some(next=>!inside(next)&&changed.some(old=>old.id===next.id)))fail('Placement would move or overwrite material outside the requested section.');clips.clear();for(const next of trial.clips)clips.set(next.id,next);continue;}
       if(definition?.creation){const placement=action.command==='audio.sfx'?soundPlacement({...project,clips:[...clips.values()]},p):null,duration=placement?.duration??p.duration;if(targets||!inside({start:p.start,duration}))fail('The proposal adds material outside the requested section.');const type=action.command==='audio.sfx'?'audio':action.command==='text.add'?'text':project.mediaAssets?.find(asset=>asset.id===p.mediaId)?.type==='audio'?'audio':'video';clips.set(p.id,{id:p.id,type,start:p.start,duration,track:p.track??placement?.track??Tracks.id(type,1)});continue;}
       if(!definition?.target||!clip||targets&&!targets.has(clip.id))fail('The proposal changes material outside the requested section.');
       if(action.command==='clip.split'&&range&&Math.abs(p.time-range[1])<.001&&clip.start>=range[0]&&clip.start<range[1]&&clip.start+clip.duration>range[1]){clip.duration=p.time-clip.start;continue;}

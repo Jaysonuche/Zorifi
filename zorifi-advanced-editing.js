@@ -146,11 +146,37 @@
     return area;
   }
 
+  const sourceClockCache=new WeakMap();
+  function integrateRate(fn,from,to,tolerance=1e-7){
+    if(to<=from)return 0;const simpson=(a,b,fa,fm,fb)=>(b-a)*(fa+4*fm+fb)/6;
+    const fa=fn(from),fb=fn(Math.max(from,to-1e-9)),middle=(from+to)/2,fm=fn(middle),whole=simpson(from,to,fa,fm,fb);
+    function refine(a,b,fa,fm,fb,area,budget,depth){const mid=(a+b)/2,leftMid=(a+mid)/2,rightMid=(mid+b)/2,fl=fn(leftMid),fr=fn(rightMid),left=simpson(a,mid,fa,fl,fm),right=simpson(mid,b,fm,fr,fb),error=left+right-area;if(depth===0||Math.abs(error)<15*budget)return left+right+error/15;return refine(a,mid,fa,fl,fm,left,budget/2,depth-1)+refine(mid,b,fm,fr,fb,right,budget/2,depth-1);}
+    return refine(from,to,fa,fm,fb,whole,tolerance,14);
+  }
   function sourceTiming(clip,time){
-    const progress=clamp((time-clip.start)/Math.max(.01,clip.duration),0,1),base=Math.max(.05,keyframedValue(clip,'playbackRate',time,1)),points=RAMP_PRESETS[clip.speedRamp];
-    if(!points)return {sourceTime:(clip.sourceStart||0)+progress*clip.duration*base,playbackRate:base,progress};
-    const total=Math.max(.0001,rampArea(points,1)),mapped=rampArea(points,progress)/total,instant=rampValue(points,progress)/total;
-    return {sourceTime:(clip.sourceStart||0)+mapped*clip.duration*base,playbackRate:clamp(base*instant,.1,8),progress:mapped};
+    const start=Number(clip.start)||0,duration=Math.max(.001,Number(clip.duration)||.001),at=clamp(time,start,start+duration),progress=clamp((at-start)/duration,0,1),remap=clip.keyframes?.sourceTime;
+    if(remap?.length){const keys=[...remap].sort((a,b)=>a.time-b.time);if(keys.some((key,i)=>!Number.isFinite(key.time)||!Number.isFinite(key.value)||key.value<0||i&&key.value<keys[i-1].value-1e-7))throw new Error('Source-time keys must stay finite, nonnegative and in forward source order.');const source=value=>ZorifiEasingCurves.interpolateKeyframes(keys,value,clip.keyframeEasing||'linear'),low=Math.max(keys[0].time,at-.0001),high=Math.min(keys.at(-1).time,at+.0001),rate=high>low?(source(high)-source(low))/(high-low):0;return {sourceTime:source(at),playbackRate:clamp(rate,0,16),progress,timeRemapped:true};}
+    const points=RAMP_PRESETS[clip.speedRamp],total=points?Math.max(.0001,rampArea(points,1)):1,rateKeys=clip.keyframes?.playbackRate,base=clamp(keyframedValue(clip,'playbackRate',at,1),.05,16),instant=points?rampValue(points,progress)/total:1;
+    if(!rateKeys?.length&&(!points||points.every(point=>base*point.v/total>=.05&&base*point.v/total<=16))){const mapped=points?rampArea(points,progress)/total:progress;return {sourceTime:(clip.sourceStart||0)+mapped*duration*base,playbackRate:base*instant,progress:mapped};}
+    const signature=JSON.stringify([start,duration,clip.sourceStart||0,clip.playbackRate||1,clip.speedRamp||'',rateKeys||[]]);let cached=sourceClockCache.get(clip);
+    if(cached?.signature!==signature){const rate=t=>clamp(keyframedValue(clip,'playbackRate',t,1)*(points?rampValue(points,(t-start)/duration)/total:1),.05,16),knots=[...new Set([start,start+duration,...(rateKeys||[]).map(key=>key.time),...(points||[]).map(point=>start+point.p*duration)].filter(t=>t>=start&&t<=start+duration))].sort((a,b)=>a-b),prefix=[0];for(let i=1;i<knots.length;i++)prefix.push(prefix[i-1]+integrateRate(rate,knots[i-1],knots[i]));cached={signature,rate,knots,prefix,lastTime:null,lastArea:0};sourceClockCache.set(clip,cached);}
+    let area;if(cached.lastTime===at)area=cached.lastArea;else{let index=cached.knots.findIndex(knot=>knot>=at);if(index<0)index=cached.knots.length-1;if(cached.knots[index]===at)area=cached.prefix[index];else{index=Math.max(0,index-1);area=cached.prefix[index]+integrateRate(cached.rate,cached.knots[index],at);}cached.lastTime=at;cached.lastArea=area;}
+    return {sourceTime:(clip.sourceStart||0)+area,playbackRate:cached.rate(at),progress};
+  }
+  function sourceTimeToTimeline(clip,sourceTime){let low=clip.start,high=clip.start+clip.duration;for(let i=0;i<36;i++){const middle=(low+high)/2;if(sourceTiming(clip,middle).sourceTime<sourceTime)low=middle;else high=middle;}return (low+high)/2;}
+  function bakeSourceTime(clip,from=clip.start,to=clip.start+clip.duration,shift=0,{tolerance=.0001,maxKeys=2048}={}){
+    if(![from,to,shift].every(Number.isFinite)||to<=from)throw new Error('Choose a valid source-time bake window.');const sample=time=>sourceTiming(clip,time).sourceTime,result=[{time:from+shift,value:sample(from),easing:'linear'}];
+    function segment(a,b,va,vb,depth){const quarter=a+(b-a)/4,middle=(a+b)/2,three=a+(b-a)*.75,vm=sample(middle),error=Math.max(Math.abs(sample(quarter)-(va*.75+vb*.25)),Math.abs(vm-(va+vb)/2),Math.abs(sample(three)-(va*.25+vb*.75)));if(error>tolerance&&depth>0){segment(a,middle,va,vm,depth-1);segment(middle,b,vm,vb,depth-1);}else{if(result.length>=maxKeys)throw new Error('This time curve exceeds the editable bake limit. Simplify its speed keys first.');result.push({time:b+shift,value:vb,easing:'linear'});}}
+    const knots=[...new Set([from,to,...(clip.keyframes?.playbackRate||[]).map(key=>key.time),...(clip.keyframes?.sourceTime||[]).map(key=>key.time),...(RAMP_PRESETS[clip.speedRamp]||[]).map(point=>clip.start+point.p*clip.duration)].filter(time=>time>=from&&time<=to))].sort((a,b)=>a-b);for(let i=1;i<knots.length;i++)segment(knots[i-1],knots[i],sample(knots[i-1]),sample(knots[i]),18);return result;
+  }
+  function retimeClip(clip,rate,{mode='timeline'}={}){
+    if(typeof rate!=='number'||!Number.isFinite(rate)||rate<.1||rate>8||!['timeline','source'].includes(mode))throw new Error('Choose speed0.1–8 and a timeline/source duration mode.');const start=clip.start,oldDuration=clip.duration,first=sourceTiming(clip,start).sourceTime,last=sourceTiming(clip,start+oldDuration).sourceTime,newDuration=mode==='source'?(last-first)/rate:oldDuration;if(newDuration<.05)throw new Error('A held or very short source needs an explicit output duration.');const factor=newDuration/oldDuration;clip.sourceStart=first;clip.playbackRate=rate;clip.duration=newDuration;clip.speedRamp='';if(clip.keyframes){delete clip.keyframes.sourceTime;delete clip.keyframes.playbackRate;for(const keys of Object.values(clip.keyframes))for(const key of keys)key.time=start+(key.time-start)*factor;}for(const point of clip.motion?.spatialPath?.points||[])point.time=start+(point.time-start)*factor;for(const field of ['kineticWords','captionWords'])for(const word of clip[field]||[]){word.start=start+(word.start-start)*factor;word.end=start+(word.end-start)*factor;}delete clip.timeRemapSource;return clip;
+  }
+
+  function setSpeedRamp(clip,preset){
+    if(preset==='none')preset='';if(preset&&!RAMP_PRESETS[preset])throw Error('This speed ramp is unavailable.');
+    const first=sourceTiming(clip,clip.start).sourceTime,last=sourceTiming(clip,clip.start+clip.duration).sourceTime,rate=(last-first)/clip.duration;
+    retimeClip(clip,rate,{mode:'timeline'});clip.speedRamp=preset;return clip;
   }
 
   function transitionState(type,progress,role='incoming'){
@@ -171,7 +197,7 @@
   function hexToRgb(value){const hex=String(value||'#00ff00').replace('#',''),full=hex.length===3?hex.split('').map(char=>char+char).join(''):hex;return {r:parseInt(full.slice(0,2),16)||0,g:parseInt(full.slice(2,4),16)||0,b:parseInt(full.slice(4,6),16)||0};}
   function chromaPixel(r,g,b,options={}){
     const key=hexToRgb(options.color),distance=Math.hypot(r-key.r,g-key.g,b-key.b)/441.673,tolerance=.02+clamp(options.tolerance??38,0,100)*.0048,softness=.015+clamp(options.softness??18,0,100)*.0022;
-    const alpha=clamp((distance-tolerance)/softness,0,1),spill=clamp(options.spill??45,0,100)/100;
+    let alpha=clamp((distance-tolerance)/softness,0,1);const strength=clamp(options.shadow??0,0,100)/100,peak=Math.max(r,g,b),keyPeak=Math.max(key.r,key.g,key.b),keySpread=keyPeak-Math.min(key.r,key.g,key.b);if(strength&&peak>0&&keyPeak>0&&keySpread/keyPeak>.15){const hueDistance=Math.hypot(r/peak-key.r/keyPeak,g/peak-key.g/keyPeak,b/peak-key.b/keyPeak)/Math.sqrt(3),similar=1-clamp((hueDistance-(.025+clamp(options.tolerance??38,0,100)*.0012))/.08,0,1),darker=clamp((keyPeak-peak)/(keyPeak*.2),0,1);alpha=Math.min(alpha,1-strength*similar*darker);}const spill=clamp(options.spill??45,0,100)/100;
     if(key.g>=key.r&&key.g>=key.b&&alpha<1){const neutral=Math.max(r,b),amount=(1-alpha)*spill;g=Math.round(g+(Math.min(g,neutral)-g)*amount);}
     return {r,g,b,a:Math.round(alpha*255)};
   }
@@ -208,5 +234,5 @@
   }
 
   global.ZorifiEasingCurves=ZorifiEasingCurves;
-  global.ZorifiAdvancedEditing={ZorifiEasingCurves,RAMP_PRESETS,easedProgress,cubicBezierProgress,basePropertyValue,keyframedValue,upsertKeyframe,removeKeyframeAt,keyframeAt,keyframeTimes,adjacentKeyframeTime,moveKeyframesAt,snapTime,copyKeyframes,pasteKeyframes,deleteSelectedKeyframes,moveSelectedKeyframes,sourceTiming,transitionState,chromaPixel,applyChromaToImageData,estimateFrameTranslation,trackingKeyframes};
+  global.ZorifiAdvancedEditing={ZorifiEasingCurves,RAMP_PRESETS,easedProgress,cubicBezierProgress,basePropertyValue,keyframedValue,upsertKeyframe,removeKeyframeAt,keyframeAt,keyframeTimes,adjacentKeyframeTime,moveKeyframesAt,snapTime,copyKeyframes,pasteKeyframes,deleteSelectedKeyframes,moveSelectedKeyframes,sourceTiming,sourceTimeToTimeline,bakeSourceTime,retimeClip,setSpeedRamp,transitionState,chromaPixel,applyChromaToImageData,estimateFrameTranslation,trackingKeyframes};
 })(typeof window!=='undefined'?window:globalThis);

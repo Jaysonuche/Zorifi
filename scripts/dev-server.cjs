@@ -5,7 +5,7 @@ const {pathToFileURL} = require('node:url');
 const {createLocalMediaJobs} = require('./local-media-jobs.cjs');
 const root = path.resolve(__dirname, '..');
 const types = {'.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.webmanifest':'application/manifest+json', '.png':'image/png', '.jpeg':'image/jpeg', '.mp4':'video/mp4', '.webm':'video/webm', '.wav':'audio/wav', '.mp3':'audio/mpeg', '.vtt':'text/vtt', '.svg':'image/svg+xml', '.ico':'image/x-icon'};
-const services = new Set(['vanessa-creative-feedback','vanessa-chat','vanessa-background','vanessa-director-tools','vanessa','vanessa-global','vanessa-language','vanessa-image','vanessa-scene-image','vanessa-video','vanessa-video-tool','vanessa-motion','vanessa-music','vanessa-stems','vanessa-voice','vanessa-speech','vanessa-captions','vanessa-scenes','vanessa-autocut','vanessa-provider-test','support-email']);
+const services = new Set(['vanessa-openai','vanessa-creative-feedback','vanessa-chat','vanessa-background','vanessa-director-tools','vanessa','vanessa-global','vanessa-language','vanessa-image','vanessa-scene-image','vanessa-video','vanessa-video-tool','vanessa-motion','vanessa-music','vanessa-stems','vanessa-voice','vanessa-speech','vanessa-captions','vanessa-scenes','vanessa-autocut','vanessa-provider-test','support-email']);
 function json(res, status, value) { res.writeHead(status, {'content-type':'application/json', 'cache-control':'no-store'}); res.end(JSON.stringify(value)); }
 function createServer({crmDirectory=path.join(root,'.zorifi-private'),crmKey,localMedia=createLocalMediaJobs()}={}) {
  const crm=require('./crm-store.cjs').createCRM({directory:crmDirectory,...(crmKey?{key:crmKey}:{})});
@@ -23,7 +23,7 @@ function createServer({crmDirectory=path.join(root,'.zorifi-private'),crmKey,loc
     return json(res, 200, {server:'Zorifi development server', configurations, imageConfigured:configurations.image.configured, musicConfigured:configurations.music.configured, secureStorage:{available:false}, provider:{name:'Vanessa AI Provider'}});
    }
    if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/.netlify/functions/')) {
-    const name = url.pathname === '/api/vanessa/chat'?'vanessa-chat':url.pathname === '/api/vanessa-provider' ? (url.searchParams.get('service')||'vanessa-global') : url.pathname.split('/').at(-1);
+    const name = url.pathname === '/api/vanessa/openai'?'vanessa-openai':url.pathname === '/api/vanessa/chat'?'vanessa-chat':url.pathname === '/api/vanessa-provider' ? (url.searchParams.get('service')||'vanessa-global') : url.pathname.split('/').at(-1);
     if (!services.has(name)) return json(res, 404, {error:'Unknown service.'});
     const chunks=[]; let size=0;
     for await (const chunk of req) {size+=chunk.length;if(size>32*1024*1024)return json(res,413,{error:'Request too large.'});chunks.push(chunk);}
@@ -83,7 +83,8 @@ function createServer({crmDirectory=path.join(root,'.zorifi-private'),crmKey,loc
    if(relative==='index.html'&&process.env.FIREBASE_WEB_API_KEY&&process.env.FIREBASE_PROJECT_ID){
     // Local previews need the same public Firebase client configuration as the
     // Vercel build. Never copy server/provider secrets into HTML.
-    const publicConfig={apiKey:process.env.FIREBASE_WEB_API_KEY,projectId:process.env.FIREBASE_PROJECT_ID,authDomain:process.env.FIREBASE_AUTH_DOMAIN||'',appId:process.env.FIREBASE_APP_ID||'',googleClientId:process.env.GOOGLE_OAUTH_CLIENT_ID||'',storageBucket:process.env.FIREBASE_STORAGE_BUCKET||'',socialMediaEnabled:process.env.ZORIFI_SOCIAL_MEDIA_ENABLED==='true'};
+    const localFirebase=(await import('../netlify/functions/_shared/firebase-local.mjs')).localFirebase(new Request(origin));
+    const publicConfig={...(localFirebase?{authEmulator:localFirebase.auth,firestoreEmulator:localFirebase.firestore}:{}),apiKey:process.env.FIREBASE_WEB_API_KEY,projectId:process.env.FIREBASE_PROJECT_ID,authDomain:process.env.FIREBASE_AUTH_DOMAIN||'',appId:process.env.FIREBASE_APP_ID||'',googleClientId:process.env.GOOGLE_OAUTH_CLIENT_ID||'',storageBucket:process.env.FIREBASE_STORAGE_BUCKET||'',socialMediaEnabled:process.env.ZORIFI_SOCIAL_MEDIA_ENABLED==='true'};
     const bootstrap='<script>window.__ZORIFI_FIREBASE_CONFIG__='+JSON.stringify(publicConfig).replace(/</g,'\\u003c')+';</script>';
     data=Buffer.from(data.toString('utf8').replace('</head>',bootstrap+'</head>'));
    }

@@ -27,10 +27,10 @@ test('both chat entry points package the native planner and local runtime depend
       else dependencies.add(relative);
     }
   };
-  for (const name of ['professional-planner', 'creative-feedback', 'vanessa-router', 'services']) {
+  for (const name of ['professional-planner', 'creative-feedback', 'vanessa-router', 'services', 'openai-capabilities']) {
     visit(`netlify/functions/_shared/${name}.mjs`);
   }
-  for (const entry of ['api/vanessa-provider.js', 'api/vanessa/chat.js']) {
+  for (const entry of ['api/vanessa-provider.js', 'api/vanessa/chat.js', 'api/vanessa/openai.js']) {
     for (const file of dependencies) {
       assert.ok(path.matchesGlob(file, config.functions[entry].includeFiles), `${entry} omits ${file}`);
     }
