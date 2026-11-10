@@ -64,3 +64,53 @@ test('local memory bounds retained history and tolerates corrupted local data',a
  for(let i=0;i<105;i++)await memory.saveMessageToMemory('alice','user',`message ${i}`);
  const history=await memory.loadUserMemory('alice',1000);assert.equal(history.length,100);assert.equal(history[0].content,'message 5');assert.equal(history[99].content,'message 104');
 });
+
+test('chat handler loads local context, calls Vanessa, and saves both sides of a successful turn',async()=>{
+ const {createVanessaMessageHandler}=await import('../src/services/chatController.js');
+ const events=[],history=[{role:'user',content:'Earlier question'}];
+ const handle=createVanessaMessageHandler({
+  loadMemory:async(userId,maxMessages)=>{events.push(['load',userId,maxMessages]);return history;},
+  askVanessa:async(memory,userMessage)=>{events.push(['ai',memory,userMessage]);return {provider:'Gemini',text:'A reply.'};},
+  saveMemory:async(...args)=>{events.push(['save',...args]);return true;},
+ });
+ assert.deepEqual(await handle('alice','Current question','director'),{
+  success:true,provider:'Gemini',reply:'A reply.',memorySaved:true,
+ });
+ assert.deepEqual(events,[
+  ['load','alice',15],
+  ['ai',history,'Current question'],
+  ['save','alice','user','Current question','director'],
+  ['save','alice','model','A reply.','director'],
+ ]);
+});
+
+test('chat handler keeps the reply when optional local memory is unavailable',async()=>{
+ const {createVanessaMessageHandler}=await import('../src/services/chatController.js');
+ const saves=[];
+ const handle=createVanessaMessageHandler({
+  loadMemory:async()=>[],
+  askVanessa:async()=>({provider:'Groq',text:'A reply.'}),
+  saveMemory:async(...args)=>{saves.push(args);return false;},
+ });
+ assert.deepEqual(await handle('alice','Current question'),{
+  success:true,provider:'Groq',reply:'A reply.',memorySaved:false,
+  memoryWarning:'Vanessa replied, but this conversation could not be saved to local memory.',
+ });
+ assert.equal(saves.length,1,'do not store an assistant-only turn when user memory was not saved');
+});
+
+test('chat handler reports AI failures with its safe fallback reply',async()=>{
+ const {createVanessaMessageHandler}=await import('../src/services/chatController.js');
+ const errors=[],originalError=console.error;console.error=(...args)=>errors.push(args);
+ const handle=createVanessaMessageHandler({
+  loadMemory:async()=>[],
+  askVanessa:async()=>{throw Error('provider unavailable');},
+  saveMemory:async()=>{throw Error('must not save after provider failure');},
+ });
+ try{
+  const result=await handle('alice','Current question');
+  assert.equal(result.success,false);
+  assert.match(result.reply,/trouble connecting/);
+  assert.equal(errors.length,1);
+ }finally{console.error=originalError;}
+});
