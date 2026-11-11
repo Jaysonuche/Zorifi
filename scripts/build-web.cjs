@@ -13,4 +13,12 @@ const config = {apiKey: process.env.FIREBASE_WEB_API_KEY || '', projectId: proce
 const injection = `<script>window.__ZORIFI_FIREBASE_CONFIG__=${JSON.stringify(config).replace(/</g, '\\u003c')};</script>`;
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8').replace('<head>', `<head>\n    ${injection}`);
 fs.writeFileSync(path.join(output, 'index.html'), html);
-console.log(`Built ${files.length} web files plus assets into web-dist.`);
+// Public provenance only. Never serialize the build environment into the release.
+let sourceCommit = process.env.ZORIFI_SOURCE_COMMIT || process.env.VERCEL_GIT_COMMIT_SHA || '';
+if (!/^[a-f0-9]{40}$/i.test(sourceCommit)) {
+  try { sourceCommit = require('node:child_process').execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); }
+  catch { sourceCommit = ''; }
+}
+const release = { version: require('../package.json').version, channel: 'beta', sourceCommit: /^[a-f0-9]{40}$/i.test(sourceCommit) ? sourceCommit : null, builtAt: new Date().toISOString() };
+fs.writeFileSync(path.join(output, 'release.json'), JSON.stringify(release, null, 2) + '\n');
+console.log(`Built ${files.length + 1} web files plus assets into web-dist.`);

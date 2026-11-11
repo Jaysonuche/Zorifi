@@ -4,6 +4,17 @@ const ENDPOINT='https://generativelanguage.googleapis.com/v1beta/interactions';
 const MODELS={image:'gemini-nano-banana-2.1',music:'lyria-3-clip-preview'};
 const MAX_RESULT_BYTES=3_000_000; // Keep the JSON response below Vercel's function payload limit.
 
+// Return bounded retry guidance, never raw quota details or provider messages.
+export async function geminiQuotaFailure(response,kind){
+ let data;try{data=await response.json();}catch{}
+ const details=Array.isArray(data?.error?.details)?data.error.details:[];
+ const unavailable=details.some(item=>item?.['@type']==='type.googleapis.com/google.rpc.QuotaFailure'&&Array.isArray(item.violations)&&item.violations.some(v=>v.quotaValue!==undefined&&String(v.quotaValue).trim()!==''&&Number(v.quotaValue)===0));
+ const alternative=kind==='image'?'Use an imported clean plate or explicit local processing.':'Use imported audio or the native music studio.';
+ const error=new ServiceError(unavailable?`Gemini ${kind} generation has no available project quota. ${alternative} Check the project's model access in AI Studio.`:`Gemini ${kind} generation reached a project quota or rate limit. Wait before explicitly retrying. ${alternative}`,429,unavailable?'PROVIDER_QUOTA_UNAVAILABLE':'PROVIDER_RATE_LIMIT');
+ if(!unavailable){const header=response.headers.get('retry-after'),numeric=Number(header),headerSeconds=header?(Number.isFinite(numeric)?numeric:(Date.parse(header)-Date.now())/1000):NaN,delay=details.find(item=>item?.['@type']==='type.googleapis.com/google.rpc.RetryInfo')?.retryDelay,seconds=typeof delay==='string'&&/^\d+(?:\.\d+)?s$/.test(delay)?Number(delay.slice(0,-1)):NaN;error.retryAfter=Math.max(1,Math.min(86400,Math.ceil(Number.isFinite(headerSeconds)&&headerSeconds>0?headerSeconds:Number.isFinite(seconds)&&seconds>0?seconds:60)));}
+ return error;
+}
+
 export function geminiMediaModel(type){
  const model=env(type==='image'?'GEMINI_IMAGE_MODEL':'GEMINI_MUSIC_MODEL')||MODELS[type];
  if(!/^[a-zA-Z0-9._-]+$/.test(model))throw new ServiceError('Invalid Gemini media model configuration.',503,'NOT_CONFIGURED');
@@ -16,7 +27,7 @@ async function interact(kind,body,{signal}={}){
  catch{if(signal?.aborted)throw new ServiceError('Media generation request stopped.',499,'CANCELLED');throw new ServiceError(`Gemini ${kind} generation could not be reached or timed out. Please retry.`,502,'PROVIDER_UNAVAILABLE');}
  if(!response.ok){
   // Never return Google's raw error: it may contain credentials or user input.
-  if(response.status===429)throw new ServiceError(`Gemini ${kind} generation reached its quota. Check paid-tier access and limits.`,429,'PROVIDER_RATE_LIMIT');
+  if(response.status===429)throw await geminiQuotaFailure(response,kind);
   if([400,401,403,404].includes(response.status))throw new ServiceError(`Gemini ${kind} generation is unavailable for this key. Check paid-tier access, model availability and key restrictions.`,502,'PROVIDER_REJECTED');
   throw new ServiceError(`Gemini ${kind} generation is temporarily unavailable. Please retry.`,502,'PROVIDER_UNAVAILABLE');
  }

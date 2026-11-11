@@ -1,0 +1,210 @@
+ZORIFI MASTER SPECIFICATION — TRACEABILITY / STAGED DELIVERY
+11 November 2026 | Source: attached master specification, sections 1–29.
+
+This continues the existing application and commits ac099cf/5a7d286. It does not
+replace the ten-item editing report with a claim that the full commercial master
+specification is finished. Implemented/Tests below refer to bounded supported
+paths, not universal creative quality, every codec or physical device.
+The current release stage repairs and verifies native editing, quota recovery,
+manual/Vanessa parity and export. It does not activate new payment collection,
+OpenAI production use, paid infrastructure or unapproved prices/allowances.
+
+SECTION1 — PRODUCT IDENTITY: IMPLEMENTED / PARTIALLY TESTED
+Existing Zorifi/Vanessa branding, J.U.P.C.O Enterprises ownership/About,
+responsive web editor, music/image workspaces and Android packaging are present.
+Paths: index.html, app.js, zorifi-app-settings.js, manifest.webmanifest,
+android/, scripts/build-android.cjs. Native music/image functions exist; the
+complete proposed production/vocal/story systems are not implied by branding.
+
+SECTION2 — INFRASTRUCTURE / SECURITY: IMPLEMENTED CORE / PARTIAL PRODUCTION
+Vercel static frontend + Node API; Firebase Auth/accounts:lookup; UID-scoped
+private Firestore sessions; device projects/IndexedDB media. OpenAI Responses,
+server secrets, strict schema/tool validation and signed quota state prepared.
+Paths: vercel.json, api/vanessa-provider.js, provider.mjs, vanessa-router.mjs,
+openai-*.mjs, firestore.rules, zorifi-firebase.js, zorifi-project-model.js.
+Tests: openai-backend/capabilities/production-policy, provider-authorization,
+deployment-config, actual Auth+Firestore emulator/browser workflow.
+OpenAI remains hosted default-off, not activated by this editing deployment.
+Full public App Check client integration and aggregate spend boundary remain.
+Prior exposed launcher credential was removed before commit; revoke/replace it.
+
+SECTION3 — VANESSA: IMPLEMENTED CORE / PARTIAL UNIVERSAL ACCEPTANCE
+Actual native reviewed editing, project snapshots, memory isolation, corrections,
+Stop/Pause/Undo/Redo, opt-in hands-free, silence submission, device female voice
+and synchronized boundary subtitles are present. Existing Gemini remains.
+Paths: zorifi-vanessa-production/professional/voice/listening*.js,
+zorifi-vanessa-memory*.js, zorifi-editor-workflow-bridge.js.
+Tests: vanessa-production-browser, stage2-complete-browser,
+vanessa-listening-browser, vanessa-device-voice-probe, voice unit suites.
+Windows female speech is tested; physical iPhone microphone/wake word and
+consistent female voice availability on every OS remain unverified.
+
+SECTION4 — STANDARD / ADVANCED / NEXUS: NOT IMPLEMENTED AS SPECIFIED
+Current app has legacy Free/Pro plus provider configuration, not the requested
+three subscription-linked reasoning modes. OpenAI gate/UID quotas exist but
+15 daily Free OpenAI turns followed by metered Gemini routing is not integrated.
+Needed: authoritative plan policy, model evaluation/access, per-tier accounting,
+atomic allowance/credit consumption and fallback budget. No free unlimited claim.
+
+SECTION5 — PROFESSIONAL EDITING: IMPLEMENTED / TESTED CORE; PARTIAL FULL SCOPE
+Actual multitrack sequential clips, overlay tracks, explicit insert/overwrite/
+append, source clocks, split/trim/ripple/move, masks/chroma/cutout, transitions,
+native motion graph, keyframes/Bezier/easing, planar camera and composition UI.
+Paths: zorifi-timeline-edit-api/interactions.js, zorifi-advanced-editing.js,
+zorifi-motion-graph/renderer/workspace.js, background/cutout/mask modules.
+Tests: timeline-placement, source-clock, motion-graph and actual editor/browser
+workflows with decoded MP4. See the ten-item report for detailed boundaries.
+No optical-flow synthesis, full geometry 3D reconstruction, AEP/FFX/plugin engine
+or certified all-device 4K/8K/60fps output. Those are incomplete, not renamed.
+
+SECTION6 — TEXT / CAPTIONS / AUDIO: IMPLEMENTED / TESTED SUPPORTED CORE
+Text contains TTS; Audio contains Beats/SFX; editable caption corrections,
+source-linked timing, SRT, original cues, mixing/fades/keys/loops are present.
+Paths: zorifi-editor-audio-workflows.js, editor-speech.mjs, zorifi-sfx.js,
+zorifi-audio-engine.js. Tests: editor-speech, editor-audio-workflows,
+editor-workflows-browser, captions-browser, sound-design, source-clock.
+Provider transcripts currently estimate segment timing; forced word alignment
+and the proposed plan-linked 3/day caption/background allowances are incomplete.
+No licensed commercial hit-song catalogue or pitch-preserving TTS speed claim.
+
+SECTION7 — THREE SUBSCRIPTIONS: PARTIAL LEGACY / NEW POLICY NOT IMPLEMENTED
+zorifi-billing.js has legacy Free/Pro display/cache state; backend subscription()
+checks actual UID-bound verified cloud records. Nexus, proposed per-plan quotas,
+story duration/music unlock entitlements are not integrated. Existing local
+limits differ from the new proposal and are not represented as its completion.
+Client state never substitutes for verified server billing. No new checkout.
+
+SECTION8 — ADVANCED AUTOCUT: PARTIAL
+Existing media analysis/planning, beat/story/pacing workflows and native timeline
+assembly remain. Paths: zorifi-autocut*.js, autocut-planner.mjs, director-tools.
+New authoritative Pro/Nexus-only gating and broad professional quality across
+long recordings remain incomplete. Ordinary manual editing stays available.
+
+SECTION9 — NATIVE MUSIC STUDIO: PARTIAL
+Existing zorifi-music-studio.js and zorifi-audio-engine.js supply editable tracks,
+local synthesis/sequencing, audio effects, mix/render and project workflows.
+Full requested producer intelligence/genre acceptance and 1/3/6 daily limits,
+1/3/10-minute generation entitlements are not verified/integrated as proposed.
+Cloud Lyria is separate and does not turn every local action into a paid call.
+
+SECTION10 — PERMANENT MUSIC UNLOCKS: NOT STARTED
+No authoritative unique-song unlock ledger or atomic successful-export settlement
+matching 5/15/30 is present. Needed: stable song licence/identity, concurrency-safe
+reservation/commit/refund, permanent grants and downgrade retention. Reusing
+ordinary imported/local audio must not be falsely billed as a generated unlock.
+
+SECTION11 — REALISTIC SINGING: BLOCKED / DISABLED
+Ordinary speech is not singing. No authorized Suno multi-user API/redistribution
+rights or licensed alternative, credentials, measured costs and approved vocal
+allowances are verified. No singing pack or new paid vocal provider enabled.
+
+SECTION12 — AUDIO / VIDEO STORY BUILDER: PARTIAL
+Existing scene planner/AutoCut/native text, narration, SFX/music and editable
+motion assembly provide building blocks. Complete1/3/10-minute entitlement,
+character-dialogue orchestration and reusable licensed speech caching remain.
+Paths: zorifi-scenes.js, director/studio modules, native editing/workflow bridge.
+No promise of free cloud-generated footage for every storyline second.
+
+SECTION13 — AI CINEMATIC GENERATION: PARTIAL ADAPTERS / LIVE COMMERCIAL BLOCKED
+Existing provider video jobs and opt-in OpenAI video adapter are bounded and
+owner-scoped. OpenAI video is mock-tested only; production flag stays off.
+Per-model live output, costs, commercial rights and paid credit quote/settlement
+need verification. No 4K native AI generation or 8K AI-generation claim.
+
+SECTION14 — IMAGE STUDIO: PARTIAL / PROVIDER QUOTA BOUNDARY
+Existing image generation/variation/import plus local adjustment/background
+workflows. Gemini clean-plate quota is handled without paid automatic fallback;
+explicit local approximate fill and imported clean plates are alternatives.
+Shared wallet and quoted draft-to-final credit flow are not implemented. Paid
+image-provider switching requires explicit configuration/approval/live testing.
+
+SECTION15 — FOUR CREDIT WALLETS: NOT STARTED
+OpenAI usage reservations are internal safeguards, not purchased customer credit
+balances. Four distinct wallets, quotes, idempotent settlement, refunds and
+auditable durable purchases require an authoritative server ledger and rules.
+No client-side balance is claimed to enforce commercial access.
+
+SECTION16 — CREDIT STORE STAGES: BLOCKED FROM LIVE ACTIVATION
+Stage 1 Vanessa/images first, then video, then vocals remains the documented
+order. Checkout/payment webhook implementations and launch approvals are absent;
+unsupported packs are not activated by the editing release.
+
+SECTION17 — PACK PRICES: NOT STARTED / PROVISIONAL
+No brainstorming figures were added as live SKUs. Need approved catalogue,
+measured costs, margins/fees/taxes, versioning and regional pack quantities.
+
+SECTION18 — PLAN PRICES: NOT STARTED AS NEW SPECIFICATION
+GBP7.99/19.99 are proposals, not newly activated recurring products. Annual
+prices unresolved. No automatic billing/renewal created by this release.
+
+SECTION19 — NIGERIA-FIRST BILLING: NOT STARTED / COMMERCIAL CONFIG REQUIRED
+Need approved NGN/GBP/USD/GHS/KES catalogue, verified billing-country eligibility,
+eligible payment-provider accounts, signed webhooks/refunds and Google Play
+billing assessment. IP alone must not grant a regional price. No real charges.
+
+SECTION20 — BUDGET: PARTIAL SAFEGUARDS; GLOBAL £15 HARD CAP NOT IMPLEMENTED
+OpenAI allowlist, rate/daily/concurrent limits, nonrefunded allowance reservations,
+strict disabled media flags and signed ledger exist. Gemini chat rate limits
+and explicit media quota failures remain. None establishes a guaranteed shared
+£15 monthly monetary ceiling over every provider. No revenue-driven automatic
+spend increase enabled. Aggregate accounting, ceilings, alerts and in-flight
+cost reconciliation are required before unrestricted paid rollout.
+
+SECTION21 — ADMINISTRATION: PARTIAL
+Backend admin identity is server-pinned by Firebase UID, not client role.
+New comprehensive signed/versioned catalogue/quota/provider/budget admin and
+financial audit UI/API are incomplete. Host secrets remain owner-managed.
+
+SECTION22 — USAGE DASHBOARD: PARTIAL
+Authenticated OpenAI usage receipts exist; full all-plan daily/monthly music,
+caption/background and four-wallet/purchase history dashboard is absent.
+Do not display invented commercial balances or promise unlimited fallback.
+
+SECTION23 — UPGRADE EXPERIENCE: PARTIAL LEGACY
+Existing profile/plan/settings UI remains. New Free/Pro/Nexus comparison and
+unlocked reasoning defaults await authoritative entitlements and approved
+pricing. Credit purchases will not substitute for a subscription tier.
+
+SECTION24 — MODULAR PROVIDERS: IMPLEMENTED FOUNDATION / PARTIAL LIVE MODALITIES
+Existing Gemini, OpenAI Responses/optional adapters, native audio, local models
+and other configured media services remain separated. No provider automatically
+replaces another and incurs charges after quota errors. Optional OpenAI media
+and Realtime are not all live verified; see OPENAI-PRODUCTION-READINESS.txt.
+
+SECTION25 — PRIVACY / RIGHTS: IMPLEMENTED CORE / PARTIAL COMMERCIAL AUDIT
+UID isolation, private local projects, explicit microphone/media consent,
+validated native tools, bounded APIs, signatures and deletion controls exist.
+Native SFX are original. No new copyrighted songs, paid samples or realistic
+singing licence is fabricated. Full legal/commercial review remains outstanding.
+
+SECTION26 — STAGING: IN PROGRESS
+Audit/traceability exists; backend and native editing stages are the current
+verified delivery. Commercial music unlock/wallet/payment stages remain open.
+The current user's explicit release instruction authorizes verified editing
+deployment; it does not authorize enabling paid infrastructure or checkout.
+
+SECTION27 — ACCEPTANCE: PARTIAL
+583-test baseline preserved before this stage; new tests add quota/local fill,
+manual settings safety, actual caption/TTS/SFX/clean-plate MP4 and release proof.
+Final counts/results are recorded in the stage report. Numerous subscription,
+wallet, payment, global monetary and provider-quality acceptance tests remain
+blocked by missing implementation/configuration; no broad completion claim.
+
+SECTION28 — PROHIBITIONS: OBSERVED IN THIS STAGE
+No rebuild, destructive reset, credential publication, paid auto-fallback,
+new infrastructure, prices, checkout activation or Firebase upgrade. Existing
+native editor and Gemini production configuration preserved. Unsupported
+providers/features fail visibly rather than returning fabricated success.
+
+SECTION29 — REPORT: MAINTAINED
+See UPGRADE-3.47.0-REPORT.txt for files, exact tests, supported manual/AI parity,
+export receipts, limits, deployment proof and costs. This traceability document
+preserves every master section; incomplete entries are deliberate status
+disclosures and remaining work, not claims of implementation.
+
+NEXT COMMERCIAL IMPLEMENTATION STAGE (NO LIVE CHARGES AUTHORIZED)
+Implement authoritative configurable three-tier policy, per-user allowances and
+metered fallback together with a durable four-wallet/unique-song ledger in the
+emulators. Validate quotas/refunds/concurrency before any real payment adapter.
+Then use payment sandboxes after eligibility/account configuration; retain all
+unapproved SKUs/paid modalities disabled until separately approved.

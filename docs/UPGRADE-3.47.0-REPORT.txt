@@ -1,0 +1,146 @@
+ZORIFI 3.47.0 BETA — EDITING / QUOTA RECOVERY STAGE
+11 November 2026 | Continued from ac099cf; no restart or discarded editor work.
+
+RELEASE GATE
+Deployment is authorized by the current request after critical checks pass.
+Candidate verification and final production status are recorded below once
+observed; version strings alone do not establish deployment success.
+No new payment collection, provider subscription, Firebase upgrade or secret
+configuration is part of this editing release. OpenAI hosted/media gates remain
+off. Existing Gemini/Firebase/Vercel configuration is preserved.
+
+TEN EDITING REQUIREMENTS — STATUS
+1. Professional tool integration: PARTIAL full vision; supported native tools
+   implemented/tested. Shared manual/Vanessa graph and validated transaction path.
+2. Unified Background: IMPLEMENTED/TESTED supported matte, brush, chroma and
+   local person paths. Fine hair/edge quality and arbitrary video motion vary.
+3. Text/Audio/Captions: IMPLEMENTED core; PARTIAL exact transcript/voice quality
+   across providers/devices. Editable timing and rendered narration/SFX tested.
+4. Multiple clips on one track: IMPLEMENTED/TESTED native sequential/insert/
+   overwrite/overlay, locks, source clocks, history and project persistence.
+5. Sound effects: IMPLEMENTED/TESTED original library and native audio mix;
+   not an unlicensed commercial-song or exhaustive sound catalogue.
+6. Cinematic Parallax: IMPLEMENTED/TESTED editable planar depth/camera with
+   imported or explicit local approximate plate. Gemini generative reconstruction
+   remains PROVIDER-QUOTA BLOCKED; no live generated-plate quality claim.
+7. Motion graphics/camera: IMPLEMENTED native benchmark; PARTIAL full professional
+   application parity, external plugins and all-device high-resolution encoding.
+8. Creative packs/transitions: IMPLEMENTED native editable packs; PARTIAL full
+   tutorial/plugin equivalence. No optical-flow/Twixtor/AEP/FFX claim.
+9. Shape morphing/expressions: IMPLEMENTED editable benchmark; PARTIAL universal
+   reproduction. Typed bounded expressions are data; arbitrary JS is unsupported.
+10. UI animation/mattes/masks: IMPLEMENTED editable benchmark; PARTIAL full
+    tutorial acceptance. No actual GPS/search/booking/payment implied by artwork.
+All ten are therefore NOT certified complete. These statuses retain the scope
+and limits of the original CONSOLIDATED-REQUIREMENTS-STATUS.txt report.
+
+NEWLY IMPLEMENTED / REPAIRED
+- Gemini image/music 429 errors are sanitized and distinguish zero available
+  quota from retryable rate/quota exhaustion. Bounded Retry-After survives the
+  real handler; no automatic retry or paid-provider switch. Music errors point
+  to native/imported audio rather than irrelevant image tools.
+- Background reconstruction UI enforces a source/account/project cooldown.
+  Local texture fill is an explicit alternative with source-matte review,
+  retained original, cancellation/stale guards and device persistence. It fills
+  from neighbouring visible colours, bounded to 640px; it can smear complex
+  backgrounds and does not recover hidden objects/text. Import a clean plate
+  when fidelity matters. Same reviewed workflow is available to Vanessa.
+- Nested composition name/dimensions/duration/fps now have manual controls
+  using the existing composition.settings graph opcode also used by Vanessa.
+- Root Composition settings validate bounds and restore native state/history
+  when device saving fails. Root composition-format automation is not a new
+  Vanessa command; supported nested settings share the existing validated tool.
+- Frame snapshots use separate decoders so they cannot seek the live preview
+  or move the user's playhead. Caches prune deleted layers and release on editor
+  exit/account scope changes rather than retaining video buffers indefinitely.
+- MP4 startup/duration acceptance is checked before claiming export success.
+  Recorder initialization must not consume the requested timeline duration.
+- Version 3.47.0, cache 250 and a secret-free public release.json make the deployed
+  version/commit inspectable. verify-hosted-release.cjs checks version, commit,
+  twelve runtime hashes, authentication rejection and existing AI configuration.
+
+ACTUAL EDITOR TESTS / RECEIPTS
+- upgrade-final-unit.log: 589 tests passed, 0 failed, 0 skipped.
+  Original 535 and previous 583 tests retained; no disabled/skipped replacements.
+- professional-native-tools-browser.cjs: 51/51 actual staged native tools.
+- motion-composition-export-browser.cjs: real root settings control, failed-save
+  rollback including Undo/Redo, manual/Vanessa nested settings parity, native
+  zoom-shake pack, changing preview, exact reopen and audible animated MP4.
+  Fixture retains normal project defaults; a fixture-only overwrite was corrected
+  while keeping the strict savedMatches assertion.
+- source-clock-browser.cjs: actual red/green/blue video scrubbing, integrated
+  speed/remap, linked captions, history/reopen, held frame and decoded MP4. It
+  additionally verifies snapshot rendering leaves the live decoder unchanged.
+- background-workflows-browser.cjs: real even-colour matte, pointer brush
+  erase/restore, chroma pixels, nested mask, Undo/Redo/reopen and decoded MP4.
+- parallax-local-browser.cjs: mocked quota/cooldown + explicit actual on-device
+  fill via Vanessa, manual depth scene, source/matte retention, exact history/
+  reopening, pixel checks and MP4. No live cloud generation calls.
+- parallax-workflows-browser.cjs: reviewed provider-fixture plate, exact source/
+  matte preservation, depth camera positions, Undo/Redo/Stop/reopen.
+- editor-workflows-browser.cjs: real saved WAV, editable captions/corrections,
+  source synchronization, Stop/stale/save rollback, decoded caption pixels and
+  audible TTS/original SFX in MP4, canonical reopen and retained WAV blob.
+  Provider/auth responses are fixtures; recorded public-phrase speech is reused.
+- stage2-complete-browser.cjs: actual 45-second commercial/native workflow,
+  45 coordinated actions, review/correction/recovery, memory isolation/history/
+  reopen and real MP4 decoded video/audio. No new paid AI generation.
+- vanessa-production-browser.cjs: Chromium/WebKit split/trim, confirmation,
+  visible timeline, Undo/Redo/save/refresh, ordinary conversation, Stop, stale
+  proposals, opt-in mic and user isolation, with disclosed provider fixtures.
+- vanessa-listening-browser.cjs: permission opt-in, silence submission, natural
+  follow-ups, echo suspension, Stop/Pause and hidden/account cancellation using
+  representative speech-recognition events, not physical acoustic recognition.
+- vanessa-device-voice-probe.cjs: installed Windows Microsoft Hazel female voice
+  completed speech and subtitle boundaries, persisted voice selection and zero
+  cloud speech requests. Physical iPhone mic/voice remains unverified.
+- Native motion workspace/controls/benchmark/nested-media tests cover editable
+  shapes, vectors, keys, masks, parenting, matting, responsive 320–1440px bounds,
+  independent source windows and audible MP4 output.
+- build:web/check, secret scan and final hosted receipts are release gates.
+
+PROVIDER INVESTIGATION / ALTERNATIVES / COSTS
+The earlier real clean-plate request returned 429. Gemini rate limits apply to
+the project, not to each API key; generating more keys does not raise quota.
+The previous response did not prove precisely which account entitlement was
+exhausted. The repair uses actual RetryInfo/Retry-After/QuotaFailure details when
+available and asks the owner to inspect AI Studio access; it does not assert
+that upgrading always fixes every 429.
+An existing opt-in OpenAI image adapter is a possible separately billed option,
+not a verified free reconstruction service. It was not enabled or silently used.
+The implemented local fill and imported clean plate avoid cloud generation
+costs. Local fill has no paid model, new binary dependency or external upload.
+Existing pinned local person segmentation downloads public runtime/model files
+only after explicit consent; source pixels remain on-device.
+No new paid AI requests, provider licences, checkout or paid infrastructure were
+introduced by this stage. Existing hosting/build/CDN usage remains subject to
+the owner's current plan/quotas. The £15 shared AI budget is not a per-user
+allowance and is not claimed to be a guaranteed global hard cap.
+
+MAIN MODIFIED FILES
+app.js; zorifi-motion-workspace.js; zorifi-parallax-workflow.js;
+zorifi-editor-workflow-bridge.js; netlify/functions/_shared/gemini-media.mjs;
+index.html; sw.js; zorifi-app-settings.js; package.json/package-lock.json;
+scripts/build-web.cjs; scripts/verify-hosted-release.cjs;
+tests/background-reconstruction-quota.test.cjs;
+tests/motion-composition-export-browser.cjs; tests/parallax-local-browser.cjs;
+tests/editor-workflows-browser.cjs; tests/source-clock-browser.cjs;
+tests/stage2-complete-browser.cjs; regenerated zorifi-interface-catalog.json.
+Unrelated pre-existing README.md change is left untouched/uncommitted.
+
+MASTER SPECIFICATION / REMAINING WORK
+MASTER-REQUIREMENTS-TRACEABILITY.txt maps all 29 master sections to actual code,
+tests, missing work and blockers. This editing release does not complete the
+new commercial product: three server-enforced reasoning tiers, 15/day OpenAI
+Free fallback, Nexus, native music generation/unlock allowances, four customer
+wallets, payment providers/webhooks, regional prices, realistic singing, draft/
+final image charging and aggregate monetary controls still require implementation
+and/or approved provider/commercial configuration. No proposed prices are live.
+High-resolution 4K/8K/60fps throughput on arbitrary devices, every source codec,
+physical phone/iPad behavior and universal creative quality remain uncertified.
+
+PRIMARY REFERENCES
+https://ai.google.dev/gemini-api/docs/rate-limits
+https://vercel.com/docs/cli/deploy
+https://vercel.com/docs/cli/promote
+https://developers.openai.com/api/docs/models/gpt-5-nano
