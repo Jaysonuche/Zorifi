@@ -203,7 +203,11 @@
       "zorifi-vanessa-professional.css",
       "zorifi-creative-strategies.json",
       "zorifi-vanessa-voice.js",
-      "zorifi-vanessa-voice.css"
+      "zorifi-vanessa-voice.css",
+      "zorifi-native-music.js",
+      "zorifi-native-music-worker.js",
+      "zorifi-native-music-workspace.js",
+      "zorifi-native-music.css"
     ],
     "win": {
       "target": "nsis",

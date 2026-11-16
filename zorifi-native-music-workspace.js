@@ -1,0 +1,123 @@
+/* Native music adapters share state.clips, IndexedDB, native history and project persistence. */
+(function(root){
+  'use strict';
+  const Engine=root.ZorifiNativeMusic;if(!Engine)return;
+  const clone=value=>structuredClone(value),escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const uid=()=>currentUser?.id||'guest',id=()=>crypto.randomUUID(),aborted=()=>new DOMException('Native music operation stopped.','AbortError');
+  let controller=null,stage='',error='',mounted=false,dialogScope='',runningScope='',page=0;
+  const ACTIONS=Object.freeze({
+    'music.native.compose':{parameters:['prompt','genre','duration','bpm','key','scaleMode','timeSignature','groove','selectedInstruments','rhythm','bassline','vocals','seed'],description:'Compose original editable instrumental patterns on this device; no cloud AI request.'},
+    'music.native.edit':{parameters:['edit'],description:'Edit notes or instrument of a native pattern and render a new source. One native Undo.'},
+    'music.native.lock':{parameters:['locked'],description:'Lock or unlock native composition notes without preventing timeline arrangement.'}
+  });
+  function allowed(action){
+    if(!action||!ACTIONS[action.command]||Object.keys(action).some(k=>!['command','target','parameters'].includes(k)))throw Error('Unsupported native music operation.');
+    const p=action.parameters||{};if(Object.keys(p).some(k=>!ACTIONS[action.command].parameters.includes(k)))throw Error('Unsupported native music parameter.');
+    return p;
+  }
+  function catalog(){return Object.entries(ACTIONS).map(([command,definition])=>({command,...definition,execution:'native-workflow',confirmation:'review',provider:null}));}
+  function captureScope(){if(state.view!=='editor'||!state.projectId)throw Error('Open an editing project first.');return{owner:uid(),project:state.projectId,revision:JSON.stringify(ProjectModel.captureHistory(state))};}
+  function check(scope,signal){if(signal?.aborted)throw aborted();if(uid()!==scope.owner||state.projectId!==scope.project||state.view!=='editor')throw aborted();if(JSON.stringify(ProjectModel.captureHistory(state))!==scope.revision)throw Error('The project changed during synthesis. Your later edits were kept; prepare the music again.');}
+  function target(targetId){const clip=state.clips.find(c=>c.id===targetId&&c.musicPattern);if(!clip)throw Error('Select an existing native instrument clip.');if(trackState(clip.track).locked)throw Error('Unlock this timeline track first.');return clip;}
+  function renderPattern(pattern,{signal}={}){
+    if(signal?.aborted)return Promise.reject(aborted());
+    return new Promise((resolve,reject)=>{
+      const worker=new Worker(new URL('zorifi-native-music-worker.js',document.baseURI)),job=id();let done=false;
+      const finish=(callback,result)=>{if(done)return;done=true;signal?.removeEventListener('abort',abort);worker.terminate();callback(result);},abort=()=>finish(reject,aborted());
+      signal?.addEventListener('abort',abort,{once:true});worker.onerror=()=>finish(reject,Error('Native synthesis could not run on this device. No timeline changes were made.'));
+      worker.onmessage=event=>{if(event.data?.id!==job)return;if(event.data.error)finish(reject,Error(event.data.error));else finish(resolve,event.data.result);};
+      worker.postMessage({id:job,pattern,sampleRate:48000});
+    });
+  }
+  async function removeStaged(scope,assetId){
+    // Explicit captured owner prevents cleanup from touching the next signed-in account.
+    const db=await openMediaDatabase();await new Promise((resolve,reject)=>{const transaction=db.transaction(MEDIA_STORE_NAME,'readwrite');transaction.objectStore(MEDIA_STORE_NAME).delete(scope.owner+'::'+scope.project+'::'+assetId);transaction.oncomplete=resolve;transaction.onerror=()=>reject(Error('Staged native audio could not be removed.'));transaction.onabort=()=>reject(Error('Staged native audio cleanup was interrupted.'));});
+  }
+  function commit(change){
+    const before=ProjectModel.captureHistory(state),assets=[...state.mediaAssets],undo=[...state.undo],redo=[...state.redo];
+    try{snapshot();change();recalculateDuration();render();if(saveProject()!==true)throw Error('The native music change could not be saved.');}
+    catch(problem){ProjectModel.restoreHistory(state,before);state.mediaAssets=assets;state.undo=undo;state.redo=redo;render();if(saveProject()!==true)throw Error('The change was rolled back. Device storage could not save the restored project; free storage before closing.');throw problem;}
+  }
+  async function execute(action,{confirmed=false,signal:externalSignal}={}){
+    const params=allowed(action);if(!confirmed)return{status:'REQUIRES_CONFIRMATION',action,message:'Review the native music operation before applying it.'};
+    if(controller)throw Error('Finish or stop the current native music operation first.');
+    const scope=captureScope(),localController=new AbortController(),staged=[];controller=localController;runningScope=scope.owner+'|'+scope.project;error='';
+    const abort=()=>localController.abort();externalSignal?.addEventListener('abort',abort,{once:true});if(externalSignal?.aborted)abort();const signal=localController.signal;
+    let committed=false;
+    try{
+      check(scope,signal);
+      if(action.command==='music.native.lock'){
+        if(typeof params.locked!=='boolean')throw Error('Choose lock or unlock.');const clip=target(action.target),pattern=Engine.editPattern(clip.musicPattern,{operation:'lock',value:params.locked});
+        commit(()=>{clip.musicPattern=pattern;});committed=true;return{status:'SUCCESS',verified:true,persisted:true,clipId:clip.id,locked:pattern.locked};
+      }
+      const previous=action.command==='music.native.edit'?target(action.target):null;
+      const arrangement=previous?null:Engine.compose(params),patterns=previous?[Engine.editPattern(previous.musicPattern,params.edit)]:arrangement.patterns;
+      if(previous&&patterns[0].locked!==previous.musicPattern.locked)throw Error('Use the lock action to change composition protection.');
+      const start=state.currentTime;
+      for(let index=0;index<patterns.length;index++){
+        const pattern=patterns[index];stage=`Rendering ${pattern.instrument} · ${index+1}/${patterns.length}`;refreshStatus();
+        const rendered=await renderPattern(pattern,{signal});check(scope,signal);
+        const assetId='native-'+id(),file=new Blob([rendered.bytes],{type:'audio/wav'}),asset={id:assetId,name:pattern.instrument+' · '+(arrangement?.title||previous.name.replace(/^[^·]+· /,'')),type:'audio',duration:rendered.duration,size:file.size,mimeType:'audio/wav',localFile:true,persisted:false,generated:true,nativeInstrument:pattern.instrument,stemRole:['kick','snare','hat'].includes(pattern.instrument)?'drums':pattern.instrument==='bass'?'bass':'lead',waveform:{peaks:rendered.peaks,duration:rendered.duration,sampleRate:48000,channels:1},provenance:arrangement?.provenance||{engine:'zorifi-native-procedural-v1',cloudModel:false}};
+        staged.push({asset,pattern});await storeProjectMedia(scope.project,assetId,file,{signal,userId:scope.owner});check(scope,signal);asset.persisted=true;asset.url=editorResources.createManagedUrl(file);
+      }
+      check(scope,signal);stage='Saving native arrangement';refreshStatus();
+      const created=[];
+      commit(()=>{
+        for(const {asset,pattern} of staged){
+          state.mediaAssets.push(asset);
+          if(previous){previous.mediaId=asset.id;previous.musicPattern=pattern;previous.name=asset.name;previous.stemRole=asset.stemRole;}
+          else{const clip={id:'native-clip-'+id(),type:'audio',mediaId:asset.id,name:asset.name,start,duration:asset.duration,sourceStart:0,playbackRate:1,track:chooseTrack('audio',start,asset.duration,true),opacity:100,volume:80,audioFadeIn:0,audioFadeOut:0,stemRole:asset.stemRole,audioEffects:{role:'music'},musicPattern:pattern,songId:arrangement.id};const canonical=ProjectModel.migrateProject({id:'native-canonical',clips:[clip]}).clips[0];state.clips.push(canonical);created.push(canonical);}
+        }
+        if(arrangement){const {patterns:_,...metadata}=arrangement;state.creatorSettings.nativeSong=metadata;musicStudioSettings({...params,duration:arrangement.duration,bpm:arrangement.bpm,key:arrangement.key,scaleMode:arrangement.scaleMode,generation:null});}
+        state.selected=previous?.id||created[0]?.id;
+      });committed=true;
+      const clips=previous?[previous]:created;if(!clips.every(c=>state.clips.includes(c)&&state.mediaAssets.some(a=>a.id===c.mediaId&&a.persisted)))throw Error('Native timeline verification failed.');
+      return {status:'SUCCESS',verified:true,persisted:true,clipIds:clips.map(c=>c.id),duration:staged[0]?.asset.duration,cloudCalls:0,message:`${previous?'Updated the instrument':'Added '+created.length+' original instrument tracks'} and saved the project. One Undo restores the previous edit.`};
+    }finally{
+      externalSignal?.removeEventListener('abort',abort);controller=null;runningScope='';stage='';
+      if(!committed)for(const {asset} of staged){if(asset.url)revokeManagedUrl(asset.url);try{await removeStaged(scope,asset.id);}catch{error='Unused temporary audio may remain on this device. Your project was not changed.';}}
+      refreshStatus();
+    }
+  }
+  function cancel(){controller?.abort();}
+  function refreshStatus(){for(const node of document.querySelectorAll('[data-native-status]'))node.textContent=stage||error;for(const button of document.querySelectorAll('[data-native-submit]'))button.disabled=Boolean(controller);for(const button of document.querySelectorAll('[data-native-stop]'))button.hidden=!controller;}
+  function markup(){const studio=musicStudioSettings(),clips=state.clips.filter(c=>c.musicPattern);return `<section class="native-music-composer"><header><span><b>Native Instrument Lab</b><small>Original procedural composition · on this device · editable notes · no cloud charge</small></span><button type="button" data-native-midi ${clips.length?'':'disabled'}>Export MIDI</button></header><form data-native-compose-form><label>Direction<input name="prompt" maxlength="1500" value="${escape(studio.prompt)}" placeholder="An energetic Afrobeats instrumental"></label><label>Genre<input name="genre" maxlength="50" value="${escape(studio.genre)}"></label><label>Exact duration (s)<input name="duration" type="number" min="5" max="600" step=".1" value="${studio.duration}" required></label><label>Tempo<input name="bpm" type="number" min="40" max="200" value="${studio.bpm}" required></label><label>Key<select name="key">${Engine.NOTES.map(n=>`<option ${studio.key===n?'selected':''}>${n}</option>`).join('')}</select></label><label>Scale<select name="scaleMode">${Object.keys(Engine.SCALES).map(n=>`<option ${studio.scaleMode===n?'selected':''}>${n}</option>`).join('')}</select></label><label>Instrument<select name="instrument"><option value="piano">Piano</option><option value="synth-lead">Pluck</option><option value="strings">Pad</option></select></label><button data-native-submit ${controller?'disabled':''}>Build native arrangement</button><button type="button" data-native-stop ${controller?'':'hidden'}>Stop</button></form><p role="status" data-native-status>${escape(stage||error)}</p>${clips.length?`<div class="native-pattern-list">${clips.map(c=>`<button type="button" data-native-notes="${escape(c.id)}">${escape(c.musicPattern.instrument)} · ${c.musicPattern.notes.length} notes${c.musicPattern.locked?' · Locked':''}</button>`).join('')}</div>`:''}</section>`;}
+  async function runFromForm(form){const values=Object.fromEntries(new FormData(form)),params={prompt:values.prompt,genre:values.genre,duration:Number(values.duration),bpm:Number(values.bpm),key:values.key,scaleMode:values.scaleMode,selectedInstruments:[values.instrument],timeSignature:musicStudioSettings().timeSignature,groove:musicStudioSettings().groove,rhythm:musicStudioSettings().rhythm,bassline:musicStudioSettings().bassline,vocals:'instrumental'};try{const receipt=await execute({command:'music.native.compose',parameters:params},{confirmed:true});toast(receipt.message);}catch(problem){error=problem.name==='AbortError'?'Stopped. No pending music was applied.':problem.message;refreshStatus();toast(error);}}
+  function download(bytes,name,mime){const url=editorResources.createManagedUrl(new Blob([bytes],{type:mime})),link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>revokeManagedUrl(url),30000);}
+  function exportMidi(){const clips=state.clips.filter(c=>c.musicPattern);if(!clips.length)throw Error('Add native instruments first.');const patterns=clips.map(c=>{const p=clone(c.musicPattern),rate=c.playbackRate||1,from=c.sourceStart||0;p.notes=p.notes.filter(n=>n.start<from+c.duration*rate&&n.start+n.duration>from).map(n=>({...n,start:c.start+Math.max(0,n.start-from)/rate,duration:Math.min(n.start+n.duration,from+c.duration*rate)/rate-Math.max(n.start,from)/rate}));p.duration=Math.max(...clips.map(item=>item.start+item.duration));p.notes=p.notes.filter(n=>n.duration>=.005);return p;});download(Engine.midiFile(patterns),state.currentProject.replace(/[^a-z0-9-_]+/gi,'-')+'.mid','audio/midi');}
+  function interpret(message){
+    const text=String(message).trim().replace(/^(?:hey )?vanessa[, ]+/i,'').replace(/^(?:can|could|would) you |^please /i,'');
+    if(!/^(?:create|make|compose|build|generate|transpose|quantize|lock|unlock|change)\b/i.test(text)||!/\bnative\b|\bon[- ]device\b/i.test(text))return null;
+    if(/^(?:create|make|compose|build|generate)\b/i.test(text)&&/\b(?:music|song|beat|arrangement|soundtrack|instrumental)\b/i.test(text)){
+      const studio=musicStudioSettings(),seconds=text.match(/\b(\d+(?:\.\d+)?)\s*(?:seconds?|secs?|s)\b/i),minutes=text.match(/\b(\d+(?:\.\d+)?)\s*(?:minutes?|mins?)\b/i),tempo=text.match(/\b(\d+)\s*bpm\b/i),key=text.match(/\b([A-G]#?)\s+(major|minor|pentatonic)\b/i),genre=/\bafro(?:beats?)?\b/i.test(text)?'Afrobeats':/\b(?:lofi|lo-fi)\b/i.test(text)?'Lo-Fi':/\b(?:pop|dance|upbeat)\b/i.test(text)?'Pop':'Cinematic';
+      const parameters={prompt:text,genre,duration:seconds?Number(seconds[1]):minutes?Number(minutes[1])*60:studio.duration,bpm:tempo?Number(tempo[1]):studio.bpm,key:key?key[1].toUpperCase():studio.key,scaleMode:key?key[2].toLowerCase():studio.scaleMode,timeSignature:studio.timeSignature,selectedInstruments:/\bpad|strings\b/i.test(text)?['strings']:/\bpluck\b/i.test(text)?['synth-lead']:['piano'],vocals:/\b(?:singing|vocals|sing)\b/i.test(text)&&!/\bwithout\s+(?:singing|vocals)\b/i.test(text)?'vocal':'instrumental'};
+      Engine.compose(parameters);return{command:'music.native.compose',parameters};
+    }
+    const clip=state.clips.find(c=>c.id===state.selected&&c.musicPattern);if(!clip)return null;
+    if(/^unlock\b/i.test(text)||/^lock\b/i.test(text))return{command:'music.native.lock',target:clip.id,parameters:{locked:!/^unlock\b/i.test(text)}};
+    if(/^quantize\b/i.test(text))return{command:'music.native.edit',target:clip.id,parameters:{edit:{operation:'quantize',beats:.25}}};
+    const transpose=text.match(/^transpose\b.*?\b(up|down)\s+(\d+)\s+semitones?\b/i);if(transpose)return{command:'music.native.edit',target:clip.id,parameters:{edit:{operation:'transpose',semitones:Number(transpose[2])*(transpose[1].toLowerCase()==='down'?-1:1)}}};return null;
+  }
+  function noteMarkup(clip){const p=clip.musicPattern,notes=p.notes.slice(page*24,page*24+24),width=640,height=130,scale=width/p.duration,min=Math.min(36,...p.notes.map(n=>n.pitch)),max=Math.max(84,...p.notes.map(n=>n.pitch));return `<header><span><small>NATIVE PATTERN · SOURCE NOTES</small><h2>${escape(p.instrument)}</h2></span><button data-native-close aria-label="Close">×</button></header><p>Changes render a new local source; the same clip, trims, mixer, timing and effects stay editable. ${p.duration}s · ${p.bpm} BPM. ${p.locked?'Composition locked.':''}</p><svg class="native-piano-roll" viewBox="0 0 ${width} ${height}" role="img" aria-label="Actual MIDI notes for this instrument">${p.notes.map(n=>`<rect x="${n.start*scale}" y="${height-8-(n.pitch-min)/(max-min)*110}" width="${Math.max(1,n.duration*scale)}" height="5" rx="2"/>`).join('')}</svg><div class="native-note-actions"><button data-native-lock="${!p.locked}">${p.locked?'Unlock':'Lock'} notes</button><button data-native-transpose="-1" ${p.locked?'disabled':''}>−1 semitone</button><button data-native-transpose="1" ${p.locked?'disabled':''}>+1 semitone</button><button data-native-quantize ${p.locked?'disabled':''}>Quantize 1/16</button><label>Instrument<select data-native-instrument ${p.locked?'disabled':''}>${Engine.INSTRUMENTS.map(n=>`<option ${p.instrument===n?'selected':''}>${n}</option>`).join('')}</select></label></div><p role="status" data-native-status>${escape(stage||error)}</p><div class="native-note-scroll"><table><thead><tr><th>Pitch</th><th>Start (s)</th><th>Length (s)</th><th>Velocity</th><th>Apply</th></tr></thead><tbody>${notes.map(n=>`<tr data-native-note-id="${escape(n.id)}"><td><input aria-label="MIDI pitch" data-field="pitch" type="number" min="0" max="127" value="${n.pitch}"></td><td><input aria-label="Note start" data-field="start" type="number" min="0" max="${p.duration}" step=".01" value="${n.start}"></td><td><input aria-label="Note duration" data-field="duration" type="number" min=".005" max="${p.duration}" step=".01" value="${n.duration}"></td><td><input aria-label="Note velocity" data-field="velocity" type="number" min="0" max="1" step=".05" value="${n.velocity}"></td><td><button data-native-note-save ${p.locked?'disabled':''}>Save</button><button data-native-note-delete ${p.locked?'disabled':''}>Delete</button></td></tr>`).join('')}</tbody></table></div><footer><button data-native-page="-1" ${page?'':'disabled'}>Previous</button><span>${page+1} / ${Math.max(1,Math.ceil(p.notes.length/24))}</span><button data-native-page="1" ${(page+1)*24<p.notes.length?'':'disabled'}>Next</button><button data-native-add ${p.locked?'disabled':''}>Add note</button><button data-native-close>Done</button></footer>`;}
+  function showNotes(clipId,{keepPage=false}={}){
+    if(!keepPage)page=0;const clip=target(clipId);document.querySelector('[data-native-pattern-dialog]')?.remove();const dialog=document.createElement('dialog');dialog.dataset.nativePatternDialog=clipId;dialog.className='native-pattern-dialog';dialogScope=uid()+'|'+state.projectId;dialog.innerHTML=noteMarkup(clip);document.body.append(dialog);dialog.showModal();dialog.addEventListener('close',()=>dialog.remove());
+    dialog.querySelectorAll('[data-native-close]').forEach(b=>b.onclick=()=>dialog.close());dialog.querySelectorAll('[data-native-page]').forEach(b=>b.onclick=()=>{page+=Number(b.dataset.nativePage);showNotes(clipId,{keepPage:true});});
+    const apply=async(edit,command='music.native.edit')=>{try{const receipt=await execute({command,target:clipId,parameters:command==='music.native.lock'?{locked:edit}:{edit}},{confirmed:true});error='';if(dialog.isConnected)showNotes(clipId,{keepPage:true});toast(receipt.message||'Composition protection saved.');}catch(problem){error=problem.name==='AbortError'?'Stopped.':problem.message;refreshStatus();}};
+    dialog.querySelector('[data-native-lock]').onclick=e=>apply(e.currentTarget.dataset.nativeLock==='true','music.native.lock');dialog.querySelectorAll('[data-native-transpose]').forEach(b=>b.onclick=()=>apply({operation:'transpose',semitones:Number(b.dataset.nativeTranspose)}));dialog.querySelector('[data-native-quantize]').onclick=()=>apply({operation:'quantize',beats:.25});dialog.querySelector('[data-native-instrument]').onchange=e=>apply({operation:'instrument',instrument:e.target.value});
+    dialog.querySelectorAll('[data-native-note-save]').forEach(b=>b.onclick=()=>{const row=b.closest('tr');apply({operation:'update',id:row.dataset.nativeNoteId,changes:Object.fromEntries([...row.querySelectorAll('input')].map(n=>[n.dataset.field,Number(n.value)]))});});dialog.querySelectorAll('[data-native-note-delete]').forEach(b=>b.onclick=()=>apply({operation:'delete',id:b.closest('tr').dataset.nativeNoteId}));dialog.querySelector('[data-native-add]').onclick=()=>apply({operation:'add',note:{id:'note-'+id(),start:Math.max(0,Math.min(clip.musicPattern.duration-.1,state.currentTime-clip.start+(clip.sourceStart||0))),duration:.1,pitch:60,velocity:.6}});
+  }
+  function install(){if(mounted)return;mounted=true;const previousPrompt=musicPromptBar;musicPromptBar=function(){return `<div class="native-music-entry">${markup()}<details class="native-cloud-music" ${musicStudioSettings().generation?'open':''}><summary>Optional cloud music generation</summary>${previousPrompt()}</details></div>`;};
+    const previousRender=render;render=function(...args){if(controller&&(runningScope!==uid()+'|'+state.projectId||state.view!=='editor'))cancel();if(dialogScope&&dialogScope!==uid()+'|'+state.projectId){document.querySelector('[data-native-pattern-dialog]')?.remove();dialogScope='';cancel();error='';}const result=previousRender(...args);return result;};
+    document.addEventListener('submit',event=>{if(event.target.matches('[data-native-compose-form]')){event.preventDefault();void runFromForm(event.target);}});
+    document.addEventListener('click',event=>{const button=event.target.closest('button');if(!button)return;try{if(button.hasAttribute('data-native-stop'))cancel();if(button.dataset.nativeNotes)showNotes(button.dataset.nativeNotes);if(button.hasAttribute('data-native-midi'))exportMidi();}catch(problem){toast(problem.message);}});
+    window.addEventListener('beforeunload',cancel);
+    // Extend the existing reviewed workflow dispatcher. Authentication, project
+    // fingerprint, confirmation, postconditions and persistence stay in the path.
+    const bridge=root.ZorifiEditorWorkflowBridge;if(bridge){let pending=null,epoch=0;const oldTurn=bridge.turn,oldExecute=bridge.execute,oldCancel=bridge.cancel;
+      bridge.turn=async message=>{if(state.view!=='editor')return oldTurn(message);const action=interpret(message);if(!action)return oldTurn(message);allowed(action);pending={id:id(),scope:root.ZorifiProductionBridge.scope(),action};return{status:'REQUIRES_CONFIRMATION',plan:{nativeMusicProposal:pending.id},message:action.command==='music.native.compose'?`I can compose ${action.parameters.duration}s of original native ${action.parameters.genre} instruments at ${action.parameters.bpm} BPM, with editable notes and separate timeline tracks. This is on-device procedural synthesis, with no cloud charge. Review and apply?`:'I can apply this native note change, render its updated audio and save it as one undoable edit. Review and apply?',preview:[{command:action.command,target:action.target||'Project',after:action.parameters,status:'REQUIRES_CONFIRMATION'}]};};
+      bridge.execute=async(plan,{confirmed=false}={})=>{if(!plan.nativeMusicProposal)return oldExecute(plan,{confirmed});if(!confirmed)return{status:'REQUIRES_CONFIRMATION',plan,message:'Review the native arrangement before applying it.'};if(!pending||pending.id!==plan.nativeMusicProposal)throw Error('The native music proposal expired. Ask again.');const job=pending,requestEpoch=epoch;await root.ZorifiProductionBridge.authorize();if(requestEpoch!==epoch)throw aborted();root.ZorifiProductionBridge.check(job.scope);pending=null;return execute(job.action,{confirmed:true});};
+      bridge.cancel=()=>{epoch++;pending=null;cancel();oldCancel();};
+    }
+  }
+  root.ZorifiNativeMusicWorkspace={execute,allowed,catalog,interpret,compose:options=>execute({command:'music.native.compose',parameters:options},{confirmed:true}),cancel,markup,showNotes,exportMidi,inspect:()=>({busy:Boolean(controller),stage,error}),blueprint:()=>Engine.blueprintFromProject(state)};install();
+})(typeof globalThis!=='undefined'?globalThis:this);

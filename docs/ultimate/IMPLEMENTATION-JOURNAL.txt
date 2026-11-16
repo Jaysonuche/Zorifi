@@ -1,0 +1,75 @@
+ZORIFI ULTIMATE V5 — CONTINUOUS IMPLEMENTATION JOURNAL
+16 November 2026
+
+CURRENT OBJECTIVE
+Continue the full supplied product vision through verified phases. A beta
+deployment does not finish the project. Preserve existing native state,51 tools,
+589 passing tests, local projects/media, Undo/Redo, exports and working Gemini.
+
+REVIEWED SOURCES
+All40 Ultimate text parts, the complete489-line backend repair specification,
+234-line music repair/branding specification,540-line AI Create specification,
+and all11 original Music Studio PDF pages were read. PDF pages rendered and
+visually inspected. requirements.json records source hashes/line references and
+every extracted heading, list/table row and normative instruction. Initial
+Unverified entries are acceptance gaps, not implementation claims; update them
+with concrete code/tests as each phase is completed. Prior29-section and10-item
+editing traceability reports remain historical evidence, not a substitute.
+
+PRECEDENCE / ARCHITECTURE
+Use the existing vanilla web/native timeline and Firebase/Vercel architecture.
+PDF Flutter/Rust/FastAPI/Postgres/GPU choices are suggestions; the current user
+and Ultimate explicitly prohibit discarding working services or adding paid
+infrastructure automatically. Original projects/media stay device-local; cloud
+collaboration is opt-in future scope with permissions/rights/funding requirements.
+Advanced research features must not delay reliable editing/playback/export.
+
+AUDIT FINDINGS
+-3.47.0 is genuinely deployed from aa2f9e7; final report commit7afd5c7 is local.
+-Music Studio prompt and generation paths hard-code30s for hosted Lyria; this
+ is not duration-entitlement enforcement. Provider output is flattened audio,
+ not editable native instruments/MIDI. Local companion5–30s is a separate model.
+-A historical429 alone does not establish which service rejected the request.
+ Collect only sanitized operation/provider/status/cost diagnostics; no blind
+ live paid reproduction or quota escalation. Native local composition must work
+ independently and must not impersonate realistic singing/cloud generation.
+-AI Create tab changes clear aiAssetDraft. Generation history is global per
+ browser rather than UID-scoped; fix isolation/cancellation and retained media
+ before expanding the workspace. No second Music Studio or editor state store.
+-AutoCut has actual local bounded evidence, validation and native compilation;
+ backend analysis is currently Gemini-specific and lacks Pro/Nexus enforcement.
+-Existing subscription() recognizes verified PRO only. Three reasoning modes,
+ 15/day metered fallback, four customer wallets, music-unlock settlement and
+ shared£15 monetary cap are not implemented by the OpenAI allowance ledger.
+-Several existing non-OpenAI provider paths lack shared monetary reservation.
+ Preserve the working beta while building a strictly gated preview foundation;
+ do not advertise old per-user limits as a global financial hard stop.
+
+SECURITY / DEPLOYMENT GATES
+Owner confirmed16 November that the exposed OpenAI key has NOT been revoked.
+Never use it. No new production promotion while this release blocker remains.
+Continue independent code/emulator/local media tests. Need owner revocation and
+replacement entered through protected host secret configuration, not chat.
+No unapproved prices, live checkout, paid services, Firebase Blaze, new recurring
+spend or uncontrolled AI retries. £15/month is shared across the whole platform.
+Protected preview + branch/PR review and actual runtime tests are mandatory
+before a new production release. Keep3.47.0 available for rollback.
+
+IMPLEMENTATION QUEUE (ACTIVE, NOT A COMPLETION CLAIM)
+1. Full checklist and secret scanner/history incident audit; privacy repair.
+2. Shared validated editing settings/motion parity and regression preservation.
+3. Native Song Blueprint integrated into existing clips/creatorSettings, original
+   instrument synthesis, exact-duration render, MIDI/pattern controls, scopes/
+   locks, history/save/reopen, WAV/MIDI/stem export and Vanessa commands.
+4. Authoritative configurable Free/Pro/Nexus policy, atomic four-wallet/allowance/
+   unique-song ledger, pricing quotes, refunds/idempotency, shared budget and
+   privileged server persistence. Emulator first; hosted fail-closed without
+   credentials/configuration. Local cached subscription cannot grant access.
+5. Supported OpenAI model routing after official documentation/project-access
+   checks; replacement-key live test only after incident remediation. No provider
+   name clutter in ordinary UI; retain accurate disclosures/admin diagnostics.
+6. Account-scoped AI Create/history and content-aware entitled AutoCut using
+   shared real tools, actual evidence, cache and compact analysis; no fake vision.
+7. More motion/masking/parallax, stories, DAW capabilities and signature features
+   through the same measurable phase gates. Research/licensing/platform gaps
+   remain explicit. Keep iterating after incremental releases.

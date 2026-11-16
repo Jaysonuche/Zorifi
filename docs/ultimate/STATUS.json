@@ -1,0 +1,702 @@
+{
+  "schema": "zorifi.ultimate.audit/1",
+  "date": "2026-11-16",
+  "overall": "Partial",
+  "productionVersion": "3.47.0",
+  "candidate": "Development branch; no new hosted release",
+  "baselineTests": 589,
+  "areas": [
+    {
+      "id": "ultimate-part-1",
+      "part": 1,
+      "title": "Creative ecosystem",
+      "status": "Partial",
+      "code": [
+        "app.js",
+        "zorifi-project-model.js",
+        "zorifi-native-music-workspace.js"
+      ],
+      "tests": [
+        "tests/native-music-browser.cjs"
+      ],
+      "remaining": [
+        "Complete professional audio/video/image/vocal/story integration remains phased.",
+        "Native desktop/mobile DSP and collaboration are incomplete."
+      ]
+    },
+    {
+      "id": "ultimate-part-2",
+      "part": 2,
+      "title": "Vanessa Evolve",
+      "status": "Partial",
+      "code": [
+        "zorifi-vanessa-production.js",
+        "zorifi-vanessa-professional.js",
+        "zorifi-vanessa-listening.js",
+        "zorifi-vanessa-voice.js"
+      ],
+      "tests": [
+        "tests/vanessa-production-browser.cjs"
+      ],
+      "remaining": [
+        "Live replacement-key OpenAI test and three-mode production routing blocked.",
+        "Physical iPhone hands-free/voice and every-device subtitle timing not certified.",
+        "Full configurable proactive project guidance requires broader acceptance."
+      ]
+    },
+    {
+      "id": "ultimate-part-3",
+      "part": 3,
+      "title": "Personalization and learning",
+      "status": "Partial",
+      "code": [
+        "zorifi-vanessa-memory-manager.js",
+        "zorifi-vanessa-creative-learning.js"
+      ],
+      "tests": [
+        "tests/creative-learning.test.cjs"
+      ],
+      "remaining": [
+        "Show-and-Teach recording of actual demonstrated edits is incomplete.",
+        "Full Creative DNA and approved long-term project journal need unified controls.",
+        "No model training or autonomous code rewriting is claimed."
+      ]
+    },
+    {
+      "id": "ultimate-part-4",
+      "part": 4,
+      "title": "Project Partner and Creative Compass",
+      "status": "Partial",
+      "code": [
+        "zorifi-scenes.js",
+        "zorifi-vanessa-creative-plan.js",
+        "zorifi-vanessa-task-continuity.js"
+      ],
+      "tests": [],
+      "remaining": [
+        "Complete goals/audience/protected-assets/budget/stage compass is incomplete.",
+        "Creative alternative branches with unaffected generation reuse are incomplete."
+      ]
+    },
+    {
+      "id": "ultimate-part-5",
+      "part": 5,
+      "title": "Device Assistant",
+      "status": "Partial",
+      "code": [
+        "zorifi-device-integration.js",
+        "electron-main.cjs"
+      ],
+      "tests": [],
+      "remaining": [
+        "Scoped file/camera/microphone pickers exist; broad device/app/MIDI control is not implemented.",
+        "Revocable per-resource OS permissions and native mobile integrations need physical-device tests."
+      ]
+    },
+    {
+      "id": "ultimate-part-6",
+      "part": 6,
+      "title": "Listen, Watch and Verify",
+      "status": "Partial",
+      "code": [
+        "zorifi-vanessa-media-review.js",
+        "zorifi-vanessa-creative-verification.js"
+      ],
+      "tests": [
+        "tests/editor-workflows-browser.cjs",
+        "tests/parallax-local-browser.cjs"
+      ],
+      "remaining": [
+        "Full musical, lyric, arrangement and technical self-evaluation is incomplete.",
+        "Broader real-footage quality sets and bounded repair-loop acceptance remain.",
+        "Subjective quality is not certified by numerical technical tests."
+      ]
+    },
+    {
+      "id": "ultimate-part-7",
+      "part": 7,
+      "title": "Unified AI Create",
+      "status": "Partial",
+      "code": [
+        "app.js",
+        "zorifi-ai-platform.js",
+        "styles.css"
+      ],
+      "tests": [
+        "tests/ai-create-isolation-browser.cjs",
+        "tests/ai-generation-scope.test.cjs"
+      ],
+      "remaining": [
+        "Central tabs now preserve drafts and isolate accounts, with stale replies suppressed.",
+        "Durable reusable inline generated media after refresh is incomplete.",
+        "Complete unified navigation, AutoCut tab and shared generation-history reuse are unfinished."
+      ]
+    },
+    {
+      "id": "ultimate-part-8",
+      "part": 8,
+      "title": "Professional Music Studio",
+      "status": "Partial",
+      "code": [
+        "zorifi-native-music.js",
+        "zorifi-native-music-workspace.js",
+        "zorifi-audio-engine.js"
+      ],
+      "tests": [
+        "tests/native-music-browser.cjs"
+      ],
+      "remaining": [
+        "Real original instrument arrangements and note editing added; not the full DAW.",
+        "Missing advanced recording/take comping, Live Session, instrument design, sends/buses and full mastering."
+      ]
+    },
+    {
+      "id": "ultimate-part-9",
+      "part": 9,
+      "title": "Song Blueprint",
+      "status": "Partial",
+      "code": [
+        "zorifi-native-music.js",
+        "zorifi-project-model.js"
+      ],
+      "tests": [
+        "tests/native-music.test.cjs"
+      ],
+      "remaining": [
+        "Portable source-note snapshots derive from actual timeline clips; no second mutable editor store.",
+        "Complete server/worker schema, lyrics/automation/provenance/version lineage and deterministic cloud-model versions remain."
+      ]
+    },
+    {
+      "id": "ultimate-part-10",
+      "part": 10,
+      "title": "Living Stems and scoped generation",
+      "status": "Partial",
+      "code": [
+        "zorifi-native-music-workspace.js"
+      ],
+      "tests": [
+        "tests/native-music-browser.cjs",
+        "tests/native-music.test.cjs"
+      ],
+      "remaining": [
+        "Native note/instrument edits render only that clip and preserve timing/mixer/effects. Composition locks work.",
+        "Section-only regeneration, full lock categories and licensed external stem separation remain unfinished."
+      ]
+    },
+    {
+      "id": "ultimate-part-11",
+      "part": 11,
+      "title": "Core DAW audio engine",
+      "status": "Partial",
+      "code": [
+        "zorifi-audio-engine.js",
+        "zorifi-native-music-worker.js"
+      ],
+      "tests": [
+        "tests/audio-studio-browser.cjs",
+        "tests/native-music-browser.cjs"
+      ],
+      "remaining": [
+        "48kHz native synthesis and real 90s offline mix verified on Windows Chromium.",
+        "AudioWorklet/sample-accurate live recording, latency/dropout benchmarks, native DSP,192kHz remain unverified."
+      ]
+    },
+    {
+      "id": "ultimate-part-12",
+      "part": 12,
+      "title": "Arrangement and Live Session",
+      "status": "Partial",
+      "code": [
+        "app.js",
+        "zorifi-timeline-edit-api.js"
+      ],
+      "tests": [
+        "tests/native-music-browser.cjs"
+      ],
+      "remaining": [
+        "Real arrangement/multitrack timeline exists.",
+        "Live Session clip launching, scenes, loop capture and simultaneous performance recording are not implemented."
+      ]
+    },
+    {
+      "id": "ultimate-part-13",
+      "part": 13,
+      "title": "Advanced MIDI and drum sequencing",
+      "status": "Partial",
+      "code": [
+        "zorifi-native-music.js",
+        "zorifi-native-music-workspace.js"
+      ],
+      "tests": [
+        "tests/native-music.test.cjs"
+      ],
+      "remaining": [
+        "Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added.",
+        "Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain.",
+        "Retrospective MIDI capture must remain opt-in and is not implemented."
+      ]
+    },
+    {
+      "id": "ultimate-part-14",
+      "part": 14,
+      "title": "Instrument Lab and SoundPrint",
+      "status": "Partial",
+      "code": [
+        "zorifi-native-music.js"
+      ],
+      "tests": [
+        "tests/native-music.test.cjs"
+      ],
+      "remaining": [
+        "Seven original procedural kick/snare/hat/bass/piano/pluck/pad voices added.",
+        "Wavetable/sample instrument designer, ADSR/LFO UI, SoundPrint, Sound Fusion, Text-to-Synth and timbre transfer remain."
+      ]
+    },
+    {
+      "id": "ultimate-part-15",
+      "part": 15,
+      "title": "Vibe Engine and music intelligence",
+      "status": "Partial",
+      "code": [
+        "zorifi-native-music.js"
+      ],
+      "tests": [
+        "tests/native-music.test.cjs"
+      ],
+      "remaining": [
+        "Seeded genre/groove/section-energy composition and exact ending work for bounded native paths.",
+        "Paint-a-Song, Style Morph, Song/Groove/Sonic DNA extraction and intelligent transitions are unfinished."
+      ]
+    },
+    {
+      "id": "ultimate-part-16",
+      "part": 16,
+      "title": "Vanessa Music Producer",
+      "status": "Partial",
+      "code": [
+        "zorifi-native-music-workspace.js",
+        "zorifi-studio-director.js"
+      ],
+      "tests": [
+        "tests/native-music-browser.cjs"
+      ],
+      "remaining": [
+        "Reviewed Vanessa native composition/transposition/quantization/locks use actual manual APIs and save.",
+        "Full producer reasoning, lyrics/MIDI planning, selective regeneration, Hum-to-Music, Ghost/Parallel Producer, Live Jam and explanations remain."
+      ]
+    },
+    {
+      "id": "ultimate-part-17",
+      "part": 17,
+      "title": "Specialist Studio Team",
+      "status": "NotStarted",
+      "code": [
+        "zorifi-vanessa-professional.js"
+      ],
+      "tests": [],
+      "remaining": [
+        "Single Vanessa workflows remain; the full specialist music-team orchestration and evaluation are not implemented.",
+        "No multi-model paid agent swarm is enabled."
+      ]
+    },
+    {
+      "id": "ultimate-part-18",
+      "part": 18,
+      "title": "Vocal Lab",
+      "status": "Partial",
+      "code": [
+        "zorifi-editor-audio-workflows.js",
+        "zorifi-audio-engine.js"
+      ],
+      "tests": [
+        "tests/editor-workflows-browser.cjs"
+      ],
+      "remaining": [
+        "Existing explicit recording, provider TTS and local EQ/cleanup paths remain.",
+        "Comping/pitch correction/harmonies/choirs/formants/de-esser/lyric melody and language adaptation unfinished.",
+        "Premium realistic singing/voice cloning blocked on licensed verified providers, consent and metering."
+      ]
+    },
+    {
+      "id": "ultimate-part-19",
+      "part": 19,
+      "title": "Smart Vocal Space",
+      "status": "NotStarted",
+      "code": [
+        "zorifi-audio-engine.js"
+      ],
+      "tests": [],
+      "remaining": [
+        "Ordinary music ducking exists but not the specified vocal-aware dynamic EQ/spectral masking workflow.",
+        "QuantumEntanglement branding must describe real DSP; no quantum computing implementation exists."
+      ]
+    },
+    {
+      "id": "ultimate-part-20",
+      "part": 20,
+      "title": "Mixing and Mastering",
+      "status": "Partial",
+      "code": [
+        "zorifi-audio-engine.js",
+        "app.js"
+      ],
+      "tests": [
+        "tests/audio-studio-browser.cjs",
+        "tests/native-music-browser.cjs"
+      ],
+      "remaining": [
+        "Existing pan/fade/EQ/compression/limiting/ducking/master WAV work.",
+        "Buses/sends/VCA/parallel chains/dynamicEQ/multiband/transient/spatial tools/true-peak/LUFS/Mix Intelligence/Audio Doctor remain incomplete."
+      ]
+    },
+    {
+      "id": "ultimate-part-21",
+      "part": 21,
+      "title": "Adaptive music and video",
+      "status": "Partial",
+      "code": [
+        "zorifi-autocut-creative.js",
+        "zorifi-native-music.js",
+        "zorifi-sfx.js"
+      ],
+      "tests": [
+        "tests/native-music-safety-browser.cjs",
+        "tests/editor-workflows-browser.cjs"
+      ],
+      "remaining": [
+        "Native requested duration and cadence, local SFX and ducking available.",
+        "Full actual video-to-score analysis, adaptive cue sections, leitmotif, intelligent transitions and runtime SDK remain."
+      ]
+    },
+    {
+      "id": "ultimate-part-22",
+      "part": 22,
+      "title": "GhostJam and time machine",
+      "status": "Partial",
+      "code": [
+        "zorifi-phase11.js",
+        "zorifi-music-studio.js"
+      ],
+      "tests": [],
+      "remaining": [
+        "Local history/named versions exist; BroadcastChannel presence is not an internet collaboration backend.",
+        "Permissioned musical branches/conflicts/merges/A-B/attribution and historical-production DSP are unfinished."
+      ]
+    },
+    {
+      "id": "ultimate-part-23",
+      "part": 23,
+      "title": "Library and marketplace",
+      "status": "Partial",
+      "code": [
+        "zorifi-creator-platform.js",
+        "zorifi-music-catalogue.js"
+      ],
+      "tests": [],
+      "remaining": [
+        "Device assets/templates/original sounds exist.",
+        "Licensed searchable creator instrument/sample library, marketplace purchases, royalty splits and provenance moderation are unfinished."
+      ]
+    },
+    {
+      "id": "ultimate-part-24",
+      "part": 24,
+      "title": "Experimental technologies",
+      "status": "NotStarted",
+      "code": [],
+      "tests": [],
+      "remaining": [
+        "NeuroSync, gesture, spatial audio, Endless Jam/Extend, Context Music and coaching remain research.",
+        "No native/hardware support or unique-world-first claim; research must not block core editing."
+      ]
+    },
+    {
+      "id": "ultimate-part-25",
+      "part": 25,
+      "title": "Professional Video Editor",
+      "status": "Partial",
+      "code": [
+        "zorifi-motion-graph.js",
+        "zorifi-motion-renderer.js",
+        "zorifi-motion-workspace.js",
+        "zorifi-parallax-workflow.js"
+      ],
+      "tests": [
+        "tests/parallax-local-browser.cjs",
+        "tests/editor-workflows-browser.cjs"
+      ],
+      "remaining": [
+        "51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds.",
+        "Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain."
+      ]
+    },
+    {
+      "id": "ultimate-part-26",
+      "part": 26,
+      "title": "Intelligent Advanced AutoCut",
+      "status": "Partial",
+      "code": [
+        "zorifi-autocut-director.js",
+        "zorifi-autocut-media.js",
+        "netlify/functions/_shared/autocut-planner.mjs"
+      ],
+      "tests": [],
+      "remaining": [
+        "Actual bounded media evidence and native edit-plan compilation exist.",
+        "Pro/Nexus production gating, shared paid accounting, OpenAI routing, six real content-set acceptance and stronger content/story quality remain."
+      ]
+    },
+    {
+      "id": "ultimate-part-27",
+      "part": 27,
+      "title": "AI Image Studio",
+      "status": "Partial",
+      "code": [
+        "app.js",
+        "netlify/functions/_shared/gemini-media.mjs"
+      ],
+      "tests": [
+        "tests/services.test.cjs"
+      ],
+      "remaining": [
+        "Configured provider pipeline and new account-isolated retained tab drafts exist.",
+        "Shared image wallet and budget wiring, draft/final credit semantics, persistent generated-image history reuse and live replacement-provider tests remain."
+      ]
+    },
+    {
+      "id": "ultimate-part-28",
+      "part": 28,
+      "title": "Voice, script, storyboard and stories",
+      "status": "Partial",
+      "code": [
+        "app.js",
+        "zorifi-editor-audio-workflows.js",
+        "zorifi-scenes.js"
+      ],
+      "tests": [
+        "tests/editor-workflows-browser.cjs",
+        "tests/ai-create-isolation-browser.cjs"
+      ],
+      "remaining": [
+        "Editable scripts/storyboards/captions and provider recordings use native project workflows.",
+        "Complete1/3/10-minute storyline engine, subscription-metered production and licensed realistic singing unfinished."
+      ]
+    },
+    {
+      "id": "ultimate-part-29",
+      "part": 29,
+      "title": "Generation and export quality",
+      "status": "Partial",
+      "code": [
+        "app.js",
+        "zorifi-motion-renderer.js"
+      ],
+      "tests": [
+        "tests/editor-workflows-browser.cjs",
+        "tests/parallax-local-browser.cjs"
+      ],
+      "remaining": [
+        "Decoded320x180 MP4 with real audio/pixels verified; prior45s480x270 artifact retained.",
+        "Real 720/1080/4K device matrix and4K/8K performance/codec certification remain.",
+        "Unsupported cloud video providers and retired models must stay disabled until verified."
+      ]
+    },
+    {
+      "id": "ultimate-part-30",
+      "part": 30,
+      "title": "Free, Pro and Nexus",
+      "status": "Partial",
+      "code": [
+        "netlify/functions/_shared/ultimate-policy.mjs",
+        "netlify/functions/_shared/ultimate-finance-ledger.mjs"
+      ],
+      "tests": [
+        "tests/ultimate-finance.test.cjs"
+      ],
+      "remaining": [
+        "Three-tier/mode proposed policy and strict local entitlement tests implemented.",
+        "Legacy production remains PRO-only; new server-owned resolver, UI, included allocations, fallback and global financial wiring unfinished.",
+        "Local native instrumentation is not proof of tamper-proof hosted/offline generation quotas."
+      ]
+    },
+    {
+      "id": "ultimate-part-31",
+      "part": 31,
+      "title": "Song unlocks",
+      "status": "Partial",
+      "code": [
+        "netlify/functions/_shared/ultimate-finance-ledger.mjs"
+      ],
+      "tests": [
+        "tests/ultimate-finance.test.cjs"
+      ],
+      "remaining": [
+        "Local atomic unique-song reservation/success settlement/refund/reuse/monthly counters and restart recovery records tested.",
+        "Trusted canonical-song ownership/artifact receipts, export coordinator and privileged hosted ledger are not integrated."
+      ]
+    },
+    {
+      "id": "ultimate-part-32",
+      "part": 32,
+      "title": "Four credit wallets",
+      "status": "Partial",
+      "code": [
+        "netlify/functions/_shared/ultimate-finance-ledger.mjs"
+      ],
+      "tests": [
+        "tests/ultimate-finance.test.cjs"
+      ],
+      "remaining": [
+        "Local four-wallet included-first reservations/refunds/history and sandbox seed receipts tested.",
+        "Actual payment adapters/signature checks/refunds/chargebacks, approved packs, admin tools and production dashboards remain."
+      ]
+    },
+    {
+      "id": "ultimate-part-33",
+      "part": 33,
+      "title": "Nigeria-first international monetization",
+      "status": "Blocked",
+      "code": [
+        "netlify/functions/_shared/ultimate-finance-ledger.mjs"
+      ],
+      "tests": [
+        "tests/ultimate-finance.test.cjs"
+      ],
+      "remaining": [
+        "Sandbox ledger stores NGN and international ISO currency purchase records.",
+        "Prices/FX safety margins/subscriptions/packs remain provisional and inactive.",
+        "Real payment-provider sandbox integration, local settlement, store approval and approved live pricing are required. No charges enabled."
+      ]
+    },
+    {
+      "id": "ultimate-part-34",
+      "part": 34,
+      "title": "Shared AI cost management",
+      "status": "Partial",
+      "code": [
+        "netlify/functions/_shared/ultimate-policy.mjs",
+        "netlify/functions/_shared/ultimate-finance-ledger.mjs"
+      ],
+      "tests": [
+        "tests/ultimate-finance.test.cjs"
+      ],
+      "remaining": [
+        "Local atomic GBP15 shared cap, cost quotes, concurrency, unknown-cost holds, usage reconciliation and overspend halt tested.",
+        "Privileged durable hosted adapter, verified live price catalog and accounting on every provider endpoint are missing.",
+        "Existing per-UID OpenAI quotas are not represented as a shared monetary hard stop."
+      ]
+    },
+    {
+      "id": "ultimate-part-35",
+      "part": 35,
+      "title": "Platform support",
+      "status": "Partial",
+      "code": [
+        "electron-main.cjs",
+        "android/",
+        "manifest.webmanifest",
+        "sw.js"
+      ],
+      "tests": [
+        "tests/ai-create-isolation-browser.cjs",
+        "tests/native-music-safety-browser.cjs"
+      ],
+      "remaining": [
+        "Responsive web/PWA/desktop/Android packaging exist; five widths now tested for new music and AI Create.",
+        "Physical mobile/iPad tests, ASIO/WASAPI/CoreAudio/Oboe native engines, plugin hosts, signed platform installers and broad high-resolution benchmarks remain."
+      ]
+    },
+    {
+      "id": "ultimate-part-36",
+      "part": 36,
+      "title": "Cloud and collaboration",
+      "status": "Partial",
+      "code": [
+        "zorifi-firebase.js",
+        "firestore.rules",
+        "zorifi-social.js"
+      ],
+      "tests": [],
+      "remaining": [
+        "Firebase accounts, private conversations and explicit Social records exist; Studio projects/media stay on-device.",
+        "Opt-in project cloud sync/version-conflict resolution and permissioned DAW collaboration/GPU infrastructure remain.",
+        "No Blaze upgrade or new paid storage enabled."
+      ]
+    },
+    {
+      "id": "ultimate-part-37",
+      "part": 37,
+      "title": "Rights and privacy",
+      "status": "Partial",
+      "code": [
+        "zorifi-privacy.js",
+        "zorifi-terms.js",
+        "scripts/check-secret-exposure.cjs",
+        "app.js"
+      ],
+      "tests": [
+        "tests/security-scan.test.cjs",
+        "tests/ai-create-isolation-browser.cjs"
+      ],
+      "remaining": [
+        "Account-isolated history, opt-in capture, server credential patterns and original instrument provenance verified in bounded tests.",
+        "Exposed key revocation, external licensing/voice-consent verification, marketplace/royalty workflows and complete public white-label audit remain."
+      ]
+    },
+    {
+      "id": "ultimate-part-38",
+      "part": 38,
+      "title": "Ten signature upgrades",
+      "status": "Partial",
+      "code": [
+        "zorifi-phase11.js",
+        "zorifi-vanessa-creative-learning.js",
+        "zorifi-native-music.js"
+      ],
+      "tests": [],
+      "remaining": [
+        "Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance.",
+        "Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance."
+      ]
+    },
+    {
+      "id": "ultimate-part-39",
+      "part": 39,
+      "title": "Implementation phases",
+      "status": "Partial",
+      "code": [
+        "docs/ultimate/requirements.json",
+        "docs/ultimate/IMPLEMENTATION-JOURNAL.txt"
+      ],
+      "tests": [],
+      "remaining": [
+        "All five sources read and1,673 source rows retained, with forty-part audit and evidence mapping.",
+        "Audit/reliability/native music/local finance phase advancing; remaining phases not declared complete.",
+        "Protected preview/production promotion blocked on credential incident and incomplete production boundaries."
+      ]
+    },
+    {
+      "id": "ultimate-part-40",
+      "part": 40,
+      "title": "Acceptance criteria",
+      "status": "Partial",
+      "code": [
+        "tests/",
+        "docs/ultimate/"
+      ],
+      "tests": [],
+      "remaining": [
+        "Unit, real-editor media/history, offline auth-fixture and existing emulator evidence are recorded separately.",
+        "Live rotated-key, actual production finance/payments, physical-device, licensed provider, full-resolution and all research acceptance remain unverified.",
+        "A source implementation, UI control or mock provider test does not certify a live paid feature."
+      ]
+    }
+  ],
+  "blockers": [
+    "Previously exposed OpenAI credential is confirmed active; owner must revoke it.",
+    "Privileged hosted financial persistence and all-provider reservation wiring missing.",
+    "Supported replacement model/project access, provider licensing and protected preview not verified.",
+    "Prices and live charges not approved; Firebase stays Spark."
+  ]
+}

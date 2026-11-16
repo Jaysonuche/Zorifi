@@ -1,7 +1,11 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
 // Verified editor upgrade; local projects and provider configuration are preserved.
-const CACHE = 'zorifi-v250-editor1';
+const CACHE = 'zorifi-v251-ultimate-preview1';
 const CORE = [
+  './zorifi-native-music.js?v=251',
+  './zorifi-native-music-worker.js',
+  './zorifi-native-music-workspace.js?v=251',
+  './zorifi-native-music.css?v=251',
   "./zorifi-motion-graph.js?v=250",
   "./zorifi-motion-renderer.js?v=250",
   "./zorifi-motion-packs.js?v=250",

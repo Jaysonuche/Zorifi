@@ -1,0 +1,146 @@
+ZORIFI ULTIMATE — FIRST VERIFIED IMPLEMENTATION PHASE
+16 November 2026 | Development branch: codex/vanessa-openai-production
+Overall master status: PARTIAL. This is not a completed commercial release.
+
+PRODUCTION / RELEASE STATUS
+Read-only release.json check at20:14 UTC confirmed production remains3.47.0,
+source aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb, built11 November.
+URL: https://zorifi.vercel.app/
+No production deploy, secret change, paid service, Firebase upgrade, live charge
+or live AI request was made in this phase. No new hosted version is claimed.
+The owner-confirmed active exposed OpenAI credential remains a release blocker.
+Rollback baseline is the existing3.47.0 deployment. README.md is a pre-existing
+user change and is excluded from this phase's commit.
+
+FULL REQUIREMENTS AUDIT
+All40 parts of Ultimate V5, the complete backend/music/AI Create repair texts,
+and all11 pages of the original Music Studio appendix were reviewed. The PDF
+was also rendered and inspected. Suggested replacement frameworks are not used
+to discard the existing working vanilla web/Firebase/Vercel application.
+requirements.json retains1,673 source heading/acceptance/instruction rows with
+source hashes and line references. REQUIREMENTS-STATUS.txt and STATUS.json audit
+all40 master areas, concrete implementation paths and missing features. Raw
+Unverified rows are open acceptance criteria, not silent implementation claims.
+The prior ten-item and29-section reports remain historical evidence.
+
+IMPLEMENTED AND VERIFIED IN THIS PHASE
+
+1. Original native Instrument Lab in the real Music Studio
+   Seven original procedural voices: kick, snare, hat, bass, piano, pluck, pad.
+   Seeded section/chord/groove/energy arrangement, including syncopated Afrobeats,
+   exact requested duration and an ending cadence. This is deterministic local
+   synthesis, not trained AI audio, realistic singing or a commercial sample set.
+   Heavy rendering runs in a dedicated cancellable worker; WAV buffers transfer
+   without copying. Sources render sequentially with resource/voice bounds.
+
+2. Editable source patterns and Song Blueprint foundation
+   Notes live on actual state.clips[].musicPattern. Source WAVs use existing
+   UID/project/asset IndexedDB storage. Blueprint snapshots derive from those
+   clips, never a duplicate mutable editor state. Existing native timeline,
+   mixer, fades, transforms and source trims remain in charge of playback/export.
+   Note add/edit/delete, velocity, instrument change, transposition,1/16 quantize,
+   note visualization and composition lock/unlock have discoverable controls.
+   MIDI export writes real tempo/note/percussion tracks and accounts for timeline
+   placement/trims. Full MIDI recording/import/controller/MPE and drum-grid UI
+   are not implemented. Full immutable blueprint/version/lyrics schema remains.
+
+3. Real manual/Vanessa parity
+   Reviewed native compose/edit/lock operations extend the existing workflow
+   dispatcher. Assistant operations retain Firebase authorization, captured
+   project revision, confirmation, real postconditions and native persistence.
+   Actual note changes render only the chosen source and commit as one Undo.
+   Stop during authorization or rendering, account/project changes, later edits
+   and device-save failure prevent pending edits or restore the prior project.
+   Native sources are retained for Undo/Redo. Temporary failed sources are cleaned
+   up under the captured account, including after an account switch.
+
+4. Exact-duration cloud repair
+   Music Studio, AI Create and the existing director no longer silently shorten
+   unsupported requests to30 seconds. The current cloud Clip option explicitly
+   refuses unsupported lengths before a billable call; the backend enforces this
+   too. Optional companion limits are explicit. A rejected90s request stays90s
+   in the Music Studio form and has an actionable visible error.
+   Two old tests expecting15s/90s to silently return30s were corrected to ask30s
+   for success. A new test verifies unsupported requests cause zero provider calls.
+   No claim was made that the historical429 source or provider quota is repaired
+   without live diagnostic evidence. Existing cooldown/error safeguards remain.
+
+5. AI Create privacy and responsive controls
+   History is account-scoped. Ambiguous legacy global history is not assigned to
+   a new account; its old local record is not destructively deleted. Account
+   switches abort work and suppress late progress/results/errors/history writes.
+   Separate video/image/voice/music/script/storyboard tab drafts are retained.
+   A real mobile tab obstruction was fixed. The same real tabs were tapped at
+   widths320/390/768/1024/1440 without page overflow or panels covering them.
+   Large inline generated-media reuse after browser refresh remains incomplete;
+   those bytes are not falsely reported as durable history media.
+
+6. Server financial foundation — LOCAL ONLY
+   Free/Pro/Nexus and Standard/Advanced/Nexus policy; four wallets; included-first
+   reservations; account/content idempotency; persistent purchase/usage entries;
+   refunds; unique-song unlock reservations completed only after successful
+   export receipts; restart recovery records; concurrency; rate limits; shared
+   GBP15 maximum; unknown-cost holds; settlement and overspend halt.
+   Real SQLite transactions were tested across connections and calendar resets.
+   Synthetic test prices only. Sandbox grants are test fixtures, NOT verified
+   payment-provider adapters. Hosted construction fails closed: no ephemeral
+   serverless SQLite and no global ledger authenticated by every user's token.
+   This foundation is not wired to production endpoints, exports, billing UI or
+   every existing provider. Local native composition tests do not prove secure
+   remotely enforced1/3/6 generation or5/15/30 unlock allowances. Those production
+   entitlements require the privileged durable ledger and integration phase.
+
+7. Incident audit and regression protection
+   Safe scanner checks current tracked/new source, reachable Git history and
+   build/artifact/log text without displaying matched secrets or reading private
+   environment/auth stores. No credential-shaped findings in the reviewed scan.
+   This does not revoke the exposed key or prove external copies are safe.
+   Existing51 staged tools are preserved. New assets are included in web build,
+   desktop packaging and PWA cache; no second editor boot/store was introduced.
+
+ACTUAL VALIDATION
+-632 unit tests passed,0 failed/skipped; baseline589 tests retained. Counts
+ include8 native music,23 local finance,8 scanner and3 account-scope regressions.
+-Actual Auth/Firestore emulators passed authentication, signed quota replay,
+ project/account isolation,20-request limit, usage isolation and real browser
+ split/visible timeline/Undo/Redo/device persistence. OpenAI replies mocked;
+ no paid API used. This is not a hosted financial-ledger emulator test.
+-Native editor browser: five separately decoded90s48kHz instrument sources;
+ real90s stereo mix (peak0.5292,RMS0.0826); actual MIDI download; note change;
+ Undo/Redo; cancellation; stale-project protection; exact reopening; reviewed
+ Vanessa transposition. Authentication fixture, no cloud calls.
+-Native safety browser: save-failure rollback; Stop during pending auth; cloud
+ duration refusal; light/dark inputs; five screen widths; real native-score MP4
+320x180,1.2539s, decoded audio peak0.02239. No page errors or paid calls.
+-Vanessa browser regression passed Chromium and WebKit ordinary reply, real
+ split, timeline update, confirmation, Undo/Redo, refresh persistence, stale
+ proposal/Stop and opt-in microphone. Auth/provider fixtures clearly labeled.
+-Editor caption/audio workflow passed actual decoded MP4 pixels and audio,
+ real native history/reopening, caption correction/source-link timing and
+ original SFX. Provider speech bytes are a fixture; no singing/TTS quality claim.
+-Parallax/local reconstruction regression passed retained original/matte,
+ quota cooldown, reviewed local fill, native depth scene, Undo/Redo/reopening
+ and decoded320x180 MP4. One parallel run returned an empty recording: the
+ existing guard rejected it with no download. The isolated retry passed and
+ invalid-duration output rejection also passed. This limitation is not hidden.
+-Project syntax/asset checks passed:414 source files,321 references.
+-Web build passed:163 files plus assets; generated interface catalogue refreshed.
+-Live release.json verified unchanged3.47.0. No replacement-key/model live test.
+
+REMAINING WORK / NEXT PHASES
+See every master area in REQUIREMENTS-STATUS.txt. Highest priority remains
+advanced motion/composition parity and broader masking/parallax acceptance,
+privileged hosted financial accounting on all billable paths, server-owned
+Nexus subscriptions and reasoning, current supported model/project evaluation,
+durable generated-media history, and entitled content-aware AutoCut. Full DAW,
+Live Session/MIDI input/instrument design/vocal lab/advanced mastering/adaptive
+scoring/collaboration/marketplace/research/native DSP remain partial or absent.
+Licensed singing, commercial music libraries and unsupported external services
+stay disabled. Physical phones/tablets/macOS/Linux and high-resolution output
+must be verified separately. Provisional prices/credit packs remain inactive.
+
+The immediate external release action is to revoke the exposed credential,
+then enter a replacement only through protected secret configuration. Next run
+one bounded live model/access test, complete the privileged financial boundary,
+verify a protected preview, and promote through the existing authorized process.
+No new paid infrastructure or Firebase Blaze is authorized by this report.

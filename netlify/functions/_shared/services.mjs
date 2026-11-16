@@ -103,7 +103,7 @@ export const music=handler(async(input,request)=>{
  if(!['start','status','cancel'].includes(action))throw new ServiceError('Unsupported music operation.');
  if(action==='cancel')throw new ServiceError('Provider cancellation is not configured.',501,'UNSUPPORTED');
  const payload={...input,model:env('VANESSA_MUSIC_MODEL')||undefined};delete payload.action;
- if(action==='start'){payload.prompt=prompt(input);payload.duration=Math.max(5,Math.min(auth.pro?600:30,Number(input.duration)||30));payload.outputFormat=auth.pro&&input.outputFormat==='wav'?'wav':'mp3';payload.requestedStems=auth.pro?(input.requestedStems||[]):[];}
+ if(action==='start'){const duration=input.duration??30,limit=auth.pro?600:30;if(typeof duration!=='number'||!Number.isFinite(duration)||duration<5||duration>limit)throw new ServiceError(`This configured cloud route supports 5–${limit} seconds for the verified account. Choose a supported duration explicitly.`,403,'DURATION_LIMIT');payload.prompt=prompt(input);payload.duration=duration;payload.outputFormat=auth.pro&&input.outputFormat==='wav'?'wav':'mp3';payload.requestedStems=auth.pro?(input.requestedStems||[]):[];}
  const data=await upstreamJson(action==='status'?`${base}/v1/music/generations/${jobId(input)}`:`${base}/v1/music/generations`,action==='status'?{headers:{authorization:`Bearer ${key}`}}:post(key,payload));
  const result=normalizeMedia({...data,requestId:data.requestId||data.request_id||input.requestId},'audio');if(!auth.pro)result.stems={};return result;
 });

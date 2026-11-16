@@ -1,0 +1,279 @@
+ZORIFI ULTIMATE V5 — FULL REQUIREMENTS STATUS
+16 November 2026 | Overall: PARTIAL | Live baseline:3.47.0
+
+All40 parts and all11 appendix pages reviewed. The raw1,673-row source inventory
+is requirements.json. This report groups it by all40 master parts; a part is
+not complete just because an individual bounded function passes. Test filenames
+are evidence pointers; see PHASE-REPORT.txt for tests actually rerun this phase.
+Unverified individual source rows remain acceptance gaps, never silent success.
+
+PART 1 — Creative ecosystem: PARTIAL
+Code: app.js, zorifi-project-model.js, zorifi-native-music-workspace.js
+Evidence pointers: tests/native-music-browser.cjs
+- Complete professional audio/video/image/vocal/story integration remains phased.
+- Native desktop/mobile DSP and collaboration are incomplete.
+
+PART 2 — Vanessa Evolve: PARTIAL
+Code: zorifi-vanessa-production.js, zorifi-vanessa-professional.js, zorifi-vanessa-listening.js, zorifi-vanessa-voice.js
+Evidence pointers: tests/vanessa-production-browser.cjs
+- Live replacement-key OpenAI test and three-mode production routing blocked.
+- Physical iPhone hands-free/voice and every-device subtitle timing not certified.
+- Full configurable proactive project guidance requires broader acceptance.
+
+PART 3 — Personalization and learning: PARTIAL
+Code: zorifi-vanessa-memory-manager.js, zorifi-vanessa-creative-learning.js
+Evidence pointers: tests/creative-learning.test.cjs
+- Show-and-Teach recording of actual demonstrated edits is incomplete.
+- Full Creative DNA and approved long-term project journal need unified controls.
+- No model training or autonomous code rewriting is claimed.
+
+PART 4 — Project Partner and Creative Compass: PARTIAL
+Code: zorifi-scenes.js, zorifi-vanessa-creative-plan.js, zorifi-vanessa-task-continuity.js
+Evidence pointers: Not rerun / no complete acceptance
+- Complete goals/audience/protected-assets/budget/stage compass is incomplete.
+- Creative alternative branches with unaffected generation reuse are incomplete.
+
+PART 5 — Device Assistant: PARTIAL
+Code: zorifi-device-integration.js, electron-main.cjs
+Evidence pointers: Not rerun / no complete acceptance
+- Scoped file/camera/microphone pickers exist; broad device/app/MIDI control is not implemented.
+- Revocable per-resource OS permissions and native mobile integrations need physical-device tests.
+
+PART 6 — Listen, Watch and Verify: PARTIAL
+Code: zorifi-vanessa-media-review.js, zorifi-vanessa-creative-verification.js
+Evidence pointers: tests/editor-workflows-browser.cjs, tests/parallax-local-browser.cjs
+- Full musical, lyric, arrangement and technical self-evaluation is incomplete.
+- Broader real-footage quality sets and bounded repair-loop acceptance remain.
+- Subjective quality is not certified by numerical technical tests.
+
+PART 7 — Unified AI Create: PARTIAL
+Code: app.js, zorifi-ai-platform.js, styles.css
+Evidence pointers: tests/ai-create-isolation-browser.cjs, tests/ai-generation-scope.test.cjs
+- Central tabs now preserve drafts and isolate accounts, with stale replies suppressed.
+- Durable reusable inline generated media after refresh is incomplete.
+- Complete unified navigation, AutoCut tab and shared generation-history reuse are unfinished.
+
+PART 8 — Professional Music Studio: PARTIAL
+Code: zorifi-native-music.js, zorifi-native-music-workspace.js, zorifi-audio-engine.js
+Evidence pointers: tests/native-music-browser.cjs
+- Real original instrument arrangements and note editing added; not the full DAW.
+- Missing advanced recording/take comping, Live Session, instrument design, sends/buses and full mastering.
+
+PART 9 — Song Blueprint: PARTIAL
+Code: zorifi-native-music.js, zorifi-project-model.js
+Evidence pointers: tests/native-music.test.cjs
+- Portable source-note snapshots derive from actual timeline clips; no second mutable editor store.
+- Complete server/worker schema, lyrics/automation/provenance/version lineage and deterministic cloud-model versions remain.
+
+PART 10 — Living Stems and scoped generation: PARTIAL
+Code: zorifi-native-music-workspace.js
+Evidence pointers: tests/native-music-browser.cjs, tests/native-music.test.cjs
+- Native note/instrument edits render only that clip and preserve timing/mixer/effects. Composition locks work.
+- Section-only regeneration, full lock categories and licensed external stem separation remain unfinished.
+
+PART 11 — Core DAW audio engine: PARTIAL
+Code: zorifi-audio-engine.js, zorifi-native-music-worker.js
+Evidence pointers: tests/audio-studio-browser.cjs, tests/native-music-browser.cjs
+- 48kHz native synthesis and real 90s offline mix verified on Windows Chromium.
+- AudioWorklet/sample-accurate live recording, latency/dropout benchmarks, native DSP,192kHz remain unverified.
+
+PART 12 — Arrangement and Live Session: PARTIAL
+Code: app.js, zorifi-timeline-edit-api.js
+Evidence pointers: tests/native-music-browser.cjs
+- Real arrangement/multitrack timeline exists.
+- Live Session clip launching, scenes, loop capture and simultaneous performance recording are not implemented.
+
+PART 13 — Advanced MIDI and drum sequencing: PARTIAL
+Code: zorifi-native-music.js, zorifi-native-music-workspace.js
+Evidence pointers: tests/native-music.test.cjs
+- Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added.
+- Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain.
+- Retrospective MIDI capture must remain opt-in and is not implemented.
+
+PART 14 — Instrument Lab and SoundPrint: PARTIAL
+Code: zorifi-native-music.js
+Evidence pointers: tests/native-music.test.cjs
+- Seven original procedural kick/snare/hat/bass/piano/pluck/pad voices added.
+- Wavetable/sample instrument designer, ADSR/LFO UI, SoundPrint, Sound Fusion, Text-to-Synth and timbre transfer remain.
+
+PART 15 — Vibe Engine and music intelligence: PARTIAL
+Code: zorifi-native-music.js
+Evidence pointers: tests/native-music.test.cjs
+- Seeded genre/groove/section-energy composition and exact ending work for bounded native paths.
+- Paint-a-Song, Style Morph, Song/Groove/Sonic DNA extraction and intelligent transitions are unfinished.
+
+PART 16 — Vanessa Music Producer: PARTIAL
+Code: zorifi-native-music-workspace.js, zorifi-studio-director.js
+Evidence pointers: tests/native-music-browser.cjs
+- Reviewed Vanessa native composition/transposition/quantization/locks use actual manual APIs and save.
+- Full producer reasoning, lyrics/MIDI planning, selective regeneration, Hum-to-Music, Ghost/Parallel Producer, Live Jam and explanations remain.
+
+PART 17 — Specialist Studio Team: NOTSTARTED
+Code: zorifi-vanessa-professional.js
+Evidence pointers: Not rerun / no complete acceptance
+- Single Vanessa workflows remain; the full specialist music-team orchestration and evaluation are not implemented.
+- No multi-model paid agent swarm is enabled.
+
+PART 18 — Vocal Lab: PARTIAL
+Code: zorifi-editor-audio-workflows.js, zorifi-audio-engine.js
+Evidence pointers: tests/editor-workflows-browser.cjs
+- Existing explicit recording, provider TTS and local EQ/cleanup paths remain.
+- Comping/pitch correction/harmonies/choirs/formants/de-esser/lyric melody and language adaptation unfinished.
+- Premium realistic singing/voice cloning blocked on licensed verified providers, consent and metering.
+
+PART 19 — Smart Vocal Space: NOTSTARTED
+Code: zorifi-audio-engine.js
+Evidence pointers: Not rerun / no complete acceptance
+- Ordinary music ducking exists but not the specified vocal-aware dynamic EQ/spectral masking workflow.
+- QuantumEntanglement branding must describe real DSP; no quantum computing implementation exists.
+
+PART 20 — Mixing and Mastering: PARTIAL
+Code: zorifi-audio-engine.js, app.js
+Evidence pointers: tests/audio-studio-browser.cjs, tests/native-music-browser.cjs
+- Existing pan/fade/EQ/compression/limiting/ducking/master WAV work.
+- Buses/sends/VCA/parallel chains/dynamicEQ/multiband/transient/spatial tools/true-peak/LUFS/Mix Intelligence/Audio Doctor remain incomplete.
+
+PART 21 — Adaptive music and video: PARTIAL
+Code: zorifi-autocut-creative.js, zorifi-native-music.js, zorifi-sfx.js
+Evidence pointers: tests/native-music-safety-browser.cjs, tests/editor-workflows-browser.cjs
+- Native requested duration and cadence, local SFX and ducking available.
+- Full actual video-to-score analysis, adaptive cue sections, leitmotif, intelligent transitions and runtime SDK remain.
+
+PART 22 — GhostJam and time machine: PARTIAL
+Code: zorifi-phase11.js, zorifi-music-studio.js
+Evidence pointers: Not rerun / no complete acceptance
+- Local history/named versions exist; BroadcastChannel presence is not an internet collaboration backend.
+- Permissioned musical branches/conflicts/merges/A-B/attribution and historical-production DSP are unfinished.
+
+PART 23 — Library and marketplace: PARTIAL
+Code: zorifi-creator-platform.js, zorifi-music-catalogue.js
+Evidence pointers: Not rerun / no complete acceptance
+- Device assets/templates/original sounds exist.
+- Licensed searchable creator instrument/sample library, marketplace purchases, royalty splits and provenance moderation are unfinished.
+
+PART 24 — Experimental technologies: NOTSTARTED
+Code: No implementation yet
+Evidence pointers: Not rerun / no complete acceptance
+- NeuroSync, gesture, spatial audio, Endless Jam/Extend, Context Music and coaching remain research.
+- No native/hardware support or unique-world-first claim; research must not block core editing.
+
+PART 25 — Professional Video Editor: PARTIAL
+Code: zorifi-motion-graph.js, zorifi-motion-renderer.js, zorifi-motion-workspace.js, zorifi-parallax-workflow.js
+Evidence pointers: tests/parallax-local-browser.cjs, tests/editor-workflows-browser.cjs
+- 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds.
+- Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.
+
+PART 26 — Intelligent Advanced AutoCut: PARTIAL
+Code: zorifi-autocut-director.js, zorifi-autocut-media.js, netlify/functions/_shared/autocut-planner.mjs
+Evidence pointers: Not rerun / no complete acceptance
+- Actual bounded media evidence and native edit-plan compilation exist.
+- Pro/Nexus production gating, shared paid accounting, OpenAI routing, six real content-set acceptance and stronger content/story quality remain.
+
+PART 27 — AI Image Studio: PARTIAL
+Code: app.js, netlify/functions/_shared/gemini-media.mjs
+Evidence pointers: tests/services.test.cjs
+- Configured provider pipeline and new account-isolated retained tab drafts exist.
+- Shared image wallet and budget wiring, draft/final credit semantics, persistent generated-image history reuse and live replacement-provider tests remain.
+
+PART 28 — Voice, script, storyboard and stories: PARTIAL
+Code: app.js, zorifi-editor-audio-workflows.js, zorifi-scenes.js
+Evidence pointers: tests/editor-workflows-browser.cjs, tests/ai-create-isolation-browser.cjs
+- Editable scripts/storyboards/captions and provider recordings use native project workflows.
+- Complete1/3/10-minute storyline engine, subscription-metered production and licensed realistic singing unfinished.
+
+PART 29 — Generation and export quality: PARTIAL
+Code: app.js, zorifi-motion-renderer.js
+Evidence pointers: tests/editor-workflows-browser.cjs, tests/parallax-local-browser.cjs
+- Decoded320x180 MP4 with real audio/pixels verified; prior45s480x270 artifact retained.
+- Real 720/1080/4K device matrix and4K/8K performance/codec certification remain.
+- Unsupported cloud video providers and retired models must stay disabled until verified.
+
+PART 30 — Free, Pro and Nexus: PARTIAL
+Code: netlify/functions/_shared/ultimate-policy.mjs, netlify/functions/_shared/ultimate-finance-ledger.mjs
+Evidence pointers: tests/ultimate-finance.test.cjs
+- Three-tier/mode proposed policy and strict local entitlement tests implemented.
+- Legacy production remains PRO-only; new server-owned resolver, UI, included allocations, fallback and global financial wiring unfinished.
+- Local native instrumentation is not proof of tamper-proof hosted/offline generation quotas.
+
+PART 31 — Song unlocks: PARTIAL
+Code: netlify/functions/_shared/ultimate-finance-ledger.mjs
+Evidence pointers: tests/ultimate-finance.test.cjs
+- Local atomic unique-song reservation/success settlement/refund/reuse/monthly counters and restart recovery records tested.
+- Trusted canonical-song ownership/artifact receipts, export coordinator and privileged hosted ledger are not integrated.
+
+PART 32 — Four credit wallets: PARTIAL
+Code: netlify/functions/_shared/ultimate-finance-ledger.mjs
+Evidence pointers: tests/ultimate-finance.test.cjs
+- Local four-wallet included-first reservations/refunds/history and sandbox seed receipts tested.
+- Actual payment adapters/signature checks/refunds/chargebacks, approved packs, admin tools and production dashboards remain.
+
+PART 33 — Nigeria-first international monetization: BLOCKED
+Code: netlify/functions/_shared/ultimate-finance-ledger.mjs
+Evidence pointers: tests/ultimate-finance.test.cjs
+- Sandbox ledger stores NGN and international ISO currency purchase records.
+- Prices/FX safety margins/subscriptions/packs remain provisional and inactive.
+- Real payment-provider sandbox integration, local settlement, store approval and approved live pricing are required. No charges enabled.
+
+PART 34 — Shared AI cost management: PARTIAL
+Code: netlify/functions/_shared/ultimate-policy.mjs, netlify/functions/_shared/ultimate-finance-ledger.mjs
+Evidence pointers: tests/ultimate-finance.test.cjs
+- Local atomic GBP15 shared cap, cost quotes, concurrency, unknown-cost holds, usage reconciliation and overspend halt tested.
+- Privileged durable hosted adapter, verified live price catalog and accounting on every provider endpoint are missing.
+- Existing per-UID OpenAI quotas are not represented as a shared monetary hard stop.
+
+PART 35 — Platform support: PARTIAL
+Code: electron-main.cjs, android/, manifest.webmanifest, sw.js
+Evidence pointers: tests/ai-create-isolation-browser.cjs, tests/native-music-safety-browser.cjs
+- Responsive web/PWA/desktop/Android packaging exist; five widths now tested for new music and AI Create.
+- Physical mobile/iPad tests, ASIO/WASAPI/CoreAudio/Oboe native engines, plugin hosts, signed platform installers and broad high-resolution benchmarks remain.
+
+PART 36 — Cloud and collaboration: PARTIAL
+Code: zorifi-firebase.js, firestore.rules, zorifi-social.js
+Evidence pointers: Not rerun / no complete acceptance
+- Firebase accounts, private conversations and explicit Social records exist; Studio projects/media stay on-device.
+- Opt-in project cloud sync/version-conflict resolution and permissioned DAW collaboration/GPU infrastructure remain.
+- No Blaze upgrade or new paid storage enabled.
+
+PART 37 — Rights and privacy: PARTIAL
+Code: zorifi-privacy.js, zorifi-terms.js, scripts/check-secret-exposure.cjs, app.js
+Evidence pointers: tests/security-scan.test.cjs, tests/ai-create-isolation-browser.cjs
+- Account-isolated history, opt-in capture, server credential patterns and original instrument provenance verified in bounded tests.
+- Exposed key revocation, external licensing/voice-consent verification, marketplace/royalty workflows and complete public white-label audit remain.
+
+PART 38 — Ten signature upgrades: PARTIAL
+Code: zorifi-phase11.js, zorifi-vanessa-creative-learning.js, zorifi-native-music.js
+Evidence pointers: Not rerun / no complete acceptance
+- Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance.
+- Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.
+
+PART 39 — Implementation phases: PARTIAL
+Code: docs/ultimate/requirements.json, docs/ultimate/IMPLEMENTATION-JOURNAL.txt
+Evidence pointers: Not rerun / no complete acceptance
+- All five sources read and1,673 source rows retained, with forty-part audit and evidence mapping.
+- Audit/reliability/native music/local finance phase advancing; remaining phases not declared complete.
+- Protected preview/production promotion blocked on credential incident and incomplete production boundaries.
+
+PART 40 — Acceptance criteria: PARTIAL
+Code: tests/, docs/ultimate/
+Evidence pointers: Not rerun / no complete acceptance
+- Unit, real-editor media/history, offline auth-fixture and existing emulator evidence are recorded separately.
+- Live rotated-key, actual production finance/payments, physical-device, licensed provider, full-resolution and all research acceptance remain unverified.
+- A source implementation, UI control or mock provider test does not certify a live paid feature.
+
+ADDITIONAL SUPPLIED SPECIFICATIONS
+Backend repair: source/history scan complete; key revocation, provider migration,
+privileged financial boundary, protected preview and production promotion remain.
+Music repair: exact-duration refusal and real native instruments tested; historical
+429 source unproven without sanitized diagnostics; provider credits not increased.
+AI Create: account isolation/tab retention/taps repaired. Unified navigation,
+durable generated-media reuse and entitled intelligent AutoCut remain partial.
+Original Music Studio appendix: native pattern/renderer/MIDI/locks foundation is
+real; all F1–F32 advanced/research features remain in the raw inventory and in
+the corresponding master areas above. Flutter/Rust/GPU suggestions are not a
+requirement to replace the working current web/Firebase/Vercel application.
+
+RELEASE GATES
+- Previously exposed OpenAI credential is confirmed active; owner must revoke it.
+- Privileged hosted financial persistence and all-provider reservation wiring missing.
+- Supported replacement model/project access, provider licensing and protected preview not verified.
+- Prices and live charges not approved; Firebase stays Spark.
