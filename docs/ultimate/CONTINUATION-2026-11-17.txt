@@ -47,7 +47,7 @@ ACTUAL CURRENT VALIDATION
  valid320x180 WebM with decoded visible pixels and audible native sound effects.
 -Syntax/asset integrity passed:419 source files and321 browser/cache references.
  Safe source/history/build scan passed with zero findings/read errors. It cannot
- establish external key revocation. Web build is recorded when completed.
+ establish external key revocation. Web build passed:163 files plus assets.
 
 CURRENT FAILURE - DO NOT HIDE
 MP4 safety and motion export checks produced invalid audio-only/empty recordings
@@ -74,3 +74,13 @@ access tests, licensing and protected-preview acceptance remain incomplete.
 Keep prices/credit packs inactive, no Blaze or paid services, shared GBP15 ceiling.
 Continue remaining motion/DAW/AutoCut/story/subscription work through reviewed
 phases. Current code is for the development branch and existing draft PR only.
+
+PROTECTED PREVIEW RECEIPT
+Runtime source: f8a044a4edaecb9f3ac69af1f2e13ae3966a4078 (pushed).
+Preview: https://zorifi-q9hbrpuze-zorifi.vercel.app/
+Deployment: dpl_HwRSW5RzshKNomrUJpBhBHVKi2Zy / READY.
+Read-only hosting metadata confirms source and development branch. Preview
+release.json returns302 to hosting login. No bypass/protection change attempted.
+Public production release.json still3.47.0 / aa2f9e7; not promoted. The preview
+build does not certify a full signed-in hosted browser or live provider test.
+A mistyped provenance preview was stopped/removed before replacement.

@@ -17,5 +17,8 @@ android-dist/
 flutter_mobile/
 vanessa-gpu/
 tests/
+output/
+tmp/
+scripts/__pycache__/
 *.log
 *.zip

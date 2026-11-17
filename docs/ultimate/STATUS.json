@@ -3,7 +3,7 @@
   "date": "2026-11-17",
   "overall": "Partial",
   "productionVersion": "3.47.0",
-  "candidate": "Development branch; no new hosted release",
+  "candidate": "Development f8a044a; protected preview READY; production unchanged",
   "baselineTests": 589,
   "areas": [
     {
