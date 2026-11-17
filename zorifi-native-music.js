@@ -94,6 +94,46 @@
     return {bytes,duration:length/sampleRate,sampleRate,channels:1,frames:length,peaks,peak,rms:Math.sqrt(sum/length)};
   }
   function vlq(number){const output=[number&127];while(number>>=7)output.unshift((number&127)|128);return output;}
+  function parseMidi(input){
+    const bytes=input instanceof Uint8Array?input:new Uint8Array(input);assert(bytes.byteLength>=14&&bytes.byteLength<=2_000_000,'Import a MIDI file between14 bytes and2 MB.');
+    const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength),label=at=>String.fromCharCode(...bytes.subarray(at,at+4));
+    assert(label(0)==='MThd','This is not a Standard MIDI File.');const header=view.getUint32(4);assert(header>=6&&header<=1024&&8+header<=bytes.length,'Invalid MIDI header.');
+    const format=view.getUint16(8),trackCount=view.getUint16(10),ppq=view.getUint16(12);assert([0,1].includes(format),'Only MIDI format0 and1 are supported.');assert(trackCount>=1&&trackCount<=64&&(format!==0||trackCount===1),'Import at most64 MIDI tracks.');assert(ppq>0&&!(ppq&0x8000),'SMPTE MIDI timing is not supported; export with musical PPQ timing.');
+    const tempos=[{tick:0,microseconds:500000,ordinal:-1}],signatures=[],raw=[],warnings=new Set();let offset=8+header,totalEvents=0,lastTick=0,ordinal=0,startedNotes=0;
+    for(let track=0;track<trackCount;track++){
+      assert(offset+8<=bytes.length&&label(offset)==='MTrk','Missing or truncated MIDI track.');const size=view.getUint32(offset+4),end=offset+8+size;offset+=8;assert(end<=bytes.length,'Truncated MIDI track data.');
+      let at=offset,tick=0,running=null,name='Track '+(track+1),finished=false;const programs=Array(16).fill(0),active=new Map(),notes=[];
+      const byte=()=>{assert(at<end,'Truncated MIDI event.');return bytes[at++];},variable=()=>{let value=0;for(let i=0;i<4;i++){const b=byte();value=value*128+(b&127);if(!(b&128))return value;}throw Error('Invalid MIDI variable-length quantity.');},data=()=>{const b=byte();assert(b<128,'Invalid MIDI event data byte.');return b;};
+      while(at<end&&!finished){
+        assert(++totalEvents<=120000,'MIDI event count exceeds the safe import limit.');tick+=variable();assert(Number.isSafeInteger(tick)&&tick<=100_000_000,'MIDI timeline exceeds the safe import range.');lastTick=Math.max(lastTick,tick);let status=byte();if(status<128){assert(running!==null,'MIDI running status has no preceding channel event.');at--;status=running;}else if(status<240)running=status;else running=null;
+        if(status===255){const type=byte(),length=variable();assert(at+length<=end,'Truncated MIDI metadata.');const value=bytes.subarray(at,at+length);at+=length;
+          if(type===47){assert(length===0,'Invalid MIDI end-of-track event.');finished=true;}
+          else if(type===81){assert(length===3&&tempos.length<1000,'Invalid or excessive MIDI tempo events.');const microseconds=value[0]*65536+value[1]*256+value[2];assert(microseconds>0,'MIDI tempo must be positive.');tempos.push({tick,microseconds,ordinal:ordinal++});}
+          else if(type===88){assert(length===4&&value[0]>0&&value[1]<=6&&signatures.length<1000,'Invalid MIDI time signature.');signatures.push({tick,numerator:value[0],denominator:2**value[1]});}
+          else if(type===3)name=new TextDecoder().decode(value).replace(/[\x00-\x1f]/g,' ').trim().slice(0,80)||name;
+          else if(type===5)warnings.add('Lyrics remain in the MIDI source; native import creates instrument notes, not singing.');
+          continue;
+        }
+        if(status===240||status===247){const length=variable();assert(at+length<=end,'Truncated MIDI SysEx event.');at+=length;warnings.add('SysEx and external instrument settings are not applied.');continue;}
+        assert(status>=128&&status<=239,'Unsupported MIDI system event.');const kind=status>>4,channel=status&15,a=data(),b=kind===12||kind===13?0:data();
+        if(kind===12){programs[channel]=a;continue;}
+        if(kind===9&&b>0){assert(++startedNotes<=30000,'Import at most30,000 MIDI notes.');const key=channel+':'+a,queue=active.get(key)||[];queue.push({tick,pitch:a,velocity:b/127,program:programs[channel],channel,track,name});active.set(key,queue);}
+        else if(kind===8||kind===9){const key=channel+':'+a,queue=active.get(key);assert(queue?.length,'MIDI note-off has no matching note-on.');const note=queue.shift();if(!queue.length)active.delete(key);assert(tick>note.tick,'Zero-length MIDI notes are not supported.');notes.push({...note,endTick:tick});}
+        else warnings.add('Controllers, sustain, pressure and pitch bend are not applied; source notes and timing are retained.');
+      }
+      assert(finished&&at===end,'MIDI track is missing its end marker or contains trailing events.');assert(active.size===0,'MIDI contains held notes without note-off events. Close the notes before importing.');for(const note of notes)raw.push({...note,name});offset=end;
+    }
+    assert(offset===bytes.length,'Unexpected data follows the MIDI tracks.');assert(raw.length>0&&raw.length<=30000,'The MIDI file contains no supported notes or too many notes.');
+    tempos.sort((a,b)=>a.tick-b.tick||a.ordinal-b.ordinal);const map=[];for(const t of tempos){if(map.at(-1)?.tick===t.tick)map[map.length-1]=t;else map.push(t);}let elapsed=0;for(let i=0;i<map.length;i++){if(i)elapsed+=(map[i].tick-map[i-1].tick)*map[i-1].microseconds/ppq/1e6;map[i].seconds=elapsed;}
+    const seconds=tick=>{let low=0,high=map.length-1;while(low<high){const mid=Math.ceil((low+high)/2);if(map[mid].tick<=tick)low=mid;else high=mid-1;}const t=map[low];return t.seconds+(tick-t.tick)*t.microseconds/ppq/1e6;},duration=seconds(lastTick),bpm=60_000_000/map[0].microseconds;
+    assert(duration>=.05&&duration<=600,'Native MIDI import supports source timelines up to600 seconds.');assert(bpm>=40&&bpm<=200,'The initial MIDI tempo must be40-200 BPM; it is never silently clamped.');
+    const groups=new Map();for(const note of raw){const instrument=note.channel===9?([35,36].includes(note.pitch)?'kick':[38,40].includes(note.pitch)?'snare':'hat'):note.program>=32&&note.program<=39?'bass':note.program>=88&&note.program<=95?'pad':note.program>=24&&note.program<=31?'pluck':'piano';
+      const group=note.track+':'+note.channel+':'+note.program+':'+instrument;if(!groups.has(group))groups.set(group,{instrument,name:note.name,channel:note.channel,program:note.program,track:note.track,notes:[]});const start=seconds(note.tick),length=seconds(note.endTick)-start;assert(length>=.005,'Notes shorter than5 ms are not supported by native instruments.');groups.get(group).notes.push({id:'midi-note-'+groups.get(group).notes.length,start,duration:length,pitch:note.pitch,velocity:note.velocity});}
+    assert(groups.size<=32,'MIDI import supports up to32 native instrument layers.');let fingerprint=2166136261;for(const b of bytes){fingerprint^=b;fingerprint=Math.imul(fingerprint,16777619);}const songId='midi-'+(fingerprint>>>0).toString(16),firstSignature=signatures.find(s=>s.tick===0),timeSignature=firstSignature?firstSignature.numerator+'/'+firstSignature.denominator:'4/4';
+    warnings.add('GM programs use Zorifi synthetic instrument approximations; external sound libraries are not imported.');if(map.length>1)warnings.add('Tempo changes are preserved in note times; native quantization uses the initial tempo.');if(signatures.length>1||!['4/4','3/4','6/8'].includes(timeSignature))warnings.add('Source meters are retained in metadata; native composition controls support4/4,3/4 and6/8.');
+    const patterns=[...groups.values()].map(g=>validatePattern({schema:SCHEMA,instrument:g.instrument,duration,bpm,key:'C',scaleMode:'minor',timeSignature,seed:songId+':'+g.track+':'+g.channel,locked:false,revision:1,midiSource:{track:g.track,name:g.name,channel:g.channel,program:g.program},notes:g.notes}));
+    return{schema:BLUEPRINT,id:songId,title:'Imported MIDI arrangement',duration,bpm,key:'C',scaleMode:'minor',timeSignature,seed:songId,sections:[],patterns,warnings:[...warnings],midi:{format,ppq,trackCount,tempoMap:map.map(t=>({tick:t.tick,microseconds:t.microseconds,seconds:t.seconds})),timeSignatures:signatures},provenance:{engine:'zorifi-native-procedural-v1',originalSynthesis:true,cloudModel:false,importedMidi:true,rights:'User-selected MIDI; composition rights are not independently verified.'}};
+  }
   function midiFile(sources){
     const patterns=sources.map(p=>validatePattern(p,{maxDuration:86400}));assert(patterns.length>0&&patterns.length<=32,'Export 1–32 native patterns.');
     assert(patterns.every(p=>p.bpm===patterns[0].bpm),'This MIDI export requires one shared tempo.');
@@ -112,5 +152,5 @@
     // References and a portable snapshot derived from the real timeline; never a second mutable store.
     return {schema:BLUEPRINT,...clone(metadata),tracks:clips.map(c=>({clipId:c.id,assetId:c.mediaId,track:c.track,start:c.start,duration:c.duration,sourceStart:c.sourceStart||0,pattern:validatePattern(c.musicPattern)}))};
   }
-  return {SCHEMA,BLUEPRINT,INSTRUMENTS,NOTES,SCALES,compose,validatePattern,editPattern,renderWav,midiFile,blueprintFromProject};
+  return {SCHEMA,BLUEPRINT,INSTRUMENTS,NOTES,SCALES,compose,validatePattern,editPattern,renderWav,parseMidi,midiFile,blueprintFromProject};
 });

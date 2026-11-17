@@ -73,3 +73,14 @@ IMPLEMENTATION QUEUE (ACTIVE, NOT A COMPLETION CLAIM)
 7. More motion/masking/parallax, stories, DAW capabilities and signature features
    through the same measurable phase gates. Research/licensing/platform gaps
    remain explicit. Keep iterating after incremental releases.
+
+
+CONTINUATION17NOVEMBER - CURRENT PROGRESS
+Shared root composition settings and bounded native MIDI import now implemented
+and tested through the actual editor/history/persistence paths. Review fixes
+cover import cancellation, shortened composition quality/sampling and preservation
+of explicit dimensions after first video import.646 unit tests pass. Current MP4
+recording checks fail on baseline and candidate on this host; invalid output is
+rejected. Real WebM output and explicit settings-preserving alternative pass.
+See CONTINUATION-2026-11-17.txt and the owner implementation PDF. Master areas and
+release/security gates remain open; no production promotion or paid calls.

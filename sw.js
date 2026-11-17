@@ -1,15 +1,15 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
 // Verified editor upgrade; local projects and provider configuration are preserved.
-const CACHE = 'zorifi-v251-ultimate-preview1';
+const CACHE = 'zorifi-v252-master-preview2';
 const CORE = [
-  './zorifi-native-music.js?v=251',
+  './zorifi-native-music.js?v=252',
   './zorifi-native-music-worker.js',
-  './zorifi-native-music-workspace.js?v=251',
-  './zorifi-native-music.css?v=251',
-  "./zorifi-motion-graph.js?v=250",
+  './zorifi-native-music-workspace.js?v=252',
+  './zorifi-native-music.css?v=252',
+  "./zorifi-motion-graph.js?v=252",
   "./zorifi-motion-renderer.js?v=250",
   "./zorifi-motion-packs.js?v=250",
-  "./zorifi-motion-workspace.js?v=250",
+  "./zorifi-motion-workspace.js?v=252",
   "./zorifi-motion-workspace.css?v=250",
   "./zorifi-editor-audio-workflows.js?v=250",
   "./zorifi-editor-audio-workflows.css?v=250",
@@ -18,12 +18,12 @@ const CORE = [
   "./index.html",
   "./zorifi-vanessa-voice.js?v=249",
   "./zorifi-vanessa-voice.css?v=249",
-  "./zorifi-vanessa-professional-tools.js?v=250",
-  "./zorifi-vanessa-media-review.js?v=250",
+  "./zorifi-vanessa-professional-tools.js?v=252",
+  "./zorifi-vanessa-media-review.js?v=252",
   "./zorifi-vanessa-creative-learning.js?v=249",
   "./zorifi-vanessa-professional-engine.js?v=249",
   "./zorifi-vanessa-workflow-recovery.js?v=249",
-  "./zorifi-vanessa-professional.js?v=250",
+  "./zorifi-vanessa-professional.js?v=252",
   "./zorifi-vanessa-professional.css?v=244",
 
   "./zorifi-timeline-edit-api.js?v=250",
@@ -158,7 +158,7 @@ const CORE = [
   "./zorifi-privacy.js?v=1",
   "./zorifi-vanessa-listening.js?v=249",
   "./zorifi-photos.js?v=232",
-  "./app.js?v=250",
+  "./app.js?v=252",
   "./zorifi-app-settings.js?v=250",
   "./zorifi-google-connections.js?v=225",
   "./zorifi-google-integration.js?v=227",
@@ -170,7 +170,7 @@ const CORE = [
   "./zorifi-timeline-interactions.js?v=250",
   "./zorifi-pocket-editor.js?v=236",
   "./zorifi-opening.js?v=231",
-  "./zorifi-master-app.js?v=250",
+  "./zorifi-master-app.js?v=252",
   "./zorifi-privacy-ui.js?v=228"
 ];
 

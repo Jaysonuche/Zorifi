@@ -1,6 +1,6 @@
 {
   "schema": "zorifi.ultimate.requirements/1",
-  "updated": "2026-11-16",
+  "updated": "2026-11-17",
   "releaseBaseline": "3.47.0",
   "baselineCommit": "aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb",
   "baselineTests": 589,
@@ -4559,7 +4559,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4572,7 +4572,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4585,7 +4585,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4598,7 +4598,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4611,7 +4611,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4624,7 +4624,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4637,7 +4637,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4650,7 +4650,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4663,7 +4663,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4676,7 +4676,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4689,7 +4689,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4702,7 +4702,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4715,7 +4715,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4728,7 +4728,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4741,7 +4741,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4754,7 +4754,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4767,7 +4767,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4780,7 +4780,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4793,7 +4793,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4806,7 +4806,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4819,7 +4819,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4832,7 +4832,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4845,7 +4845,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4858,7 +4858,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4871,7 +4871,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4884,7 +4884,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4897,7 +4897,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added. Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain. Retrospective MIDI capture must remain opt-in and is not implemented.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -7692,7 +7692,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7705,7 +7705,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7718,7 +7718,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7731,7 +7731,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7744,7 +7744,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7757,7 +7757,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7770,7 +7770,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7783,7 +7783,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7796,7 +7796,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7809,7 +7809,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7822,7 +7822,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7835,7 +7835,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7848,7 +7848,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7861,7 +7861,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7874,7 +7874,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7887,7 +7887,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7900,7 +7900,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7913,7 +7913,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7926,7 +7926,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7939,7 +7939,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7952,7 +7952,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7965,7 +7965,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7978,7 +7978,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7991,7 +7991,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8004,7 +8004,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8017,7 +8017,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8030,7 +8030,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8043,7 +8043,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8056,7 +8056,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8069,7 +8069,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8082,7 +8082,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8095,7 +8095,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8108,7 +8108,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8121,7 +8121,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8134,7 +8134,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8147,7 +8147,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },

@@ -16,14 +16,14 @@
  function quality(project,options){
   // Match the native automatic-ending rule on the transient draft as well.
   const ending=project.clips.find(item=>item.zorifiEnding&&item.endingAutoPlaced);if(ending){const end=Math.max(0,...project.clips.filter(item=>!item.zorifiEnding).map(item=>item.start+item.duration)),delta=end-ending.start;ending.start=end;for(const point of Object.values(ending.keyframes||{}).flat())point.time+=delta;}
-  project.duration=Math.max(.05,...project.clips.map(item=>item.start+item.duration));
+  project.duration=Number(project.creatorSettings?.compositionDuration)||Math.max(.05,...project.clips.map(item=>item.start+item.duration));
   const report=Review.reviewProject(project,{...options,ratio:options?.brief?.ratio,targetDuration:options?.brief?.duration,exactDuration:Boolean(options?.brief?.duration)});report.blockers=report.issues.filter(item=>item.severity==='error');return report;
  }
  async function apply(draft,action){
   if(Tools.DEFINITIONS[action.command].creation)return Tools.applyCreation(draft,action,{catalog:catalog()});
   const adapter=vanessaActionAdapter({project:draft,detached:true}),clip=adapter.resolveClip(action);
   const result=await adapter.apply(action,clip);if(result?.status!=='SUCCESS')throw Error(result?.message||'The editor action failed.');
-  draft.duration=Math.max(.05,...draft.clips.map(item=>item.start+item.duration));draft.hasCaptions=draft.clips.some(item=>item.autoCaption);return result;
+  draft.duration=Number(draft.creatorSettings?.compositionDuration)||Math.max(.05,...draft.clips.map(item=>item.start+item.duration));draft.hasCaptions=draft.clips.some(item=>item.autoCaption);return result;
  }
  async function commit(pending){
   await Bridge().authorize(pending.signal);Bridge().check(pending.scope);if(pending.signal?.aborted)throw new DOMException('Stopped.','AbortError');
@@ -43,7 +43,7 @@
    const matches=(expected,actual)=>expected===undefined||typeof expected==='number'?expected===undefined||typeof actual==='number'&&Math.abs(expected-actual)<.00001:Array.isArray(expected)?Array.isArray(actual)&&expected.length===actual.length&&expected.every((item,index)=>matches(item,actual[index])):expected&&typeof expected==='object'?actual&&Object.entries(expected).every(([key,value])=>matches(value,actual[key])):expected===actual;
    // Rendering installs native default fields. Verify every staged value and
    // clip identity while allowing those additional native defaults.
-   const verified=state.clips.length===pending.draft.clips.length&&pending.draft.clips.every(clip=>matches(clip,state.clips.find(item=>item.id===clip.id)))&&[...sources.values()].every(asset=>state.mediaAssets.some(actual=>actual.id===asset.id&&actual.url===asset.url&&actual.file?.size===asset.size));if(!verified)throw Error('The timeline or generated sound sources changed unexpectedly during the professional commit.');
+   const rootSettings=pending.actions.some(action=>action.command==='motion.edit'&&action.parameters.operation==='project.settings'),metadataVerified=!rootSettings||['frameWidth','frameHeight','ratio','duration','currentProject','creatorSettings'].every(key=>matches(pending.draft[key],state[key]));const verified=metadataVerified&&state.clips.length===pending.draft.clips.length&&pending.draft.clips.every(clip=>matches(clip,state.clips.find(item=>item.id===clip.id)))&&[...sources.values()].every(asset=>state.mediaAssets.some(actual=>actual.id===asset.id&&actual.url===asset.url&&actual.file?.size===asset.size));if(!verified)throw Error('The timeline or generated sound sources changed unexpectedly during the professional commit.');
    const actualQuality=quality(stage(state),{evidence:pending.evidence,brief:pending.brief});if(actualQuality.blockers.length)throw Error('The applied edit failed its technical review and was rolled back.');
    memory();lastResult={projectId:state.projectId,uid:Bridge().identity().uid,revision:Bridge().fingerprint(),contentSignature:ZorifiWorkflowRecovery.signature(journalProject()),undoCheckpoint:state.undo.at(-1),quality:actualQuality,proposal:pending.proposal,brief:pending.brief,evidence:pending.evidence,verified:true,completedAt:Date.now()};
    journalUpdate('committed',journalProject());

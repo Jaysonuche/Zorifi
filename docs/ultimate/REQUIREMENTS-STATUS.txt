@@ -1,5 +1,5 @@
 ZORIFI ULTIMATE V5 — FULL REQUIREMENTS STATUS
-16 November 2026 | Overall: PARTIAL | Live baseline:3.47.0
+17 November 2026 | Overall: PARTIAL | Live baseline:3.47.0
 
 All40 parts and all11 appendix pages reviewed. The raw1,673-row source inventory
 is requirements.json. This report groups it by all40 master parts; a part is
@@ -85,10 +85,10 @@ Evidence pointers: tests/native-music-browser.cjs
 
 PART 13 — Advanced MIDI and drum sequencing: PARTIAL
 Code: zorifi-native-music.js, zorifi-native-music-workspace.js
-Evidence pointers: tests/native-music.test.cjs
-- Actual note add/update/delete, transpose, velocity, 1/16 quantize, piano visualization and MIDI export added.
-- Interactive piano-roll drawing, MIDI import/recording, controllers, MPE, pitch bend, microtuning and16/32/64 step sequencer remain.
-- Retrospective MIDI capture must remain opt-in and is not implemented.
+Evidence pointers: tests/native-music.test.cjs, tests/native-midi-import.test.cjs, tests/continued-master-browser.cjs
+- Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested.
+- Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain.
+- Retrospective MIDI capture remains unimplemented and must be opt-in.
 
 PART 14 — Instrument Lab and SoundPrint: PARTIAL
 Code: zorifi-native-music.js
@@ -159,9 +159,10 @@ Evidence pointers: Not rerun / no complete acceptance
 
 PART 25 — Professional Video Editor: PARTIAL
 Code: zorifi-motion-graph.js, zorifi-motion-renderer.js, zorifi-motion-workspace.js, zorifi-parallax-workflow.js
-Evidence pointers: tests/parallax-local-browser.cjs, tests/editor-workflows-browser.cjs
+Evidence pointers: tests/parallax-local-browser.cjs, tests/editor-workflows-browser.cjs, tests/project-settings.test.cjs, tests/continued-master-browser.cjs
 - 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds.
-- Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, complete composition-settings parity and broad creative-set verification remain.
+- Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain.
+- Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.
 
 PART 26 — Intelligent Advanced AutoCut: PARTIAL
 Code: zorifi-autocut-director.js, zorifi-autocut-media.js, netlify/functions/_shared/autocut-planner.mjs

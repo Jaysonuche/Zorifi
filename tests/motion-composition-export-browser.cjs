@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const {chromium} = require('playwright');
 const {createServer} = require('../scripts/dev-server.cjs');
+const FORMAT=process.env.ZORIFI_MOTION_EXPORT_FORMAT||'mp4';if(!['mp4','webm'].includes(FORMAT))throw Error('Unsupported test export format.');
 
 // Native controls and real browser encoders; no live AI or private source media.
 (async () => {
@@ -89,21 +90,21 @@ const {createServer} = require('../scripts/dev-server.cjs');
     const previews = await page.evaluate(async () => {const a=await ZorifiMotionWorkspace.renderFrame({time:.08,width:320,height:180}),b=await ZorifiMotionWorkspace.renderFrame({time:.8,width:320,height:180});return {changes:a.data.reduce((n,v,i)=>n+(v!==b.data[i]),0),saved:ZorifiProductionBridge.savedMatches()};});
     assert(previews.changes > 100); assert(previews.saved);
 
-    assert(await page.evaluate(() => Boolean(preferredMime('mp4'))), 'This export check requires a real MP4 encoder.');
+    assert(await page.evaluate(format => Boolean(preferredMime(format)),FORMAT), 'This export check requires a real MP4 encoder.');
     await page.evaluate(() => showExport());
     const modal=page.locator('.export-modal');
     await modal.locator('[data-export-resolution]').selectOption('custom');
     await modal.locator('[data-export-width]').fill('320'); await modal.locator('[data-export-height]').fill('180');
-    await modal.locator('[data-export-fps]').selectOption('24'); await modal.locator('[data-export-format]').selectOption('mp4');
+    await modal.locator('[data-export-fps]').selectOption('24'); await modal.locator('[data-export-format]').selectOption(FORMAT);
     await modal.locator('[data-output-range]').selectOption('custom');
     await modal.locator('[data-output-from]').fill('0'); await modal.locator('[data-output-to]').fill('1.2');
     const downloading=page.waitForEvent('download',{timeout:45000}); await modal.locator('[data-start]').click();
-    const download=await downloading,output='artifacts/upgrade-motion-composition.mp4'; await download.saveAs(output);
-    const bytes=fs.readFileSync(output); assert(bytes.subarray(0,32).includes(Buffer.from('ftyp')));
-    await page.route('**/composition-export-check',r=>r.fulfill({body:bytes,contentType:'video/mp4'}));
+    const download=await downloading.catch(async error=>{console.log('Export diagnostic:',await modal.innerText());throw error;}),output='artifacts/upgrade-motion-composition.'+FORMAT; await download.saveAs(output);
+    const bytes=fs.readFileSync(output); assert(FORMAT==='mp4'?bytes.subarray(0,32).includes(Buffer.from('ftyp')):bytes.subarray(0,4).equals(Buffer.from([0x1a,0x45,0xdf,0xa3])));
+    await page.route('**/composition-export-check',r=>r.fulfill({body:bytes,contentType:'video/'+FORMAT}));
     const exported=await page.evaluate(async()=>{
       const blob=await(await fetch('/composition-export-check')).blob(),url=URL.createObjectURL(blob),v=document.createElement('video'),ac=new AudioContext();
-      try {v.muted=true;v.src=url;await new Promise((resolve,reject)=>{v.onloadeddata=resolve;v.onerror=reject;});
+      try {v.muted=true;v.src=url;await new Promise((resolve,reject)=>{v.onloadeddata=resolve;v.onerror=reject;});if(!Number.isFinite(v.duration)){v.currentTime=1e10;await new Promise(resolve=>v.onseeked=resolve);}
         const canvas=document.createElement('canvas');canvas.width=320;canvas.height=180;const ctx=canvas.getContext('2d',{willReadFrequently:true}),frames=[];
         for(const time of [.08,.8]){await new Promise(resolve=>{v.onseeked=resolve;v.currentTime=time;});ctx.clearRect(0,0,320,180);ctx.drawImage(v,0,0);frames.push([...ctx.getImageData(0,0,320,180).data]);}
         const audio=await ac.decodeAudioData(await blob.arrayBuffer());let peak=0;for(const sample of audio.getChannelData(0))peak=Math.max(peak,Math.abs(sample));
@@ -112,7 +113,7 @@ const {createServer} = require('../scripts/dev-server.cjs');
     });
     assert(exported.duration>1&&exported.duration<2,JSON.stringify(exported));assert.equal(exported.width,320);assert.equal(exported.height,180);
     assert(exported.visible);assert(exported.changes>100);assert(exported.audioPeak>.0001);assert.deepEqual(errors,[]);
-    fs.writeFileSync('artifacts/upgrade-motion-composition.json',JSON.stringify({manualComposition:true,saveFailureRollback:true,nestedSettingsParity:true,undoRedo:true,reopened:true,previews,exported},null,2));
-    console.log('Composition settings rollback, nested manual/Vanessa opcode parity, actual native zoom-shake pack, preview/Undo/Redo/reopen and decoded animated MP4 with audible SFX passed: '+JSON.stringify(exported));
+    fs.writeFileSync('artifacts/upgrade-motion-composition-'+FORMAT+'.json',JSON.stringify({format:FORMAT,manualComposition:true,saveFailureRollback:true,nestedSettingsParity:true,undoRedo:true,reopened:true,previews,exported},null,2));
+    console.log('Composition settings rollback, nested manual/Vanessa opcode parity, actual native zoom-shake pack, preview/Undo/Redo/reopen and decoded animated '+FORMAT+' with audible SFX passed: '+JSON.stringify(exported));
   } finally {await browser.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 })().catch(error=>{console.error(error);process.exitCode=1;});

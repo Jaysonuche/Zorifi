@@ -24,3 +24,8 @@ artifacts/
 
 .vercel
 .env*.local
+
+# Generated owner reports and PDF render checks
+output/pdf/
+tmp/pdfs/
+scripts/__pycache__/
