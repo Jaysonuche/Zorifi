@@ -29,8 +29,8 @@ failed delayed Chrome capture with audio-only output. Explicit per-paint capture
 was then added. Cold codec probes and a separate fresh recording stream repaired
 additional Chrome startup/first-frame failures; constructor support alone is
 not treated as proof. An experimental frame-generator path did not fix those
-failures and was removed. A multi-source regression also exposed sequential play-start
-stalls; concurrent decoder warmup/nonblocking playback repaired that path. Only the final candidate's actual receipts count as current
+failures and was removed. The multi-source path also awaited each play start inside the frame loop;
+that blocking path was removed and decoders are warmed concurrently. Only the final candidate's actual receipts count as current
 verification. Diagnostic source bytes are real encoders, not fabricated MP4s.
 
 NATIVE DRUM STEP SEQUENCER
@@ -100,3 +100,14 @@ Chrome 157.0.8103.78:
 The initial2s encoder sample is validated and discarded. The requested range
 is timed only in the separate fresh recording; no preroll is added to the file.
 No live provider or signed-in hosted acceptance test is implied by local receipts.
+
+PROTECTED DEVELOPMENT PREVIEW
+Runtime: c484db3beb91658a0afc41078b9a40158e43aa81 (pushed).
+URL: https://zorifi-dy3j75bbq-zorifi.vercel.app/
+Deployment dpl_2tz4xWvY1GKrMQGCM5yuPgpv3Sy6 is READY. Hosting metadata confirms
+the candidate and codex/vanessa-openai-production. Unauthenticated requests
+require hosting login; no protection bypass was created or used. This is not a
+signed-in hosted/browser/provider acceptance claim. Production release.json
+still3.47.0 / aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb; not promoted.
+Rollback source is preserved in prior branch commits; project/media schemas
+and original sources were not migrated or deleted.
