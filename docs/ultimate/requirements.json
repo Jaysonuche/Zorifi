@@ -1,6 +1,6 @@
 {
   "schema": "zorifi.ultimate.requirements/1",
-  "updated": "2026-11-17",
+  "updated": "2026-11-18",
   "releaseBaseline": "3.47.0",
   "baselineCommit": "aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb",
   "baselineTests": 589,
@@ -4559,7 +4559,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4572,7 +4572,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4585,7 +4585,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4598,7 +4598,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4611,7 +4611,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4624,7 +4624,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4637,7 +4637,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4650,7 +4650,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4663,7 +4663,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4676,7 +4676,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4689,7 +4689,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4702,7 +4702,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4715,7 +4715,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4728,7 +4728,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4741,7 +4741,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4754,7 +4754,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4764,10 +4764,17 @@
       "line": 647,
       "section": "Drum sequencer",
       "text": "Support 16-, 32- and 64-step patterns.",
-      "status": "Unverified",
-      "code": [],
-      "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "status": "Tested",
+      "code": [
+        "zorifi-native-music.js",
+        "zorifi-native-music-workspace.js",
+        "zorifi-native-music.css"
+      ],
+      "tests": [
+        "tests/native-drum-sequencer.test.cjs",
+        "tests/native-drum-sequencer-browser.cjs"
+      ],
+      "remaining": "Tested for bounded source-bar kick/snare/hat sequencing through manual and reviewed Vanessa controls; full master drum sequencer remains partial.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4777,10 +4784,17 @@
       "line": 651,
       "section": "Drum sequencer",
       "text": "- Per-step velocity.",
-      "status": "Unverified",
-      "code": [],
-      "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "status": "Tested",
+      "code": [
+        "zorifi-native-music.js",
+        "zorifi-native-music-workspace.js",
+        "zorifi-native-music.css"
+      ],
+      "tests": [
+        "tests/native-drum-sequencer.test.cjs",
+        "tests/native-drum-sequencer-browser.cjs"
+      ],
+      "remaining": "Tested for bounded source-bar kick/snare/hat sequencing through manual and reviewed Vanessa controls; full master drum sequencer remains partial.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4793,7 +4807,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4806,7 +4820,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4819,7 +4833,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4832,7 +4846,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4845,7 +4859,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4858,7 +4872,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4871,7 +4885,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4884,7 +4898,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4897,7 +4911,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -8979,7 +8993,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Decoded320x180 MP4 with real audio/pixels verified; prior45s480x270 artifact retained. Real 720/1080/4K device matrix and4K/8K performance/codec certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: MP4 capture now verifies a real frame, requests frames explicitly, uses the start-call clock and avoids empty/timed MP4 fragments. Current decoded motion/audio, selected-range, portrait720p,1080p and45s checks are recorded in the18November phase report. Physical device720/1080/4K matrix, arbitrary codecs/large media, frame-accurate timing and4K/8K performance certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
       "auditGroup": "ultimate-part-29",
       "areaStatus": "Partial"
     },
@@ -8992,7 +9006,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Decoded320x180 MP4 with real audio/pixels verified; prior45s480x270 artifact retained. Real 720/1080/4K device matrix and4K/8K performance/codec certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: MP4 capture now verifies a real frame, requests frames explicitly, uses the start-call clock and avoids empty/timed MP4 fragments. Current decoded motion/audio, selected-range, portrait720p,1080p and45s checks are recorded in the18November phase report. Physical device720/1080/4K matrix, arbitrary codecs/large media, frame-accurate timing and4K/8K performance certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
       "auditGroup": "ultimate-part-29",
       "areaStatus": "Partial"
     },
@@ -9005,7 +9019,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Decoded320x180 MP4 with real audio/pixels verified; prior45s480x270 artifact retained. Real 720/1080/4K device matrix and4K/8K performance/codec certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: MP4 capture now verifies a real frame, requests frames explicitly, uses the start-call clock and avoids empty/timed MP4 fragments. Current decoded motion/audio, selected-range, portrait720p,1080p and45s checks are recorded in the18November phase report. Physical device720/1080/4K matrix, arbitrary codecs/large media, frame-accurate timing and4K/8K performance certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
       "auditGroup": "ultimate-part-29",
       "areaStatus": "Partial"
     },
@@ -9018,7 +9032,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Decoded320x180 MP4 with real audio/pixels verified; prior45s480x270 artifact retained. Real 720/1080/4K device matrix and4K/8K performance/codec certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: MP4 capture now verifies a real frame, requests frames explicitly, uses the start-call clock and avoids empty/timed MP4 fragments. Current decoded motion/audio, selected-range, portrait720p,1080p and45s checks are recorded in the18November phase report. Physical device720/1080/4K matrix, arbitrary codecs/large media, frame-accurate timing and4K/8K performance certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
       "auditGroup": "ultimate-part-29",
       "areaStatus": "Partial"
     },
@@ -9031,7 +9045,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Decoded320x180 MP4 with real audio/pixels verified; prior45s480x270 artifact retained. Real 720/1080/4K device matrix and4K/8K performance/codec certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: MP4 capture now verifies a real frame, requests frames explicitly, uses the start-call clock and avoids empty/timed MP4 fragments. Current decoded motion/audio, selected-range, portrait720p,1080p and45s checks are recorded in the18November phase report. Physical device720/1080/4K matrix, arbitrary codecs/large media, frame-accurate timing and4K/8K performance certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
       "auditGroup": "ultimate-part-29",
       "areaStatus": "Partial"
     },
@@ -9044,7 +9058,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Decoded320x180 MP4 with real audio/pixels verified; prior45s480x270 artifact retained. Real 720/1080/4K device matrix and4K/8K performance/codec certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: MP4 capture now verifies a real frame, requests frames explicitly, uses the start-call clock and avoids empty/timed MP4 fragments. Current decoded motion/audio, selected-range, portrait720p,1080p and45s checks are recorded in the18November phase report. Physical device720/1080/4K matrix, arbitrary codecs/large media, frame-accurate timing and4K/8K performance certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
       "auditGroup": "ultimate-part-29",
       "areaStatus": "Partial"
     },
@@ -9057,7 +9071,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Decoded320x180 MP4 with real audio/pixels verified; prior45s480x270 artifact retained. Real 720/1080/4K device matrix and4K/8K performance/codec certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: MP4 capture now verifies a real frame, requests frames explicitly, uses the start-call clock and avoids empty/timed MP4 fragments. Current decoded motion/audio, selected-range, portrait720p,1080p and45s checks are recorded in the18November phase report. Physical device720/1080/4K matrix, arbitrary codecs/large media, frame-accurate timing and4K/8K performance certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
       "auditGroup": "ultimate-part-29",
       "areaStatus": "Partial"
     },
@@ -9070,7 +9084,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Decoded320x180 MP4 with real audio/pixels verified; prior45s480x270 artifact retained. Real 720/1080/4K device matrix and4K/8K performance/codec certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: MP4 capture now verifies a real frame, requests frames explicitly, uses the start-call clock and avoids empty/timed MP4 fragments. Current decoded motion/audio, selected-range, portrait720p,1080p and45s checks are recorded in the18November phase report. Physical device720/1080/4K matrix, arbitrary codecs/large media, frame-accurate timing and4K/8K performance certification remain. Unsupported cloud video providers and retired models must stay disabled until verified.",
       "auditGroup": "ultimate-part-29",
       "areaStatus": "Partial"
     },

@@ -278,3 +278,14 @@ RELEASE GATES
 - Privileged hosted financial persistence and all-provider reservation wiring missing.
 - Supported replacement model/project access, provider licensing and protected preview not verified.
 - Prices and live charges not approved; Firebase stays Spark.
+
+
+18 NOVEMBER CONTINUATION
+Part13: native16/32/64-step source-bar drum sequencing now tested through manual
+and reviewed Vanessa controls, source-meter timing, per-hit velocity, real audio,
+Undo/Redo and reopening. Flam/roll/probability/chaining/MPE/live capture remain.
+Part29: MP4 start/readiness and frame capture repaired; real decoded output
+checks include selected range, audio, portrait720p,1080p and45s on this Windows
+host. Physical devices, arbitrary codecs/large projects and4K/8K remain unverified.
+See CONTINUATION-2026-11-18.txt. All master areas retain their existing Partial/
+Blocked/NotStarted boundaries; no blanket completion or production claim.

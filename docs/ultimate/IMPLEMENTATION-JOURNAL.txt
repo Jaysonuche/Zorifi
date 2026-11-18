@@ -84,3 +84,14 @@ recording checks fail on baseline and candidate on this host; invalid output is
 rejected. Real WebM output and explicit settings-preserving alternative pass.
 See CONTINUATION-2026-11-17.txt and the owner implementation PDF. Master areas and
 release/security gates remain open; no production promotion or paid calls.
+
+
+18 NOVEMBER - MP4 AND NATIVE STEP SEQUENCER
+Continue same development branch. Replaced false MP4 start readiness/clock with
+actual captured-frame verification, explicit frame requests, no premature/timed
+MP4 fragments and guarded format selection. Added16/32/64-step native source-bar
+drum sequencing with manual/Vanessa parity, real audio/history/save/reopen.
+Current checks, failed diagnostic attempts and scope are recorded in the dated
+continuation report. Prior17November MP4 failures and report remain historical
+evidence, not rewritten as success. No paid AI calls, key use or production
+promotion; credential revocation and hosted financial gates remain outstanding.

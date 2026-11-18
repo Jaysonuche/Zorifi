@@ -98,7 +98,7 @@ const FORMAT=process.env.ZORIFI_MOTION_EXPORT_FORMAT||'mp4';if(!['mp4','webm'].i
     await modal.locator('[data-export-fps]').selectOption('24'); await modal.locator('[data-export-format]').selectOption(FORMAT);
     await modal.locator('[data-output-range]').selectOption('custom');
     await modal.locator('[data-output-from]').fill('0'); await modal.locator('[data-output-to]').fill('1.2');
-    const downloading=page.waitForEvent('download',{timeout:45000}); await modal.locator('[data-start]').click();
+    const downloading=page.waitForEvent('download',{timeout:45000});downloading.catch(()=>{}); await modal.locator('[data-start]').click();
     const download=await downloading.catch(async error=>{console.log('Export diagnostic:',await modal.innerText());throw error;}),output='artifacts/upgrade-motion-composition.'+FORMAT; await download.saveAs(output);
     const bytes=fs.readFileSync(output); assert(FORMAT==='mp4'?bytes.subarray(0,32).includes(Buffer.from('ftyp')):bytes.subarray(0,4).equals(Buffer.from([0x1a,0x45,0xdf,0xa3])));
     await page.route('**/composition-export-check',r=>r.fulfill({body:bytes,contentType:'video/'+FORMAT}));

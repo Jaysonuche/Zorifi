@@ -57,6 +57,21 @@
     for(const p of patterns)if(['piano','pluck','pad','bass'].includes(p.instrument)){p.notes=p.notes.filter(n=>n.start<duration-beat*1.5);add(p,Math.max(0,duration-beat*1.5),beat*1.45,(p.instrument==='bass'?36:60)+tonic,.42);}
     return {schema:BLUEPRINT,id:'song-'+hash(seed+duration+bpm+key+genre).toString(16),title:String(options.title||genre+' arrangement').slice(0,100),duration,bpm,key,scaleMode,timeSignature,seed,sections,patterns:patterns.map(validatePattern),provenance:{engine:'zorifi-native-procedural-v1',originalSynthesis:true,cloudModel:false,voice:false}};
   }
+  function drumGrid(source,{steps=16,bar=0,pitch}={}){
+    const p=validatePattern(source),defaultPitch={kick:36,snare:38,hat:42}[p.instrument];
+    assert(defaultPitch!==undefined,'Choose a native kick, snare or hat pattern for drum sequencing.');
+    assert([16,32,64].includes(steps),'Choose a 16, 32 or 64-step drum grid.');
+    const meter=String(p.timeSignature||'4/4').match(/^([1-9]\d?)\/(1|2|4|8|16|32|64|128)$/);
+    assert(meter&&Number(meter[1])<=32,'This source meter is not supported by the drum grid.');
+    pitch=pitch??defaultPitch;assert(Number.isInteger(pitch)&&pitch>=0&&pitch<=127,'Use a MIDI pitch 0–127.');
+    const barDuration=60/p.bpm*Number(meter[1])*4/Number(meter[2]),totalBars=Math.ceil(p.duration/barDuration),stepDuration=barDuration/steps;
+    assert(Number.isInteger(bar)&&bar>=0&&bar<totalBars,'Choose a source bar inside this pattern.');
+    const start=bar*barDuration,cells=Array.from({length:steps},(_,index)=>{
+      const at=Number((start+index*stepDuration).toFixed(6)),notes=p.notes.filter(n=>n.pitch===pitch&&Math.abs(n.start-at)<=.000001);
+      return {index,start:at,available:at+.005<=p.duration+.000001,noteIds:notes.map(n=>n.id),enabled:notes.length>0,velocity:notes.length?Math.max(...notes.map(n=>n.velocity)):0};
+    });
+    return {steps,bar,pitch,timeSignature:p.timeSignature||'4/4',barDuration,stepDuration,totalBars,start,end:Math.min(p.duration,start+barDuration),cells};
+  }
   function editPattern(source,edit){
     const p=validatePattern(source);assert(edit&&typeof edit.operation==='string','Choose a native note operation.');
     if(edit.operation==='lock'){assert(typeof edit.value==='boolean','Lock must be true or false.');p.locked=edit.value;return p;}
@@ -67,6 +82,17 @@
     else if(edit.operation==='delete'){assert(p.notes.some(n=>n.id===edit.id),'Choose an existing note.');p.notes=p.notes.filter(n=>n.id!==edit.id);}
     else if(edit.operation==='transpose'){assert(Number.isInteger(edit.semitones)&&Math.abs(edit.semitones)<=24,'Transpose within two octaves.');for(const note of p.notes)note.pitch+=edit.semitones;}
     else if(edit.operation==='quantize'){assert([.125,.25,.5,1].includes(edit.beats),'Choose a 1/32, 1/16, 1/8 or quarter-note grid.');const step=60/p.bpm*edit.beats;for(const note of p.notes){note.start=Math.min(p.duration-.005,Math.max(0,Math.round(note.start/step)*step));note.duration=Math.min(note.duration,p.duration-note.start);}}
+    else if(edit.operation==='step'){
+      assert(Object.keys(edit).every(key=>['operation','steps','bar','pitch','index','enabled','velocity'].includes(key)),'Unsupported drum step property.');
+      const grid=drumGrid(p,edit);assert(Number.isInteger(edit.index)&&edit.index>=0&&edit.index<grid.steps,'Choose an existing drum step.');
+      assert(typeof edit.enabled==='boolean','Choose whether this drum step is enabled.');
+      const cell=grid.cells[edit.index],velocity=edit.velocity??.75;assert(cell.available,'This drum step lies outside the source pattern.');
+      assert(finite(velocity)&&velocity>0&&velocity<=1,'Drum step velocity must be greater than 0 and at most 1.');
+      const matches=new Set(cell.noteIds);
+      if(!edit.enabled)p.notes=p.notes.filter(n=>!matches.has(n.id));
+      else if(matches.size){for(const note of p.notes)if(matches.has(note.id))note.velocity=velocity;}
+      else{let noteId='step-'+grid.bar+'-'+grid.steps+'-'+grid.pitch+'-'+edit.index;while(p.notes.some(n=>n.id===noteId))noteId+='x';assert(noteId.length<=100,'The drum step needs an available note ID.');p.notes.push({id:noteId,start:cell.start,duration:Math.max(.005,Math.min(grid.stepDuration*.8,p.duration-cell.start)),pitch:grid.pitch,velocity});}
+    }
     else throw new Error('Unsupported native note operation.');
     p.revision=(p.revision||1)+1;return validatePattern(p);
   }
@@ -152,5 +178,5 @@
     // References and a portable snapshot derived from the real timeline; never a second mutable store.
     return {schema:BLUEPRINT,...clone(metadata),tracks:clips.map(c=>({clipId:c.id,assetId:c.mediaId,track:c.track,start:c.start,duration:c.duration,sourceStart:c.sourceStart||0,pattern:validatePattern(c.musicPattern)}))};
   }
-  return {SCHEMA,BLUEPRINT,INSTRUMENTS,NOTES,SCALES,compose,validatePattern,editPattern,renderWav,parseMidi,midiFile,blueprintFromProject};
+  return {SCHEMA,BLUEPRINT,INSTRUMENTS,NOTES,SCALES,compose,validatePattern,drumGrid,editPattern,renderWav,parseMidi,midiFile,blueprintFromProject};
 });

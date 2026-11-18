@@ -1,9 +1,9 @@
 {
   "schema": "zorifi.ultimate.audit/1",
-  "date": "2026-11-17",
+  "date": "2026-11-18",
   "overall": "Partial",
   "productionVersion": "3.47.0",
-  "candidate": "Development f8a044a; protected preview READY; production unchanged",
+  "candidate": "Development MP4 capture repair and drum sequencer; no production promotion",
   "baselineTests": 589,
   "areas": [
     {
@@ -231,11 +231,13 @@
       "tests": [
         "tests/native-music.test.cjs",
         "tests/native-midi-import.test.cjs",
-        "tests/continued-master-browser.cjs"
+        "tests/continued-master-browser.cjs",
+        "tests/native-drum-sequencer.test.cjs",
+        "tests/native-drum-sequencer-browser.cjs"
       ],
       "remaining": [
-        "Actual note editing, MIDI export and reviewed bounded SMF0/1 import with tempo-map timing are implemented and tested.",
-        "Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning and16/32/64-step sequencer remain.",
+        "Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested.",
+        "Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain.",
         "Retrospective MIDI capture remains unimplemented and must be opt-in."
       ]
     },
@@ -499,11 +501,15 @@
       ],
       "tests": [
         "tests/editor-workflows-browser.cjs",
-        "tests/parallax-local-browser.cjs"
+        "tests/parallax-local-browser.cjs",
+        "tests/mp4-capture-browser.cjs",
+        "tests/export-format.test.cjs",
+        "tests/motion-composition-export-browser.cjs",
+        "tests/export-fallback-browser.cjs"
       ],
       "remaining": [
-        "Decoded320x180 MP4 with real audio/pixels verified; prior45s480x270 artifact retained.",
-        "Real 720/1080/4K device matrix and4K/8K performance/codec certification remain.",
+        "MP4 capture now verifies a real frame, requests frames explicitly, uses the start-call clock and avoids empty/timed MP4 fragments. Current decoded motion/audio, selected-range, portrait720p,1080p and45s checks are recorded in the18November phase report.",
+        "Physical device720/1080/4K matrix, arbitrary codecs/large media, frame-accurate timing and4K/8K performance certification remain.",
         "Unsupported cloud video providers and retired models must stay disabled until verified."
       ]
     },
