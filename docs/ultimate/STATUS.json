@@ -3,7 +3,7 @@
   "date": "2026-11-18",
   "overall": "Partial",
   "productionVersion": "3.47.0",
-  "candidate": "Development MP4 capture repair and drum sequencer; no production promotion",
+  "candidate": "Development mask transforms, drum articulations and local Production Preflight; production promotion gated",
   "baselineTests": 589,
   "areas": [
     {
@@ -233,11 +233,13 @@
         "tests/native-midi-import.test.cjs",
         "tests/continued-master-browser.cjs",
         "tests/native-drum-sequencer.test.cjs",
-        "tests/native-drum-sequencer-browser.cjs"
+        "tests/native-drum-sequencer-browser.cjs",
+        "tests/native-drum-articulation.test.cjs",
+        "tests/native-drum-articulation-browser.cjs"
       ],
       "remaining": [
-        "Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested.",
-        "Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain.",
+        "Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified.",
+        "Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain.",
         "Retrospective MIDI capture remains unimplemented and must be opt-in."
       ]
     },
@@ -430,12 +432,15 @@
         "tests/parallax-local-browser.cjs",
         "tests/editor-workflows-browser.cjs",
         "tests/project-settings.test.cjs",
-        "tests/continued-master-browser.cjs"
+        "tests/continued-master-browser.cjs",
+        "tests/motion-mask-transforms.test.cjs",
+        "tests/motion-mask-transforms-browser.cjs"
       ],
       "remaining": [
         "51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds.",
         "Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain.",
-        "Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions."
+        "Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+        "Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded."
       ]
     },
     {
@@ -505,7 +510,9 @@
         "tests/mp4-capture-browser.cjs",
         "tests/export-format.test.cjs",
         "tests/motion-composition-export-browser.cjs",
-        "tests/export-fallback-browser.cjs"
+        "tests/export-fallback-browser.cjs",
+        "tests/production-preflight-browser.cjs",
+        "tests/mp4-encoder-preflight-browser.cjs"
       ],
       "remaining": [
         "MP4 capture now verifies a real frame, requests frames explicitly, uses the start-call clock and avoids empty/timed MP4 fragments. Current decoded motion/audio, selected-range, portrait720p,1080p and45s checks are recorded in the18November phase report.",
@@ -663,12 +670,18 @@
       "code": [
         "zorifi-phase11.js",
         "zorifi-vanessa-creative-learning.js",
-        "zorifi-native-music.js"
+        "zorifi-native-music.js",
+        "zorifi-production-preflight.js",
+        "zorifi-production-preflight-workspace.js",
+        "zorifi-vanessa-professional.js"
       ],
-      "tests": [],
+      "tests": [
+        "tests/production-preflight.test.cjs",
+        "tests/production-preflight-browser.cjs"
+      ],
       "remaining": [
-        "Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance.",
-        "Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance."
+        "Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled.",
+        "Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback."
       ]
     },
     {
@@ -709,5 +722,6 @@
     "Privileged hosted financial persistence and all-provider reservation wiring missing.",
     "Supported replacement model/project access, provider licensing and protected preview not verified.",
     "Prices and live charges not approved; Firebase stays Spark."
-  ]
+  ],
+  "latestTests": 675
 }

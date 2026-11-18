@@ -4559,7 +4559,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4572,7 +4572,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4585,7 +4585,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4598,7 +4598,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4611,7 +4611,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4624,7 +4624,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4637,7 +4637,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4650,7 +4650,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4663,7 +4663,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4676,7 +4676,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4689,7 +4689,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4702,7 +4702,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4715,7 +4715,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4728,7 +4728,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4741,7 +4741,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4754,7 +4754,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4807,7 +4807,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4817,10 +4817,16 @@
       "line": 653,
       "section": "Drum sequencer",
       "text": "- Flam.",
-      "status": "Unverified",
-      "code": [],
-      "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "status": "Tested",
+      "code": [
+        "zorifi-native-music.js",
+        "zorifi-native-music-workspace.js"
+      ],
+      "tests": [
+        "tests/native-drum-articulation.test.cjs",
+        "tests/native-drum-articulation-browser.cjs"
+      ],
+      "remaining": "Bounded native source-note implementation verified manually and through reviewed Vanessa, PCM/MIDI, locks/budgets, Undo/Redo and save/reopen. Probability, pattern chaining and unrestricted DAW parity remain separate unfinished requirements.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4830,10 +4836,16 @@
       "line": 654,
       "section": "Drum sequencer",
       "text": "- Roll.",
-      "status": "Unverified",
-      "code": [],
-      "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "status": "Tested",
+      "code": [
+        "zorifi-native-music.js",
+        "zorifi-native-music-workspace.js"
+      ],
+      "tests": [
+        "tests/native-drum-articulation.test.cjs",
+        "tests/native-drum-articulation-browser.cjs"
+      ],
+      "remaining": "Bounded native source-note implementation verified manually and through reviewed Vanessa, PCM/MIDI, locks/budgets, Undo/Redo and save/reopen. Probability, pattern chaining and unrestricted DAW parity remain separate unfinished requirements.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4846,7 +4858,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4859,7 +4871,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4872,7 +4884,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4885,7 +4897,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4898,7 +4910,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -4911,7 +4923,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa 16/32/64-step drum sequencing with source-meter timing and per-hit velocity are implemented and tested. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, flam/roll/probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified. Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain. Retrospective MIDI capture remains unimplemented and must be opt-in.",
       "auditGroup": "ultimate-part-13",
       "areaStatus": "Partial"
     },
@@ -7706,7 +7718,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7719,7 +7731,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7732,7 +7744,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7745,7 +7757,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7758,7 +7770,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7771,7 +7783,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7784,7 +7796,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7797,7 +7809,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7810,7 +7822,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7823,7 +7835,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7836,7 +7848,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7849,7 +7861,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7862,7 +7874,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7875,7 +7887,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7888,7 +7900,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7901,7 +7913,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7914,7 +7926,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7927,7 +7939,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7940,7 +7952,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7953,7 +7965,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7966,7 +7978,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7979,7 +7991,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -7992,7 +8004,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8005,7 +8017,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8018,7 +8030,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8031,7 +8043,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8044,7 +8056,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8057,7 +8069,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8070,7 +8082,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8083,7 +8095,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8096,7 +8108,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8109,7 +8121,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8122,7 +8134,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8135,7 +8147,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8148,7 +8160,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -8161,7 +8173,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds. Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain. Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions. Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
       "auditGroup": "ultimate-part-25",
       "areaStatus": "Partial"
     },
@@ -10683,7 +10695,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10696,7 +10708,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10709,7 +10721,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10722,7 +10734,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10735,7 +10747,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10748,7 +10760,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10761,7 +10773,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10774,7 +10786,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10787,7 +10799,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10800,7 +10812,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10813,7 +10825,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10826,7 +10838,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10836,10 +10848,17 @@
       "line": 1603,
       "section": "38.10 ZORIFI Production Preflight",
       "text": "## 38.10 ZORIFI Production Preflight",
-      "status": "Unverified",
-      "code": [],
-      "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "status": "Partial",
+      "code": [
+        "zorifi-production-preflight.js",
+        "zorifi-production-preflight-workspace.js",
+        "zorifi-vanessa-professional.js"
+      ],
+      "tests": [
+        "tests/production-preflight.test.cjs",
+        "tests/production-preflight-browser.cjs"
+      ],
+      "remaining": "Local preflight checks missing/unresolved sources, timing/text/output dimensions and up to six actual rendered frames/first12s eligible root PCM; nested scopes retain their own clocks. Bounds:500 layers/depth8; some decoder/audio failures are explicitly unmeasured. Final encoded delivery, full-program loudness, all plugins, licenses, transcript sync and unfinished-section intent are not certified.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10849,10 +10868,17 @@
       "line": 1607,
       "section": "38.10 ZORIFI Production Preflight",
       "text": "- Missing assets.",
-      "status": "Unverified",
-      "code": [],
-      "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "status": "Partial",
+      "code": [
+        "zorifi-production-preflight.js",
+        "zorifi-production-preflight-workspace.js",
+        "zorifi-vanessa-professional.js"
+      ],
+      "tests": [
+        "tests/production-preflight.test.cjs",
+        "tests/production-preflight-browser.cjs"
+      ],
+      "remaining": "Local preflight checks missing/unresolved sources, timing/text/output dimensions and up to six actual rendered frames/first12s eligible root PCM; nested scopes retain their own clocks. Bounds:500 layers/depth8; some decoder/audio failures are explicitly unmeasured. Final encoded delivery, full-program loudness, all plugins, licenses, transcript sync and unfinished-section intent are not certified.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10862,10 +10888,17 @@
       "line": 1608,
       "section": "38.10 ZORIFI Production Preflight",
       "text": "- Broken media references.",
-      "status": "Unverified",
-      "code": [],
-      "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "status": "Partial",
+      "code": [
+        "zorifi-production-preflight.js",
+        "zorifi-production-preflight-workspace.js",
+        "zorifi-vanessa-professional.js"
+      ],
+      "tests": [
+        "tests/production-preflight.test.cjs",
+        "tests/production-preflight-browser.cjs"
+      ],
+      "remaining": "Local preflight checks missing/unresolved sources, timing/text/output dimensions and up to six actual rendered frames/first12s eligible root PCM; nested scopes retain their own clocks. Bounds:500 layers/depth8; some decoder/audio failures are explicitly unmeasured. Final encoded delivery, full-program loudness, all plugins, licenses, transcript sync and unfinished-section intent are not certified.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10878,7 +10911,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10888,10 +10921,17 @@
       "line": 1610,
       "section": "38.10 ZORIFI Production Preflight",
       "text": "- Audio clipping.",
-      "status": "Unverified",
-      "code": [],
-      "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "status": "Partial",
+      "code": [
+        "zorifi-production-preflight.js",
+        "zorifi-production-preflight-workspace.js",
+        "zorifi-vanessa-professional.js"
+      ],
+      "tests": [
+        "tests/production-preflight.test.cjs",
+        "tests/production-preflight-browser.cjs"
+      ],
+      "remaining": "Local preflight checks missing/unresolved sources, timing/text/output dimensions and up to six actual rendered frames/first12s eligible root PCM; nested scopes retain their own clocks. Bounds:500 layers/depth8; some decoder/audio failures are explicitly unmeasured. Final encoded delivery, full-program loudness, all plugins, licenses, transcript sync and unfinished-section intent are not certified.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10901,10 +10941,17 @@
       "line": 1611,
       "section": "38.10 ZORIFI Production Preflight",
       "text": "- Export resolution.",
-      "status": "Unverified",
-      "code": [],
-      "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "status": "Partial",
+      "code": [
+        "zorifi-production-preflight.js",
+        "zorifi-production-preflight-workspace.js",
+        "zorifi-vanessa-professional.js"
+      ],
+      "tests": [
+        "tests/production-preflight.test.cjs",
+        "tests/production-preflight-browser.cjs"
+      ],
+      "remaining": "Local preflight checks missing/unresolved sources, timing/text/output dimensions and up to six actual rendered frames/first12s eligible root PCM; nested scopes retain their own clocks. Bounds:500 layers/depth8; some decoder/audio failures are explicitly unmeasured. Final encoded delivery, full-program loudness, all plugins, licenses, transcript sync and unfinished-section intent are not certified.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10917,7 +10964,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10930,7 +10977,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10943,7 +10990,7 @@
       "status": "Unverified",
       "code": [],
       "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "remaining": "Individual acceptance not yet certified. Area gaps: Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },
@@ -10953,10 +11000,17 @@
       "line": 1615,
       "section": "38.10 ZORIFI Production Preflight",
       "text": "- Rendering errors.",
-      "status": "Unverified",
-      "code": [],
-      "tests": [],
-      "remaining": "Individual acceptance not yet certified. Area gaps: Partial foundations: conductor orchestration, protected-source edits, technical review, recovery checkpoints, approved preferences, responsive panels and limited provenance. Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace, Asset Lineage and Production Preflight need dedicated acceptance.",
+      "status": "Partial",
+      "code": [
+        "zorifi-production-preflight.js",
+        "zorifi-production-preflight-workspace.js",
+        "zorifi-vanessa-professional.js"
+      ],
+      "tests": [
+        "tests/production-preflight.test.cjs",
+        "tests/production-preflight-browser.cjs"
+      ],
+      "remaining": "Local preflight checks missing/unresolved sources, timing/text/output dimensions and up to six actual rendered frames/first12s eligible root PCM; nested scopes retain their own clocks. Bounds:500 layers/depth8; some decoder/audio failures are explicitly unmeasured. Final encoded delivery, full-program loudness, all plugins, licenses, transcript sync and unfinished-section intent are not certified.",
       "auditGroup": "ultimate-part-38",
       "areaStatus": "Partial"
     },

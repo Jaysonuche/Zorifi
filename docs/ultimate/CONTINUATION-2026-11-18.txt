@@ -111,3 +111,72 @@ signed-in hosted/browser/provider acceptance claim. Production release.json
 still3.47.0 / aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb; not promoted.
 Rollback source is preserved in prior branch commits; project/media schemas
 and original sources were not migrated or deleted.
+
+NEXT VERIFIED DEVELOPMENT PHASE — MASKS, DRUM ARTICULATIONS AND PREFLIGHT
+Continue the existing branch; c484db3 is the prior verified runtime/rollback.
+1. Native mask transforms: independent XY/rotation/inversion/removal, animated
+   mask:rotation, preserved Bezier control handles and opacity during pen edits.
+   Masks follow the actual native projected camera quad; opacity composites once
+   after perspective triangles. Bounds protect canvas radii/alpha overshoot.
+   Manual controls and reviewed Vanessa use the existing motion.edit path.
+2. Native drum flams and rolls: real owned source notes,2-hit flam and2/3/4/6/8
+   rolls. Removing/replacing an owned group preserves other pitches, off-grid
+   notes and bars. Individual-note edits detach the organizational ownership.
+   Existing music.native.edit renders real audio, saves one Undo checkpoint and
+   retains MIDI/trim/rate support. Probability/pattern chaining remain unfinished.
+3. Production Preflight: Export video/WAV contains Check before export; Vanessa
+   understands Run production preflight. Same read-only local path, existing
+   project/history and native composition renderer, no AI/provider charge.
+   Recursively checks up to500 layers/depth8 in each composition's own clock.
+   Six-frame maximum and first12s/eight eligible root sources/40MiB per-source/
+   64MiB total audio review limits. Known original SFX use their deterministic
+   native PCM source. Audio-only checks omit unnecessary black frame sampling.
+   Source limitations and decode failures remain explicit. Text-only output is
+   valid; camera/null controls cannot falsely provide visible output coverage.
+   Stop, account/project/revision/source changes discard stale samples and erase
+   private report UI. Export choices remain behind the report, unchanged.
+   Read-only sampling never fabricates a previous AI edit or replaces lastResult.
+
+ACCEPTANCE RECEIPTS (LOCAL, OFFLINE PROVIDER/AUTH FIXTURES)
+-675 unit tests pass;0 failures/skips.51 staged editing actions preserved;
+ 105 total discoverable actions include54 separate workflows.
+-tests/motion-mask-transforms-browser.cjs passed rendered manual rotation,
+ inversion, Bezier/pen preservation, direct mask-rotation keyframe control,
+ reviewed Vanessa keys, one Undo/Redo, deterministic scrub, projected camera
+ pixel bounds/50% alpha, saved reopen and remove/Undo.
+-tests/native-drum-articulation-browser.cjs passed manual flam/reviewed Vanessa
+ 8-hit roll, confirmation, unrelated note preservation, one Undo/Redo,5s decoded
+ audio, MIDI, source trim/rate MIDI and saved reopen at320/390/768/1440px.
+-tests/production-preflight-browser.cjs passed actual4-frame native pixels/2s
+ PCM, manual and Vanessa, no timeline/history mutation, no fake professional
+ result, Stop/noncooperative late result, account isolation, missing nested media,
+ retained export fields, audio-only checks and saved reopen. Light/dark UI and
+ 320/390/768/1440px fit verified;320x640 visual inspection passed.
+-tests/professional-native-tools-browser.cjs: all51 staged native actions passed.
+-tests/professional-stage2-browser.cjs and tests/vanessa-production-browser.cjs:
+ Chromium+WebKit passed real local timeline edits, ordinary conversation, review,
+ Undo/Redo, save/refresh, stale/Stop/account guards and opt-in mic state. Gemini/
+ Firebase/model replies use explicit fixtures; this is not live provider testing.
+ Windows WebKit uses data URLs because its IndexedDB Blob support is limited.
+-tests/mp4-capture-browser.cjs: actual H264/AAC MP4 decoded moving frames/audio,
+ selected range, delayed capture, silent portrait720x1280 and1920x1080 plus real
+ imported-video output. No fresh physical-device/4K/8K certification is implied.
+
+Still partial: full-master completion, unrestricted AE/DAW parity, real production
+ provider/model access, hosted finance/entitlements, physical-device qualification,
+ plugin/licensing checks, full-program LUFS, final encode/transcript/creative
+ approval. Preflight is sparse technical evidence and does not certify delivery.
+No Firebase upgrade, paid service or billable provider operation in this phase.
+Production remains gated by the previously unrevoked exposed credential. Scan
+ cleanliness cannot prove external revocation. Preserve README.md owner edits.
+The131-page PDF dated17November remains a historical snapshot; this addendum and
+the live requirements ledger record later work without rewriting that snapshot.
+
+FINAL PHASE INTEGRITY
+675/675 unit tests,0 skips/failures.432 source syntax checks and327 asset
+references passed. Web build166 files plus assets;13798 approved interface
+strings from121 sources. Offline source/history/build credential-shape scan:
+0 blockers,0 review findings,0 read errors; no claim of external revocation.
+Both new mask/articulation browser proofs reran after all preflight wrappers
+were installed and passed. MP4 encoder preparation Stop and real audio-only
+MP4 rejection guard passed with no unintended download and cleaned tracks.

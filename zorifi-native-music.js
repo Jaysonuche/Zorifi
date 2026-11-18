@@ -20,7 +20,11 @@
       assert(typeof note.id==='string'&&note.id.length<=100&&!ids.has(note.id),'Each note needs a unique ID.');ids.add(note.id);
       assert(finite(note.start)&&note.start>=0&&finite(note.duration)&&note.duration>=.005&&note.start+note.duration<=pattern.duration+.000001,'Keep notes within the pattern duration.');
       assert(Number.isInteger(note.pitch)&&note.pitch>=0&&note.pitch<=127&&finite(note.velocity)&&note.velocity>=0&&note.velocity<=1,'Use a MIDI pitch 0–127 and velocity 0–1.');
+      if(note.drumStep!==undefined)assert(note.drumStep&&Object.keys(note.drumStep).every(k=>['anchorId','articulation'].includes(k))&&typeof note.drumStep.anchorId==='string'&&['flam','roll'].includes(note.drumStep.articulation),'Unsupported drum articulation note.');
     }
+    const noteById=new Map(pattern.notes.map(n=>[n.id,n])),articulations=new Map();
+    for(const note of pattern.notes)if(note.drumStep){const anchor=noteById.get(note.drumStep.anchorId);assert(anchor&&!anchor.drumStep&&anchor.pitch===note.pitch&&note.start>anchor.start,'A drum articulation needs its original earlier hit at the same pitch.');const hits=articulations.get(anchor.id)||[];hits.push(note.drumStep.articulation);articulations.set(anchor.id,hits);}
+    for(const hits of articulations.values())assert(hits.every(kind=>kind===hits[0])&&(hits[0]==='flam'?hits.length===1:[1,2,3,5,7].includes(hits.length)),'A drum articulation supports a 2-hit flam or a 2, 3, 4, 6 or 8-hit roll.');
     assert(pattern.notes.reduce((sum,n)=>sum+n.duration,0)<=pattern.duration*16,'Pattern exceeds the native synthesis voice budget.');
     const events=pattern.notes.flatMap(n=>[{at:n.start,delta:1},{at:n.start+n.duration,delta:-1}]).sort((a,b)=>a.at-b.at||a.delta-b.delta);let voices=0;
     for(const event of events){voices+=event.delta;assert(voices<=32,'Pattern exceeds 32 simultaneous voices.');}
@@ -67,8 +71,8 @@
     const barDuration=60/p.bpm*Number(meter[1])*4/Number(meter[2]),totalBars=Math.ceil(p.duration/barDuration),stepDuration=barDuration/steps;
     assert(Number.isInteger(bar)&&bar>=0&&bar<totalBars,'Choose a source bar inside this pattern.');
     const start=bar*barDuration,cells=Array.from({length:steps},(_,index)=>{
-      const at=Number((start+index*stepDuration).toFixed(6)),notes=p.notes.filter(n=>n.pitch===pitch&&Math.abs(n.start-at)<=.000001);
-      return {index,start:at,available:at+.005<=p.duration+.000001,noteIds:notes.map(n=>n.id),enabled:notes.length>0,velocity:notes.length?Math.max(...notes.map(n=>n.velocity)):0};
+      const at=Number((start+index*stepDuration).toFixed(6)),notes=p.notes.filter(n=>!n.drumStep&&n.pitch===pitch&&Math.abs(n.start-at)<=.000001),ids=new Set(notes.map(n=>n.id)),hits=p.notes.filter(n=>ids.has(n.id)||ids.has(n.drumStep?.anchorId)),styles=notes.map(n=>hits.find(hit=>hit.drumStep?.anchorId===n.id)?.drumStep.articulation||'single');
+      return {index,start:at,available:at+.005<=p.duration+.000001,noteIds:[...ids],hitIds:hits.map(n=>n.id),enabled:notes.length>0,velocity:hits.length?Math.max(...hits.map(n=>n.velocity)):0,articulation:styles.every(style=>style===styles[0])?(styles[0]||'single'):'mixed',hits:Math.max(1,...notes.map(n=>1+hits.filter(hit=>hit.drumStep?.anchorId===n.id).length))};
     });
     return {steps,bar,pitch,timeSignature:p.timeSignature||'4/4',barDuration,stepDuration,totalBars,start,end:Math.min(p.duration,start+barDuration),cells};
   }
@@ -78,24 +82,44 @@
     assert(!p.locked,'Unlock this composition pattern before changing notes.');
     if(edit.operation==='instrument'){assert(INSTRUMENTS.includes(edit.instrument),'Unknown native instrument.');p.instrument=edit.instrument;}
     else if(edit.operation==='add'){p.notes.push(clone(edit.note));}
-    else if(edit.operation==='update'){const note=p.notes.find(n=>n.id===edit.id);assert(note,'Choose an existing note.');assert(edit.changes&&Object.keys(edit.changes).every(k=>['start','duration','pitch','velocity'].includes(k)),'Unsupported note property.');Object.assign(note,edit.changes);}
-    else if(edit.operation==='delete'){assert(p.notes.some(n=>n.id===edit.id),'Choose an existing note.');p.notes=p.notes.filter(n=>n.id!==edit.id);}
+    else if(edit.operation==='update'){const note=p.notes.find(n=>n.id===edit.id);assert(note,'Choose an existing note.');assert(edit.changes&&Object.keys(edit.changes).every(k=>['start','duration','pitch','velocity'].includes(k)),'Unsupported note property.');detachDrumStep(p,note);Object.assign(note,edit.changes);}
+    else if(edit.operation==='delete'){const note=p.notes.find(n=>n.id===edit.id);assert(note,'Choose an existing note.');detachDrumStep(p,note);p.notes=p.notes.filter(n=>n.id!==edit.id);}
     else if(edit.operation==='transpose'){assert(Number.isInteger(edit.semitones)&&Math.abs(edit.semitones)<=24,'Transpose within two octaves.');for(const note of p.notes)note.pitch+=edit.semitones;}
-    else if(edit.operation==='quantize'){assert([.125,.25,.5,1].includes(edit.beats),'Choose a 1/32, 1/16, 1/8 or quarter-note grid.');const step=60/p.bpm*edit.beats;for(const note of p.notes){note.start=Math.min(p.duration-.005,Math.max(0,Math.round(note.start/step)*step));note.duration=Math.min(note.duration,p.duration-note.start);}}
+    else if(edit.operation==='quantize'){assert([.125,.25,.5,1].includes(edit.beats),'Choose a 1/32, 1/16, 1/8 or quarter-note grid.');const step=60/p.bpm*edit.beats;for(const note of p.notes){delete note.drumStep;note.start=Math.min(p.duration-.005,Math.max(0,Math.round(note.start/step)*step));note.duration=Math.min(note.duration,p.duration-note.start);}}
     else if(edit.operation==='step'){
-      assert(Object.keys(edit).every(key=>['operation','steps','bar','pitch','index','enabled','velocity'].includes(key)),'Unsupported drum step property.');
+      assert(Object.keys(edit).every(key=>['operation','steps','bar','pitch','index','enabled','velocity','articulation','hits'].includes(key)),'Unsupported drum step property.');
       const grid=drumGrid(p,edit);assert(Number.isInteger(edit.index)&&edit.index>=0&&edit.index<grid.steps,'Choose an existing drum step.');
       assert(typeof edit.enabled==='boolean','Choose whether this drum step is enabled.');
       const cell=grid.cells[edit.index],velocity=edit.velocity??.75;assert(cell.available,'This drum step lies outside the source pattern.');
       assert(finite(velocity)&&velocity>0&&velocity<=1,'Drum step velocity must be greater than 0 and at most 1.');
-      const matches=new Set(cell.noteIds);
-      if(!edit.enabled)p.notes=p.notes.filter(n=>!matches.has(n.id));
-      else if(matches.size){for(const note of p.notes)if(matches.has(note.id))note.velocity=velocity;}
-      else{let noteId='step-'+grid.bar+'-'+grid.steps+'-'+grid.pitch+'-'+edit.index;while(p.notes.some(n=>n.id===noteId))noteId+='x';assert(noteId.length<=100,'The drum step needs an available note ID.');p.notes.push({id:noteId,start:cell.start,duration:Math.max(.005,Math.min(grid.stepDuration*.8,p.duration-cell.start)),pitch:grid.pitch,velocity});}
+      const style=edit.articulation;assert(style===undefined||['single','flam','roll'].includes(style),'Choose a single hit, flam or roll.');
+      assert(edit.hits===undefined||style!==undefined,'Choose an articulation before setting its hit count.');
+      const hits=edit.hits??(style==='flam'?2:style==='roll'?4:1);assert(Number.isInteger(hits)&&(style==='roll'?[2,3,4,6,8].includes(hits):hits===(style==='flam'?2:1)),'Use 2 hits for a flam or 2, 3, 4, 6 or 8 hits for a roll.');
+      const matches=new Set(cell.noteIds),owned=new Set(cell.hitIds);
+      if(!edit.enabled)p.notes=p.notes.filter(n=>!owned.has(n.id));
+      else{
+        if(!matches.size){let noteId='step-'+grid.bar+'-'+grid.steps+'-'+grid.pitch+'-'+edit.index;while(p.notes.some(n=>n.id===noteId))noteId+='x';assert(noteId.length<=100,'The drum step needs an available note ID.');matches.add(noteId);p.notes.push({id:noteId,start:cell.start,duration:Math.max(.005,Math.min(grid.stepDuration*.8,p.duration-cell.start)),pitch:grid.pitch,velocity});}
+        if(style!==undefined)p.notes=p.notes.filter(n=>!matches.has(n.drumStep?.anchorId));
+        const anchors=p.notes.filter(n=>matches.has(n.id));
+        for(const anchor of anchors){
+          if(style!==undefined&&style!=='single'){
+            const interval=style==='flam'?Math.min(.03,grid.stepDuration*.25):grid.stepDuration/hits;
+            for(let hit=1;hit<hits;hit++){
+              const at=Number((anchor.start+interval*hit).toFixed(6));assert(at+.005<=Math.min(p.duration,grid.start+grid.barDuration)+.000001,'This source step has too little room for the requested articulation.');
+              let noteId='step-hit-'+hash(anchor.id+':'+style+':'+hit).toString(16);while(p.notes.some(n=>n.id===noteId))noteId+='x';assert(noteId.length<=100,'The drum articulation needs an available note ID.');
+              p.notes.push({id:noteId,start:at,duration:Math.max(.005,Math.min(anchor.duration,style==='roll'?interval*.8:anchor.duration,p.duration-at)),pitch:anchor.pitch,velocity,drumStep:{anchorId:anchor.id,articulation:style}});
+            }
+          }
+          const children=p.notes.filter(n=>n.drumStep?.anchorId===anchor.id),flam=children[0]?.drumStep.articulation==='flam';anchor.velocity=flam?Number((velocity*.65).toFixed(6)):velocity;for(const child of children)child.velocity=velocity;
+        }
+      }
     }
     else throw new Error('Unsupported native note operation.');
     p.revision=(p.revision||1)+1;return validatePattern(p);
   }
+  // Editing an individual source note makes its group independent; subsequent
+  // step changes must never remove notes the user has edited separately.
+  function detachDrumStep(pattern,note){const anchorId=note.drumStep?.anchorId||note.id;for(const hit of pattern.notes)if(hit.drumStep?.anchorId===anchorId)delete hit.drumStep;}
   function renderWav(source,{sampleRate=48000}={}){
     const p=validatePattern(source);assert([22050,44100,48000].includes(sampleRate),'Unsupported synthesis sample rate.');
     const length=Math.round(p.duration*sampleRate),samples=new Float32Array(length),tau=Math.PI*2;

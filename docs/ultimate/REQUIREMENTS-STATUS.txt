@@ -289,3 +289,14 @@ checks include selected range, audio, portrait720p,1080p and45s on this Windows
 host. Physical devices, arbitrary codecs/large projects and4K/8K remain unverified.
 See CONTINUATION-2026-11-18.txt. All master areas retain their existing Partial/
 Blocked/NotStarted boundaries; no blanket completion or production claim.
+
+18 NOVEMBER ADDENDUM - SUBSEQUENT PHASE
+Part13 flams/rolls now tested; probability/chaining/MPE/live capture remain.
+Part25 independent masks/rotation keys/perspective alpha now tested through
+manual and reviewed Vanessa operations with real pixels/one Undo/save/reopen.
+Part38 local Preflight partial:500 layers/depth8, up to6 actual frames/12s eligible
+root PCM, source clocks, Stop/account guards and untouched export form/history.
+Final encoding/full LUFS/plugins/rights/transcript/creative readiness not certified.
+675 tests pass; all40 master areas still partial/blocked/not started as recorded
+in STATUS.json and1673-row requirements ledger. Protected preview only; the
+previously unrevoked credential continues to block production promotion.
