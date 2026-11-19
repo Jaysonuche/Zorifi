@@ -91,6 +91,7 @@
       "zorifi-motion-renderer.js",
       "zorifi-motion-graph.js",
       "zorifi-production-preflight.js",
+      "zorifi-offline-mix.js",
       "zorifi-production-preflight-workspace.js",
       "zorifi-production-preflight.css",
       "zorifi-compute-engine.js",

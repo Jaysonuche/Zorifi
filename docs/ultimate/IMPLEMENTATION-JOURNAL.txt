@@ -104,3 +104,11 @@ mutating timeline/history or fabricating an AI result.675 unit tests plus actual
 editor/browser/MP4 regressions; scope and receipts in dated continuation report.
 51 staged actions retained;105 discoverable entries include54 workflows.
 No billable provider operation, Firebase upgrade or production promotion.
+
+19 NOVEMBER - PIANO ROLL, TRIM PATHS, NESTED PCM
+Native interactive source-note gestures and reviewed Vanessa source-note edits
+now render actual PCM with one Undo/save. Animated native stroke trimming
+preserves Bezier/fill and passes actual MP4 decode. Root-only/partial-success
+WAV export replaced with bounded shared nested PCM, stereo metrics and safe
+Stop/account failure handling.695 tests pass; full audit and limits recorded
+in CONTINUATION-2026-11-19.txt. Production/provider/billing gates unchanged.

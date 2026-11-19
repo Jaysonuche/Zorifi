@@ -36,9 +36,9 @@
     if(kind==='audio'&&!hasAudio(project.clips,project.mediaAssets||[],project.trackStates||{}))note('warning','no_audio','No enabled audio source was found. A silent export may be intentional.',[]);
     if(error)unassessed.push({id:'rendered-samples',scope:[],reason:String(error).slice(0,240)});
     for(const item of rendered?.unassessed||[])unassessed.push({...item,scope:[]});
-    if(scopes.length>1)unassessed.push({id:'nested-audio',scope:[],reason:'The bounded mix sample includes root audio sources only; listen to nested audio in the complete export.'});
+    if(scopes.length>1&&!rendered?.audio?.mixReport?.nativeNested)unassessed.push({id:'nested-audio',scope:[],reason:'The bounded mix sample includes root audio sources only; listen to nested audio in the complete export.'});
     unassessed.push({id:'rights-and-plugins',scope:[],reason:'External plugin compatibility, rights/licensing, transcript accuracy and whether locked sections are creatively finished require separate review. Locks are preserved and are not treated as errors.'});
-    unassessed.push({id:'delivery-review',scope:[],reason:'This report checks the complete timeline structure and at most six rendered frames plus the first twelve seconds of eligible root audio. It does not verify every frame, full-program loudness, artistic quality or the final encoded file.'});
+    unassessed.push({id:'delivery-review',scope:[],reason:'This report checks the complete timeline structure and at most six rendered frames plus the first twelve seconds of eligible timeline audio. It does not verify every frame, full-program loudness, artistic quality or the final encoded file.'});
     const summary={errors:issues.filter(i=>i.severity==='error').length,warnings:issues.filter(i=>i.severity==='warning').length,layers:Math.min(count,LIMITS.layers),compositions:scopes.length,frames:rendered?.frames?.length||0,audioSeconds:rendered?.audio?.duration||0};
     return {version:1,kind,status:summary.errors?'problems-found':'review-required',summary,issues,checks,unassessed,scopes,rendered:rendered||null,readOnly:true,providerCalls:0};
   }

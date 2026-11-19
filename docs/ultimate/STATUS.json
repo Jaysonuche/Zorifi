@@ -1,9 +1,9 @@
 {
   "schema": "zorifi.ultimate.audit/1",
-  "date": "2026-11-18",
+  "date": "2026-11-19",
   "overall": "Partial",
   "productionVersion": "3.47.0",
-  "candidate": "Development mask transforms, drum articulations and local Production Preflight; production promotion gated",
+  "candidate": "Development piano roll, native Trim Paths and safe nested offline audio; production remains gated",
   "baselineTests": 589,
   "areas": [
     {
@@ -235,11 +235,13 @@
         "tests/native-drum-sequencer.test.cjs",
         "tests/native-drum-sequencer-browser.cjs",
         "tests/native-drum-articulation.test.cjs",
-        "tests/native-drum-articulation-browser.cjs"
+        "tests/native-drum-articulation-browser.cjs",
+        "tests/native-piano-roll.test.cjs",
+        "tests/native-piano-roll-browser.cjs"
       ],
       "remaining": [
-        "Actual note editing, MIDI export/import and manual/Vanessa16/32/64-step drum sequencing, velocity,2-hit flams and2/3/4/6/8-hit rolls are tested. Articulations are owned editable source notes; off-grid notes, source trim/rate MIDI, one Undo, save/reopen and audio are verified.",
-        "Interactive piano-roll drawing, MIDI recording, controllers/sustain/pitch bend, MPE, microtuning, probability/pattern chaining and advanced per-step pitch offsets remain.",
+        "Native source notes now support interactive snapped mouse/touch draw, move, resize/delete, keyboard and exact table editing, with meter-aware1/2/4-bar windows/24-pitch banks/512 visible notes. Reviewed Vanessa note commands share music.native.edit; real PCM, one Undo/gesture, live dialog Undo/Redo refresh, locks and saved reopen are tested. MIDI import/export and16/32/64-step sequencing/flam/roll remain preserved.",
+        "Live MIDI recording, controllers/sustain/pitch bend, expression lanes, MPE, microtuning, probability/pattern chaining, scale/chord tools and full DAW piano-roll parity remain.",
         "Retrospective MIDI capture remains unimplemented and must be opt-in."
       ]
     },
@@ -345,15 +347,18 @@
       "status": "Partial",
       "code": [
         "zorifi-audio-engine.js",
-        "app.js"
+        "app.js",
+        "zorifi-offline-mix.js"
       ],
       "tests": [
         "tests/audio-studio-browser.cjs",
-        "tests/native-music-browser.cjs"
+        "tests/native-music-browser.cjs",
+        "tests/offline-mix.test.cjs",
+        "tests/offline-mix-browser.cjs"
       ],
       "remaining": [
-        "Existing pan/fade/EQ/compression/limiting/ducking/master WAV work.",
-        "Buses/sends/VCA/parallel chains/dynamicEQ/multiband/transient/spatial tools/true-peak/LUFS/Mix Intelligence/Audio Doctor remain incomplete."
+        "Existing source pan/fade/EQ/compression/limiting/ducking preserved. WAV now uses shared native constant-rate nested timing, trims, private track/container/category/master gains and pan, exact composition length and real stereo sample metrics. Failed audible sources stop the whole mix; Stop/account/revision guards block late output. Shared preflight samples nested eligible PCM, not only root clips.",
+        "Variable-rate/remapped offline audio, pitch-preserving time stretch and non-default container DSP/fades are explicitly rejected rather than silently omitted. Buses/sends/VCA/parallel chains/dynamicEQ/multiband/transient/spatial tools/true-peak/LUFS/Mix Intelligence/Audio Doctor remain incomplete. Native media APIs can finish underlying decode/render after Stop; results are discarded and nodes disconnected."
       ]
     },
     {
@@ -434,13 +439,16 @@
         "tests/project-settings.test.cjs",
         "tests/continued-master-browser.cjs",
         "tests/motion-mask-transforms.test.cjs",
-        "tests/motion-mask-transforms-browser.cjs"
+        "tests/motion-mask-transforms-browser.cjs",
+        "tests/motion-trim-paths.test.cjs",
+        "tests/motion-trim-paths-browser.cjs"
       ],
       "remaining": [
         "51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds.",
         "Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain.",
         "Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
-        "Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded."
+        "Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
+        "Native Trim Paths adds editable/animated stroke start/end/degree offset, wrapping and independent shape-group channels. Cubic controls/fill remain intact;24-chord-per-cubic length approximation is bounded. Manual/reviewed Vanessa, pixels/history/reopen and actual encoded/decoded320x180 MP4 are verified. External AE plugins and unrestricted geometric/optical-flow parity remain unimplemented."
       ]
     },
     {
@@ -677,11 +685,12 @@
       ],
       "tests": [
         "tests/production-preflight.test.cjs",
-        "tests/production-preflight-browser.cjs"
+        "tests/production-preflight-browser.cjs",
+        "tests/offline-mix-browser.cjs"
       ],
       "remaining": [
         "Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled.",
-        "Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible root audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; nested audio needs full playback."
+        "Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible timeline audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; constant-rate nested sampling now works; variable-rate/container DSP and full-program review remain limited."
       ]
     },
     {
@@ -723,5 +732,5 @@
     "Supported replacement model/project access, provider licensing and protected preview not verified.",
     "Prices and live charges not approved; Firebase stays Spark."
   ],
-  "latestTests": 675
+  "latestTests": 695
 }

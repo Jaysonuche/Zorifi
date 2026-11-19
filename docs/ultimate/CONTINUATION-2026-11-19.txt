@@ -1,0 +1,115 @@
+ZORIFI ULTIMATE —19 NOVEMBER2026 DEVELOPMENT CONTINUATION
+Continue codex/vanessa-openai-production. Previous verified handoff c3d8c34;
+previous runtime8a50014. This is a tested phase, not completion of the master.
+All40 audit areas and1673 raw requirements remain in STATUS.json/requirements.json.
+Owner README.md edits are intentionally untouched and excluded from commits.
+
+REAL NATIVE PIANO ROLL — PART13
+Existing source patterns, WAV worker, media ownership and history remain the
+authority. The new SVG editor draws bounded1/2/4-source-bar windows and24-pitch
+banks with a512-visible-note cap. Original notes remain available in the exact
+numeric table; a dense-view warning does not delete hidden source material.
+Mouse draw/move/right-edge resize, touch tap/drag, source-time snap, keyboard arrows,
+Shift resize, Delete and gesture Escape/cancel share music.native.edit. Reviewed
+Vanessa source-note commands use this same validator/renderer/one-save checkpoint.
+Undo/Redo and external note locks refresh the open dialog; its scroll is retained.
+Draw/move/resize produced real source PCM, preserved unrelated notes and saved
+one Undo each. Composition locks, voice budgets and source trim/rate remain.
+MIDI recording/controllers/MPE/microtuning/expression lanes/scale and chord tools,
+probability/chaining and unrestricted DAW interaction remain unfinished.
+
+NATIVE TRIM PATHS — PART25
+Editable stroke start/end percentages and degree offset; equal ends mean empty
+and reversed ends wrap. Scalar shapeTrimStart/End/Offset and independent named
+group channels use the existing nested-time evaluator and reviewed motion.edit.
+Original Bezier vertices/tangents and fill remain intact. Stroke subsegments use
+a bounded24-chord-per-cubic arc-length lookup and exact cubic splitting, not an
+AE plugin or a claim of analytic arc-length/optical-flow equivalence.
+Manual/reviewed Vanessa, rendered coverage/wrap/offset, deterministic scrubbing,
+one Undo/Redo and saved reopen passed. Actual320x180 MP4 stroke animation was
+encoded and decoded: initially black frame is legitimate, early visible stroke
+coverage grows to later coverage. Independent full FFmpeg decode was visually
+checked too; the optional diagnostic binary stays under ignored artifacts and
+is not shipped or added as an application dependency.
+
+The first new MP4 test used a mocked HTTP video response without byte-range
+seeking and read its first black frame at requested times. Correcting the test
+to decode the actual downloaded Blob resolved the false result. Temporary video
+capture/readback/calibration experiments were discarded. The verified video
+exporter is retained; no artificial frames/preroll or runtime codec change added.
+
+SHARED SAFE OFFLINE MIX — PART20/38
+Audit found WAV export only visited root clips, ignored explicit composition
+length, used mutating ensure(), omitted category gain, and caught/ignored source
+decode failures. It could present an incomplete mix as a successful download.
+zorifi-offline-mix.js now derives exact root intervals/source offsets from affine
+positive constant-rate nested clocks, validates them against the native graph,
+uses read-only normalization and existing source processing, and applies inherited
+private-track/container gain/pan plus source fades/volume/pan/ducking and mixer
+category/master controls. No alternate editor store or server/provider is used.
+The exact composition duration includes initial/trailing silence. Samples, WAV
+export and the bounded preflight share this renderer; nested audio is measured
+when supported instead of a misleading root-only silent result.
+
+Mix limits:600s range;64 audible layers;64MiB encoded/source,128MiB encoded total;
+256MiB decoded total and128MiB stereo output;1.2million graph automation workload.
+Preflight lowers source/encoded budgets to8 layers/40MiB/source/64MiB total and
+samples the first12s at16kHz. Source reads are bounded while streaming, decoded
+originals are cached per source and output nodes/buffers disconnected/released.
+decodeAudioData still decodes entire originals and cannot be natively aborted;
+decoded memory is checked after decoding. This is not unlimited-media support.
+WebAudio source rates change pitch.50Hz gain/pan automation is an approximation,
+not sample-accurate arbitrary automation or pitch-preserving time stretch.
+Variable-rate/remapped audio, expression-driven leaf gain/pan and non-default
+container DSP/fades are rejected explicitly. They are not silently flattened.
+Stereo sample peaks/RMS/full-scale counts are real PCM metrics, not true-peak/LUFS.
+
+Any failed eligible source stops the whole export. Stop, modal close, page hide,
+account/project/revision/source changes prevent late downloads/status/save and
+remove private export UI. Native decode/render may finish underneath cancellation;
+results are discarded. Download URLs are revoked on close/account change.
+
+LOCAL ACCEPTANCE EVIDENCE
+-695 unit tests pass;0 failures/skips. Previously675 preserved;20 added tests.
+-tests/native-piano-roll-browser.cjs: actual mouse draw/move/resize, touch tap,
+ gesture cancellation, source preservation, keyboard move/resize/delete, one Undo per gesture, live Undo/Redo
+ dialog refresh, reviewed Vanessa note addition,5s decoded PCM, saved reopen,
+ composition locking and320/390/768/1440px bounds passed. No live provider calls.
+-tests/motion-trim-paths-browser.cjs: actual native stroke/fill pixels, wrap/offset,
+ animated keys, manual/reviewed Vanessa, one Undo, reopening, responsive controls
+ and real encoded/decoded MP4 passed. Auth/model is an explicit local fixture.
+-tests/offline-mix-browser.cjs:8s composition; nested source audible only3.5–4.5s;
+ source offset/rate2; private track state independent of root mute. Measured stereo
+ gain ratio0.0384000 against the same unity source chain matches independent
+ parent/private-track/source/category/master multipliers. Crop4–5s, real stereo
+ WAV, nested preflight, corrupt-second-source refusal, Stop/account switch,
+ unchanged project/history and saved reopen all passed.0 live provider calls.
+ Vanessa registered export controls now respect the Music workspace and open WAV
+ settings without claiming that opening controls created a file.
+-Existing drum articulation browser passed after piano-roll integration.
+-All51 staged tool checks passed against the actual editor adapter.
+-Chromium/WebKit Vanessa conversation/split/confirmation/Undo/Redo/save/Stop/
+ opt-in mic state/account isolation and coordinated professional-edit regressions
+ passed with explicitly mocked auth/provider responses. Not live AI/voice quality
+ or physical iPhone certification. Windows WebKit uses a data-URL media fallback.
+-Existing MP4 capture checks passed selected range, delayed start, decoded motion/
+ audio, imported video, silent portrait720x1280 and1920x1080. No4K/8K/device claim.
+
+REMAINING GATES
+Production remains3.47.0 Beta / aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb.
+The owner last confirmed the exposed credential was not revoked. Do not reuse it
+or promote production before remediation and the other hosted financial/provider/
+licensing/device acceptance gates. No paid service, live charge, Firebase upgrade
+or billable AI request was enabled. The existing£15 AI ceiling remains.
+Full master completion, hosted wallet/entitlement enforcement, subscriptions and
+all-provider reservations remain partial/inactive as recorded by the checklist.
+The131-page17November PDF remains a dated historical snapshot; this report and
+the live ledger record later work. Draft PR1 stays unmerged.
+
+FINAL PHASE INTEGRITY
+695/695 unit tests;0 failures/skips.439 JavaScript syntax checks and329 browser/
+cache asset references passed. Built167 web files plus assets;13906 approved
+interface strings from122 sources. Offline source/history/build credential-shape
+audit:0 blockers,0 review findings,0 read errors. This cannot establish external
+credential revocation. Extended piano-roll proof includes real touch dragging
+and keyboard move/resize/delete. The existing51 staged tools remain verified.

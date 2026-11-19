@@ -76,6 +76,30 @@
     });
     return {steps,bar,pitch,timeSignature:p.timeSignature||'4/4',barDuration,stepDuration,totalBars,start,end:Math.min(p.duration,start+barDuration),cells};
   }
+  // Pointer and keyboard editors use source seconds, never timeline seconds.
+  // This geometry is transient; actual notes remain in the existing pattern.
+  function pianoRollGrid(source,{bar=0,bars=1,beats=.25,minPitch=48}={}){
+    const p=validatePattern(source),meter=String(p.timeSignature||'4/4').match(/^([1-9]\d?)\/(1|2|4|8|16|32|64|128)$/);
+    assert(meter&&Number(meter[1])<=32,'This source meter is not supported by the piano roll.');
+    assert([.125,.25,.5,1].includes(beats),'Choose a 1/32, 1/16, 1/8 or quarter-note grid.');
+    assert([1,2,4].includes(bars),'Show one, two or four source bars.');
+    assert(Number.isInteger(minPitch)&&minPitch>=0&&minPitch<=104,'Choose a lowest visible MIDI pitch from 0 to 104.');
+    const barDuration=60/p.bpm*Number(meter[1])*4/Number(meter[2]),totalBars=Math.ceil(p.duration/barDuration),step=60/p.bpm*beats;
+    assert(Number.isInteger(bar)&&bar>=0&&bar<totalBars,'Choose a source bar inside this pattern.');
+    const start=bar*barDuration,span=Math.min(barDuration*bars,p.duration-start),end=start+span,visible=p.notes.filter(n=>n.start<end&&n.start+n.duration>start&&n.pitch>=minPitch&&n.pitch<minPitch+24);
+    return {bar,bars,beats,minPitch,maxPitch:minPitch+23,rows:24,start,end,span,step,barDuration,totalBars,duration:p.duration,notes:visible.slice(0,512),visibleCount:visible.length,truncated:visible.length>512};
+  }
+  function pianoRollEdit(source,{mode='add',noteId,time,pitch,duration,velocity=.7,id}={}){
+    const p=validatePattern(source);assert(!p.locked,'Unlock this composition pattern before changing notes.');
+    assert(['add','move','resize'].includes(mode),'Choose add, move or resize for the piano roll.');
+    assert(finite(time)&&finite(pitch)&&finite(duration),'Piano-roll coordinates must be finite.');
+    assert(Number.isInteger(pitch)&&pitch>=0&&pitch<=127,'Use a MIDI pitch 0–127.');
+    const boundedDuration=Math.max(.005,Math.min(p.duration,duration)),start=Math.max(0,Math.min(p.duration-boundedDuration,time));
+    if(mode==='add'){assert(typeof id==='string'&&id.length>0&&id.length<=100&&!p.notes.some(n=>n.id===id),'Use an available piano-roll note ID.');assert(finite(velocity)&&velocity>=0&&velocity<=1,'Use a note velocity from 0 to 1.');return {operation:'add',note:{id,start,duration:boundedDuration,pitch,velocity}};}
+    const note=p.notes.find(n=>n.id===noteId);assert(note,'Choose an existing piano-roll note.');
+    if(mode==='move')return {operation:'update',id:note.id,changes:{start,pitch}};
+    return {operation:'update',id:note.id,changes:{duration:Math.max(.005,Math.min(p.duration-note.start,duration))}};
+  }
   function editPattern(source,edit){
     const p=validatePattern(source);assert(edit&&typeof edit.operation==='string','Choose a native note operation.');
     if(edit.operation==='lock'){assert(typeof edit.value==='boolean','Lock must be true or false.');p.locked=edit.value;return p;}
@@ -202,5 +226,5 @@
     // References and a portable snapshot derived from the real timeline; never a second mutable store.
     return {schema:BLUEPRINT,...clone(metadata),tracks:clips.map(c=>({clipId:c.id,assetId:c.mediaId,track:c.track,start:c.start,duration:c.duration,sourceStart:c.sourceStart||0,pattern:validatePattern(c.musicPattern)}))};
   }
-  return {SCHEMA,BLUEPRINT,INSTRUMENTS,NOTES,SCALES,compose,validatePattern,drumGrid,editPattern,renderWav,parseMidi,midiFile,blueprintFromProject};
+  return {SCHEMA,BLUEPRINT,INSTRUMENTS,NOTES,SCALES,compose,validatePattern,drumGrid,pianoRollGrid,pianoRollEdit,editPattern,renderWav,parseMidi,midiFile,blueprintFromProject};
 });

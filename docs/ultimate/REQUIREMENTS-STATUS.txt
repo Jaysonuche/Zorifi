@@ -300,3 +300,15 @@ Final encoding/full LUFS/plugins/rights/transcript/creative readiness not certif
 675 tests pass; all40 master areas still partial/blocked/not started as recorded
 in STATUS.json and1673-row requirements ledger. Protected preview only; the
 previously unrevoked credential continues to block production promotion.
+
+19 NOVEMBER CONTINUATION
+Part13: bounded interactive mouse/touch piano-roll source-note editing tested,
+including locks, live Undo/Redo refresh, real PCM and saved reopen. Full DAW,
+MPE/controllers/live MIDI/chord/scale tools/probability/chaining remain.
+Part25: native Trim Paths scalar/group keys tested manually/Vanessa/pixels and
+actual encoded/decoded MP4; approximate arc lengths are disclosed.
+Part20/38: constant-rate nested WAV/PCM, inherited mix controls, full duration,
+corrupt-source refusal and Stop/account guards tested; shared preflight samples
+nested timeline audio. Variable clocks/container DSP/time stretch/LUFS remain.
+695 unit tests pass.40 areas and1673 raw rows retain incomplete acceptance
+where appropriate. See STATUS.json, requirements.json and dated phase report.
