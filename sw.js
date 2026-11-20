@@ -1,22 +1,23 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
 // Verified editor upgrade; local projects and provider configuration are preserved.
-const CACHE = 'zorifi-v255-native-roll-trim-nested-audio-preview';
+const CACHE = 'zorifi-v256-harmony-repeaters-composition-audio-preview';
 const CORE = [
-  './zorifi-offline-mix.js?v=255',
+  './zorifi-composition-audio.js?v=256',
+  './zorifi-offline-mix.js?v=256',
   './zorifi-production-preflight.js?v=255',
   './zorifi-production-preflight-workspace.js?v=255',
   './zorifi-production-preflight.css?v=254',
-  './zorifi-native-music.js?v=255',
+  './zorifi-native-music.js?v=256',
   './zorifi-native-music-worker.js',
-  './zorifi-native-music-workspace.js?v=255',
-  './zorifi-native-music.css?v=255',
-  "./zorifi-motion-graph.js?v=255",
-  "./zorifi-motion-renderer.js?v=255",
+  './zorifi-native-music-workspace.js?v=256',
+  './zorifi-native-music.css?v=256',
+  "./zorifi-motion-graph.js?v=256",
+  "./zorifi-motion-renderer.js?v=256",
   "./zorifi-motion-packs.js?v=250",
-  "./zorifi-motion-workspace.js?v=255",
-  "./zorifi-motion-workspace.css?v=250",
+  "./zorifi-motion-workspace.js?v=256",
+  "./zorifi-motion-workspace.css?v=256",
   "./zorifi-editor-audio-workflows.js?v=250",
-  "./zorifi-editor-audio-workflows.css?v=250",
+  "./zorifi-editor-audio-workflows.css?v=256",
   "./zorifi-editor-workflow-bridge.js?v=250",
   "./zorifi-parallax-workflow.js?v=250",
   "./index.html",
@@ -162,7 +163,7 @@ const CORE = [
   "./zorifi-privacy.js?v=1",
   "./zorifi-vanessa-listening.js?v=249",
   "./zorifi-photos.js?v=232",
-  "./app.js?v=255",
+  "./app.js?v=256",
   "./zorifi-app-settings.js?v=250",
   "./zorifi-google-connections.js?v=225",
   "./zorifi-google-integration.js?v=227",
@@ -174,7 +175,7 @@ const CORE = [
   "./zorifi-timeline-interactions.js?v=250",
   "./zorifi-pocket-editor.js?v=236",
   "./zorifi-opening.js?v=231",
-  "./zorifi-master-app.js?v=255",
+  "./zorifi-master-app.js?v=256",
   "./zorifi-privacy-ui.js?v=228"
 ];
 

@@ -1,0 +1,31 @@
+const test=require('node:test'),assert=require('node:assert/strict'),M=require('../zorifi-native-music.js');
+const fixture=(extra={})=>({schema:M.SCHEMA,instrument:'piano',duration:5,bpm:120,key:'C',scaleMode:'major',timeSignature:'4/4',revision:1,notes:[{id:'original',start:.2,duration:.2,pitch:61,velocity:.43,originalLabel:'keep me'}],...extra});
+const chord=(extra={})=>({operation:'chord',root:60,quality:'major',inversion:0,start:1,duration:.5,velocity:.7,idPrefix:'chord',...extra});
+test('all native chord qualities/inversions create independent editable source notes and preserve originals',()=>{
+ for(const [quality,intervals]of Object.entries(M.CHORDS))for(let inversion=0;inversion<intervals.length;inversion++){const p=fixture(),before=structuredClone(p),r=M.editPattern(p,chord({quality,inversion}));assert.deepEqual(r.notes[0],p.notes[0]);assert.deepEqual(r.notes.slice(1).map(n=>n.pitch),intervals.map((n,i)=>60+n+(i<inversion?12:0)).sort((a,b)=>a-b));assert(r.notes.slice(1).every(n=>n.start===1&&n.duration===.5&&n.velocity===.7));assert.equal(r.revision,2);assert.deepEqual(p,before);}
+ assert(Object.isFrozen(M.CHORDS)&&Object.isFrozen(M.CHORDS.minor7));
+});
+test('chord validation rejects unsafe fields, source overrun, collisions, unsupported drums and MIDI bounds atomically',()=>{
+ for(const change of [{root:-1},{root:125},{root:60.5},{quality:'toString'},{quality:'remote-provider'},{inversion:3},{inversion:-1},{start:-1},{start:4.8},{duration:0},{duration:Infinity},{velocity:0},{velocity:1.1},{idPrefix:''},{idPrefix:'x'.repeat(81)},{url:'https://invalid'}]){const p=fixture(),before=structuredClone(p);assert.throws(()=>M.editPattern(p,chord(change)));assert.deepEqual(p,before);}
+ const duplicate=fixture({notes:[{id:'chord-1',start:0,duration:.1,pitch:60,velocity:.5}]});assert.throws(()=>M.editPattern(duplicate,chord()),/existing note IDs/);assert.throws(()=>M.editPattern(fixture({instrument:'kick'}),chord()),/pitched/);assert.throws(()=>M.editPattern(fixture(),chord({root:117,inversion:1})),/MIDI pitch/);
+});
+test('scale snap uses nearest valid pitch with lower ties and updates only requested source data',()=>{
+ const notes=[61,63,66,126].map((pitch,i)=>({id:'note'+i,pitch,start:i*.5,duration:.2,velocity:.3+i*.1})),p=fixture({notes,seed:'keep-seed'}),before=structuredClone(p),r=M.editPattern(p,{operation:'scale',key:'C',scaleMode:'major'});assert.deepEqual(r.notes.map(n=>n.pitch),[60,62,65,125]);assert.equal(r.key,'C');assert.equal(r.scaleMode,'major');assert.equal(r.seed,'keep-seed');for(let i=0;i<notes.length;i++)assert.deepEqual({...r.notes[i],pitch:notes[i].pitch},notes[i]);assert.deepEqual(p,before);
+ const selected=M.editPattern(p,{operation:'scale',key:'D',scaleMode:'minor',noteIds:['note0']});assert.equal(selected.notes[0].pitch,60);assert.deepEqual(selected.notes.slice(1),p.notes.slice(1));assert.equal(selected.key,p.key);assert.equal(selected.scaleMode,p.scaleMode);
+});
+test('scale snapping handles MIDI edges, all existing scales and explicit metadata-only changes',()=>{
+ const p=fixture({notes:[{id:'bottom',pitch:0,start:0,duration:.1,velocity:.5}],key:'C',scaleMode:'major'}),r=M.editPattern(p,{operation:'scale',key:'B',scaleMode:'major'});assert.equal(r.notes[0].pitch,1);
+ for(const key of M.NOTES)for(const scaleMode of Object.keys(M.SCALES)){const p=fixture({notes:[{id:'edge',pitch:127,start:0,duration:.1,velocity:.5}],key:'unknown'}),r=M.editPattern(p,{operation:'scale',key,scaleMode});assert(r.notes.every(n=>n.pitch>=0&&n.pitch<=127&&M.SCALES[scaleMode].map(d=>(M.NOTES.indexOf(key)+d)%12).includes(n.pitch%12)));}
+ const meta=fixture({notes:[{id:'c',pitch:60,start:0,duration:.1,velocity:.5}],key:'A',scaleMode:'minor'}),updated=M.editPattern(meta,{operation:'scale',key:'C',scaleMode:'major'});assert.deepEqual(updated.notes,meta.notes);assert.equal(updated.key,'C');assert.equal(updated.scaleMode,'major');assert.throws(()=>M.editPattern(updated,{operation:'scale',key:'C',scaleMode:'major'}),/already/);
+});
+test('scale selections/keys/no-ops and locks are checked before changing any source',()=>{
+ for(const edit of [{key:'H'},{scaleMode:'harmonic-minor'},{noteIds:[]},{noteIds:['missing']},{noteIds:['original','original']},{noteIds:{}},{noteIds:null},{extra:true}]){const p=fixture(),before=structuredClone(p);assert.throws(()=>M.editPattern(p,{operation:'scale',key:'C',scaleMode:'major',...edit}));assert.deepEqual(p,before);}
+ for(const edit of [chord(),{operation:'scale',key:'C',scaleMode:'major'}])assert.throws(()=>M.editPattern(fixture({locked:true}),edit),/Unlock/);assert.throws(()=>M.editPattern(fixture({instrument:'hat'}),{operation:'scale',key:'C',scaleMode:'major'}),/pitched/);
+});
+test('selected scale changes safely detach articulation ownership while preserving unrelated hit timing',()=>{
+ let p=fixture({instrument:'kick',notes:[]});p=M.editPattern(p,{operation:'step',steps:16,index:0,pitch:61,enabled:true,articulation:'flam',hits:2});p=M.editPattern(p,{operation:'instrument',instrument:'piano'});const child=p.notes.find(n=>n.drumStep),before=structuredClone(p),r=M.editPattern(p,{operation:'scale',key:'C',scaleMode:'major',noteIds:[child.id]});assert.equal(r.notes.find(n=>n.id===child.id).pitch,60);assert.equal(r.notes.find(n=>n.id!==child.id).pitch,61);assert(!r.notes.some(n=>n.drumStep));assert.deepEqual(r.notes.map(n=>[n.id,n.start,n.duration,n.velocity]),before.notes.map(n=>[n.id,n.start,n.duration,n.velocity]));assert.deepEqual(p,before);
+});
+test('harmony changes obey synthesis polyphony and produce real deterministic PCM/MIDI',()=>{
+ const busy=fixture({notes:Array.from({length:30},(_,i)=>({id:'n'+i,start:1,duration:.1,pitch:60,velocity:.3}))});assert.throws(()=>M.editPattern(busy,chord()),/32 simultaneous/);assert.equal(busy.notes.length,30);
+ const p=fixture(),c=M.editPattern(p,chord({quality:'minor7'})),s=M.editPattern(c,{operation:'scale',key:'C',scaleMode:'major'}),a=M.renderWav(p,{sampleRate:22050}),b=M.renderWav(c,{sampleRate:22050}),d=M.renderWav(s,{sampleRate:22050});assert.equal(a.duration,b.duration);assert.equal(b.duration,d.duration);assert.notDeepEqual(a.bytes,b.bytes);assert.notDeepEqual(b.bytes,d.bytes);assert.deepEqual(M.renderWav(s,{sampleRate:22050}).bytes,d.bytes);assert.notDeepEqual(M.midiFile([p]),M.midiFile([c]));assert.notDeepEqual(M.midiFile([c]),M.midiFile([s]));
+});

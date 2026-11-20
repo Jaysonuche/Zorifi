@@ -5,6 +5,7 @@
   const INSTRUMENTS=Object.freeze(['kick','snare','hat','bass','piano','pluck','pad']);
   const NOTES=Object.freeze(['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']);
   const SCALES=Object.freeze({minor:[0,2,3,5,7,8,10],major:[0,2,4,5,7,9,11],pentatonic:[0,3,5,7,10]});
+  const CHORDS=Object.freeze(Object.fromEntries(Object.entries({major:[0,4,7],minor:[0,3,7],diminished:[0,3,6],augmented:[0,4,8],sus2:[0,2,7],sus4:[0,5,7],major7:[0,4,7,11],minor7:[0,3,7,10],dominant7:[0,4,7,10]}).map(([key,value])=>[key,Object.freeze(value)])));
   const clone=value=>structuredClone(value),finite=value=>typeof value==='number'&&Number.isFinite(value);
   function assert(value,message){if(!value)throw new TypeError(message);}
   function hash(text){let result=2166136261;for(const char of String(text)){result^=char.charCodeAt(0);result=Math.imul(result,16777619);}return result>>>0;}
@@ -105,6 +106,37 @@
     if(edit.operation==='lock'){assert(typeof edit.value==='boolean','Lock must be true or false.');p.locked=edit.value;return p;}
     assert(!p.locked,'Unlock this composition pattern before changing notes.');
     if(edit.operation==='instrument'){assert(INSTRUMENTS.includes(edit.instrument),'Unknown native instrument.');p.instrument=edit.instrument;}
+    else if(edit.operation==='chord'){
+      assert(Object.keys(edit).every(key=>['operation','root','quality','inversion','start','duration','velocity','idPrefix'].includes(key)),'Unsupported chord property.');
+      assert(!['kick','snare','hat'].includes(p.instrument),'Choose a pitched native instrument for chords.');
+      assert(Number.isInteger(edit.root)&&edit.root>=0&&edit.root<=127,'Use a MIDI chord root from 0 to 127.');
+      assert(Object.hasOwn(CHORDS,edit.quality),'Choose a supported chord quality.');
+      const intervals=CHORDS[edit.quality],inversion=edit.inversion??0,velocity=edit.velocity??.7;
+      assert(Number.isInteger(inversion)&&inversion>=0&&inversion<intervals.length,'Choose an inversion inside this chord.');
+      assert(finite(edit.start)&&edit.start>=0&&finite(edit.duration)&&edit.duration>=.005&&edit.start+edit.duration<=p.duration+.000001,'Keep the chord inside the source pattern.');
+      assert(finite(velocity)&&velocity>0&&velocity<=1,'Use a chord velocity greater than 0 and at most 1.');
+      assert(typeof edit.idPrefix==='string'&&edit.idPrefix.length>0&&edit.idPrefix.length<=80,'Use an available chord note ID prefix.');
+      const notes=intervals.map((interval,index)=>({id:edit.idPrefix+'-'+index,start:edit.start,duration:edit.duration,pitch:edit.root+interval+(index<inversion?12:0),velocity}));
+      assert(notes.every(note=>note.pitch<=127&&!p.notes.some(existing=>existing.id===note.id)),'The chord exceeds MIDI pitch bounds or uses existing note IDs.');
+      p.notes.push(...notes.sort((a,b)=>a.pitch-b.pitch));
+    }
+    else if(edit.operation==='scale'){
+      assert(Object.keys(edit).every(key=>['operation','key','scaleMode','noteIds'].includes(key)),'Unsupported scale-snap property.');
+      assert(!['kick','snare','hat'].includes(p.instrument),'Choose a pitched native instrument for scale snapping.');
+      assert(NOTES.includes(edit.key)&&Object.hasOwn(SCALES,edit.scaleMode),'Choose a supported key and scale.');
+      const all=edit.noteIds===undefined,sourceIds=new Set(p.notes.map(note=>note.id)),ids=all?sourceIds:new Set(Array.isArray(edit.noteIds)?edit.noteIds:[]);
+      assert(all||Array.isArray(edit.noteIds)&&edit.noteIds.length>0&&edit.noteIds.length<=30000&&ids.size===edit.noteIds.length&&edit.noteIds.every(value=>typeof value==='string'&&sourceIds.has(value)),'Choose existing unique source note IDs.');
+      assert(ids.size>0,'Add or select source notes before snapping to a scale.');
+      const tonic=NOTES.indexOf(edit.key),allowed=new Set(SCALES[edit.scaleMode].map(step=>(tonic+step)%12));let changes=0;
+      for(const note of p.notes)if(ids.has(note.id)&&!allowed.has(note.pitch%12)){
+        // Ascending distance and the lower candidate first make ties explicit,
+        // deterministic and stable at the MIDI boundaries.
+        let pitch=note.pitch;for(let distance=1;distance<=12;distance++){const lower=note.pitch-distance,upper=note.pitch+distance;if(lower>=0&&allowed.has(lower%12)){pitch=lower;break;}if(upper<=127&&allowed.has(upper%12)){pitch=upper;break;}}
+        detachDrumStep(p,note);note.pitch=pitch;changes++;
+      }
+      assert(changes>0||all&&(p.key!==edit.key||p.scaleMode!==edit.scaleMode),'These source notes are already in the requested scale. No edit was applied.');
+      if(all){p.key=edit.key;p.scaleMode=edit.scaleMode;}
+    }
     else if(edit.operation==='add'){p.notes.push(clone(edit.note));}
     else if(edit.operation==='update'){const note=p.notes.find(n=>n.id===edit.id);assert(note,'Choose an existing note.');assert(edit.changes&&Object.keys(edit.changes).every(k=>['start','duration','pitch','velocity'].includes(k)),'Unsupported note property.');detachDrumStep(p,note);Object.assign(note,edit.changes);}
     else if(edit.operation==='delete'){const note=p.notes.find(n=>n.id===edit.id);assert(note,'Choose an existing note.');detachDrumStep(p,note);p.notes=p.notes.filter(n=>n.id!==edit.id);}
@@ -226,5 +258,5 @@
     // References and a portable snapshot derived from the real timeline; never a second mutable store.
     return {schema:BLUEPRINT,...clone(metadata),tracks:clips.map(c=>({clipId:c.id,assetId:c.mediaId,track:c.track,start:c.start,duration:c.duration,sourceStart:c.sourceStart||0,pattern:validatePattern(c.musicPattern)}))};
   }
-  return {SCHEMA,BLUEPRINT,INSTRUMENTS,NOTES,SCALES,compose,validatePattern,drumGrid,pianoRollGrid,pianoRollEdit,editPattern,renderWav,parseMidi,midiFile,blueprintFromProject};
+  return {SCHEMA,BLUEPRINT,INSTRUMENTS,NOTES,SCALES,CHORDS,compose,validatePattern,drumGrid,pianoRollGrid,pianoRollEdit,editPattern,renderWav,parseMidi,midiFile,blueprintFromProject};
 });

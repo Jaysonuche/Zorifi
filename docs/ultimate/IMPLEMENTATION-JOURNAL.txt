@@ -112,3 +112,13 @@ preserves Bezier/fill and passes actual MP4 decode. Root-only/partial-success
 WAV export replaced with bounded shared nested PCM, stereo metrics and safe
 Stop/account failure handling.695 tests pass; full audit and limits recorded
 in CONTINUATION-2026-11-19.txt. Production/provider/billing gates unchanged.
+
+
+20 NOVEMBER - HARMONY, REPEATERS AND COMPOSITION FADES
+Native fixed chords/inversions and one-shot scale correction share existing
+manual/Vanessa source edits. Transient shape/group repeaters share renderer,
+projected masks and motion.edit. Ancestor fades now survive live preview/WAV/MP4
+and preflight without duplicated gains; unsupported container DSP still refuses.
+Concurrent metadata401/network/timeouts are handled honestly.717 tests pass;
+actual PCM/MP4/browser/history/reopen evidence and limits are in the dated report.
+All40 master parts/1673 raw rows retained. No paid calls or production promotion.
