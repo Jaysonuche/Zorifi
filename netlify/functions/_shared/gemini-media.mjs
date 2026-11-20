@@ -69,6 +69,7 @@ export async function generateGeminiImage(input,description,{signal}={}){
 }
 
 export async function generateGeminiMusic(input,description){
+ if(input.duration!==undefined&&(typeof input.duration!=='number'||input.duration!==30))throw new ServiceError('Cloud music supports exactly 30 seconds. Choose 30 seconds explicitly or use native instruments for the requested length.',400,'UNSUPPORTED_DURATION');
  const model=geminiMediaModel('music');
  if(model!=='lyria-3-clip-preview')throw new ServiceError('Zorifi currently supports the 30-second Lyria Clip model only.',503,'NOT_CONFIGURED');
  // Studio stores the tonic and scale separately. Preserve both in the natural-

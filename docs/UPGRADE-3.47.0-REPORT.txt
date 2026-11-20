@@ -2,9 +2,14 @@ ZORIFI 3.47.0 BETA — EDITING / QUOTA RECOVERY STAGE
 11 November 2026 | Continued from ac099cf; no restart or discarded editor work.
 
 RELEASE GATE
-Deployment is authorized by the current request after critical checks pass.
-Candidate verification and final production status are recorded below once
-observed; version strings alone do not establish deployment success.
+Deployment was authorized by the current request after critical checks passed.
+Released source commit: aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb.
+GitHub main was fast-forwarded through the existing deployment workflow.
+Vercel production deployment dpl_HUsot9r3g9ssd6PNJ53jxFEzGusc is READY:
+https://zorifi-377iqp3ny-zorifi.vercel.app
+Primary live application: https://zorifi.vercel.app/?release=250
+The deployment completed its build in 23 seconds using the existing basic build
+machine/settings. No additional deployment service was provisioned.
 No new payment collection, provider subscription, Firebase upgrade or secret
 configuration is part of this editing release. OpenAI hosted/media gates remain
 off. Existing Gemini/Firebase/Vercel configuration is preserved.
@@ -55,6 +60,10 @@ NEWLY IMPLEMENTED / REPAIRED
   exit/account scope changes rather than retaining video buffers indefinitely.
 - MP4 startup/duration acceptance is checked before claiming export success.
   Recorder initialization must not consume the requested timeline duration.
+  MP4 session output is flushed once after the initial prepared frame so muxer
+  fragment timing cannot add an entire second before the clock starts. Existing
+  WebM timing is preserved. The final decoded probe checks dimensions and MP4
+  duration before download; actual truncated encoding is rejected visibly.
 - Version 3.47.0, cache 250 and a secret-free public release.json make the deployed
   version/commit inspectable. verify-hosted-release.cjs checks version, commit,
   twelve runtime hashes, authentication rejection and existing AI configuration.
@@ -76,6 +85,8 @@ ACTUAL EDITOR TESTS / RECEIPTS
 - parallax-local-browser.cjs: mocked quota/cooldown + explicit actual on-device
   fill via Vanessa, manual depth scene, source/matte retention, exact history/
   reopening, pixel checks and MP4. No live cloud generation calls.
+  A real recorder paused early produced invalid-duration output; the app rejected
+  it with a visible error and no download. Normal 1.2s output decoded at 1.271333s.
 - parallax-workflows-browser.cjs: reviewed provider-fixture plate, exact source/
   matte preservation, depth camera positions, Undo/Redo/Stop/reopen.
 - editor-workflows-browser.cjs: real saved WAV, editable captions/corrections,
@@ -98,6 +109,27 @@ ACTUAL EDITOR TESTS / RECEIPTS
   shapes, vectors, keys, masks, parenting, matting, responsive 320–1440px bounds,
   independent source windows and audible MP4 output.
 - build:web/check, secret scan and final hosted receipts are release gates.
+  Build 159 files plus assets; syntax 401 source files and 314 browser/cache
+  references passed. The committed clean checkout builds without pending files.
+
+OBSERVED LIVE VERIFICATION
+- artifacts/upgrade-hosted-release.json: version 3.47.0 and exact source commit;
+  twelve deployed runtime SHA-256 hashes match the clean Git checkout build.
+- Both live /api/vanessa/chat and /api/vanessa/openai returned 401 to unsigned
+  requests. Gemini gemini-3.6-flash remains configured. No secrets/rules changed;
+  hosted OpenAI remains disabled and no new paid AI request was performed.
+- artifacts/upgrade-live-browser.json and desktop/mobile screenshots: actual
+  production HTML/runtime loaded with no JavaScript exceptions. Native shape,
+  keyframe, Undo/Redo and local save ran; 390px viewport had 390px document width.
+  This manual-editor check uses an isolated local profile fixture, not a claim
+  of production Firebase sign-in or a live Gemini conversation. Existing real
+  emulator/auth and mocked conversation regressions remain separately disclosed.
+- The actual 45-second MP4 rerun decoded 45.079533s at 480x270 with audible audio;
+  conversation/editing/correction/recovery/history/reopen regressions passed.
+- Browser smoke passed startup/import/edit/save/reopen/WebM720p export,
+  mobile privacy, service-worker offline startup, consent withdrawal and erasure.
+Installed apps should refresh/reopen to acquire cache 250. Old private projects
+and media were not migrated or deleted.
 
 PROVIDER INVESTIGATION / ALTERNATIVES / COSTS
 The earlier real clean-plate request returned 429. Gemini rate limits apply to

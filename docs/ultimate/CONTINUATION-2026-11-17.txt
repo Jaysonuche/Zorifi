@@ -1,0 +1,86 @@
+ZORIFI ULTIMATE - CONTINUATION / 17 NOVEMBER 2026
+
+SCOPE
+Continue the existing branch and master checklist, preserving the working beta.
+This is an incremental implementation phase, not completion of the Ultimate
+specification. README.md contains a pre-existing owner change and is excluded
+from our commits. Production remains 3.47.0 / aa2f9e7. No paid calls, live charges,
+Firebase upgrade or new production promotion were performed in this phase.
+
+IMPLEMENTED
+1. Shared composition settings
+   Manual controls and Vanessa use the same validated project.settings operation
+   for root dimensions, FPS, duration, work area and name. Strict bounds, atomic
+   validation, metadata postconditions and selected-section restrictions apply.
+   Shortening the composition preserves clips/sources beyond its end and warns.
+   Existing native history, persistence and playback duration remain connected.
+   Explicit dimensions survive the first video import. Professional review and
+   sampled rendering honor shortened compositions without trimming retained clips.
+
+2. Native MIDI import
+   Added bounded SMF0/1/PPQ parsing, note timing, tempo-map conversion, running
+   status, GM instrument metadata and separate original procedural instruments.
+   MIDI is reviewed before application. Real WAV assets and editable notes enter
+   existing clips/IndexedDB, with one Undo and save/rollback/stale-project guards.
+   Cancel, Close and Escape abort an in-flight reviewed import before commit.
+   Unsupported controllers, sustain, pitch-bend, SysEx, lyrics and instruments
+   are disclosed. This is not a full GM soundfont, MPE host or realistic singing.
+   music.native.import shares the existing asynchronous native-music adapter.
+
+3. Explicit alternative after MP4 encoder failure
+   Invalid MP4 output remains blocked. A Review WebM alternative control opens
+   the existing review screen, preserving dimensions, FPS, quality, bitrates,
+   filename and custom output range. The user selects the alternative; there is
+   no silent substitution or MP4 filename on WebM bytes.
+
+ACTUAL CURRENT VALIDATION
+-646 unit tests passed, zero failed/skipped (632 previous plus7 MIDI and7 root
+ settings cases). Existing51 staged editing actions remain present.
+-Actual browser manual composition form and Vanessa structured proposal/commit,
+ visible native state, Undo/Redo, real MIDI file-picker review, audible decoded
+ 1s48kHz bass source, save/reload and390px no page overflow passed.
+ Authentication and assistant interpretation are offline fixtures; paid calls0.
+-Full motion-composition WebM export passed:320x180, finite1.336s, visible changing
+ decoded frames, audible audio. Includes composition/history/save-failure paths.
+-Explicit WebM fallback passed after a deliberately paused real recorder caused
+ invalid short MP4. No bad file was downloaded; restored native recorder exported
+ valid320x180 WebM with decoded visible pixels and audible native sound effects.
+-Syntax/asset integrity passed:419 source files and321 browser/cache references.
+ Safe source/history/build scan passed with zero findings/read errors. It cannot
+ establish external key revocation. Web build passed:163 files plus assets.
+
+CURRENT FAILURE - DO NOT HIDE
+MP4 safety and motion export checks produced invalid audio-only/empty recordings
+on this host. The same native safety scenario failed in an untouched d0ec5e1
+baseline worktree. Existing guards correctly rejected the output. No evidence
+attributes this failure to the new MIDI or settings work. An experimental capture
+priming change did not fix it and was reverted. Current MP4 is NOT certified;
+older phase MP4 successes remain historical evidence. WebM is the tested explicit
+alternative, not a claim that the MP4 encoder regression is repaired.
+
+REPORT / CHECKLIST
+The owner PDF is generated from current code, reachable Git history, actual tool
+definitions, test names, historical report inventory and all40 master-area gaps.
+It distinguishes implemented paths, bounded test evidence, production release,
+prepared integrations, disabled services and missing work. Full1,673-row master
+inventory remains in requirements.json. Lost uncommitted/pre-snapshot work cannot
+be reconstructed or honestly certified. Private keys/user media are excluded.
+
+RELEASE / COST GATES
+Owner last confirmed16November that the exposed OpenAI credential was not revoked.
+Do not use it or promote production until revocation/replacement is completed.
+Privileged hosted financial accounting, full provider budget wiring, current model
+access tests, licensing and protected-preview acceptance remain incomplete.
+Keep prices/credit packs inactive, no Blaze or paid services, shared GBP15 ceiling.
+Continue remaining motion/DAW/AutoCut/story/subscription work through reviewed
+phases. Current code is for the development branch and existing draft PR only.
+
+PROTECTED PREVIEW RECEIPT
+Runtime source: f8a044a4edaecb9f3ac69af1f2e13ae3966a4078 (pushed).
+Preview: https://zorifi-q9hbrpuze-zorifi.vercel.app/
+Deployment: dpl_HwRSW5RzshKNomrUJpBhBHVKi2Zy / READY.
+Read-only hosting metadata confirms source and development branch. Preview
+release.json returns302 to hosting login. No bypass/protection change attempted.
+Public production release.json still3.47.0 / aa2f9e7; not promoted. The preview
+build does not certify a full signed-in hosted browser or live provider test.
+A mistyped provenance preview was stopped/removed before replacement.

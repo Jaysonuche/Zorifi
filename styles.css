@@ -1896,3 +1896,20 @@ main.app-shell[data-view="editor"] { height:100vh;height:100dvh;width:100%;min-w
 @media(prefers-reduced-motion:reduce){.autocut-orbit::before,.autocut-orbit::after{animation:none}.autocut-upload-zone,.autocut-existing-media label{transition:none}.autocut-generating progress::-webkit-progress-value{transition:none}}
 .autocut-direction{display:grid;grid-template-columns:minmax(0,2fr) minmax(200px,1fr);gap:16px;margin:24px 0}.autocut-direction label{display:grid;gap:8px;font-size:13px;font-weight:600}.autocut-direction :is(textarea,select){width:100%;min-height:48px;padding:12px;border:1px solid var(--border,#cbd0dc);border-radius:12px;background:var(--surface,#fff);color:inherit;font:inherit}.autocut-direction textarea{resize:vertical}.autocut-direction .autocut-consent{grid-column:1/-1;display:flex;align-items:center;text-align:left;font-size:12px;line-height:1.6;font-weight:400}.autocut-consent input{flex:0 0 auto;width:22px;height:22px;accent-color:#8054eb}.autocut-consent[hidden]{display:none}.autocut-finished details{text-align:left;line-height:1.7}.autocut-finished details li{margin-bottom:8px}.autocut-finished details ol{padding-left:22px}
 @media(max-width:650px){.autocut-direction{grid-template-columns:1fr}.autocut-direction .autocut-consent{align-items:flex-start}}
+
+/* The wrapped creation tabs own a real grid row, so the workspace cannot cover them. */
+.ai-create-screen{grid-template-rows:auto minmax(0,1fr);min-width:0}
+.ai-create-topbar{position:relative;z-index:2;min-height:58px;min-width:0;box-sizing:border-box}
+.ai-create-topbar .generation-kind-tabs{min-width:0;flex-shrink:1;overflow-x:auto;max-width:100%;box-sizing:border-box;overscroll-behavior-x:contain}
+.ai-create-topbar .generation-kind-tabs button{white-space:nowrap;flex-shrink:0}
+.ai-create-body,.ai-asset-layout,.generation-history{min-width:0;min-height:0}
+.ai-create-screen>.ai-asset-layout{height:100%}
+@media(max-width:1100px){
+  .ai-create-topbar{flex-wrap:wrap;gap:6px;padding-bottom:6px}
+  .ai-create-topbar .generation-kind-tabs{order:3;width:100%;flex-basis:100%}
+}
+@media(max-width:760px){
+  .ai-create-screen>.ai-asset-layout{display:block;min-height:0;height:100%;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom)}
+  .ai-asset-form{overflow:visible;min-width:0}
+  .ai-asset-result{min-width:0;overflow-wrap:anywhere}
+}
