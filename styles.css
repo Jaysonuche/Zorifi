@@ -1913,3 +1913,5 @@ main.app-shell[data-view="editor"] { height:100vh;height:100dvh;width:100%;min-w
   .ai-asset-form{overflow:visible;min-width:0}
   .ai-asset-result{min-width:0;overflow-wrap:anywhere}
 }
+
+.project-versions-modal{max-height:calc(100dvh - 28px);overflow:auto;overscroll-behavior:contain}.project-version-list article{min-width:0;background:var(--panel-2);border-color:var(--line)}.project-version-list span{min-width:0;overflow-wrap:anywhere;flex:1}.project-version-list small{color:var(--muted)}.project-version-list button{flex:0 0 auto;background:var(--panel-2);color:var(--text);border-color:var(--line)}

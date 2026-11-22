@@ -122,3 +122,13 @@ and preflight without duplicated gains; unsupported container DSP still refuses.
 Concurrent metadata401/network/timeouts are handled honestly.717 tests pass;
 actual PCM/MP4/browser/history/reopen evidence and limits are in the dated report.
 All40 master parts/1673 raw rows retained. No paid calls or production promotion.
+
+
+22 NOVEMBER - SCALE LOCK, VISUAL LOOPS AND SAFER RECOVERY
+Persistent native pitch-entry locks and typed visual keyframe loops now share
+manual/Vanessa validation/history/save; real PCM/MIDI/MP4 tested. Existing local
+version history fixes false saved receipts, unsaved base projects, stale restores,
+missing sources, storage rollback and pending-autosave loss on cancellation.
+Worker/engine cache versions now coupled; old named shell caches are bounded.
+736 unit tests pass. Current report records actual acceptance/limits; the full
+master remains partial and production/provider/financial gates stay unchanged.

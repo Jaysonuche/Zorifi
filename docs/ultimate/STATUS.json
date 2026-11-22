@@ -1,9 +1,9 @@
 {
   "schema": "zorifi.ultimate.audit/1",
-  "date": "2026-11-20",
+  "date": "2026-11-22",
   "overall": "Partial",
   "productionVersion": "3.47.0",
-  "candidate": "Development native harmony, animated shape repeaters and nested composition fades; production remains gated",
+  "candidate": "Development persistent scale lock, visual keyframe loops and safer local recovery; production remains gated",
   "baselineTests": 589,
   "areas": [
     {
@@ -239,11 +239,13 @@
         "tests/native-piano-roll.test.cjs",
         "tests/native-piano-roll-browser.cjs",
         "tests/native-harmony.test.cjs",
-        "tests/native-harmony-browser.cjs"
+        "tests/native-harmony-browser.cjs",
+        "tests/native-scale-lock.test.cjs",
+        "tests/native-scale-lock-browser.cjs"
       ],
       "remaining": [
         "Native source notes now support interactive snapped mouse/touch draw, move, resize/delete, keyboard and exact table editing, with meter-aware1/2/4-bar windows/24-pitch banks/512 visible notes. Reviewed Vanessa note commands share music.native.edit; real PCM, one Undo/gesture, live dialog Undo/Redo refresh, locks and saved reopen are tested. MIDI import/export and16/32/64-step sequencing/flam/roll remain preserved.",
-        "Nine native fixed chord qualities/inversions and one-shot selected/all-source nearest-scale correction now share manual/reviewed Vanessa music.native.edit, real PCM/MIDI, one Undo, locks and saved reopen. This is not persistent scale locking, chord recognition or progression generation. Live MIDI recording, controllers/sustain/pitch bend, expression lanes, MPE, microtuning, probability/pattern chaining and full DAW parity remain.",
+        "Nine fixed chord qualities/inversions, one-shot correction and persistent native scale locking now share manual/reviewed Vanessa music.native.edit, real PCM/MIDI, locks, history and saved reopen. A lock preserves old notes; new/pitch-edited notes/chords/transpose map to its explicit key/scale, and keyboard steps stay in scale. Drum sounds pause mapping; pitched sounds resume it. MIDI carries actual notes, not editor-lock metadata. Chord recognition/progression generation, live MIDI/controllers, expression lanes/MPE/microtuning, probability/pattern chains and full DAW parity remain.",
         "Retrospective MIDI capture remains unimplemented and must be opt-in."
       ]
     },
@@ -448,7 +450,10 @@
         "tests/motion-trim-paths.test.cjs",
         "tests/motion-trim-paths-browser.cjs",
         "tests/motion-repeater.test.cjs",
-        "tests/motion-repeater-browser.cjs"
+        "tests/motion-repeater-browser.cjs",
+        "tests/motion-key-loops.test.cjs",
+        "tests/motion-key-loops-browser.cjs",
+        "tests/professional-key-loop.test.cjs"
       ],
       "remaining": [
         "51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds.",
@@ -456,7 +461,8 @@
         "Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.",
         "Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
         "Native Trim Paths adds editable/animated stroke start/end/degree offset, wrapping and independent shape-group channels. Cubic controls/fill remain intact;24-chord-per-cubic length approximation is bounded. Manual/reviewed Vanessa, pixels/history/reopen and actual encoded/decoded320x180 MP4 are verified. External AE plugins and unrestricted geometric/optical-flow parity remain unimplemented.",
-        "Native Shape Repeater now supports1–64 transient geometry copies, offset/XY/scale/rotation/opacity, scalar and independent named-group animation. Projected bounds/mask pixels, manual/reviewed Vanessa, one Undo/Redo, reopen and actual decoded MP4 tested.2,048 aggregate copies/frame,16,384 local extent/effective scale and existing canvas budgets are enforced; no AE/plugin parity claimed."
+        "Native Shape Repeater now supports1–64 transient geometry copies, offset/XY/scale/rotation/opacity, scalar and independent named-group animation. Projected bounds/mask pixels, manual/reviewed Vanessa, one Undo/Redo, reopen and actual decoded MP4 tested.2,048 aggregate copies/frame,16,384 local extent/effective scale and existing canvas budgets are enforced; no AE/plugin parity claimed.",
+        "Native cycle/ping-pong expressions now repeat an existing visual keyed segment after its end in the containing composition clock, preserving keys/easing. Manual property/mode controls, reviewed Vanessa/backend validation, real repeated/reversed pixels, one Undo/Redo, nested rates, reopen and decoded4s MP4 tested. Audio/time and spatial/stagger-owned channels are excluded; at least2 finite keys/1ms span and existing render budgets are enforced. No arbitrary expression scripting or AE parity."
       ]
     },
     {
@@ -690,17 +696,23 @@
         "zorifi-production-preflight.js",
         "zorifi-production-preflight-workspace.js",
         "zorifi-vanessa-professional.js",
-        "zorifi-composition-audio.js"
+        "zorifi-composition-audio.js",
+        "app.js",
+        "sw.js"
       ],
       "tests": [
         "tests/production-preflight.test.cjs",
         "tests/production-preflight-browser.cjs",
         "tests/offline-mix-browser.cjs",
-        "tests/composition-audio-browser.cjs"
+        "tests/composition-audio-browser.cjs",
+        "tests/project-version-recovery-browser.cjs",
+        "tests/service-worker-update.test.cjs",
+        "tests/service-worker-named-cache-browser.cjs"
       ],
       "remaining": [
         "Production Preflight now audits up to500 layers/eight nesting levels, using each composition clock. Manual export controls and Vanessa share actual renderer/PCM sampling, stale/Stop/account guards and no editing/history/provider calls. Text-only output and audio-only delivery are handled.",
-        "Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible timeline audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; constant-rate nested sampling with ancestor fades works; variable-rate/container DSP and full-program review remain limited."
+        "Full Creative Conductor, Intent Lock, Audio Truth Check, Creative Branches, Smart Budget Director, full Recovery Vault, Learning Studio, Adaptive Workspace and Asset Lineage need dedicated acceptance. Preflight remains partial: up to six frames, first12s eligible timeline audio, no final encode/full LUFS/license/plugin/transcript/unfinished-section certification; constant-rate nested sampling with ancestor fades works; variable-rate/container DSP and full-program review remain limited.",
+        "Existing on-device named/automatic history now verifies named-save success/base project, validates and stages retained media before guarded restore, preserves current sources and one Undo, rolls back failed metadata writes and safely resumes an already-pending autosave only in the unchanged original scope. Quota/corruption/missing sources/account/project/revision/storage/Stop/reopen and small screens tested. This is partial local Recovery Vault, not source-version backups, multi-tab ACID storage, cloud/lost-device/deleted-media recovery. Native worker versions are coupled by integrity checks; named app caches retain current/previous and prune older releases without deleting unrelated media."
       ]
     },
     {
@@ -739,8 +751,8 @@
   "blockers": [
     "Previously exposed OpenAI credential was last confirmed unrevoked; owner remediation remains unverified.",
     "Privileged hosted financial persistence and all-provider reservation wiring missing.",
-    "Supported replacement model/project access, provider licensing and protected preview not verified.",
+    "Supported replacement model/project access, provider licensing and signed-in hosted/provider acceptance not verified.",
     "Prices and live charges not approved; Firebase stays Spark."
   ],
-  "latestTests": 717
+  "latestTests": 736
 }

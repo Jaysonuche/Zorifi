@@ -1,20 +1,20 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
 // Verified editor upgrade; local projects and provider configuration are preserved.
-const CACHE = 'zorifi-v256-harmony-repeaters-composition-audio-preview';
+const CACHE = 'zorifi-v257-scale-lock-key-loops-recovery-preview';
 const CORE = [
   './zorifi-composition-audio.js?v=256',
   './zorifi-offline-mix.js?v=256',
   './zorifi-production-preflight.js?v=255',
   './zorifi-production-preflight-workspace.js?v=255',
   './zorifi-production-preflight.css?v=254',
-  './zorifi-native-music.js?v=256',
-  './zorifi-native-music-worker.js',
-  './zorifi-native-music-workspace.js?v=256',
-  './zorifi-native-music.css?v=256',
-  "./zorifi-motion-graph.js?v=256",
+  './zorifi-native-music.js?v=257',
+  './zorifi-native-music-worker.js?v=257',
+  './zorifi-native-music-workspace.js?v=257',
+  './zorifi-native-music.css?v=257',
+  "./zorifi-motion-graph.js?v=257",
   "./zorifi-motion-renderer.js?v=256",
   "./zorifi-motion-packs.js?v=250",
-  "./zorifi-motion-workspace.js?v=256",
+  "./zorifi-motion-workspace.js?v=257",
   "./zorifi-motion-workspace.css?v=256",
   "./zorifi-editor-audio-workflows.js?v=250",
   "./zorifi-editor-audio-workflows.css?v=256",
@@ -66,7 +66,7 @@ const CORE = [
   "./icons/zorifi-logo.jpeg?v=231",
   "./assets/vanessa-orb.webp?v=231",
   "./zorifi-theme.js?v=174",
-  "./styles.css?v=229&studio=8",
+  "./styles.css?v=257&studio=8",
   "./zorifi-touch-workspace.css?v=222",
   "./zorifi-template-feed.css?v=1",
   "./zorifi-vanessa-orb.css?v=231",
@@ -163,7 +163,7 @@ const CORE = [
   "./zorifi-privacy.js?v=1",
   "./zorifi-vanessa-listening.js?v=249",
   "./zorifi-photos.js?v=232",
-  "./app.js?v=256",
+  "./app.js?v=257",
   "./zorifi-app-settings.js?v=250",
   "./zorifi-google-connections.js?v=225",
   "./zorifi-google-integration.js?v=227",
@@ -200,7 +200,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   // Keep the previous shell for already-open installed windows; never delete
   // unrelated device caches or substitute one release's HTML for JavaScript.
-  event.waitUntil(caches.keys().then(keys => {const previous=keys.filter(key=>/^zorifi-v\d+$/.test(key)&&key!==CACHE).sort((a,b)=>Number(b.slice(8))-Number(a.slice(8)))[0];return Promise.all(keys.filter(key=>/^zorifi-v\d+$/.test(key)&&key!==CACHE&&key!==previous).map(key=>caches.delete(key)));}).then(() => self.clients.claim()));
+  event.waitUntil(caches.keys().then(keys => {const releaseKey=key=>/^zorifi-v\d{1,9}(?:-[a-z0-9]+)*$/.test(key),version=key=>Number(/^zorifi-v(\d+)/.exec(key)[1]);const previous=keys.filter(key=>releaseKey(key)&&key!==CACHE).sort((a,b)=>version(b)-version(a))[0];return Promise.all(keys.filter(key=>releaseKey(key)&&key!==CACHE&&key!==previous).map(key=>caches.delete(key)));}).then(() => self.clients.claim()));
 });
 
 self.addEventListener('fetch', event => {

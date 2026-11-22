@@ -11,6 +11,14 @@ const context={self:{addEventListener(){}},console};vm.runInNewContext(fs.readFi
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.webmanifest'),'utf8'));
 const refs=[...html.matchAll(/(?:src|href)="([^"?]+)(?:[^" ]*)"/g)].map(match=>match[1]).concat(context.self.assets,manifest.icons.map(icon=>icon.src));
 for(const ref of refs){const relative=ref.split('?')[0].replace(/^\.\//,'');if(relative&&!/^https?:/.test(relative)&&!fs.existsSync(path.join(root,relative)))errors.push(`Missing referenced asset: ${ref}`);}
+// The worker must synthesize with the same engine that validated the editor data.
+const nativeEngine=html.match(/<script src="(zorifi-native-music\.js\?[^" ]+)"/)?.[1];
+const nativeWorker=fs.readFileSync(path.join(root,'zorifi-native-music-worker.js'),'utf8');
+const workerEngine=nativeWorker.match(/importScripts\(['"]([^'"]+)['"]\)/)?.[1];
+if(!nativeEngine||workerEngine!==nativeEngine)errors.push('Native synthesis worker and editor engine versions differ.');
+const musicWorkspace=fs.readFileSync(path.join(root,'zorifi-native-music-workspace.js'),'utf8');
+const workerUrl=musicWorkspace.match(/new Worker\(new URL\(['"]([^'"]+)['"]/)?.[1];
+if(!workerUrl||!context.self.assets.includes('./'+workerUrl))errors.push('The native synthesis worker URL is missing from the current offline cache.');
 for(const name of ['scripts/build-web.cjs','scripts/build-android.cjs','scripts/package-current.cjs','build/zorifi.ico','build/entitlements.mac.plist'])if(!fs.existsSync(path.join(root,name)))errors.push(`Missing build file: ${name}`);
 console.log(`Checked syntax of ${checked} source files and ${refs.length} browser/cache asset references.`);
 if(errors.length){console.error(errors.join('\n'));process.exitCode=1;}else console.log('Project integrity checks passed.');

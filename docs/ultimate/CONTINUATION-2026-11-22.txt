@@ -1,0 +1,138 @@
+ZORIFI ULTIMATE — SCALE LOCKING, KEYFRAME LOOPS AND SAFER RECOVERY
+22 November 2026 | Development preview | Master specification still PARTIAL
+
+Continued the existing branch from3e01894; previous tested runtime0dc54f8
+remains the rollback reference. No restart, duplicate editor state, project/media
+migration or deletion. Owner README.md edit remains excluded. The40-area audit
+and1,673 raw requirements remain in STATUS.json and requirements.json.
+
+PERSISTENT NATIVE SCALE LOCK — PART13
+Source patterns now retain a separate enabled/key/scaleMode lock. Enabling or
+changing the lock preserves existing notes and their sound. New notes, actual
+pitch edits, chord tones and transposition map to the nearest allowed MIDI pitch;
+equal-distance ties go lower. Up/down piano-roll keys step to the next allowed
+pitch. Timing/velocity-only edits keep an existing chromatic pitch unchanged.
+Drum instruments pause mapping without deleting the setting; pitched instruments
+resume it. One-shot scale correction remains a separate explicit operation.
+
+Manual controls and reviewed Vanessa music.native.edit commands share the native
+worker, source validation, one Undo and on-device persistence. Scope is supported
+native instruments/scales, not live MIDI controllers, external plugins or a full
+DAW. Existing out-of-scale notes are intentionally not silently normalized. MIDI
+export contains real note pitches; editor-lock metadata stays in the project.
+
+REPEATED KEYFRAMED VISUAL ANIMATION — PART25
+Typed expression.set {property,expression:{type:'loop',mode:'cycle'|'ping-pong'}}
+reuses the first-to-last keyed segment after its end, in that layer's containing
+composition clock. The original segment/keys/easing are unchanged. Cycle restarts;
+ping-pong reverses then repeats. No key or layer duplication and no JavaScript
+evaluation. At least two finite keys spanning1ms are required. Remove the repeat
+before deleting required keys. Existing interpolation, nested rates/source trims,
+mask/group/effect/repeater channels and render budgets remain authoritative.
+
+Audio gain/pan, source time/rate, spatial-path-owned positions and stagger-owned
+textOffset are explicitly excluded. These are visual loops, not audio Live Session
+or unrestricted After Effects expressions. Manual selection now loads each chosen
+property's own saved repeat mode and Remove availability; changing from X/cycle
+to Y/ping-pong cannot silently overwrite Y using X's mode. Shared backend proposal
+guidance documents the actual typed schema; native validation remains final.
+
+LOCAL PROJECT VERSION RECOVERY — PART38, STILL PARTIAL
+The existing version store now returns/reads back success. Named-version UI no
+longer reports success after quota/storage failure, and first verifies the base
+project is saved on the current account. Version history uses captured account,
+project, edit revision and observed saved-data guards. Closing it, Stop, page hide,
+account/project/edit changes or a newer observed storage value prevent stale work.
+
+Restores validate snapshot integrity/project identity, stage retained original
+media using the existing guarded loader, and refuse missing sources. Both restored
+and immediately undoable current timelines need their source files. The explicit
+version wins over a newer temporary recovery checkpoint. Current library sources
+added after the version remain available, and one Undo restores the prior edit.
+Before-restore safety snapshot and project metadata writes use readback and
+compensating rollback. This is not a multi-tab ACID database transaction.
+
+A failed/cancelled restore restarts a previously pending autosave only if the same
+account/project/revision and original saved data still match. It cannot resume
+into another account or overwrite newer observed storage. Long milestone names,
+small screens and theme surfaces are handled. Existing retention stays8 named/
+12 automatic versions and30 Undo entries. No separate source-revision backup,
+cloud sync, deleted-source recovery or lost-device Recovery Vault is claimed.
+Older snapshots rely on that project's retained on-device media library.
+
+INSTALLED-APP CACHE RELIABILITY
+Native editor/worker imports/cache URLs now sharev257. The integrity check rejects
+a worker engine version different from the editor and a worker URL absent from
+the active offline cache. This prevents the previously possible253 worker/256
+editor mismatch when installed apps retain exact old asset URLs.
+Activation now recognizes suffixed app release caches as well as plain numeric
+releases, retaining current and one previous shell and pruning older app shells.
+It preserves unrelated cache names and does not delete IndexedDB project/media.
+Actual native-browser activation verifies cleanup, unrelated media preservation
+and the previous shell's exact offline script. The existing update-transition
+browser test remains separately required; activation is not proof of all devices.
+
+ACCEPTANCE EVIDENCE
+-736 unit tests pass,0 failures/skips: previous717 plus8 scale-lock,8 visual-loop,
+ one shared backend validation and2 named-cache retention tests.
+-Native scale-lock browser: actual pointer/table/keyboard edits, unchanged old
+ notes and initial sound, drum pause/resume, reviewed lock/note/disable proposals,
+ confirmation, one Undo/Redo, locks, saved reopen, retained trims/rate/mixer and
+ real5s decoded PCM/MIDI. MIDI pitches [60,62,62,72] match the actual source notes.
+-Motion-loop browser: actual repeated/reversed pixels, manual/reviewed Vanessa,
+ confirmation/history, key preservation/removal, nested rate2 clocks/locks,
+ independent X-cycle/Y-ping-pong selection,320–1440px pane/text bounds, reopen
+ and real4s320x180 encoded/decoded MP4. No AE/plugin parity claim.
+-Recovery browser: actual PNG/2s PCM restored from IndexedDB, visible old timeline,
+ one Undo/Redo and saved reopen; named-save quota failure, corrupt/foreign/missing
+ source refusal, compensating storage rollback, account/project/revision/storage/
+ Stop guards, new unsaved-project milestone, safe autosave resumption and80-char
+ milestone names at320/390/768/1440px.
+-Shared backend validator accepts real bounded visual loop proposals, preserves
+ input, and rejects arbitrary extra code fields, audio loops and locked targets.
+-Named-cache tests use actual CacheStorage/service-worker activation, not only a
+ map fixture. A temporary expanded update harness observed the still-old worker
+ and was discarded; the separate activation proof identifies the intended state.
+
+All AI/auth responses in editor acceptance are explicit local fixtures. None of
+these tests certifies live replacement-key/model access, voice quality or physical
+iPhone/iPad/macOS/Linux/4K/8K output. No billable provider operation was performed.
+The complete regression/build/release receipt follows after final verification.
+
+REMAINING MASTER AND RELEASE GATES
+Persistent native locking does not finish Part13: live MIDI, controllers/MPE,
+expression lanes, microtuning, probability/pattern chains and retrospective capture
+remain. Full motion/AE/roto/optical-flow parity, native audio crossfades/submix buses,
+variable-rate offline audio, full-program LUFS/true-peak, source-revision lineage,
+cloud Recovery Vault and other signature tools remain incomplete as inventoried.
+Hosted financial enforcement/all-provider reservations, approved commercial prices,
+provider licensing/replacement model access and broad device acceptance remain.
+
+Previously exposed OpenAI credential revocation remains unverified; the owner last
+explicitly confirmed it was not revoked. Do not use it or promote production until
+remediation and the remaining gates. Production remains3.47.0 Beta, source
+aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb. No Firebase upgrade, live charge or
+unapproved paid service; the working£15 monthly AI ceiling stays in place.
+
+Only the existing protected Git development preview is authorized. Draft PR1
+stays unmerged. Keep current project backups before rollback:0dc54f8 does not
+enforce scale locks or render loop expressions, and older saves can discard
+unknown settings. The131-page17November PDF remains a dated historical snapshot;
+this report and the current checklist record subsequent work. Master incomplete.
+
+FINAL LOCAL REGRESSIONS AND INTEGRITY
+736/736 unit tests,0 failures/skips.454 JavaScript syntax files and331 browser/
+cache references pass. Build168 web files plus assets;14,115 approved strings
+from123 sources. Offline source/history/build credential-shape scan:0 blockers,
+0 review findings,0 read errors. It cannot verify external key revocation.
+All51 staged tools pass against the actual native adapter/renderer. Existing
+professional Stage2 and Vanessa production suites pass Chromium/WebKit with local
+auth/provider fixtures, including coordinated45s edits, split/timeline updates,
+history/save/reopen, confirmation/stale/Stop/Pause and account/memory isolation.
+Existing piano-roll and harmony PCM/MIDI/history/locks/reopen regressions pass.
+Original real Chromium service-worker update/old-client/offline-reload checks
+pass alongside the new independent named-cache activation proof.
+MP4 capture passes actual decoded moving frames/audio, selected range, delayed
+recording, imported video, silent720x1280 and1920x1080. Existing nested composition
+fade controls/live analyser/PCM/decoded MP4 AAC/Undo/reopen regression also passes.
+No live model, provider voice-quality or physical-device certification is implied.
