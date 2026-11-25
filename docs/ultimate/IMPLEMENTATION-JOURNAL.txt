@@ -132,3 +132,13 @@ missing sources, storage rollback and pending-autosave loss on cancellation.
 Worker/engine cache versions now coupled; old named shell caches are bounded.
 736 unit tests pass. Current report records actual acceptance/limits; the full
 master remains partial and production/provider/financial gates stay unchanged.
+
+
+25 NOVEMBER - AUDIO CROSSFADES AND LOCAL SOURCE HISTORY
+Native linear crossfade pairs now share manual/Vanessa timing, PCM/WAV/live preview
+and MP4 with safe update/reset/history. Source history reads actual retained media,
+checkpoint observations and explicit parent links; earlier native audio + notes
+restore together after decode/guards and save as one Undo. Actual chat-confirmation
+coverage exposed and repaired the omitted native proposal dispatcher branch.
+773 tests pass; all40 areas/1673 rows preserved, master partial, no paid services
+or production promotion. The dated report records exact limits and rollout gates.

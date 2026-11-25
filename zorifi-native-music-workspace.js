@@ -52,13 +52,14 @@
         commit(()=>{clip.musicPattern=pattern;});committed=true;return{status:'SUCCESS',verified:true,persisted:true,clipId:clip.id,locked:pattern.locked,cloudCalls:0,message:(pattern.locked?'Locked':'Unlocked')+' the native composition notes and saved the project. One Undo restores the previous edit.'};
       }
       const previous=action.command==='music.native.edit'?target(action.target):null;
+      if(previous&&(previous.audioCrossfade||state.clips.some(c=>c.audioCrossfade?.incomingId===previous.id)))throw Error('Reset the native audio crossfade before changing its source notes or instrument.');
       const arrangement=previous?null:action.command==='music.native.import'?Engine.parseMidi(params.bytes):Engine.compose(params),patterns=previous?[Engine.editPattern(previous.musicPattern,params.edit)]:arrangement.patterns;
       if(previous&&patterns[0].locked!==previous.musicPattern.locked)throw Error('Use the lock action to change composition protection.');
       const start=state.currentTime;
       for(let index=0;index<patterns.length;index++){
         const pattern=patterns[index];stage=`Rendering ${pattern.instrument} · ${index+1}/${patterns.length}`;refreshStatus();
         const rendered=await renderPattern(pattern,{signal});check(scope,signal);
-        const assetId='native-'+id(),file=new Blob([rendered.bytes],{type:'audio/wav'}),asset={id:assetId,name:pattern.instrument+' · '+(arrangement?.title||previous.name.replace(/^[^·]+· /,'')),type:'audio',duration:rendered.duration,size:file.size,mimeType:'audio/wav',localFile:true,persisted:false,generated:true,nativeInstrument:pattern.instrument,stemRole:['kick','snare','hat'].includes(pattern.instrument)?'drums':pattern.instrument==='bass'?'bass':'lead',waveform:{peaks:rendered.peaks,duration:rendered.duration,sampleRate:48000,channels:1},provenance:arrangement?.provenance||{engine:'zorifi-native-procedural-v1',cloudModel:false}};
+        const assetId='native-'+id(),file=new Blob([rendered.bytes],{type:'audio/wav'}),asset={id:assetId,name:pattern.instrument+' · '+(arrangement?.title||previous.name.replace(/^[^·]+· /,'')),type:'audio',duration:rendered.duration,size:file.size,mimeType:'audio/wav',localFile:true,persisted:false,generated:true,nativeInstrument:pattern.instrument,...(previous?{sourceAssetId:previous.mediaId}:{}),stemRole:['kick','snare','hat'].includes(pattern.instrument)?'drums':pattern.instrument==='bass'?'bass':'lead',waveform:{peaks:rendered.peaks,duration:rendered.duration,sampleRate:48000,channels:1},provenance:arrangement?.provenance||{engine:'zorifi-native-procedural-v1',cloudModel:false}};
         staged.push({asset,pattern});await storeProjectMedia(scope.project,assetId,file,{signal,userId:scope.owner});check(scope,signal);asset.persisted=true;asset.url=editorResources.createManagedUrl(file);
       }
       check(scope,signal);stage='Saving native arrangement';refreshStatus();

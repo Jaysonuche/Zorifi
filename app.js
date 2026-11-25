@@ -4583,7 +4583,7 @@ function vanessaActionAdapter({project=state,detached=false}={}){
 }
 async function executeVanessaPlan(plan,{confirmed=false}={}){
   if(state.view!=='editor')return {status:VanessaActions.STATUS.FAILED,message:'Open a project first, then I can perform that edit.',items:[]};
-  if(plan.editorWorkflowProposal&&window.ZorifiEditorWorkflowBridge){try{return await ZorifiEditorWorkflowBridge.execute(plan,{confirmed});}catch(error){return {status:error.name==='AbortError'?'CANCELLED':'FAILED',message:error.message,items:[]};}}
+  if((plan.editorWorkflowProposal||plan.nativeMusicProposal||plan.sourceLineageProposal)&&window.ZorifiEditorWorkflowBridge){try{return await ZorifiEditorWorkflowBridge.execute(plan,{confirmed});}catch(error){return {status:error.name==='AbortError'?'CANCELLED':'FAILED',message:error.message,items:[]};}}
   if(plan.professionalProposal&&window.ZorifiProfessionalStudio){try{return await ZorifiProfessionalStudio.execute(plan,{confirmed});}catch(error){return {status:error.name==='AbortError'?'CANCELLED':'FAILED',message:error.message,items:[]};}}
   if(window.ZorifiProductionBridge&&plan.actions?.length&&plan.actions.every(action=>ZorifiProductionBridge.initial.has(action.command))){try{const result=await ZorifiProductionBridge.execute(plan,{confirmed});vanessaPendingPlan=result.status===VanessaActions.STATUS.REQUIRES_CONFIRMATION?result.plan:null;return result;}catch(error){vanessaPendingPlan=null;return {status:error.name==='AbortError'?'CANCELLED':'FAILED',message:error.message,items:[]};}}
   vanessaActionState='validating';mountVanessa();const context=vanessaEditorContext(),result=await VanessaActions.execute(plan,context,vanessaActionAdapter(),{confirmed});
