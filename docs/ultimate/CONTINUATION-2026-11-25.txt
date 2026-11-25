@@ -46,7 +46,8 @@ of every edit or proof of copyright/creator attribution. Future native source ed
 now record the actual previous asset ID. Existing reviewed background-plate parent
 links are readable; missing/unrecorded ancestry is never invented. Inspection
 bounds:2000 current assets/layers,24 composition nesting,20 checkpoints,10000
-historical layers and8MiB per checkpoint. Parent display stops at24 links with an
+historical layers and8,388,608 serialized JSON code units per checkpoint.
+Parent display stops at24 links with an
 explicit finding, so long legitimate native revision chains remain inspectable.
 
 Earlier-source restore initially supports the same root native audio layer in
@@ -143,3 +144,12 @@ strings from125 sources. Offline source/history/build credential-shape scan:
 All existing51 staged action, Chromium/WebKit professional/Vanessa, local recovery,
 native music actual-confirmation and real MP4 regressions passed. New crossfade
 and lineage proofs include real PCM/WAV/decoded AAC and responsive controls.
+
+PROTECTED PREVIEW RECEIPT
+Tested runtimeb54ff4cfbf51770e498f95afe7a6357cad49845e committed and pushed.
+GitHub Vercel status=success; deploymentDE7p4Pwt8uQant1WerbwU9bghyrM.
+https://zorifi-git-codex-vanessa-openai-production-zorifi.vercel.app
+Unauthenticated release.json returns302 to hosting login. Public release.json
+returns200:3.47.0 Beta / aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb.
+No protection bypass or full signed-in hosted/provider acceptance performed.
+The following documentation-only receipt changes no runtime files.
