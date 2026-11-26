@@ -204,3 +204,12 @@ motion-path-morph-browser.cjs; professional-path-morph.test.cjs;
 sample-peak-normalize.test.cjs/sample-peak-normalize-browser.cjs.
 The five current checklist/report files record this phase; the owner README
 change is excluded from staging and the historical PDF remains unchanged.
+
+PROTECTED PREVIEW RECEIPT
+Tested runtime0cdce7695ed7aeaed684adc63ae944e9b3913078 committed and pushed.
+GitHub Vercel status=success; deployment6C3ym7fekZRV5rGuXbxaSYzdMx3p.
+https://zorifi-git-codex-vanessa-openai-production-zorifi.vercel.app
+Unauthenticated release.json returns302 to hosting login. Public release.json
+returns200:3.47.0 Beta / aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb.
+No protection bypass/full signed-in hosted-provider acceptance performed.
+Draft PR1 remains open/unmerged; the following receipt commit changes docs only.
