@@ -92,6 +92,8 @@
       "zorifi-motion-graph.js",
       "zorifi-production-preflight.js",
       "zorifi-offline-mix.js",
+      "zorifi-sample-peak-normalize.css",
+      "zorifi-sample-peak-normalize.js",
       "zorifi-composition-audio.js",
       "zorifi-asset-lineage.css",
       "zorifi-asset-lineage-workspace.js",

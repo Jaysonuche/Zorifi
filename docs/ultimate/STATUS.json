@@ -1,9 +1,9 @@
 {
   "schema": "zorifi.ultimate.audit/1",
-  "date": "2026-11-25",
+  "date": "2026-11-26",
   "overall": "Partial",
   "productionVersion": "3.47.0",
-  "candidate": "Development native audio crossfades and account-scoped source history; production remains gated",
+  "candidate": "Development phase259 native ADSR, editable path morphing and selected sample-peak normalization; production remains gated",
   "baselineTests": 589,
   "areas": [
     {
@@ -40,13 +40,15 @@
       "tests": [
         "tests/vanessa-production-browser.cjs",
         "tests/native-scale-lock-browser.cjs",
-        "tests/asset-lineage-browser.cjs"
+        "tests/asset-lineage-browser.cjs",
+        "tests/native-adsr-browser.cjs"
       ],
       "remaining": [
         "Live replacement-key OpenAI test and three-mode production routing blocked.",
         "Physical iPhone hands-free/voice and every-device subtitle timing not certified.",
         "Full configurable proactive project guidance requires broader acceptance.",
-        "Actual native music chat confirmation routing repaired; earlier native tests exercised only the reviewed bridge. Strengthened native scale/note and retained-source tests now use sendToVanessa and the outer confirmation path, actual worker/media/history/save. Live model/voice/device acceptance remains separate."
+        "Actual native music chat confirmation routing repaired; earlier native tests exercised only the reviewed bridge. Strengthened native scale/note and retained-source tests now use sendToVanessa and the outer confirmation path, actual worker/media/history/save. Live model/voice/device acceptance remains separate.",
+        "Music workspace Vanessa mounting now attaches the open desktop conversation to the actual .music-editor-screen shell when the regular workspace/inspector host is absent, preserving standard editor and inspector routing. Actual music launcher, review/cancel/apply and responsive host assertions pass with local auth fixtures; no live-model or physical-device acceptance is inferred."
       ]
     },
     {
@@ -145,14 +147,19 @@
       "code": [
         "zorifi-native-music.js",
         "zorifi-native-music-workspace.js",
-        "zorifi-audio-engine.js"
+        "zorifi-audio-engine.js",
+        "zorifi-native-music-worker.js",
+        "zorifi-native-music.css"
       ],
       "tests": [
-        "tests/native-music-browser.cjs"
+        "tests/native-music-browser.cjs",
+        "tests/native-adsr.test.cjs",
+        "tests/native-adsr-browser.cjs"
       ],
       "remaining": [
         "Real original instrument arrangements and note editing added; not the full DAW.",
-        "Missing advanced recording/take comping, Live Session, instrument design, sends/buses and full mastering."
+        "Missing advanced recording/take comping, Live Session, instrument design, sends/buses and full mastering.",
+        "Native per-pattern ADSR now shares manual controls and reviewed Vanessa music.native.edit with actual worker-rendered source PCM, original notes/MIDI/timing/mixer/effects and one Undo/save. Attack/decay/release are 0–10s, sustain 0–1; stages compress together inside each existing note if needed, positive release reaches zero on its final sample, and no source tail is added. Reset removes the optional envelope; unconfigured instrument WAVs retain byte parity. This is a bounded note-volume envelope, not a wavetable/sample instrument designer, LFO, SoundPrint, Sound Fusion or timbre transfer."
       ]
     },
     {
@@ -178,15 +185,21 @@
       "title": "Living Stems and scoped generation",
       "status": "Partial",
       "code": [
-        "zorifi-native-music-workspace.js"
+        "zorifi-native-music-workspace.js",
+        "zorifi-native-music.js",
+        "zorifi-native-music-worker.js",
+        "zorifi-native-music.css"
       ],
       "tests": [
         "tests/native-music-browser.cjs",
-        "tests/native-music.test.cjs"
+        "tests/native-music.test.cjs",
+        "tests/native-adsr.test.cjs",
+        "tests/native-adsr-browser.cjs"
       ],
       "remaining": [
         "Native note/instrument edits render only that clip and preserve timing/mixer/effects. Composition locks work.",
-        "Section-only regeneration, full lock categories and licensed external stem separation remain unfinished."
+        "Section-only regeneration, full lock categories and licensed external stem separation remain unfinished.",
+        "Native per-pattern ADSR now shares manual controls and reviewed Vanessa music.native.edit with actual worker-rendered source PCM, original notes/MIDI/timing/mixer/effects and one Undo/save. Attack/decay/release are 0–10s, sustain 0–1; stages compress together inside each existing note if needed, positive release reaches zero on its final sample, and no source tail is added. Reset removes the optional envelope; unconfigured instrument WAVs retain byte parity. This is a bounded note-volume envelope, not a wavetable/sample instrument designer, LFO, SoundPrint, Sound Fusion or timbre transfer."
       ]
     },
     {
@@ -265,14 +278,20 @@
       "title": "Instrument Lab and SoundPrint",
       "status": "Partial",
       "code": [
-        "zorifi-native-music.js"
+        "zorifi-native-music.js",
+        "zorifi-native-music-workspace.js",
+        "zorifi-native-music-worker.js",
+        "zorifi-native-music.css"
       ],
       "tests": [
-        "tests/native-music.test.cjs"
+        "tests/native-music.test.cjs",
+        "tests/native-adsr.test.cjs",
+        "tests/native-adsr-browser.cjs"
       ],
       "remaining": [
         "Seven original procedural kick/snare/hat/bass/piano/pluck/pad voices added.",
-        "Wavetable/sample instrument designer, ADSR/LFO UI, SoundPrint, Sound Fusion, Text-to-Synth and timbre transfer remain."
+        "Wavetable/sample instrument designer, LFO UI, SoundPrint, Sound Fusion, Text-to-Synth and timbre transfer remain.",
+        "Native per-pattern ADSR now shares manual controls and reviewed Vanessa music.native.edit with actual worker-rendered source PCM, original notes/MIDI/timing/mixer/effects and one Undo/save. Attack/decay/release are 0–10s, sustain 0–1; stages compress together inside each existing note if needed, positive release reaches zero on its final sample, and no source tail is added. Reset removes the optional envelope; unconfigured instrument WAVs retain byte parity. This is a bounded note-volume envelope, not a wavetable/sample instrument designer, LFO, SoundPrint, Sound Fusion or timbre transfer."
       ]
     },
     {
@@ -298,14 +317,20 @@
       "status": "Partial",
       "code": [
         "zorifi-native-music-workspace.js",
-        "zorifi-studio-director.js"
+        "zorifi-studio-director.js",
+        "zorifi-native-music.js",
+        "zorifi-native-music-worker.js",
+        "zorifi-native-music.css"
       ],
       "tests": [
-        "tests/native-music-browser.cjs"
+        "tests/native-music-browser.cjs",
+        "tests/native-adsr.test.cjs",
+        "tests/native-adsr-browser.cjs"
       ],
       "remaining": [
         "Reviewed Vanessa native composition/transposition/quantization/locks use actual manual APIs and save.",
-        "Full producer reasoning, lyrics/MIDI planning, selective regeneration, Hum-to-Music, Ghost/Parallel Producer, Live Jam and explanations remain."
+        "Full producer reasoning, lyrics/MIDI planning, selective regeneration, Hum-to-Music, Ghost/Parallel Producer, Live Jam and explanations remain.",
+        "Native per-pattern ADSR now shares manual controls and reviewed Vanessa music.native.edit with actual worker-rendered source PCM, original notes/MIDI/timing/mixer/effects and one Undo/save. Attack/decay/release are 0–10s, sustain 0–1; stages compress together inside each existing note if needed, positive release reaches zero on its final sample, and no source tail is added. Reset removes the optional envelope; unconfigured instrument WAVs retain byte parity. This is a bounded note-volume envelope, not a wavetable/sample instrument designer, LFO, SoundPrint, Sound Fusion or timbre transfer."
       ]
     },
     {
@@ -365,7 +390,9 @@
         "zorifi-offline-mix.js",
         "zorifi-composition-audio.js",
         "zorifi-editor-audio-workflows.js",
-        "zorifi-editor-workflow-bridge.js"
+        "zorifi-editor-workflow-bridge.js",
+        "zorifi-sample-peak-normalize.js",
+        "zorifi-sample-peak-normalize.css"
       ],
       "tests": [
         "tests/audio-studio-browser.cjs",
@@ -375,12 +402,15 @@
         "tests/composition-audio.test.cjs",
         "tests/composition-audio-browser.cjs",
         "tests/editor-crossfades.test.cjs",
-        "tests/editor-crossfades-browser.cjs"
+        "tests/editor-crossfades-browser.cjs",
+        "tests/sample-peak-normalize.test.cjs",
+        "tests/sample-peak-normalize-browser.cjs"
       ],
       "remaining": [
         "Existing source pan/fade/EQ/compression/limiting/ducking preserved. Shared WAV uses constant-rate nested timing, trims, inherited gain/pan, exact composition length and real stereo sample metrics. Ancestor fades now use each container clock once in live preview, WAV, MP4 and preflight. Manual root-composition/reviewed Vanessa fades have one Undo/save; children remain editable. Failed sources stop the whole mix; Stop/account/revision guards discard late output.",
         "Variable-rate/remapped offline audio, pitch-preserving time stretch and non-default container DSP remain explicitly rejected rather than omitted. Fades alone do not implement submix buses/sends/VCA/parallel chains/dynamicEQ/multiband/transient/spatial tools/true-peak/LUFS/Mix Intelligence/Audio Doctor. Browser decode/render may finish after Stop; results are discarded and nodes disconnected.",
-        "Native root-pair linear audio crossfades now share manual/reviewed Vanessa create/update/reset, existing preview/WAV/MP4 fade fields, retimed incoming keys/captions, one Undo/save and reopening. Sources/outer fades remain intact; later clips stay put and a gap can remain. Constant rates<=16,0.01–30s overlap and strict metadata/locks/collision/dependency checks apply. Equal-power curves, source-handle extension/ripple and full DAW mixing remain unfinished."
+        "Native root-pair linear audio crossfades now share manual/reviewed Vanessa create/update/reset, existing preview/WAV/MP4 fade fields, retimed incoming keys/captions, one Undo/save and reopening. Sources/outer fades remain intact; later clips stay put and a gap can remain. Constant rates<=16,0.01–30s overlap and strict metadata/locks/collision/dependency checks apply. Equal-power curves, source-handle extension/ripple and full DAW mixing remain unfinished.",
+        "Normalize selected sample peak now measures an isolated processed root audio/video source before track/master levels and other clips, scales its native base/volume-key envelope after DSP, and verifies a second real stereo render within0.05dB before one Undo/save. Targets −24 to−1dBFS, clip/full source ≤120s, constant positive rate≤16, ≤1000 monotone volume keys and0–200% resulting levels; local originals ≤64MiB encoded,128MiB decoded,48MiB output at48kHz. Stop/account/project/selection/source/revision guards discard stale results; failed storage verification rolls back history and levels. Real source/FX/timing/mixer stay editable. This is sample-peak/RMS evidence, not LUFS, true-peak, full-mix normalization or mastering; browser decode/render may finish after Stop and decoded memory is checked after native decode."
       ]
     },
     {
@@ -459,7 +489,9 @@
         "zorifi-motion-graph.js",
         "zorifi-motion-renderer.js",
         "zorifi-motion-workspace.js",
-        "zorifi-parallax-workflow.js"
+        "zorifi-parallax-workflow.js",
+        "zorifi-advanced-editing.js",
+        "zorifi-vanessa-professional-tools.js"
       ],
       "tests": [
         "tests/parallax-local-browser.cjs",
@@ -474,7 +506,11 @@
         "tests/motion-repeater-browser.cjs",
         "tests/motion-key-loops.test.cjs",
         "tests/motion-key-loops-browser.cjs",
-        "tests/professional-key-loop.test.cjs"
+        "tests/professional-key-loop.test.cjs",
+        "tests/motion-path-morph.test.cjs",
+        "tests/motion-path-morph-retime.test.cjs",
+        "tests/professional-path-morph.test.cjs",
+        "tests/motion-path-morph-browser.cjs"
       ],
       "remaining": [
         "51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds.",
@@ -483,7 +519,8 @@
         "Independent mask XY/rotation/inversion/removal and mask:rotation keys now preserve Bezier handles/opacity. Native camera projection and mask opacity are tested with pixels, manual controls, reviewed Vanessa, one Undo and save/reopen. Full AE3D/roto/tracking parity remains excluded.",
         "Native Trim Paths adds editable/animated stroke start/end/degree offset, wrapping and independent shape-group channels. Cubic controls/fill remain intact;24-chord-per-cubic length approximation is bounded. Manual/reviewed Vanessa, pixels/history/reopen and actual encoded/decoded320x180 MP4 are verified. External AE plugins and unrestricted geometric/optical-flow parity remain unimplemented.",
         "Native Shape Repeater now supports1–64 transient geometry copies, offset/XY/scale/rotation/opacity, scalar and independent named-group animation. Projected bounds/mask pixels, manual/reviewed Vanessa, one Undo/Redo, reopen and actual decoded MP4 tested.2,048 aggregate copies/frame,16,384 local extent/effective scale and existing canvas budgets are enforced; no AE/plugin parity claimed.",
-        "Native cycle/ping-pong expressions now repeat an existing visual keyed segment after its end in the containing composition clock, preserving keys/easing. Manual property/mode controls, reviewed Vanessa/backend validation, real repeated/reversed pixels, one Undo/Redo, nested rates, reopen and decoded4s MP4 tested. Audio/time and spatial/stagger-owned channels are excluded; at least2 finite keys/1ms span and existing render budgets are enforced. No arbitrary expression scripting or AE parity."
+        "Native cycle/ping-pong expressions now repeat an existing visual keyed segment after its end in the containing composition clock, preserving keys/easing. Manual property/mode controls, reviewed Vanessa/backend validation, real repeated/reversed pixels, one Undo/Redo, nested rates, reopen and decoded4s MP4 tested. Audio/time and spatial/stagger-owned channels are excluded; at least2 finite keys/1ms span and existing render budgets are enforced. No arbitrary expression scripting or AE parity.",
+        "Native shape.morph now stores corresponding editable path vertices/Bezier handles in main or named-group channels with unchanged point order/count and closed flag. Manual pen/JSON controls and reviewed motion.edit share history/save and native rendering. Composition clocks, precompose/duplicate/animation retime and source-duration retime preserve morph timing. Limits: 1–128 keys/channel, 2–2000 points/key, 65536 project keyed vertices, ±16384 coordinates, 16384 local extent and 16Mi local pixels; monotone easing/Bezier handles exclude overshoot. Segment maximum-area validation rejects unsafe intermediate planes before commit. Topology conversion, optical interpolation, arbitrary shape matching and full AE parity remain incomplete."
       ]
     },
     {
@@ -780,5 +817,5 @@
     "Supported replacement model/project access, provider licensing and signed-in hosted/provider acceptance not verified.",
     "Prices and live charges not approved; Firebase stays Spark."
   ],
-  "latestTests": 773
+  "latestTests": 808
 }

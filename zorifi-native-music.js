@@ -9,6 +9,28 @@
   const clone=value=>structuredClone(value),finite=value=>typeof value==='number'&&Number.isFinite(value);
   function assert(value,message){if(!value)throw new TypeError(message);}
   const pitched=pattern=>!['kick','snare','hat'].includes(pattern.instrument);
+  function validateEnvelope(envelope){
+    assert(envelope&&typeof envelope==='object'&&!Array.isArray(envelope)&&Object.keys(envelope).length===4&&Object.keys(envelope).every(key=>['attack','decay','sustain','release'].includes(key)),'Use exactly attack, decay, sustain and release for the native envelope.');
+    for(const key of ['attack','decay','release'])assert(finite(envelope[key])&&envelope[key]>=0&&envelope[key]<=10,'Envelope attack, decay and release must be 0–10 seconds.');
+    assert(finite(envelope.sustain)&&envelope.sustain>=0&&envelope.sustain<=1,'Envelope sustain must be 0–1.');
+    return envelope;
+  }
+  // Custom ADSR occupies the existing note window, including release. If the
+  // attack+decay+release times exceed that window, compress all three by the same
+  // factor. Sustain fills any remaining time and keeps its requested level.
+  // Zero stages are instantaneous; positive release reaches zero on the final
+  // sample. No tail extends note/MIDI/source duration or voice budgets.
+  // Unconfigured patterns retain their original synthesis path byte for byte.
+  function noteEnvelope(envelope,window){
+    const total=envelope.attack+envelope.decay+envelope.release,scale=total>window?window/total:1;
+    return {attack:envelope.attack*scale,decay:envelope.decay*scale,sustain:envelope.sustain,release:envelope.release*scale};
+  }
+  function envelopeLevel(envelope,time,window){
+    const release=envelope.release,gate=window-release,held=Math.min(time,gate);
+    let level=held<envelope.attack?held/envelope.attack:envelope.decay>0&&held<envelope.attack+envelope.decay?1-(1-envelope.sustain)*(held-envelope.attack)/envelope.decay:envelope.sustain;
+    if(release>0&&time>=gate)level*=Math.max(0,(window-time)/release);
+    return level;
+  }
   function nearestScalePitch(pitch,key,scaleMode){
     assert(Number.isInteger(pitch)&&pitch>=0&&pitch<=127,'Use a MIDI pitch 0–127.');
     const allowed=new Set(SCALES[scaleMode].map(step=>(NOTES.indexOf(key)+step)%12));
@@ -28,6 +50,7 @@
   function validatePattern(pattern,{maxDuration=600}={}){
     assert(pattern&&pattern.schema===SCHEMA,'Unsupported native music pattern.');
     assert(INSTRUMENTS.includes(pattern.instrument),'Choose a supported native instrument.');
+    if(pattern.envelope!==undefined)validateEnvelope(pattern.envelope);
     if(pattern.scaleLock!==undefined){const lock=pattern.scaleLock;assert(lock&&typeof lock==='object'&&!Array.isArray(lock)&&Object.keys(lock).every(k=>['enabled','key','scaleMode'].includes(k))&&typeof lock.enabled==='boolean'&&NOTES.includes(lock.key)&&Object.hasOwn(SCALES,lock.scaleMode),'Use a supported native scale-lock setting.');}
     assert(finite(pattern.duration)&&pattern.duration>=.05&&pattern.duration<=maxDuration,'Pattern duration exceeds the supported range.');
     assert(finite(pattern.bpm)&&pattern.bpm>=40&&pattern.bpm<=200,'Tempo must be 40–200 BPM.');
@@ -128,6 +151,11 @@
       assert(!lock.enabled||pitched(p),'Choose a pitched instrument before enabling scale lock.');
       assert(!p.scaleLock||p.scaleLock.enabled!==lock.enabled||p.scaleLock.key!==lock.key||p.scaleLock.scaleMode!==lock.scaleMode,'The scale lock already has these settings. No edit was applied.');p.scaleLock=lock;
     }
+    else if(edit.operation==='envelope'){
+      assert(Object.keys(edit).length===2&&Object.keys(edit).every(key=>['operation','envelope'].includes(key)),'Use a supported native envelope edit.');
+      if(edit.envelope===null){assert(p.envelope!==undefined,'This pattern already uses its original instrument envelope. No edit was applied.');delete p.envelope;}
+      else{const envelope=validateEnvelope(edit.envelope);assert(!p.envelope||['attack','decay','sustain','release'].some(key=>p.envelope[key]!==envelope[key]),'The envelope already has these settings. No edit was applied.');p.envelope=clone(envelope);}
+    }
     else if(edit.operation==='instrument'){assert(INSTRUMENTS.includes(edit.instrument),'Unknown native instrument.');p.instrument=edit.instrument;}
     else if(edit.operation==='chord'){
       assert(Object.keys(edit).every(key=>['operation','root','quality','inversion','start','duration','velocity','idPrefix'].includes(key)),'Unsupported chord property.');
@@ -203,9 +231,9 @@
     const p=validatePattern(source);assert([22050,44100,48000].includes(sampleRate),'Unsupported synthesis sample rate.');
     const length=Math.round(p.duration*sampleRate),samples=new Float32Array(length),tau=Math.PI*2;
     for(const note of p.notes){
-      const from=Math.round(note.start*sampleRate),count=Math.min(length-from,Math.round(note.duration*sampleRate)),frequency=440*2**((note.pitch-69)/12),rng=random(p.seed+':'+note.id),attack=p.instrument==='pad'?.08:.003,release=Math.min(p.instrument==='pad'?.18:.055,note.duration*.4);
+      const from=Math.round(note.start*sampleRate),count=Math.min(length-from,Math.round(note.duration*sampleRate)),frequency=440*2**((note.pitch-69)/12),rng=random(p.seed+':'+note.id),attack=p.instrument==='pad'?.08:.003,release=Math.min(p.instrument==='pad'?.18:.055,note.duration*.4),customEnvelope=p.envelope?noteEnvelope(p.envelope,(count-1)/sampleRate):null;
       for(let i=0;i<count;i++){
-        const t=i/sampleRate,end=(count-i)/sampleRate,envelope=Math.min(1,t/attack,end/release),phase=tau*frequency*t;let wave;
+        const t=i/sampleRate,end=(count-i)/sampleRate,envelope=customEnvelope?envelopeLevel(customEnvelope,t,(count-1)/sampleRate):Math.min(1,t/attack,end/release),phase=tau*frequency*t;let wave;
         if(p.instrument==='kick')wave=Math.sin(tau*(47*t+90*.024*(1-Math.exp(-t/.024))))*Math.exp(-t*17);
         else if(p.instrument==='snare')wave=((rng()*2-1)*.8+Math.sin(tau*180*t)*.2)*Math.exp(-t*25);
         else if(p.instrument==='hat')wave=(rng()*2-1)*Math.exp(-t*65)*.45;

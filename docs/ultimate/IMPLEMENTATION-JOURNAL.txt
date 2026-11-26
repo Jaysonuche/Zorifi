@@ -142,3 +142,28 @@ restore together after decode/guards and save as one Undo. Actual chat-confirmat
 coverage exposed and repaired the omitted native proposal dispatcher branch.
 773 tests pass; all40 areas/1673 rows preserved, master partial, no paid services
 or production promotion. The dated report records exact limits and rollout gates.
+
+
+26 NOVEMBER — PHASE259: ADSR, PATH MORPH AND SELECTED SAMPLE PEAK
+Native optional per-pattern ADSR uses the existing music.native.edit worker/source
+replacement path and retains original instrument sound when no envelope is set.
+Topology-matched shape/group path channels animate exact native vertices/handles
+through shape.morph and reviewed motion.edit. Review fixed intermediate-area
+render-bound validation and source-duration retiming of main/group morph keys.
+Selected root sample-peak normalization replaces the prior hard-coded volume
+assignment: isolated actual processed PCM, post-DSP native envelope scaling, a
+second render verifying target within0.05dB, then one history/save with rollback.
+ADSR/morph/normalizer share native timeline state; no second editor or media store.
+Music-shell Vanessa mounting regression now uses the real .music-editor-screen
+host while standard workspace and inspector mounts remain covered.
+808/808 unit tests pass,0 failures/skips; the35 added tests cover the new bounded
+features. Actual new ADSR/morph/sample-peak browser proofs include PCM/MIDI/pixels,
+review/cancel/apply, history/storage/reopen,320–1440px layouts and decoded MP4.
+All transport/auth fixtures are explicitly local; no paid/liveAI acceptance.
+Build:173 files,14,440 interface strings/126 sources. Source/credential-shape scan:
+0 blockers/review findings/read errors; external key revocation remains unknown.
+Broader regression/integrity validation and protected deployment receipt remain
+pending root integration. All40 master areas/1,673 raw rows and exact individual
+statuses preserved; overall Partial. No commits, production promotion, live price
+activation, new paid service or Firebase upgrade in this documentation update.
+See CONTINUATION-2026-11-26.txt for exact APIs, limits, gaps and pending receipt.
