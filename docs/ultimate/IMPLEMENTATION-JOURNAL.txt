@@ -204,3 +204,8 @@ the effective validated curve and peak warning in Vanessa review. Actual decline
 case and equal-power PCM/MP4 proof pass;844 units/477syntax/341refs pass. Bridge
 260.1 plus a new named260cache prevents stale installed review code. Cache and
 legacy-crossfade regressions rerun successfully; no DSP or production changes.
+
+Final phase260 runtime1e39896438a8d9b5add280294730199bc3099031 pushed; Vercel
+success52qh3w5yn6fYwEsCuRPHuiErwp1p. Includes preserved-curve review correction
+and bridge260.1/cache refresh. Supersedes initial474e2f7 runtime; draft PR1 stays
+unmerged and public/paid gates stay in place. Following commit is docs only.

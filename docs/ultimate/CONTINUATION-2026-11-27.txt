@@ -289,3 +289,12 @@ The bridge asset is260.1 and the named260cache changes to ensure installed apps
 receive this correction. Actual equal-power/MP4 proof,844/844 unit tests,477/341
 integrity, build173 and final named-cache/legacy-crossfade regressions pass.
 The following runtime/hosting receipt supersedes the earlier phase260 rollout.
+
+FINAL PROTECTED RUNTIME RECEIPT
+Runtime1e39896438a8d9b5add280294730199bc3099031 includes the effective-curve
+review correction and bridge260.1/new named cache. Committed/pushed; GitHub
+Vercel status success, deployment52qh3w5yn6fYwEsCuRPHuiErwp1p. This supersedes
+the initial474e2f7 phase260 runtime; all four feature proofs/844 unit results and
+relevant final crossfade/cache/integrity/build checks are recorded above.
+Draft PR1 remains open/unmerged; owner README edit excluded. Following receipt
+commit changes documentation only. Production and paid-service gates unchanged.
