@@ -193,3 +193,8 @@ Production remains3.47.0/aa2f9e7; exposed-key revocation externally unverified.
 No paid services, Firebase upgrade/live charges or£15-ceiling change.
 Historical reports and17November PDF remain dated snapshots. Owner README
 edit remains excluded from this phase. See CONTINUATION-2026-11-27.txt.
+
+Phase260 runtime474e2f73c8444d2842529582da054f7fd4f845a3 pushed; Vercel success
+HA4bA6heUt8VFn5SrG5RRQPBXdkQ. Protected alias returns login302; public production
+remains3.47.0/aa2f9e7. Draft PR1 updated/unmerged. No production promotion,
+billable-provider call, paid-service activation or Firebase upgrade.
