@@ -1,6 +1,6 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
 // Verified editor upgrade; local projects and provider configuration are preserved.
-const CACHE = 'zorifi-v260-modulation-morph-copy-equal-power-preview';
+const CACHE = 'zorifi-v260-modulation-morph-copy-equal-power-review-preview';
 const CORE = [
   './zorifi-sample-peak-normalize.js?v=259',
   './zorifi-sample-peak-normalize.css?v=259',

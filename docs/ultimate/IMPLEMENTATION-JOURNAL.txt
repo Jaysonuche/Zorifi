@@ -198,3 +198,9 @@ Phase260 runtime474e2f73c8444d2842529582da054f7fd4f845a3 pushed; Vercel success
 HA4bA6heUt8VFn5SrG5RRQPBXdkQ. Protected alias returns login302; public production
 remains3.47.0/aa2f9e7. Draft PR1 updated/unmerged. No production promotion,
 billable-provider call, paid-service activation or Firebase upgrade.
+
+Final phase260 review correction: omitted-curve equal-power edits now describe
+the effective validated curve and peak warning in Vanessa review. Actual decline
+case and equal-power PCM/MP4 proof pass;844 units/477syntax/341refs pass. Bridge
+260.1 plus a new named260cache prevents stale installed review code. Cache and
+legacy-crossfade regressions rerun successfully; no DSP or production changes.
