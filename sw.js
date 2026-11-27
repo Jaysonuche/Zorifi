@@ -1,6 +1,6 @@
 // Studio redesign refresh: reinstalling this worker refreshes the current release assets.
 // Verified editor upgrade; local projects and provider configuration are preserved.
-const CACHE = 'zorifi-v259-envelopes-morph-sample-peak-preview';
+const CACHE = 'zorifi-v260-modulation-morph-copy-equal-power-preview';
 const CORE = [
   './zorifi-sample-peak-normalize.js?v=259',
   './zorifi-sample-peak-normalize.css?v=259',
@@ -13,7 +13,7 @@ const CORE = [
   './zorifi-production-preflight-workspace.js?v=255',
   './zorifi-production-preflight.css?v=254',
   './zorifi-native-music.js?v=259',
-  './zorifi-native-music-worker.js?v=259',
+  './zorifi-native-music-worker.js?v=260',
   './zorifi-native-music-workspace.js?v=259',
   './zorifi-native-music.css?v=259',
   "./zorifi-motion-graph.js?v=259",

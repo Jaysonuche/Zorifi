@@ -40,7 +40,7 @@ test('separate group morphs preserve transforms, paint, masks, expressions, trim
 
 test('nested morph clocks follow containing source timing and preserve exact scrub after retime/precompose/duplicate',()=>{
  const p=fixture();G.apply(p,action('layer.set',{start:2,duration:4}));for(const [time,points]of [[2,start],[6,end]])G.apply(p,action('shape.morph',{time,points,closed:true}));G.apply(p,action('composition.precompose',{id:'comp',layerIds:['path'],track:8},null));G.apply(p,action('layer.set',{start:5},'comp'));G.apply(p,action('source.retime',{rate:2,mode:'source'},'comp'));const n=sample(p,6);assert.equal(n.localTime,2);assert.equal(n.geometry.points[0].x,(start[0].x+end[0].x)/2);
- const q=keys(fixture());G.apply(q,action('animation.retime',{from:0,to:2,newFrom:1,newTo:5}));assert.equal(sample(q,3).geometry.points[0].x,(start[0].x+end[0].x)/2);G.apply(q,action('layer.duplicate',{id:'copy',start:2,track:1}));assert.deepEqual(q.clips.find(c=>c.id==='copy').motion.pathMorph.keys.map(k=>k.time),[3,7]);assert.throws(()=>G.apply(q,action('animation.copy',{sourceId:'path'},'copy')),/not copied/);
+ const q=keys(fixture());G.apply(q,action('animation.retime',{from:0,to:2,newFrom:1,newTo:5}));assert.equal(sample(q,3).geometry.points[0].x,(start[0].x+end[0].x)/2);G.apply(q,action('layer.duplicate',{id:'copy',start:2,track:1}));assert.deepEqual(q.clips.find(c=>c.id==='copy').motion.pathMorph.keys.map(k=>k.time),[3,7]);const retained=structuredClone(q.clips.find(c=>c.id==='copy').motion.pathMorph);G.apply(q,action('animation.copy',{sourceId:'path'},'copy'));assert.deepEqual(q.clips.find(c=>c.id==='copy').motion.pathMorph,retained);
 });
 
 test('morphs reject locked native layers, nested tracks and containing composition tracks',()=>{

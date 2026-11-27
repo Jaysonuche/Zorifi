@@ -1,5 +1,5 @@
 /* Dedicated synthesis worker: a completed WAV is transferred, not copied. */
-importScripts('zorifi-native-music.js?v=259');
+importScripts('zorifi-native-music.js?v=260');
 self.onmessage=event=>{
   const {id,pattern,sampleRate}=event.data||{};
   try{const result=self.ZorifiNativeMusic.renderWav(pattern,{sampleRate});self.postMessage({id,result},[result.bytes]);}

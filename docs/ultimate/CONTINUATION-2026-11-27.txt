@@ -1,0 +1,271 @@
+ZORIFI ULTIMATE — PHASE260 IMPLEMENTATION AND RELIABILITY
+27 November 2026 | Protected development candidate | Master remains PARTIAL
+
+Continues codex/vanessa-openai-production from phase259 runtime0cdce7695ed7
+and documentation60c7edfc10db. Existing editor state, source files, native history,
+project saving and51 staged actions remain the authority. No new editor store,
+project migration, paid provider or Firebase upgrade is introduced. The owner's
+README edit and all prior reports/PDF remain untouched by this documentation task.
+
+This report records bounded implementation and actual local evidence. Full-master,
+live-provider and physical-device acceptance are separate from these feature tests.
+Only observed deployment results are added to the final receipt.
+
+NATIVE INSTRUMENT AMPLITUDE LFO — PART8/10/14/16
+The optional pattern.amplitudeLfo object has exactly five fields:
+ {waveform:'sine'|'triangle',clock:'hz'|'beats',rate,depth,phase}
+Hz rate is0.05–20. Beat-clock rate is a period of0.125,0.25,0.5,1,2,4,8 or16
+quarter-note beats at the source pattern BPM. Depth is0–1; phase is0≤degrees<360.
+The native edit uses:
+ {operation:'amplitudeLfo',amplitudeLfo:{waveform:'sine',clock:'hz',
+   rate:4,depth:.4,phase:0}}
+Reset uses amplitudeLfo:null and removes the optional field. Repeating identical
+settings/resetting an unconfigured source refuses as a no-op. Unknown fields,
+invalid clocks/waves/non-finite/out-of-range values refuse before rendering.
+
+The LFO attenuates the mixed native source after its original tanh saturation and
+before its existing end fade. Its source-pattern clock continues across notes;
+it does not restart at each note onset. Phase0 starts at the original level and
+phase180 at minimum. Depth0 leaves the original sound unchanged; depth1 can reach
+zero, with no signal boost. Sine changes smoothly; triangle uses linear ramps.
+Each existing instrument carrier, ADSR, note/MIDI timing, source duration, voice
+budget, clip source trim/rate, mixer, effects and source-parent history remain.
+Clip playback rate naturally changes playback of the rendered source clock; this
+is not a separate project-clock/pitch-preserving modulation system.
+
+Collapsed source-note controls and the reviewed native-music bridge use the same
+music.native.edit operation, worker rendering, source replacement and one Undo/save.
+The active crossfade source-change guard remains: reset the pair before replacing
+its native source. Composition and timeline locks still refuse changes. Source
+files are rendered locally; no provider or licensed external sample is requested.
+
+Vanessa grammar examples:
+ Set native tremolo sine 4 Hz depth 40% phase 0 degrees
+ Set native tremolo triangle every 1 beat depth 50%
+ Reset native tremolo
+
+Nine focused LFO units pass. They verify optional data round-trip, independent
+PCM attenuation for both waveforms at22050/44100/48000Hz, source-clock phase/depth,
+beat periods/BPM, no extra source voices/tails, malformed/no-op/lock cases, reset
+and zero-depth parity, unchanged MIDI and21 pre-LFO legacy hashes across seven
+instruments and three sample rates. Actual worker/UI/outer Vanessa, saved reopen,
+scopes/locks/history and decoded MP4 browser proof also passes.
+
+This is amplitude tremolo, not pitch vibrato, filter LFO, a general modulation
+matrix, wavetable/sample design, SoundPrint, Sound Fusion or timbre transfer.
+The Instrument Lab master requirement stays Partial; raw LFO row0389 advances
+only to Partial based on the bounded implementation and focused tests.
+
+NATIVE SOURCE SCOPE RELIABILITY
+Asynchronous native rendering now captures the actual state/project/view,
+local owner/cloudUid/session object, immutable JSON-string Undo/Redo stack arrays
+and ordered entries, and source-library array plus asset object/id/type/duration/
+size/url/file identity. Checks run after worker/storage work and before committing.
+Selection, clip/key/mixer changes remain part of the full current-project revision.
+Changed sources/session/history cannot silently acquire late source replacements.
+
+Failed/cancelled staging cleans up the captured owner's own project namespace;
+it does not use whichever account is signed in later. A stale session cannot
+remount the old note dialog in the next account. This strengthens the existing
+local source workflow and does not introduce a mock production identity, alternate
+project store or ownership bypass. Actual delayed worker/session/cloud/source/
+history browser rejection checks pass, including Stop and unchanged project state.
+
+EXPLICIT COMPATIBLE PATH-ANIMATION COPY — PART25
+The existing animation.copy operation retains scalar-copy parameters and adds:
+ {sourceId,properties?,at?,expressions?,
+  morphs:[{sourceGroupId?,targetGroupId?}]}
+Up to33 explicit path mappings are accepted; an omitted group ID means the main
+editable path. Group names are not guessed. Each target path appears only once.
+A source morph may be copied into more than one explicitly selected target path;
+the copied channels are independent, not aliased. Scalar-only copies now leave
+existing path morphs intact instead of refusing merely because a layer has them.
+
+Requested morph channels clone corresponding literal vertices, incoming/outgoing
+Bezier handles and easing. Their key times shift by(at or target.start) minus
+source.start in the target's containing composition clock. They are not scaled,
+cropped or resampled; all copied morph keys must fit the target layer duration
+and the existing0–86400 clock bounds. Matching point count/order and open/closed
+topology are required. Explicit main→group, group→main and group→group mappings
+are supported when their existing geometry is compatible.
+
+Only requested target morph channels and selected scalar channels are replaced.
+The target's original base geometry, paint, layer timing/transforms and unmapped
+animation remain editable. Existing optional scalar-expression copying retains
+its route. Malformed/duplicate mappings, missing source channels, incompatible
+topology, locks/protected containing tracks and whole-project key/vertex/render
+budgets fail on the draft before any project mutation. Source layers stay unchanged.
+
+Collapsed Motion Scenes controls expose source layer, placement, scalar/expression
+options and one explicitly chosen source-path→target-path mapping. The same
+operation is available to reviewed Vanessa through motion.edit/dataJson. All
+existing dataJson transport and graph limits remain. Eleven focused tests pass,
+including clock/paint/mask preservation, main/group mappings, isolation, failures,
+budgets, nested source clocks and exact professional-tool postconditions.
+Actual UI/outer-confirmation/pixel/MP4/reopen browser proof passes with no browser
+exceptions or live provider calls.
+
+This does not infer topology, normalize differently sized shapes, copy arbitrary
+source code or add optical flow/full After Effects parity. A compatible path
+can visibly move/reshape to the copied literal source coordinates by design.
+
+EQUAL-POWER CROSSFADE CURVES — PART12/20
+audio.crossfade.apply adds optional curve:'linear'|'equal-power'. The existing
+root-pair source/track/boundary/overlap0.01–30s/lock/collision/dependency guards
+remain. Later clips do not ripple, and the incoming clip still moves earlier.
+Only the inner outgoing/incoming fade curves change. Existing outer fades,
+source windows, key/caption shifting, re-edit/reset and one Undo/save remain.
+
+The shared AudioEngine.fadeGain evaluates optional audioFadeInCurve and
+audioFadeOutCurve. Equal-power gain is sine(pi/2×progress); the outgoing fade's
+remaining progress gives its complementary cosine. Across the overlap the
+squared gains sum to one, with both midpoint gains about0.707. Default/legacy
+fades stay exactly linear. These same native fields feed preview, offline PCM,
+WAV and MP4 audio rather than a disconnected crossfade preview.
+
+Existing version1/default-linear pair records stay readable. Explicit curves use
+version2 metadata with a validated curve and expected source/timing/fade records.
+Updating/restoring a pair preserves its original curve fields, including whether
+a field was originally absent. Reset restores original fades/curves and boundary.
+Changed or malformed pair records refuse atomically instead of overwriting edits.
+
+The manual selector and reviewed Vanessa share the same native operation.
+An explicit request can choose either curve; an omitted curve preserves the
+existing pair's choice or defaults to linear for a new pair. UI/review warn that
+correlated recordings can still raise the combined peak. Constant squared gain
+does not guarantee constant perceived loudness or prevent clipping/master gain.
+
+Eight new curve units and28 existing crossfade units pass. Actual new browser
+proof passes with real source tones, manual curve selection, outer Vanessa
+review/decline/apply, exact native preview law, measured stereo PCM, one Undo/Redo,
+save/reopen/reset and320/390/768/1440px controls. The actual encoded/decoded MP4
+retains the equal-power two-tone relationship; no sample-exact recorder clock is
+claimed. The recorded AAC normalized squared-gain sum is about0.995 and the
+measured late gap is silent. Artifact: artifacts/editor-crossfade-curves-browser.json
+and artifacts/equal-power-crossfade.mp4. No browser exceptions/provider requests.
+
+This does not extend source handles, analyze correlation automatically, implement
+ripple arrangement, full DAW buses/sends, LUFS/true-peak or mastering.
+
+NORMALIZER HISTORY-PROCESSING REPAIR — PART20
+The phase259100ms dialog monitor repeatedly cloned/serialized the current project
+and reserialized every Undo/Redo checkpoint. A valid large path project with
+64000 keyed vertices and30 native JSON-string history checkpoints could re-encode
+about92.7MB of Undo data on every tick. A local diagnostic took266–332ms for each
+old full guard against a100ms interval. This is diagnostic evidence, not a general
+device performance guarantee; the earlier object-checkpoint diagnostic is not the
+native history representation and is not used as a result.
+
+Actual app.js pushHistory/Undo/Redo store immutable JSON strings. The repaired
+normalizer checks exact stack array identity, length, ordered entry values and
+the cheap account/session/project/view/selection/source identities without
+serializing those strings again. Non-string checkpoints refuse up front rather
+than weakening history protection. No old-checkpoint in-place mutation exception
+is introduced: supported entries are immutable strings.
+
+Idle timer and render-progress callbacks use these cheap live checks. Full current
+project structural comparisons remain on manual submission, after source reading,
+after each completed full PCM render and immediately before mutation. Edits that
+change current clip/key/mixer data without changing identities still stale the
+operation before committing. Stop/source/account/selection guards remain active
+through read/decode/render progress; late native results remain discardable.
+
+measureProposal accepts optional verify(defaults to check) so native execution can
+separate cheap progress guards from full structural checkpoints without weakening
+the original caller contract. Capture retains one current history snapshot for
+the proposed render; it does not allocate a reserialized full Undo history.
+
+Seven new scope units and10 existing normalization units pass. Deterministic
+operation counts prove100 idle ticks make0 additional history captures and0 Undo
+serializations on the valid64000-vertex graph;2000 progress checks retain bounded
+full captures and0 history-stack serialization. Tests exercise actual native
+pushHistory/snapshot/Undo/Redo function bodies, stack replacements/order/length/
+checkpoint-string changes, current clip/key/mixer changes, account/session/source/
+selection/project changes and stale manual submission. These are operation-count
+assertions, not machine-specific speed thresholds. The existing actual browser
+normalization/Stop/storage/MP4 regression passes with the repaired guards.
+
+ACTUAL LOCAL EVIDENCE AND RELEASE GATES
+844/844 full-suite unit tests pass,0 failures/skips (808 previous +36 new):
+ LFO9, animation-copy11, curve8, normalizer-scope7, shared backend-copy1.
+All four actual feature browser proofs pass:
+ native-lfo-browser: actual worker PCM/MIDI and measured modulation, manual and
+ outer reviewed Vanessa/decline/withhold, legacy/reset parity, source-parent
+ history, Undo/Redo/reopen/locks/crossfades, Stop/session/cloud/source/history
+ refusals and decoded MP4. No provider calls/browser errors.
+ motion-animation-copy-browser: explicit main/group mappings, scalar isolation,
+ base/paint/source preservation, native pixels, actual reviewed outer Vanessa,
+ decline/withhold/stale/storage rollback/locks/history/reopen and decoded MP4.
+ Native sampler survives refresh in the fixture; actual close UI restores tools.
+ editor-crossfade-curves-browser: manual and reviewed curve switching, preview
+ gain law, independent PCM tone envelopes, Undo/Redo/reopen/reset and MP4 AAC.
+ Encoded gains have squared sum0.9954 in the observed proof; MediaRecorder/AAC
+ timing is not sample-accurate. It proves the law/actual audio, not exact transport.
+ sample-peak-normalize-browser: measured stereo target, actual outer Vanessa,
+ source/session/selection/Stop guards, failed-storage rollback and MP4/reopen.
+All new controls fit320/390/768/1440px; LFO and copying also check dark/light.
+All ten requested existing regression scripts pass serially, exit0:
+ professional-native-tools-browser(all51); professional-stage2-browser and
+ vanessa-production-browser(Chromium/WebKit,8 local authenticated turns each);
+ native-scale-lock-browser; native-harmony-browser; asset-lineage-browser;
+ editor-crossfades-browser; project-version-recovery-browser; native-adsr-browser;
+ service-worker-named-cache-browser. Existing actual PCM/MIDI/source restoration,
+ timeline/history/Undo/Redo/reopen/locks/Stop/account/device-media/decoded-MP4
+ assertions pass. Cache test retains current/previous app releases and unrelated
+ media with exact prior scripts still available offline. Stage2 LIVE/REPLAY=0.
+ Windows WebKit uses its documented data-URL fallback; Chromium uses IDB Blobs.
+Integrity:477 syntax files and341 browser/cache refs pass. Worker engine/URL/cache
+references are coupled at260; the cache check caught and corrected the stale259
+worker URL before release. Build173 web files plus assets;14,536 approved strings
+from126 sources. Offline source/history/build credential-shape scan reports
+0 blockers,0 review findings and0 read errors. It cannot verify external revocation.
+
+All40 areas and1,673 raw source rows, source text and source hashes remain in the
+full inventory. All area statuses and all other individual statuses are retained;
+only LFO row0389 changes Unverified→Partial. Overall master remains Partial.
+Prior reports and the131-page17November PDF remain dated historical snapshots;
+current phase reports/checklist track later work and the remaining gaps.
+
+Last verified production baseline:3.47.0 Beta /
+aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb; root will re-observe hosting before release.
+Previously exposed-key revocation is externally unverified. No exposed credential
+is used by this work. Protected development preview remains the authorized release
+destination; public promotion stays gated. No live AI/voice/provider/device
+acceptance follows from local auth/model fixtures or procedural audio proofs.
+
+Privileged hosted financial persistence/all-provider reservations, replacement
+model/project access, approved pricing/licensing, physical-device/high-resolution
+acceptance and the broader instrument/DAW/AE/master requirements remain incomplete.
+No paid service/live charge/Firebase upgrade is authorized or enabled by this
+phase. The shared£15 monthly AI ceiling remains. Keep draft PR1 unmerged and
+preserve device project/media backups before rolling back; earlier builds do not
+expose these controls and cannot guarantee retaining new metadata on save.
+
+PROTECTED RELEASE RECEIPT
+The tested runtime and hosting observation are recorded after commit/push below.
+No public production promotion or protection bypass is authorized.
+
+ROLLBACK AND COMPATIBILITY
+Retain0cdce7695ed7aeaed684adc63ae944e9b3913078 as the prior tested runtime
+(documentation60c7edfc10db81632ff9aaaca287ef9bf941ab06). Preserve device project
+and media backups before reverting. Existing native rendered WAVs remain ordinary
+media, but old engines do not edit/resynthesize amplitudeLfo metadata. Old engines
+ignore the new equal-power fade fields and may play/export linear fades instead;
+new V2 pair controls are not backward-compatible with old reset/edit controls.
+Copied path-morph channels use the existing259 data schema, but the explicit copy
+API/control requires260. No project migration/new dependency is introduced.
+
+CHANGED IMPLEMENTATION PATHS
+Native engine/workspace/controls: zorifi-native-music.js,
+zorifi-native-music-workspace.js, zorifi-native-music.css and worker import.
+Path copying/UI: zorifi-motion-graph.js, zorifi-motion-workspace.js/.css;
+shared backend professional-planner.mjs and vanessa-prompts.mjs.
+Crossfade: zorifi-audio-engine.js, zorifi-editor-audio-workflows.js,
+zorifi-editor-workflow-bridge.js. Normalizer: zorifi-sample-peak-normalize.js.
+Asset wiring: index.html, sw.js and generated zorifi-interface-catalog.json.
+New tests: native-lfo.test.cjs/native-lfo-browser.cjs;
+motion-animation-copy.test.cjs/motion-animation-copy-browser.cjs;
+professional-animation-copy.test.cjs; editor-crossfade-curves.test.cjs/
+editor-crossfade-curves-browser.cjs; sample-peak-normalize-scope.test.cjs.
+Existing motion-path-morph.test.cjs now asserts scalar-copy preservation rather
+than blanket refusal on morph layers. All source changes use existing stores.

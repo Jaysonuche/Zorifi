@@ -15,6 +15,23 @@
     assert(finite(envelope.sustain)&&envelope.sustain>=0&&envelope.sustain<=1,'Envelope sustain must be 0–1.');
     return envelope;
   }
+  const LFO_BEATS=Object.freeze([.125,.25,.5,1,2,4,8,16]);
+  function validateAmplitudeLfo(lfo){
+    assert(lfo&&typeof lfo==='object'&&!Array.isArray(lfo)&&Object.keys(lfo).length===5&&Object.keys(lfo).every(key=>['waveform','clock','rate','depth','phase'].includes(key)),'Use exactly waveform, clock, rate, depth and phase for amplitude LFO.');
+    assert(['sine','triangle'].includes(lfo.waveform)&&['hz','beats'].includes(lfo.clock),'Choose a sine or triangle amplitude LFO with Hz or beat clock.');
+    assert(finite(lfo.rate)&&(lfo.clock==='hz'?lfo.rate>=.05&&lfo.rate<=20:LFO_BEATS.includes(lfo.rate)),'Use 0.05–20 Hz or a supported beat period: 0.125, 0.25, 0.5, 1, 2, 4, 8 or 16 quarter-note beats.');
+    assert(finite(lfo.depth)&&lfo.depth>=0&&lfo.depth<=1,'Amplitude LFO depth must be 0–1.');
+    assert(finite(lfo.phase)&&lfo.phase>=0&&lfo.phase<360,'Amplitude LFO phase must be at least 0 and below 360 degrees.');
+    return lfo;
+  }
+  // Source-pattern clock is continuous across notes. Attenuation only, after
+  // the original voice mixer/saturation and before its source-end fade. The
+  // instrument carrier, ADSR, source duration and MIDI notes are unchanged.
+  function amplitudeLfoGain(lfo,time,bpm){
+    const frequency=lfo.clock==='beats'?bpm/(60*lfo.rate):lfo.rate,cycle=(time*frequency+lfo.phase/360)%1;
+    const attenuation=lfo.waveform==='triangle'?1-Math.abs(cycle*2-1):.5-.5*Math.cos(Math.PI*2*cycle);
+    return Math.max(0,Math.min(1,1-lfo.depth*attenuation));
+  }
   // Custom ADSR occupies the existing note window, including release. If the
   // attack+decay+release times exceed that window, compress all three by the same
   // factor. Sustain fills any remaining time and keeps its requested level.
@@ -51,6 +68,7 @@
     assert(pattern&&pattern.schema===SCHEMA,'Unsupported native music pattern.');
     assert(INSTRUMENTS.includes(pattern.instrument),'Choose a supported native instrument.');
     if(pattern.envelope!==undefined)validateEnvelope(pattern.envelope);
+    if(pattern.amplitudeLfo!==undefined)validateAmplitudeLfo(pattern.amplitudeLfo);
     if(pattern.scaleLock!==undefined){const lock=pattern.scaleLock;assert(lock&&typeof lock==='object'&&!Array.isArray(lock)&&Object.keys(lock).every(k=>['enabled','key','scaleMode'].includes(k))&&typeof lock.enabled==='boolean'&&NOTES.includes(lock.key)&&Object.hasOwn(SCALES,lock.scaleMode),'Use a supported native scale-lock setting.');}
     assert(finite(pattern.duration)&&pattern.duration>=.05&&pattern.duration<=maxDuration,'Pattern duration exceeds the supported range.');
     assert(finite(pattern.bpm)&&pattern.bpm>=40&&pattern.bpm<=200,'Tempo must be 40–200 BPM.');
@@ -156,6 +174,11 @@
       if(edit.envelope===null){assert(p.envelope!==undefined,'This pattern already uses its original instrument envelope. No edit was applied.');delete p.envelope;}
       else{const envelope=validateEnvelope(edit.envelope);assert(!p.envelope||['attack','decay','sustain','release'].some(key=>p.envelope[key]!==envelope[key]),'The envelope already has these settings. No edit was applied.');p.envelope=clone(envelope);}
     }
+    else if(edit.operation==='amplitudeLfo'){
+      assert(Object.keys(edit).length===2&&Object.keys(edit).every(key=>['operation','amplitudeLfo'].includes(key)),'Use a supported native amplitude LFO edit.');
+      if(edit.amplitudeLfo===null){assert(p.amplitudeLfo!==undefined,'This pattern already has no amplitude LFO. No edit was applied.');delete p.amplitudeLfo;}
+      else{const lfo=validateAmplitudeLfo(edit.amplitudeLfo);assert(!p.amplitudeLfo||['waveform','clock','rate','depth','phase'].some(key=>p.amplitudeLfo[key]!==lfo[key]),'Amplitude LFO already has these settings. No edit was applied.');p.amplitudeLfo=clone(lfo);}
+    }
     else if(edit.operation==='instrument'){assert(INSTRUMENTS.includes(edit.instrument),'Unknown native instrument.');p.instrument=edit.instrument;}
     else if(edit.operation==='chord'){
       assert(Object.keys(edit).every(key=>['operation','root','quality','inversion','start','duration','velocity','idPrefix'].includes(key)),'Unsupported chord property.');
@@ -247,7 +270,7 @@
     const bytes=new ArrayBuffer(44+length*2),view=new DataView(bytes),ascii=(at,s)=>{for(let n=0;n<s.length;n++)view.setUint8(at+n,s.charCodeAt(n));};
     ascii(0,'RIFF');view.setUint32(4,36+length*2,true);ascii(8,'WAVE');ascii(12,'fmt ');view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);view.setUint32(24,sampleRate,true);view.setUint32(28,sampleRate*2,true);view.setUint16(32,2,true);view.setUint16(34,16,true);ascii(36,'data');view.setUint32(40,length*2,true);
     const peaks=Array(480).fill(0),step=Math.max(1,Math.ceil(length/peaks.length));let peak=0,sum=0;
-    for(let i=0;i<length;i++){const tail=Math.min(1,(length-1-i)/(sampleRate*.025)),value=Math.tanh(samples[i])*tail;peak=Math.max(peak,Math.abs(value));sum+=value*value;peaks[Math.min(peaks.length-1,Math.floor(i/step))]=Math.max(peaks[Math.min(peaks.length-1,Math.floor(i/step))],Math.abs(value));view.setInt16(44+i*2,Math.round(value*32767),true);}
+    for(let i=0;i<length;i++){const tail=Math.min(1,(length-1-i)/(sampleRate*.025)),value=p.amplitudeLfo?Math.tanh(samples[i])*amplitudeLfoGain(p.amplitudeLfo,i/sampleRate,p.bpm)*tail:Math.tanh(samples[i])*tail;peak=Math.max(peak,Math.abs(value));sum+=value*value;peaks[Math.min(peaks.length-1,Math.floor(i/step))]=Math.max(peaks[Math.min(peaks.length-1,Math.floor(i/step))],Math.abs(value));view.setInt16(44+i*2,Math.round(value*32767),true);}
     return {bytes,duration:length/sampleRate,sampleRate,channels:1,frames:length,peaks,peak,rms:Math.sqrt(sum/length)};
   }
   function vlq(number){const output=[number&127];while(number>>=7)output.unshift((number&127)|128);return output;}
@@ -309,5 +332,5 @@
     // References and a portable snapshot derived from the real timeline; never a second mutable store.
     return {schema:BLUEPRINT,...clone(metadata),tracks:clips.map(c=>({clipId:c.id,assetId:c.mediaId,track:c.track,start:c.start,duration:c.duration,sourceStart:c.sourceStart||0,pattern:validatePattern(c.musicPattern)}))};
   }
-  return {SCHEMA,BLUEPRINT,INSTRUMENTS,NOTES,SCALES,CHORDS,compose,validatePattern,drumGrid,pianoRollGrid,pianoRollEdit,stepPitch,editPattern,renderWav,parseMidi,midiFile,blueprintFromProject};
+  return {SCHEMA,BLUEPRINT,INSTRUMENTS,NOTES,SCALES,CHORDS,LFO_BEATS,compose,validatePattern,drumGrid,pianoRollGrid,pianoRollEdit,stepPitch,editPattern,renderWav,parseMidi,midiFile,blueprintFromProject};
 });

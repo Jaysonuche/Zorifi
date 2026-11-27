@@ -1,5 +1,5 @@
 ZORIFI ULTIMATE V5 — FULL REQUIREMENTS STATUS
-26 November 2026 | Overall: PARTIAL | Live baseline:3.47.0
+27 November 2026 | Overall: PARTIAL | Live baseline:3.47.0
 
 All40 parts and all11 appendix pages reviewed. The raw1,673-row source inventory
 is requirements.json. Bounded feature passes do not complete whole master areas.
@@ -19,6 +19,7 @@ Evidence pointers: tests/vanessa-production-browser.cjs, tests/native-scale-lock
 - Full configurable proactive project guidance requires broader acceptance.
 - Actual native music chat confirmation routing repaired; earlier native tests exercised only the reviewed bridge. Strengthened native scale/note and retained-source tests now use sendToVanessa and the outer confirmation path, actual worker/media/history/save. Live model/voice/device acceptance remains separate.
 - Music workspace Vanessa mounting now attaches the open desktop conversation to the actual .music-editor-screen shell when the regular workspace/inspector host is absent, preserving standard editor and inspector routing. Actual music launcher, review/cancel/apply and responsive host assertions pass with local auth fixtures; no live-model or physical-device acceptance is inferred.
+- Native asynchronous source rendering now guards state/project/view, owner/cloudUid/session identity, exact immutable JSON-string Undo/Redo arrays and ordered entries, and source-library array/asset object/id/type/duration/size/url/file identity. Late worker/storage results cannot commit after a changed scope. Unused staged media cleanup retains the captured owner rather than using the next signed-in account. Actual browser worker/session/cloud/source/history rejection checks pass without an authentication fallback.
 
 PART 3 — Personalization and learning: PARTIAL
 Code: zorifi-vanessa-memory-manager.js, zorifi-vanessa-creative-learning.js
@@ -55,10 +56,12 @@ Evidence pointers: tests/ai-create-isolation-browser.cjs, tests/ai-generation-sc
 
 PART 8 — Professional Music Studio: PARTIAL
 Code: zorifi-native-music.js, zorifi-native-music-workspace.js, zorifi-audio-engine.js, zorifi-native-music-worker.js, zorifi-native-music.css
-Evidence pointers: tests/native-music-browser.cjs, tests/native-adsr.test.cjs, tests/native-adsr-browser.cjs
+Evidence pointers: tests/native-music-browser.cjs, tests/native-adsr.test.cjs, tests/native-adsr-browser.cjs, tests/native-lfo.test.cjs, tests/native-lfo-browser.cjs
 - Real original instrument arrangements and note editing added; not the full DAW.
 - Missing advanced recording/take comping, Live Session, instrument design, sends/buses and full mastering.
 - Native per-pattern ADSR now shares manual controls and reviewed Vanessa music.native.edit with actual worker-rendered source PCM, original notes/MIDI/timing/mixer/effects and one Undo/save. Attack/decay/release are 0–10s, sustain 0–1; stages compress together inside each existing note if needed, positive release reaches zero on its final sample, and no source tail is added. Reset removes the optional envelope; unconfigured instrument WAVs retain byte parity. This is a bounded note-volume envelope, not a wavetable/sample instrument designer, LFO, SoundPrint, Sound Fusion or timbre transfer.
+- Native amplitude LFO now stores optional amplitudeLfo {waveform,clock,rate,depth,phase} on each pattern and shares the existing music.native.edit/worker/source-replacement path. Sine/triangle tremolo attenuates the original mixed source after tanh saturation and before its existing end fade, using a continuous source clock; notes/ADSR/MIDI/timing/mixer stay unchanged. Hz range0.05–20, or periods0.125/0.25/0.5/1/2/4/8/16 quarter-note beats at the source BPM, depth0–1 and phase0≤degrees<360. Reset removes the optional field. Focused units verify exact legacy/reset PCM parity and independent gain/clock behavior. Actual manual and outer reviewed Vanessa, independent PCM/MIDI, saved reopen, reset/locks/crossfade protection and320–1440px dark/light browser checks pass, including decoded MP4. Live-provider/physical-device acceptance is separate; no pitch/filter/LFO matrix, full Instrument Lab or timbre transfer is claimed.
+- Native asynchronous source rendering now guards state/project/view, owner/cloudUid/session identity, exact immutable JSON-string Undo/Redo arrays and ordered entries, and source-library array/asset object/id/type/duration/size/url/file identity. Late worker/storage results cannot commit after a changed scope. Unused staged media cleanup retains the captured owner rather than using the next signed-in account. Actual browser worker/session/cloud/source/history rejection checks pass without an authentication fallback.
 
 PART 9 — Song Blueprint: PARTIAL
 Code: zorifi-native-music.js, zorifi-project-model.js
@@ -68,10 +71,12 @@ Evidence pointers: tests/native-music.test.cjs
 
 PART 10 — Living Stems and scoped generation: PARTIAL
 Code: zorifi-native-music-workspace.js, zorifi-native-music.js, zorifi-native-music-worker.js, zorifi-native-music.css
-Evidence pointers: tests/native-music-browser.cjs, tests/native-music.test.cjs, tests/native-adsr.test.cjs, tests/native-adsr-browser.cjs
+Evidence pointers: tests/native-music-browser.cjs, tests/native-music.test.cjs, tests/native-adsr.test.cjs, tests/native-adsr-browser.cjs, tests/native-lfo.test.cjs, tests/native-lfo-browser.cjs
 - Native note/instrument edits render only that clip and preserve timing/mixer/effects. Composition locks work.
 - Section-only regeneration, full lock categories and licensed external stem separation remain unfinished.
 - Native per-pattern ADSR now shares manual controls and reviewed Vanessa music.native.edit with actual worker-rendered source PCM, original notes/MIDI/timing/mixer/effects and one Undo/save. Attack/decay/release are 0–10s, sustain 0–1; stages compress together inside each existing note if needed, positive release reaches zero on its final sample, and no source tail is added. Reset removes the optional envelope; unconfigured instrument WAVs retain byte parity. This is a bounded note-volume envelope, not a wavetable/sample instrument designer, LFO, SoundPrint, Sound Fusion or timbre transfer.
+- Native amplitude LFO now stores optional amplitudeLfo {waveform,clock,rate,depth,phase} on each pattern and shares the existing music.native.edit/worker/source-replacement path. Sine/triangle tremolo attenuates the original mixed source after tanh saturation and before its existing end fade, using a continuous source clock; notes/ADSR/MIDI/timing/mixer stay unchanged. Hz range0.05–20, or periods0.125/0.25/0.5/1/2/4/8/16 quarter-note beats at the source BPM, depth0–1 and phase0≤degrees<360. Reset removes the optional field. Focused units verify exact legacy/reset PCM parity and independent gain/clock behavior. Actual manual and outer reviewed Vanessa, independent PCM/MIDI, saved reopen, reset/locks/crossfade protection and320–1440px dark/light browser checks pass, including decoded MP4. Live-provider/physical-device acceptance is separate; no pitch/filter/LFO matrix, full Instrument Lab or timbre transfer is claimed.
+- Native asynchronous source rendering now guards state/project/view, owner/cloudUid/session identity, exact immutable JSON-string Undo/Redo arrays and ordered entries, and source-library array/asset object/id/type/duration/size/url/file identity. Late worker/storage results cannot commit after a changed scope. Unused staged media cleanup retains the captured owner rather than using the next signed-in account. Actual browser worker/session/cloud/source/history rejection checks pass without an authentication fallback.
 
 PART 11 — Core DAW audio engine: PARTIAL
 Code: zorifi-audio-engine.js, zorifi-native-music-worker.js
@@ -80,11 +85,12 @@ Evidence pointers: tests/audio-studio-browser.cjs, tests/native-music-browser.cj
 - AudioWorklet/sample-accurate live recording, latency/dropout benchmarks, native DSP,192kHz remain unverified.
 
 PART 12 — Arrangement and Live Session: PARTIAL
-Code: app.js, zorifi-timeline-edit-api.js, zorifi-editor-audio-workflows.js, zorifi-editor-workflow-bridge.js
-Evidence pointers: tests/native-music-browser.cjs, tests/editor-crossfades.test.cjs, tests/editor-crossfades-browser.cjs
+Code: app.js, zorifi-timeline-edit-api.js, zorifi-editor-audio-workflows.js, zorifi-editor-workflow-bridge.js, zorifi-audio-engine.js
+Evidence pointers: tests/native-music-browser.cjs, tests/editor-crossfades.test.cjs, tests/editor-crossfades-browser.cjs, tests/editor-crossfade-curves.test.cjs, tests/editor-crossfade-curves-browser.cjs
 - Real arrangement/multitrack timeline exists.
 - Live Session clip launching, scenes, loop capture and simultaneous performance recording are not implemented.
-- Native root-pair linear audio crossfades now share manual/reviewed Vanessa create/update/reset, existing preview/WAV/MP4 fade fields, retimed incoming keys/captions, one Undo/save and reopening. Sources/outer fades remain intact; later clips stay put and a gap can remain. Constant rates<=16,0.01–30s overlap and strict metadata/locks/collision/dependency checks apply. Equal-power curves, source-handle extension/ripple and full DAW mixing remain unfinished.
+- Native root-pair linear audio crossfades now share manual/reviewed Vanessa create/update/reset, existing preview/WAV/MP4 fade fields, retimed incoming keys/captions, one Undo/save and reopening. Sources/outer fades remain intact; later clips stay put and a gap can remain. Constant rates<=16,0.01–30s overlap and strict metadata/locks/collision/dependency checks apply. Source-handle extension/ripple and full DAW mixing remain unfinished; phase260 adds the bounded equal-power option described below.
+- Native pair crossfades now offer explicit linear or equal-power curves through the same manual/reviewed Vanessa operation and shared preview/offline/export fade gain. Equal-power uses complementary sine/cosine gains with constant squared sum; correlated recordings may still raise combined peaks. Legacy version1/default linear metadata stays readable; version2 owns explicit curve fields and preserves/restores original inner/outer curve state on update/reset. Source timing, outer fades, later clips, caption/key shifting, locks/collisions and one Undo/save remain native. New unit and real browser PCM/Vanessa/manual/MP4 AAC/Undo/reopen proofs pass at320–1440px. This does not add source-handle extension/ripple, automatic correlation correction or full DAW routing/mastering.
 
 PART 13 — Advanced MIDI and drum sequencing: PARTIAL
 Code: zorifi-native-music.js, zorifi-native-music-workspace.js
@@ -95,10 +101,11 @@ Evidence pointers: tests/native-music.test.cjs, tests/native-midi-import.test.cj
 
 PART 14 — Instrument Lab and SoundPrint: PARTIAL
 Code: zorifi-native-music.js, zorifi-native-music-workspace.js, zorifi-native-music-worker.js, zorifi-native-music.css
-Evidence pointers: tests/native-music.test.cjs, tests/native-adsr.test.cjs, tests/native-adsr-browser.cjs
+Evidence pointers: tests/native-music.test.cjs, tests/native-adsr.test.cjs, tests/native-adsr-browser.cjs, tests/native-lfo.test.cjs, tests/native-lfo-browser.cjs
 - Seven original procedural kick/snare/hat/bass/piano/pluck/pad voices added.
-- Wavetable/sample instrument designer, LFO UI, SoundPrint, Sound Fusion, Text-to-Synth and timbre transfer remain.
+- Wavetable/sample instrument designer, pitch/filter modulation, SoundPrint, Sound Fusion, Text-to-Synth and timbre transfer remain.
 - Native per-pattern ADSR now shares manual controls and reviewed Vanessa music.native.edit with actual worker-rendered source PCM, original notes/MIDI/timing/mixer/effects and one Undo/save. Attack/decay/release are 0–10s, sustain 0–1; stages compress together inside each existing note if needed, positive release reaches zero on its final sample, and no source tail is added. Reset removes the optional envelope; unconfigured instrument WAVs retain byte parity. This is a bounded note-volume envelope, not a wavetable/sample instrument designer, LFO, SoundPrint, Sound Fusion or timbre transfer.
+- Native amplitude LFO now stores optional amplitudeLfo {waveform,clock,rate,depth,phase} on each pattern and shares the existing music.native.edit/worker/source-replacement path. Sine/triangle tremolo attenuates the original mixed source after tanh saturation and before its existing end fade, using a continuous source clock; notes/ADSR/MIDI/timing/mixer stay unchanged. Hz range0.05–20, or periods0.125/0.25/0.5/1/2/4/8/16 quarter-note beats at the source BPM, depth0–1 and phase0≤degrees<360. Reset removes the optional field. Focused units verify exact legacy/reset PCM parity and independent gain/clock behavior. Actual manual and outer reviewed Vanessa, independent PCM/MIDI, saved reopen, reset/locks/crossfade protection and320–1440px dark/light browser checks pass, including decoded MP4. Live-provider/physical-device acceptance is separate; no pitch/filter/LFO matrix, full Instrument Lab or timbre transfer is claimed.
 
 PART 15 — Vibe Engine and music intelligence: PARTIAL
 Code: zorifi-native-music.js
@@ -108,10 +115,12 @@ Evidence pointers: tests/native-music.test.cjs
 
 PART 16 — Vanessa Music Producer: PARTIAL
 Code: zorifi-native-music-workspace.js, zorifi-studio-director.js, zorifi-native-music.js, zorifi-native-music-worker.js, zorifi-native-music.css
-Evidence pointers: tests/native-music-browser.cjs, tests/native-adsr.test.cjs, tests/native-adsr-browser.cjs
+Evidence pointers: tests/native-music-browser.cjs, tests/native-adsr.test.cjs, tests/native-adsr-browser.cjs, tests/native-lfo.test.cjs, tests/native-lfo-browser.cjs
 - Reviewed Vanessa native composition/transposition/quantization/locks use actual manual APIs and save.
 - Full producer reasoning, lyrics/MIDI planning, selective regeneration, Hum-to-Music, Ghost/Parallel Producer, Live Jam and explanations remain.
 - Native per-pattern ADSR now shares manual controls and reviewed Vanessa music.native.edit with actual worker-rendered source PCM, original notes/MIDI/timing/mixer/effects and one Undo/save. Attack/decay/release are 0–10s, sustain 0–1; stages compress together inside each existing note if needed, positive release reaches zero on its final sample, and no source tail is added. Reset removes the optional envelope; unconfigured instrument WAVs retain byte parity. This is a bounded note-volume envelope, not a wavetable/sample instrument designer, LFO, SoundPrint, Sound Fusion or timbre transfer.
+- Native amplitude LFO now stores optional amplitudeLfo {waveform,clock,rate,depth,phase} on each pattern and shares the existing music.native.edit/worker/source-replacement path. Sine/triangle tremolo attenuates the original mixed source after tanh saturation and before its existing end fade, using a continuous source clock; notes/ADSR/MIDI/timing/mixer stay unchanged. Hz range0.05–20, or periods0.125/0.25/0.5/1/2/4/8/16 quarter-note beats at the source BPM, depth0–1 and phase0≤degrees<360. Reset removes the optional field. Focused units verify exact legacy/reset PCM parity and independent gain/clock behavior. Actual manual and outer reviewed Vanessa, independent PCM/MIDI, saved reopen, reset/locks/crossfade protection and320–1440px dark/light browser checks pass, including decoded MP4. Live-provider/physical-device acceptance is separate; no pitch/filter/LFO matrix, full Instrument Lab or timbre transfer is claimed.
+- Native asynchronous source rendering now guards state/project/view, owner/cloudUid/session identity, exact immutable JSON-string Undo/Redo arrays and ordered entries, and source-library array/asset object/id/type/duration/size/url/file identity. Late worker/storage results cannot commit after a changed scope. Unused staged media cleanup retains the captured owner rather than using the next signed-in account. Actual browser worker/session/cloud/source/history rejection checks pass without an authentication fallback.
 
 PART 17 — Specialist Studio Team: NOTSTARTED
 Code: zorifi-vanessa-professional.js
@@ -134,11 +143,13 @@ Evidence pointers: No dedicated acceptance yet
 
 PART 20 — Mixing and Mastering: PARTIAL
 Code: zorifi-audio-engine.js, app.js, zorifi-offline-mix.js, zorifi-composition-audio.js, zorifi-editor-audio-workflows.js, zorifi-editor-workflow-bridge.js, zorifi-sample-peak-normalize.js, zorifi-sample-peak-normalize.css
-Evidence pointers: tests/audio-studio-browser.cjs, tests/native-music-browser.cjs, tests/offline-mix.test.cjs, tests/offline-mix-browser.cjs, tests/composition-audio.test.cjs, tests/composition-audio-browser.cjs, tests/editor-crossfades.test.cjs, tests/editor-crossfades-browser.cjs, tests/sample-peak-normalize.test.cjs, tests/sample-peak-normalize-browser.cjs
+Evidence pointers: tests/audio-studio-browser.cjs, tests/native-music-browser.cjs, tests/offline-mix.test.cjs, tests/offline-mix-browser.cjs, tests/composition-audio.test.cjs, tests/composition-audio-browser.cjs, tests/editor-crossfades.test.cjs, tests/editor-crossfades-browser.cjs, tests/sample-peak-normalize.test.cjs, tests/sample-peak-normalize-browser.cjs, tests/editor-crossfade-curves.test.cjs, tests/editor-crossfade-curves-browser.cjs, tests/sample-peak-normalize-scope.test.cjs
 - Existing source pan/fade/EQ/compression/limiting/ducking preserved. Shared WAV uses constant-rate nested timing, trims, inherited gain/pan, exact composition length and real stereo sample metrics. Ancestor fades now use each container clock once in live preview, WAV, MP4 and preflight. Manual root-composition/reviewed Vanessa fades have one Undo/save; children remain editable. Failed sources stop the whole mix; Stop/account/revision guards discard late output.
 - Variable-rate/remapped offline audio, pitch-preserving time stretch and non-default container DSP remain explicitly rejected rather than omitted. Fades alone do not implement submix buses/sends/VCA/parallel chains/dynamicEQ/multiband/transient/spatial tools/true-peak/LUFS/Mix Intelligence/Audio Doctor. Browser decode/render may finish after Stop; results are discarded and nodes disconnected.
-- Native root-pair linear audio crossfades now share manual/reviewed Vanessa create/update/reset, existing preview/WAV/MP4 fade fields, retimed incoming keys/captions, one Undo/save and reopening. Sources/outer fades remain intact; later clips stay put and a gap can remain. Constant rates<=16,0.01–30s overlap and strict metadata/locks/collision/dependency checks apply. Equal-power curves, source-handle extension/ripple and full DAW mixing remain unfinished.
+- Native root-pair linear audio crossfades now share manual/reviewed Vanessa create/update/reset, existing preview/WAV/MP4 fade fields, retimed incoming keys/captions, one Undo/save and reopening. Sources/outer fades remain intact; later clips stay put and a gap can remain. Constant rates<=16,0.01–30s overlap and strict metadata/locks/collision/dependency checks apply. Source-handle extension/ripple and full DAW mixing remain unfinished; phase260 adds the bounded equal-power option described below.
 - Normalize selected sample peak now measures an isolated processed root audio/video source before track/master levels and other clips, scales its native base/volume-key envelope after DSP, and verifies a second real stereo render within0.05dB before one Undo/save. Targets −24 to−1dBFS, clip/full source ≤120s, constant positive rate≤16, ≤1000 monotone volume keys and0–200% resulting levels; local originals ≤64MiB encoded,128MiB decoded,48MiB output at48kHz. Stop/account/project/selection/source/revision guards discard stale results; failed storage verification rolls back history and levels. Real source/FX/timing/mixer stay editable. This is sample-peak/RMS evidence, not LUFS, true-peak, full-mix normalization or mastering; browser decode/render may finish after Stop and decoded memory is checked after native decode.
+- Native pair crossfades now offer explicit linear or equal-power curves through the same manual/reviewed Vanessa operation and shared preview/offline/export fade gain. Equal-power uses complementary sine/cosine gains with constant squared sum; correlated recordings may still raise combined peaks. Legacy version1/default linear metadata stays readable; version2 owns explicit curve fields and preserves/restores original inner/outer curve state on update/reset. Source timing, outer fades, later clips, caption/key shifting, locks/collisions and one Undo/save remain native. New unit and real browser PCM/Vanessa/manual/MP4 AAC/Undo/reopen proofs pass at320–1440px. This does not add source-handle extension/ripple, automatic correlation correction or full DAW routing/mastering.
+- Selected sample-peak normalization no longer deep-clones the current project and reserializes every Undo/Redo checkpoint on each100ms monitor/progress tick. Native history entries are immutable JSON strings: exact stack identity, length, order and values are checked without serializing those strings again. Idle/progress guards use cheap account/session/project/view/selection/source/history checks; full current-project structural checks remain at submission, after source reading and each full render, and immediately before commit. Non-string history refuses rather than weakening guards. Deterministic operation-count tests prove100 idle ticks make0 extra history captures/Undo serializations and2000 progress checks use bounded full captures. Existing actual normalization PCM/outer Vanessa/Stop/stale/storage rollback/Undo/reopen/MP4 regression passes; native decode memory/Stop and sample-peak-only limitations remain.
 
 PART 21 — Adaptive music and video: PARTIAL
 Code: zorifi-autocut-creative.js, zorifi-native-music.js, zorifi-sfx.js
@@ -160,14 +171,14 @@ Evidence pointers: No dedicated acceptance yet
 - Licensed searchable creator instrument/sample library, marketplace purchases, royalty splits and provenance moderation are unfinished.
 
 PART 24 — Experimental technologies: NOTSTARTED
-Code: No dedicated implementation tracked
+Code: No implementation mapped
 Evidence pointers: No dedicated acceptance yet
 - NeuroSync, gesture, spatial audio, Endless Jam/Extend, Context Music and coaching remain research.
 - No native/hardware support or unique-world-first claim; research must not block core editing.
 
 PART 25 — Professional Video Editor: PARTIAL
 Code: zorifi-motion-graph.js, zorifi-motion-renderer.js, zorifi-motion-workspace.js, zorifi-parallax-workflow.js, zorifi-advanced-editing.js, zorifi-vanessa-professional-tools.js
-Evidence pointers: tests/parallax-local-browser.cjs, tests/editor-workflows-browser.cjs, tests/project-settings.test.cjs, tests/continued-master-browser.cjs, tests/motion-mask-transforms.test.cjs, tests/motion-mask-transforms-browser.cjs, tests/motion-trim-paths.test.cjs, tests/motion-trim-paths-browser.cjs, tests/motion-repeater.test.cjs, tests/motion-repeater-browser.cjs, tests/motion-key-loops.test.cjs, tests/motion-key-loops-browser.cjs, tests/professional-key-loop.test.cjs, tests/motion-path-morph.test.cjs, tests/motion-path-morph-retime.test.cjs, tests/professional-path-morph.test.cjs, tests/motion-path-morph-browser.cjs
+Evidence pointers: tests/parallax-local-browser.cjs, tests/editor-workflows-browser.cjs, tests/project-settings.test.cjs, tests/continued-master-browser.cjs, tests/motion-mask-transforms.test.cjs, tests/motion-mask-transforms-browser.cjs, tests/motion-trim-paths.test.cjs, tests/motion-trim-paths-browser.cjs, tests/motion-repeater.test.cjs, tests/motion-repeater-browser.cjs, tests/motion-key-loops.test.cjs, tests/motion-key-loops-browser.cjs, tests/professional-key-loop.test.cjs, tests/motion-path-morph.test.cjs, tests/motion-path-morph-retime.test.cjs, tests/professional-path-morph.test.cjs, tests/motion-path-morph-browser.cjs, tests/motion-animation-copy.test.cjs, tests/motion-animation-copy-browser.cjs
 - 51 staged editing tools preserved; native layers/masks/easing/Bezier/shapes/camera/parallax/local plate repair tested within existing bounds.
 - Full AE parity, optical flow, geometry 3D, universal segmentation/tracking, broad creative-set verification remain.
 - Root composition dimensions/FPS/duration/work area now share a validated manual/Vanessa operation with scope checks and metadata postconditions.
@@ -176,6 +187,7 @@ Evidence pointers: tests/parallax-local-browser.cjs, tests/editor-workflows-brow
 - Native Shape Repeater now supports1–64 transient geometry copies, offset/XY/scale/rotation/opacity, scalar and independent named-group animation. Projected bounds/mask pixels, manual/reviewed Vanessa, one Undo/Redo, reopen and actual decoded MP4 tested.2,048 aggregate copies/frame,16,384 local extent/effective scale and existing canvas budgets are enforced; no AE/plugin parity claimed.
 - Native cycle/ping-pong expressions now repeat an existing visual keyed segment after its end in the containing composition clock, preserving keys/easing. Manual property/mode controls, reviewed Vanessa/backend validation, real repeated/reversed pixels, one Undo/Redo, nested rates, reopen and decoded4s MP4 tested. Audio/time and spatial/stagger-owned channels are excluded; at least2 finite keys/1ms span and existing render budgets are enforced. No arbitrary expression scripting or AE parity.
 - Native shape.morph now stores corresponding editable path vertices/Bezier handles in main or named-group channels with unchanged point order/count and closed flag. Manual pen/JSON controls and reviewed motion.edit share history/save and native rendering. Composition clocks, precompose/duplicate/animation retime and source-duration retime preserve morph timing. Limits: 1–128 keys/channel, 2–2000 points/key, 65536 project keyed vertices, ±16384 coordinates, 16384 local extent and 16Mi local pixels; monotone easing/Bezier handles exclude overshoot. Segment maximum-area validation rejects unsafe intermediate planes before commit. Topology conversion, optical interpolation, arbitrary shape matching and full AE parity remain incomplete.
+- Animation copy now accepts up to33 explicit morphs mappings [{sourceGroupId?,targetGroupId?}], with omitted group IDs selecting the main path. Scalar-only copy leaves morphs intact. Requested channels retain literal corresponding vertices/handles/easing and shift by (at or target.start) minus source.start in the target containing composition clock. Keys must fit the target layer; point count and open/closed topology must match. Only mapped target morphs/selected scalar channels are replaced; base geometry/paint/unmapped animation remain editable. Malformed/duplicate mappings, incompatible topology/clocks/locks and whole-project render/animation budgets refuse atomically. Focused units and actual manual/reviewed Vanessa/pixel/MP4/reopen/Undo/storage/stale/lock checks pass in dark/light320–1440px browser layouts. Shared backend proposal validation also passes. No automatic shape matching/resampling, optical interpolation or full AE parity is claimed.
 
 PART 26 — Intelligent Advanced AutoCut: PARTIAL
 Code: zorifi-autocut-director.js, zorifi-autocut-media.js, netlify/functions/_shared/autocut-planner.mjs
@@ -267,7 +279,7 @@ Code: docs/ultimate/requirements.json, docs/ultimate/IMPLEMENTATION-JOURNAL.txt
 Evidence pointers: No dedicated acceptance yet
 - All five sources read and1,673 source rows retained, with forty-part audit and evidence mapping.
 - Audit/reliability/native music/local finance phase advancing; remaining phases not declared complete.
-- Protected preview/production promotion blocked on credential incident and incomplete production boundaries.
+- Public production promotion remains gated on credential remediation and incomplete production boundaries. Authorized protected development previews retain hosting sign-in protection.
 
 PART 40 — Acceptance criteria: PARTIAL
 Code: tests/, docs/ultimate/
@@ -353,6 +365,22 @@ proofs cover ADSR worker PCM/MIDI, morph decoded320x180 MP4 and real selected st
 normalization/rollback/Stop/stale-source scopes plus decoded3s MP4 AAC near−9dBFS.
 Responsive320/390/768/1440px proofs use explicit local auth/provider fixtures.
 All40 area statuses and1,673 raw row statuses are retained; no area promotion.
-Further regression/integrity checks and protected preview receipt are pending
-root integration. See CONTINUATION-2026-11-26.txt. Production/provider/finance/
+All eight phase259 regressions and integrity checks passed; protected runtime
+0cdce76 deployed. See CONTINUATION-2026-11-26.txt. Production/provider/finance/
 credential/device gates and the historical17November PDF remain unchanged.
+
+
+27 NOVEMBER CONTINUATION — PHASE260
+Native amplitude LFO, explicit compatible path-animation copy, equal-power
+crossfades and cheaper scope-safe normalization are implemented through existing
+state/history/source paths.844/844 full unit tests pass,0 failures/skips
+(808 previous +36 new). All four feature browser proofs pass with actual PCM/
+pixels/outer Vanessa/MP4/history/reopen and320–1440px controls. All ten existing
+regression scripts pass, including51 tools, Chromium/WebKit professional/Vanessa,
+native scale/harmony/ADSR, lineage, crossfades, recovery and named cache retention.
+477 syntax files/341 asset references pass; build173 files,14,536 strings/126
+sources. Offline credential scan0 findings/read errors; active revocation cannot
+be determined by that scan. Protected hosting receipt follows in the report. No
+acceptance is invented. LFO row0389 is now Partial; all40 area statuses and all other raw
+row statuses/source text/hashes remain unchanged. Overall master remains Partial.
+See CONTINUATION-2026-11-27.txt; credential/provider/finance/device/cost gates remain.
