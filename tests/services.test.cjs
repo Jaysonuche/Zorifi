@@ -73,7 +73,7 @@ test('Gemini Lyria prompt returns a playable 30-second MP3 without polling or in
  const savedFetch=global.fetch,savedNetlify=global.Netlify;let body;
  global.Netlify={env:{get:firebaseEnv(key=>key==='GEMINI_API_KEY'?'unit-test-key':'')}};
  global.fetch=firebaseTransport(async(url,options)=>{assert.equal(url,'https://generativelanguage.googleapis.com/v1beta/interactions');body=JSON.parse(options.body);return Response.json({steps:[{type:'model_output',content:[{type:'text',text:'Lyrics'},{type:'audio',mime_type:'audio/mpeg',data:Buffer.from('mp3-bytes').toString('base64')}]}]});});
- try{const response=await run('vanessa-music',{prompt:'A calm piano melody',genre:'ambient',vocals:'instrumental',duration:15}),result=await response.json();assert.equal(response.status,200);assert.equal(body.model,'lyria-3-clip-preview');assert.match(body.input,/calm piano melody/);assert.match(body.input,/Instrumental, no vocals/);assert.equal(result.duration,30);assert.match(result.url,/^data:audio\/mpeg;base64,/);assert.deepEqual(result.stems,{});}
+ try{const response=await run('vanessa-music',{prompt:'A calm piano melody',genre:'ambient',vocals:'instrumental',duration:30}),result=await response.json();assert.equal(response.status,200);assert.equal(body.model,'lyria-3-clip-preview');assert.match(body.input,/calm piano melody/);assert.match(body.input,/Instrumental, no vocals/);assert.equal(result.duration,30);assert.match(result.url,/^data:audio\/mpeg;base64,/);assert.deepEqual(result.stems,{});}
  finally{global.fetch=savedFetch;global.Netlify=savedNetlify;}
 });
 
@@ -82,11 +82,19 @@ test('Gemini Lyria keeps Studio key, scale and rhythm in its music direction',as
  global.Netlify={env:{get:firebaseEnv(key=>key==='GEMINI_API_KEY'?'unit-test-key':'')}};
  global.fetch=firebaseTransport(async(url,options)=>{body=JSON.parse(options.body);return Response.json({steps:[{type:'model_output',content:[{type:'audio',mime_type:'audio/mp3',data:Buffer.from('music-clip').toString('base64')}]}]});});
  try{
-  const response=await run('vanessa-music',{prompt:'A driving synthwave soundtrack',genre:'Synthwave',mood:'Energetic & Driving',tempo:128,key:'D',scaleMode:'minor',timeSignature:'6/8',groove:'half-time',instrumentation:'synth lead, bass guitar',duration:90});
+  const response=await run('vanessa-music',{prompt:'A driving synthwave soundtrack',genre:'Synthwave',mood:'Energetic & Driving',tempo:128,key:'D',scaleMode:'minor',timeSignature:'6/8',groove:'half-time',instrumentation:'synth lead, bass guitar',duration:30});
   const result=await response.json();assert.equal(response.status,200);assert.equal(result.duration,30);
   for(const expected of ['Genre: Synthwave','Mood: Energetic & Driving','Tempo: 128 BPM','Key: D','Scale: minor','Time signature: 6/8','Groove: half-time','Instruments: synth lead, bass guitar'])assert.ok(body.input.includes(expected),expected);
   assert.equal(body.model,'lyria-3-clip-preview');assert.equal(typeof body.input,'string');assert.ok(!body.parameters);assert.equal(result.mimeType,'audio/mpeg');
  }finally{global.fetch=savedFetch;global.Netlify=savedNetlify;}
+});
+
+test('cloud music refuses unsupported requested durations before any billable generation',async()=>{
+ const savedFetch=global.fetch,savedNetlify=global.Netlify;let paidCalls=0;
+ global.Netlify={env:{get:firebaseEnv(key=>key==='GEMINI_API_KEY'?'unit-test-key':'')}};
+ global.fetch=firebaseTransport(async()=>{paidCalls++;throw Error('No provider call may occur for an unsupported duration.');});
+ try{for(const duration of [15,90,600,'30',null]){const response=await run('vanessa-music',{prompt:'Original instrumental',duration}),result=await response.json();assert.equal(response.status,400);assert.equal(result.code,'UNSUPPORTED_DURATION');assert.match(result.error,/exactly 30 seconds/);}assert.equal(paidCalls,0);}
+ finally{global.fetch=savedFetch;global.Netlify=savedNetlify;}
 });
 
 test('Gemini media errors are safe and never claim a generated file',async()=>{

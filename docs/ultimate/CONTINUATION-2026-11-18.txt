@@ -1,0 +1,195 @@
+ZORIFI ULTIMATE - MP4 REPAIR / NATIVE STEP SEQUENCING
+18 November 2026 | Continues existing development branch; production unchanged.
+
+MP4 DIAGNOSIS AND REPAIR
+The former export implementation used a MediaRecorder start event as frame
+readiness and as the timeline clock. A premature requestData flush could emit
+that event without encoded video. Conversely, waiting for the first muxed chunk
+without that flush extended a real requested1.2s scene to2.171533s. Empty/audio-
+only recordings were rejected correctly, but retrying did not repair capture.
+
+Current app.js verifies an actual canvas video frame via a muted video-only
+capture sink before recording, keeps the capture consumer active, requests each rendered frame explicitly where
+supported, and uses the recorder.start call as the clock origin. MP4 gathers a
+complete session without early/timed fragment flushes. It verifies real encoded
+frames from a short local sample, negotiates supported H.264/AAC candidates, then
+creates a fresh video capture and audio-track clone for the actual saved range.
+The discarded sample never becomes a download or an edit/history checkpoint. Compatible automatic
+capture and loadeddata fallbacks remain for browsers without those frame APIs.
+Audio/video decoders are warmed together before recording; playback does not
+block the frame loop. New source seeks are awaited after setting their target.
+The sink, callbacks, timer, audio context and tracks are cleaned up on success,
+failure and cancellation. Encoder errors stay visible; invalid outputs remain
+blocked. An MP4 constructor failure no longer silently creates another format.
+The existing explicit WebM alternative remains available after supported errors.
+
+Diagnosis was iterative: isolated early-flush tests alone did not reproduce the
+app failure. A first preflight/clock-only candidate passed some Edge cases but
+failed delayed Chrome capture with audio-only output. Explicit per-paint capture
+was then added. Cold codec probes and a separate fresh recording stream repaired
+additional Chrome startup/first-frame failures; constructor support alone is
+not treated as proof. An experimental frame-generator path did not fix those
+failures and was removed. The multi-source path also awaited each play start inside the frame loop;
+that blocking path was removed and decoders are warmed concurrently. Only the final candidate's actual receipts count as current
+verification. Diagnostic source bytes are real encoders, not fabricated MP4s.
+
+NATIVE DRUM STEP SEQUENCER
+Added16/32/64 evenly divided steps per actual source bar in native kick/snare/hat
+patterns. Meter, BPM, bar, MIDI pitch and hit velocity remain real note data;
+other bars, other pitches and off-grid notes are preserved. Partial last bars
+disable cells beyond the source. Locks, resource limits and validation apply.
+The same music.native.edit operation serves manual controls and reviewed Vanessa
+commands, rerenders real WAV audio, saves one native Undo, and persists locally.
+Example: Enable native drum step5 of32 in bar2 at pitch38 to70% velocity.
+Responsive controls use the existing note dialog rather than a separate store.
+Flam/roll/probability/chaining, full per-step pitch offsets, MIDI recording/MPE
+and interactive piano-roll drawing remain incomplete. No world-first claim.
+
+CURRENT VALIDATION
+-656 unit tests pass, zero failed/skipped. Existing51 staged tools retained.
+-Native sequencer real browser: manual step, reviewed Vanessa step, decoded5s
+ audio, exactly one history checkpoint per edit, Undo/Redo, save/reopen and
+320/390/768/1440px dialogs passed. Firebase identity is a fixture; paid calls0.
+-Real MP4 capture tests decode moving pixels, finite duration and actual audio;
+ delayed capture confirmation, selected range, silent portrait720p and1080p,
+ imported real video and45s output are verified where named in receipts.
+-Actual Chromium/WebKit Vanessa regression passed ordinary reply, real split,
+ visible timeline, confirmation, Undo/Redo, device save/reload, stale proposal,
+ Stop and account isolation. Mic remains opt-in. Auth/AI replies are fixtures.
+-Explicit fallback regression rejects deliberately paused/invalid real MP4 with
+ no download, then exports reviewed WebM with decoded visible pixels/audio.
+-Build, syntax/reference checks and safe credential scan are recorded as final gates.
+Encoder-preparation cancellation and real audio-only MP4 rejection are checked
+without fabricated encoded bytes or invalid downloads.
+
+EVIDENCE / LIMITS
+See artifacts/mp4-capture-edge.json, mp4-capture-chrome.json,
+native-drum-sequencer-browser.json, mp4-native-safety-final.log,
+vanessa-export-phase-regression.log and ultimate-unit-tests-final.log.
+These are bounded Windows browser tests, not every device/codec/media size.
+Real-time capture can reject output outside its duration/dimension guard. It is
+not a frame-accurate offline encoder or4K/8K/60fps physical-device certification.
+The17November131-page historical PDF remains a dated snapshot; this phase report
+records the subsequent repair without erasing its prior failure evidence.
+
+SECURITY / COST / RELEASE
+No paid AI calls, new providers, live charges, Firebase upgrade or new recurring
+service were introduced. Original Studio media stays on the device. Preserve
+the pre-existing owner README.md edit. Shared initial AI ceiling remains GBP15.
+Production remains3.47.0 / aa2f9e7 until release gates pass. Owner last confirmed
+the exposed key was not revoked; do not reuse it or promote production without
+incident remediation. Hosted privileged finance, all-provider reservations,
+replacement-key/model access, licensing and device acceptance remain unfinished.
+Development branch/protected preview only; keep the existing draft PR unmerged.
+
+FINAL LOCAL RECEIPTS
+656 unit tests pass with zero failures/skips. Web build:163 files plus assets.
+Syntax/reference integrity and secret scan passed; credential scan findings0,
+read errors0. This cannot establish external key revocation.
+Edge 157.0.4341.60:
+  delayed-audio / 320x180 / 1.217633s / moving decoded frames / audible PCM
+  portrait-silent / 720x1280 / 1.2091s / moving decoded frames / intentionally silent
+  1080p-silent / 1920x1080 / 1.202367s / moving decoded frames / intentionally silent
+  imported-video / 480x270 / 1.207s / moving decoded frames / audible PCM
+  long-range / 480x270 / 45.029967s / moving decoded frames / audible PCM
+Chrome 157.0.8103.78:
+  delayed-audio / 320x180 / 1.187167s / moving decoded frames / audible PCM
+  portrait-silent / 720x1280 / 1.198967s / moving decoded frames / intentionally silent
+  1080p-silent / 1920x1080 / 1.1883s / moving decoded frames / intentionally silent
+  imported-video / 480x270 / 1.2327s / moving decoded frames / audible PCM
+The initial2s encoder sample is validated and discarded. The requested range
+is timed only in the separate fresh recording; no preroll is added to the file.
+No live provider or signed-in hosted acceptance test is implied by local receipts.
+
+PROTECTED DEVELOPMENT PREVIEW
+Runtime: c484db3beb91658a0afc41078b9a40158e43aa81 (pushed).
+URL: https://zorifi-dy3j75bbq-zorifi.vercel.app/
+Deployment dpl_2tz4xWvY1GKrMQGCM5yuPgpv3Sy6 is READY. Hosting metadata confirms
+the candidate and codex/vanessa-openai-production. Unauthenticated requests
+require hosting login; no protection bypass was created or used. This is not a
+signed-in hosted/browser/provider acceptance claim. Production release.json
+still3.47.0 / aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb; not promoted.
+Rollback source is preserved in prior branch commits; project/media schemas
+and original sources were not migrated or deleted.
+
+NEXT VERIFIED DEVELOPMENT PHASE — MASKS, DRUM ARTICULATIONS AND PREFLIGHT
+Continue the existing branch; c484db3 is the prior verified runtime/rollback.
+1. Native mask transforms: independent XY/rotation/inversion/removal, animated
+   mask:rotation, preserved Bezier control handles and opacity during pen edits.
+   Masks follow the actual native projected camera quad; opacity composites once
+   after perspective triangles. Bounds protect canvas radii/alpha overshoot.
+   Manual controls and reviewed Vanessa use the existing motion.edit path.
+2. Native drum flams and rolls: real owned source notes,2-hit flam and2/3/4/6/8
+   rolls. Removing/replacing an owned group preserves other pitches, off-grid
+   notes and bars. Individual-note edits detach the organizational ownership.
+   Existing music.native.edit renders real audio, saves one Undo checkpoint and
+   retains MIDI/trim/rate support. Probability/pattern chaining remain unfinished.
+3. Production Preflight: Export video/WAV contains Check before export; Vanessa
+   understands Run production preflight. Same read-only local path, existing
+   project/history and native composition renderer, no AI/provider charge.
+   Recursively checks up to500 layers/depth8 in each composition's own clock.
+   Six-frame maximum and first12s/eight eligible root sources/40MiB per-source/
+   64MiB total audio review limits. Known original SFX use their deterministic
+   native PCM source. Audio-only checks omit unnecessary black frame sampling.
+   Source limitations and decode failures remain explicit. Text-only output is
+   valid; camera/null controls cannot falsely provide visible output coverage.
+   Stop, account/project/revision/source changes discard stale samples and erase
+   private report UI. Export choices remain behind the report, unchanged.
+   Read-only sampling never fabricates a previous AI edit or replaces lastResult.
+
+ACCEPTANCE RECEIPTS (LOCAL, OFFLINE PROVIDER/AUTH FIXTURES)
+-675 unit tests pass;0 failures/skips.51 staged editing actions preserved;
+ 105 total discoverable actions include54 separate workflows.
+-tests/motion-mask-transforms-browser.cjs passed rendered manual rotation,
+ inversion, Bezier/pen preservation, direct mask-rotation keyframe control,
+ reviewed Vanessa keys, one Undo/Redo, deterministic scrub, projected camera
+ pixel bounds/50% alpha, saved reopen and remove/Undo.
+-tests/native-drum-articulation-browser.cjs passed manual flam/reviewed Vanessa
+ 8-hit roll, confirmation, unrelated note preservation, one Undo/Redo,5s decoded
+ audio, MIDI, source trim/rate MIDI and saved reopen at320/390/768/1440px.
+-tests/production-preflight-browser.cjs passed actual4-frame native pixels/2s
+ PCM, manual and Vanessa, no timeline/history mutation, no fake professional
+ result, Stop/noncooperative late result, account isolation, missing nested media,
+ retained export fields, audio-only checks and saved reopen. Light/dark UI and
+ 320/390/768/1440px fit verified;320x640 visual inspection passed.
+-tests/professional-native-tools-browser.cjs: all51 staged native actions passed.
+-tests/professional-stage2-browser.cjs and tests/vanessa-production-browser.cjs:
+ Chromium+WebKit passed real local timeline edits, ordinary conversation, review,
+ Undo/Redo, save/refresh, stale/Stop/account guards and opt-in mic state. Gemini/
+ Firebase/model replies use explicit fixtures; this is not live provider testing.
+ Windows WebKit uses data URLs because its IndexedDB Blob support is limited.
+-tests/mp4-capture-browser.cjs: actual H264/AAC MP4 decoded moving frames/audio,
+ selected range, delayed capture, silent portrait720x1280 and1920x1080 plus real
+ imported-video output. No fresh physical-device/4K/8K certification is implied.
+
+Still partial: full-master completion, unrestricted AE/DAW parity, real production
+ provider/model access, hosted finance/entitlements, physical-device qualification,
+ plugin/licensing checks, full-program LUFS, final encode/transcript/creative
+ approval. Preflight is sparse technical evidence and does not certify delivery.
+No Firebase upgrade, paid service or billable provider operation in this phase.
+Production remains gated by the previously unrevoked exposed credential. Scan
+ cleanliness cannot prove external revocation. Preserve README.md owner edits.
+The131-page PDF dated17November remains a historical snapshot; this addendum and
+the live requirements ledger record later work without rewriting that snapshot.
+
+FINAL PHASE INTEGRITY
+675/675 unit tests,0 skips/failures.432 source syntax checks and327 asset
+references passed. Web build166 files plus assets;13798 approved interface
+strings from121 sources. Offline source/history/build credential-shape scan:
+0 blockers,0 review findings,0 read errors; no claim of external revocation.
+Both new mask/articulation browser proofs reran after all preflight wrappers
+were installed and passed. MP4 encoder preparation Stop and real audio-only
+MP4 rejection guard passed with no unintended download and cleaned tracks.
+
+PHASE PREVIEW RECEIPT
+Runtime8a50014f69cf2004497791b18d9981b37f58e6cc is committed and pushed to
+codex/vanessa-openai-production. GitHub commit status Vercel=success and its
+deployment bot reports Ready for ApZrikJRstpuVb1Ub7tUHBHzj1Pj. Protected alias:
+https://zorifi-git-codex-vanessa-openai-production-zorifi.vercel.app
+Preview release.json returns302 to hosting login. No protection bypass or
+signed-in hosted/provider acceptance was attempted. This session lacks Vercel
+CLI login; the receipt uses GitHub hosting status/bot plus HTTP verification.
+Public release.json verified200:3.47.0 Beta /
+aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb; production was not promoted.
+Draft PR1 remains open/unmerged and records the exact tested runtime. A following
+documentation-only commit records this receipt; runtime files are unchanged.

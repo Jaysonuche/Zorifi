@@ -6,7 +6,25 @@
  const fail=message=>{throw new Error(message);};
  function identity(){if(!firebaseGateway.configured()||!currentUser?.cloudUid||firebaseGateway.session?.uid!==currentUser.cloudUid)fail('Sign in to your Firebase account before using Vanessa.');return {uid:currentUser.cloudUid,localId:currentUser.id,session:firebaseGateway.session,projectId:state.projectId};}
  async function authorize(signal){const captured=identity();await firebaseGateway.getIdToken();if(signal?.aborted)throw new DOMException('Vanessa request cancelled.','AbortError');const latest=identity();if(captured.uid!==latest.uid||captured.localId!==latest.localId||captured.session!==latest.session)fail('The signed-in account changed.');return captured;}
- function fingerprint(){return JSON.stringify([state.projectId,state.selected,ProjectModel.captureHistory(state),state.undo.length,state.redo.length,state.mediaAssets.map(asset=>[asset.id,asset.type,asset.duration])]);}
+ // Ephemeral guard observations, not another editor or history store. Native
+ // checkpoints are immutable JSON strings; compare their values without copying
+ // megabytes of old projects into every fingerprint. Weak keys release removed
+ // stacks/libraries/assets, and URL/File contents never enter the guard string.
+ const stackObservations=new WeakMap(),sourceObservations=new WeakMap(),libraryObservations=new WeakMap();let observationId=0;
+ const sourceFields=['id','type','duration','size','url','file','mimeType','builtin','sfxId','audioTrackId'];
+ function stackToken(stack){
+  if(!Array.isArray(stack)||stack.some(entry=>typeof entry!=='string'))fail('Repair invalid native Undo/Redo history before asking Vanessa to edit.');
+  let record=stackObservations.get(stack);if(!record||record.entries.length!==stack.length||record.entries.some((entry,index)=>entry!==stack[index])){record={token:++observationId,entries:stack.slice()};stackObservations.set(stack,record);}return record.token;
+ }
+ function sourceToken(asset){
+  if(!asset||typeof asset!=='object'||Array.isArray(asset))fail('Repair the project source library before asking Vanessa to edit.');
+  const values=sourceFields.map(key=>asset[key]);let record=sourceObservations.get(asset);if(!record||record.values.some((value,index)=>!Object.is(value,values[index]))){record={token:++observationId,values};sourceObservations.set(asset,record);}return record.token;
+ }
+ function libraryToken(library){
+  if(!Array.isArray(library))fail('Repair the project source library before asking Vanessa to edit.');
+  const tokens=library.map(sourceToken);let record=libraryObservations.get(library);if(!record||record.tokens.length!==tokens.length||record.tokens.some((token,index)=>token!==tokens[index])){record={token:++observationId,tokens};libraryObservations.set(library,record);}return record.token;
+ }
+ function fingerprint(){const guards=[stackToken(state.undo),stackToken(state.redo),libraryToken(state.mediaAssets)];return JSON.stringify([state.projectId,state.selected,ProjectModel.captureHistory(state),state.undo.length,state.redo.length,state.mediaAssets.map(asset=>[asset.id,asset.type,asset.duration]),guards]);}
  function scope(){return {...identity(),project:state,view:state.view,revision:fingerprint()};}
  function check(captured){const current=identity();if(current.uid!==captured.uid||current.localId!==captured.localId||current.session!==captured.session||state!==captured.project||state.view!==captured.view||state.projectId!==captured.projectId||fingerprint()!==captured.revision)fail('The account, project, selection or timeline changed. Ask Vanessa to prepare a fresh proposal.');}
  function normalize(plan){if(!Array.isArray(plan?.actions)||plan.actions.length!==1)fail('Use one split, trim, undo, redo or save operation per instruction.');const action=structuredClone(plan.actions[0]),p=action.parameters||{};if(!initial.has(action.command)||Object.keys(action).some(key=>!['command','target','parameters','confirmation'].includes(key))||!p||Array.isArray(p)||typeof p!=='object')fail('That editing operation is unsupported.');if(action.confirmation!==undefined&&typeof action.confirmation!=='boolean')fail('Invalid confirmation metadata.');delete action.confirmation;const keys=action.command==='clip.split'?['time']:action.command==='clip.trim'?['duration','from']:[];if(Object.keys(p).some(key=>!keys.includes(key)))fail('The proposal contains unsupported parameters.');action.parameters=p;
@@ -35,17 +53,24 @@
  }
  async function request(input,{signal,intent='conversation'}={}){
   if(requestActive)fail('Vanessa is finishing the previous request. Please wait or press Stop.');requestActive=true;activeIntent=intent;
-  const startingProject=state.projectId,startingView=state.view,startingRevision=['editing','professional'].includes(intent)?fingerprint():null;
-  const controller=new AbortController(),cancel=()=>controller.abort(signal.reason);if(signal?.aborted)cancel();else signal?.addEventListener('abort',cancel,{once:true});controllers.add(controller);const turnEpoch=epoch;
-  try{if(!ZorifiPrivacy.consent(localStorage,currentUser?.id||'guest'))fail('Enable optional AI processing in Privacy & data before asking Vanessa.');const account=await authorize(controller.signal);if(startingProject!==state.projectId||startingView!==state.view||startingRevision&&startingRevision!==fingerprint())fail('The project changed before this request was sent.');const project=state.view==='editor'?{id:state.projectId,ownerUid:account.uid}:null,key=`zorifi-vanessa-cloud-session-v1:${account.uid}:${project?.id||'home'}`;let session;try{session=JSON.parse(localStorage.getItem(key)||'null');}catch{}if(!session?.id)session={id:crypto.randomUUID(),sequence:0};const requestId=crypto.randomUUID(),capturedProject=state.projectId,capturedView=state.view,capturedRevision=['editing','professional'].includes(intent)?fingerprint():null;let sequence=session.sequence+1;
+  const controller=new AbortController(),cancel=()=>controller.abort(signal?.reason);controllers.add(controller);const turnEpoch=epoch;
+  try{
+   // Captures may reject malformed history or authentication. Keep every such
+   // failure inside this finally so a failed request cannot latch the busy flag.
+   const editing=['editing','professional'].includes(intent),startingProject=state.projectId,startingView=state.view,startingScope=editing?scope():null;
+   if(signal?.aborted)cancel();else signal?.addEventListener('abort',cancel,{once:true});
+   if(!ZorifiPrivacy.consent(localStorage,currentUser?.id||'guest'))fail('Enable optional AI processing in Privacy & data before asking Vanessa.');const account=await authorize(controller.signal);
+   if(startingProject!==state.projectId||startingView!==state.view)fail('The project changed before this request was sent.');if(startingScope)check(startingScope);
+   const project=state.view==='editor'?{id:state.projectId,ownerUid:account.uid}:null,key=`zorifi-vanessa-cloud-session-v1:${account.uid}:${project?.id||'home'}`;let session;try{session=JSON.parse(localStorage.getItem(key)||'null');}catch{}if(!session?.id)session={id:crypto.randomUUID(),sequence:0};const requestId=crypto.randomUUID(),capturedProject=state.projectId,capturedView=state.view,capturedScope=editing?scope():null;let sequence=session.sequence+1;
    for(let attempt=0;attempt<2;attempt++){session.sequence=sequence;localStorage.setItem(key,JSON.stringify(session));const payload={sessionId:session.id,requestId,sequence,project,intent,message:input.message||input.prompt||input.input?.message,context:{...(input.context||input.editorContext||input.input?.context||{}),...(input.input?.profile?{profile:input.input.profile}:{}),...(input.input?.memories?{approvedMemories:input.input.memories}:{}),...(input.input?.attachments?{attachments:input.input.attachments}:{})},preferredLanguage:currentUser.language||globalI18n.locale};
-    const response=await firebaseGateway.authenticatedFetch(endpoint(),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:controller.signal}),data=await response.json();
-    if(controller.signal.aborted||turnEpoch!==epoch||currentUser?.id!==account.localId||firebaseGateway.session!==account.session||state.projectId!==capturedProject||state.view!==capturedView||capturedRevision&&fingerprint()!==capturedRevision)throw new DOMException('The conversation or project changed. The reply was discarded.','AbortError');
+    const response=await firebaseGateway.authenticatedFetch(endpoint(),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:controller.signal}),data=await response.json();let sameScope=true;if(capturedScope)try{check(capturedScope);}catch{sameScope=false;}
+    if(controller.signal.aborted||turnEpoch!==epoch||currentUser?.id!==account.localId||firebaseGateway.session!==account.session||state.projectId!==capturedProject||state.view!==capturedView||!sameScope)throw new DOMException('The conversation or project changed. The reply was discarded.','AbortError');
     if(!response.ok){if(data.code==='SEQUENCE_CONFLICT'&&data.expectedSequence&&attempt===0){sequence=data.expectedSequence;continue;}throw Object.assign(new Error(data.error||'Vanessa could not complete this request.'),{status:response.status,code:data.code});}
     if(data.requestId!==requestId||data.sessionId!==session.id||data.sequence!==sequence)fail('Vanessa returned a reply for a different conversation turn.');return data;
    }
   }finally{signal?.removeEventListener('abort',cancel);controllers.delete(controller);if(turnEpoch===epoch){requestActive=false;activeIntent=null;}}
  }
+
  function cancel(reason='Vanessa request stopped.'){epoch++;requestActive=false;activeIntent=null;for(const controller of controllers)controller.abort(new DOMException(reason,'AbortError'));controllers.clear();executing.clear();proposals.clear();}
  async function clearConversation(){const account=identity(),key=`zorifi-vanessa-cloud-session-v1:${account.uid}:${state.view==='editor'?state.projectId:'home'}`;let session;try{session=JSON.parse(localStorage.getItem(key)||'null');}catch{}if(session?.id){const response=await firebaseGateway.authenticatedFetch(endpoint(),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({operation:'clear',sessionId:session.id})});if(!response.ok)throw Error('Cloud conversation removal failed. Your conversation is kept so you can retry.');}localStorage.removeItem(key);}
  async function turn(message){if(!isDirectVanessaCommand(message))return null;const local=state.view==='editor'?VanessaActions.parseNaturalLanguage(message,vanessaEditorContext()):{actions:[]};if(/^\s*(?:please\s+)?undo\b/i.test(message))local.actions=[{command:'history.undo',parameters:{}}];if(/^\s*(?:please\s+)?redo\b/i.test(message))local.actions=[{command:'history.redo',parameters:{}}];if(!local.actions.length||!local.actions.every(action=>initial.has(action.command)))return null;

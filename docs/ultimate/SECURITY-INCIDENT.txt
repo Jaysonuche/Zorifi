@@ -1,0 +1,73 @@
+ZORIFI ULTIMATE — CREDENTIAL EXPOSURE / RELEASE GATE
+Audit: 16 November 2026
+Baseline HEAD: 7afd5c71da2423e6758e5085dcb5c47e6432f5d5 (working tree in progress)
+
+INCIDENT STATUS: OPEN — PRODUCTION PROMOTION BLOCKED
+
+The owner previously pasted an OpenAI credential into the conversation and
+confirmed on 16 November that it has NOT been revoked. Do not reuse that key.
+No live API request, credential validation, deployment, billing change or secret
+configuration was performed for this audit. The key is intentionally absent
+from this document, the audit receipt, tests and scanner output.
+
+Revocation is still required at the provider. A clean repository scan does not
+revoke a key, prove non-use, identify third-party copies, or establish that the
+credential is safe. Replacement credentials must be entered only through the
+protected hosting-secret configuration or a hidden local input flow. They must
+not be pasted into chat, source, logs, build arguments or a Git commit.
+
+READ-ONLY OFFLINE AUDIT RESULTS
+
+scripts/check-secret-exposure.cjs scanned:
+- 546 currently tracked text files (approximately 6.75 MB).
+- 8 new untracked source/document files present at audit time.
+- 1,096 distinct reachable historical text blobs (approximately 58.86 MB).
+- All 69 reachable commit messages.
+- 1,152 text build/artifact/log files (approximately 17.46 MB).
+
+Detected credential-shaped findings: 0. Read failures: 0.
+Receipt: artifacts/ultimate-credential-audit.json (local, ignored by Git).
+The working tree changes concurrently; rerun the audit on the final reviewed
+candidate before publishing a preview or promoting a release.
+
+COVERAGE AND LIMITS
+
+The scanner detects recognizable OpenAI, Anthropic, GitHub, Stripe/payment,
+Slack, AWS access-ID, Google API-key and private-key-header shapes. Findings
+contain only category, location and a one-way fingerprint; matched content and
+source context are never printed. Google API-key matches are review items,
+because Firebase public web configuration is not itself an administrator key.
+
+The scanner deliberately does not read .env files, private credential/auth
+stores, dependencies, symlinks, binary/zero-byte-containing files or files over
+8 MiB. Git history covers reachable objects, not discarded unreachable blobs.
+External conversation copies, provider/hosting logs, cloud audit records,
+credentials in unrecognized formats and out-of-workspace backups are outside
+this scan. No claim of a complete forensic investigation is made.
+
+PREVENTION / VERIFICATION
+
+Run: node scripts/check-secret-exposure.cjs
+It exits nonzero for secret-shaped blockers, read failures or incomplete scans.
+Review-only Google API keys do not establish a secret leak; verify restrictions
+and usage separately. No key is sent to any provider during the scan.
+
+Eight tests pass in tests/security-scan.test.cjs. These verify redaction of
+matched values and filenames, stable one-way fingerprints, private-file
+exclusion, overlap classification, traversal/binary/size protection, removal
+from current source while a secret remains in history, and commit-message
+leak detection. Synthetic fixture tokens are assembled only in temporary test
+repositories and never authenticate a request.
+
+REMAINING RELEASE REQUIREMENTS
+
+1. Owner confirms revocation of the exposed credential.
+2. Replacement is entered through a protected secret configuration, without
+   revealing its value to this conversation.
+3. Authorized bounded live connection test uses the replacement credential,
+   with actual project/model access and spending safeguards verified.
+4. Final candidate passes regression/security/export checks and protected
+   preview review. Existing 3.47.0 remains the production rollback baseline.
+
+This audit found no reason to rewrite Git history or delete project data.
+It does not close the active exposed-key incident or authorize production.

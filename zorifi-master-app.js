@@ -56,7 +56,7 @@
       if(musicStudioJob&&['queued','running'].includes(musicStudioJob.result?.status))throw new Error('Music generation is already running.');
       if(!provider.configured)throw new Error(provider.error||'Connect a music provider in AI settings first.');
       const local=provider.provider==='Local CPU',lyria=String(provider.provider||'').startsWith('Gemini Lyria');
-      const requested=Number(settings.duration)||30,duration=lyria?30:local?Math.min(30,Math.max(5,requested)):Math.min(600,Math.max(15,requested));
+      const requested=Number(settings.duration),duration=requested;if(!Number.isFinite(duration)||duration<5||duration>600)throw Error('Choose an exact music duration between 5 and 600 seconds.');if(lyria&&duration!==30)throw Error(`You requested ${duration}s. Cloud music supports exactly 30s. Choose that length explicitly or ask for a native instrumental arrangement.`);if(local&&duration>30)throw Error('The optional companion supports 5–30s. Ask for native instruments for a longer arrangement.');
       const normalized=MusicStudio.normalize({...settings,prompt,duration,requestedStems:[],vocals:local?'instrumental':settings.vocals});
       const input=MusicStudio.providerPayload({...normalized,mood:settings.mood,outputFormat:local?'wav':'mp3'});
       // The configured server chooses the actual model; no credential or

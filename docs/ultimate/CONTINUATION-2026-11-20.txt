@@ -1,0 +1,142 @@
+ZORIFI ULTIMATE — HARMONY, SHAPE REPEATERS AND COMPOSITION AUDIO
+20 November 2026 | Development preview | Master specification still PARTIAL
+
+SCOPE AND BASELINE
+Continued codex/vanessa-openai-production from656d16b; previous tested runtime
+837b3c4 remains the rollback reference. Existing editor state, source patterns,
+51 staged tools, history and device persistence retained. README.md contains
+an owner edit and is deliberately excluded. No production promotion or paid
+provider request is authorized by this phase.40 master audit areas and1,673 raw
+requirements remain inventoried in STATUS.json and requirements.json.
+
+NATIVE HARMONY — PART13
+Native Music Studio now inserts separately editable chord tones: nine fixed
+qualities, explicit MIDI root, inversion, source start/length and velocity.
+Nearest-scale correction applies once to selected notes or the complete source.
+Equal-distance pitch ties go lower. Timing, duration, velocity and unrelated
+notes stay intact; all-source correction updates the pattern's key/scale label.
+Selected-note correction leaves that label unchanged. Source locks, MIDI0–127,
+duration, note count and voice budgets are checked atomically before mutation.
+The collapsible Harmony controls and reviewed Vanessa commands use the existing
+music.native.edit action, native WAV worker and one Undo/save operation.
+
+These are fixed chord insertion and one-shot correction, not persistent scale
+locking, chord recognition, AI progression writing, MPE or a complete DAW.
+Future note entry is not automatically constrained to the selected scale.
+
+NATIVE SHAPE REPEATER — PART25
+One to64 transient copies of source geometry support per-copy XY translation,
+rotation, scale, offset and start/end opacity. Copies do not duplicate stored
+layers or change original paths. Scalar shapeRepeat channels and independent
+named-group channels use the existing nested-time evaluator and motion.edit.
+Expanded render bounds preserve repeated geometry through native camera/quad
+projection and masks. Limits include2,048 aggregate repeated copies/frame,
+16,384 local extent, bounded effective scale and existing canvas memory budgets.
+This is native bounded motion graphics, not external AE/AEP/plugin compatibility.
+
+Visual QA found the tools pane itself could overflow even when the outer page
+fit. The desktop form was442px wide inside a248px pane. Scoped grid sizing and
+wrapping now contain controls and text at320/390/768/1440px; the desktop form is
+154px within that248px pane. The browser now measures actual controls and text
+rectangles against the inspector. Repeater labels and guidance use plain names.
+
+COMPOSITION AUDIO FADES — PART20/38
+New zorifi-composition-audio.js validates existing audioFadeIn/Out fields and
+evaluates ancestor envelopes using each containing composition's own clock.
+It applies every fade once, without duplicating inherited gain or pan. Existing
+root composition controls and reviewed Vanessa audio.fade share that validator.
+Manual controls validate a draft before one snapshot, save on device and roll
+back if persistence fails. Track/ancestor locks and account/project scope remain.
+Children and original media stay editable. Runtime ancestry handles nested
+constant-rate compositions; this does not add universal nested-target AI routing.
+
+Live playback, MP4 audio, offline WAV and bounded Production Preflight now share
+the ancestor envelope. Non-default container DSP is still rejected for offline
+mix-down rather than silently omitted. Ducking-disabled preview/export gains
+now use a short12ms smoothing time instead of the unrelated ducking-release
+time, which previously smeared fades. Enabled ducking behavior is retained.
+Native motion media now explicitly preload audio/video. Preview proof uses a
+real Play gesture and a running AudioContext, not an autoplay assumption.
+
+All prior offline mix budgets, source validation and cancellation guards remain.
+Variable-rate/remapped offline audio, pitch-preserving time stretch, full buses,
+sends/VCA/parallel chains and full-program LUFS/true-peak mastering remain gaps.
+Underlying browser decode/render can finish after Stop; late output is discarded.
+
+MUSIC PROVIDER SETTINGS FAILURE REPAIRED
+The old shared metadata promise rejected before concurrent callers reached its
+catch handler, producing an unhandled error on a genuine401 response. All callers
+now share a guarded result with configured:false and the actual failure. Newest
+request/source wins the cache; late old responses cannot overwrite it. The server
+metadata fetch aborts after10s and offers retry. This does not fabricate successful
+cloud generation or change authentication. Local tools remain usable when the
+cloud settings endpoint is unavailable. Companion probing retains its own path.
+
+LOCAL ACCEPTANCE EVIDENCE
+-717/717 unit tests pass;0 failures/skips.695 previous tests preserved,22 added.
+-Native harmony browser: manual chord/inversion, selected correction/no-op,
+ reviewed Vanessa chord/all-source correction, real5s PCM and MIDI, one Undo,
+ saved reopen, source locking and320/390/768/1440px controls passed.
+-Shape Repeater browser: actual repeated/opacity/group/projected-mask pixels,
+ manual/reviewed Vanessa, one Undo/Redo, deterministic scrub, save/reopen and
+ real320x180 encoded/decoded animated MP4 passed. Screen-fit review also checks
+ the tools pane itself, not only the outer document.
+-Composition audio browser: nested rate2 source preserved; manual0.5s and reviewed
+ Vanessa0.8s fades; confirmation/one Undo/Redo; live gain/analyser; real PCM/WAV;
+ decoded2s MP4 AAC fade envelope; locks, saved reopen and320–1440px passed.
+-Music settings browser: eight simultaneous401 callers, network failure, ordered
+ forced probes and10s stalled-fetch cancellation passed without unhandled errors.
+-Existing piano-roll, mask, nested offline mix, all51 staged editor actions,
+ coordinated professional Stage2 and Vanessa production regression suites passed.
+ Chromium/WebKit conversation/split/history/save/confirmation/Stop/account tests
+ use explicit local auth/model fixtures. They are not live AI or female voice
+ quality acceptance; Windows WebKit uses its documented data-URL media fallback.
+-Existing MP4 capture checks passed real selected range, delayed recording,
+ moving frames/audio, imported video, silent720x1280 portrait and1920x1080.
+ This is not physical iPhone/iPad/macOS/Linux or universal4K/8K certification.
+
+New tests: tests/native-harmony.test.cjs, tests/native-harmony-browser.cjs,
+tests/motion-repeater.test.cjs, tests/motion-repeater-browser.cjs,
+tests/composition-audio.test.cjs, tests/composition-audio-browser.cjs,
+tests/music-provider-settings-browser.cjs. Existing offline-mix assertions now
+accept supported ancestor fades while still refusing unsupported container DSP.
+Local evidence/screenshots/media are under ignored artifacts/; no test fixture
+auth token or provider simulation is introduced into the deployed application.
+Four heavy browser suites initially timed out at page load when launched together.
+Sequential reruns passed their existing assertions; startup timeouts were not
+hidden by loosening checks. The pane overflow was fixed, not merely dismissed
+because the earlier outer-document width assertion passed.
+
+RELEASE AND REMAINING LIMITATIONS
+Only the existing protected development-preview workflow is used. Production
+remains3.47.0 Beta at aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb pending gates.
+The owner last explicitly confirmed that the exposed OpenAI key was not revoked;
+current revocation cannot be verified by an offline repository scan. Do not use
+that credential or promote production until remediation. Hosted wallet/entitlement
+enforcement, all-provider reservations, approved prices/licensing/replacement
+model access and broad physical-device acceptance remain incomplete. No Firebase
+upgrade, live charge or billable AI call; the working£15 monthly ceiling remains.
+
+Draft PR1 stays open/draft/unmerged. The131-page17November implementation PDF
+remains a dated historical snapshot; this dated report and current ledger record
+the later work. Passing this phase does not complete the full master specification.
+
+Rollback must preserve current project backups:837b3c4 cannot render the new
+shape-repeat channels or ancestor fades, and older saves may discard settings
+they do not understand. This phase adds no project/media migration or deletion.
+
+FINAL PHASE INTEGRITY
+447 JavaScript syntax files and331 browser/cache references passed. Web build
+contains168 files plus assets and14,045 approved strings from123 sources.
+Offline source/history/build credential-shape scan:0 blockers,0 review findings,
+0 read errors. This scan cannot verify external credential revocation. Existing
+Trim Paths and Production Preflight browser regressions passed after integration.
+
+PROTECTED PREVIEW RECEIPT
+Tested runtime0dc54f8c58dabf753ebe230f5d205da2717c5f4b is committed and pushed.
+GitHub Vercel status=success; deploymentBVK3QdKL2BuYXw3EiCUuuEgtamE8.
+https://zorifi-git-codex-vanessa-openai-production-zorifi.vercel.app
+Unauthenticated release.json returns302 to hosting login. Public release.json
+returns200 with3.47.0 Beta / aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb.
+No protection bypass or full signed-in hosted/provider acceptance performed.
+This following documentation-only receipt changes no runtime files.

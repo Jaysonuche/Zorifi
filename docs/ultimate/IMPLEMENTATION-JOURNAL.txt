@@ -1,0 +1,252 @@
+ZORIFI ULTIMATE V5 — CONTINUOUS IMPLEMENTATION JOURNAL
+16 November 2026
+
+CURRENT OBJECTIVE
+Continue the full supplied product vision through verified phases. A beta
+deployment does not finish the project. Preserve existing native state,51 tools,
+589 passing tests, local projects/media, Undo/Redo, exports and working Gemini.
+
+REVIEWED SOURCES
+All40 Ultimate text parts, the complete489-line backend repair specification,
+234-line music repair/branding specification,540-line AI Create specification,
+and all11 original Music Studio PDF pages were read. PDF pages rendered and
+visually inspected. requirements.json records source hashes/line references and
+every extracted heading, list/table row and normative instruction. Initial
+Unverified entries are acceptance gaps, not implementation claims; update them
+with concrete code/tests as each phase is completed. Prior29-section and10-item
+editing traceability reports remain historical evidence, not a substitute.
+
+PRECEDENCE / ARCHITECTURE
+Use the existing vanilla web/native timeline and Firebase/Vercel architecture.
+PDF Flutter/Rust/FastAPI/Postgres/GPU choices are suggestions; the current user
+and Ultimate explicitly prohibit discarding working services or adding paid
+infrastructure automatically. Original projects/media stay device-local; cloud
+collaboration is opt-in future scope with permissions/rights/funding requirements.
+Advanced research features must not delay reliable editing/playback/export.
+
+AUDIT FINDINGS
+-3.47.0 is genuinely deployed from aa2f9e7; final report commit7afd5c7 is local.
+-Music Studio prompt and generation paths hard-code30s for hosted Lyria; this
+ is not duration-entitlement enforcement. Provider output is flattened audio,
+ not editable native instruments/MIDI. Local companion5–30s is a separate model.
+-A historical429 alone does not establish which service rejected the request.
+ Collect only sanitized operation/provider/status/cost diagnostics; no blind
+ live paid reproduction or quota escalation. Native local composition must work
+ independently and must not impersonate realistic singing/cloud generation.
+-AI Create tab changes clear aiAssetDraft. Generation history is global per
+ browser rather than UID-scoped; fix isolation/cancellation and retained media
+ before expanding the workspace. No second Music Studio or editor state store.
+-AutoCut has actual local bounded evidence, validation and native compilation;
+ backend analysis is currently Gemini-specific and lacks Pro/Nexus enforcement.
+-Existing subscription() recognizes verified PRO only. Three reasoning modes,
+ 15/day metered fallback, four customer wallets, music-unlock settlement and
+ shared£15 monetary cap are not implemented by the OpenAI allowance ledger.
+-Several existing non-OpenAI provider paths lack shared monetary reservation.
+ Preserve the working beta while building a strictly gated preview foundation;
+ do not advertise old per-user limits as a global financial hard stop.
+
+SECURITY / DEPLOYMENT GATES
+Owner confirmed16 November that the exposed OpenAI key has NOT been revoked.
+Never use it. No new production promotion while this release blocker remains.
+Continue independent code/emulator/local media tests. Need owner revocation and
+replacement entered through protected host secret configuration, not chat.
+No unapproved prices, live checkout, paid services, Firebase Blaze, new recurring
+spend or uncontrolled AI retries. £15/month is shared across the whole platform.
+Protected preview + branch/PR review and actual runtime tests are mandatory
+before a new production release. Keep3.47.0 available for rollback.
+
+IMPLEMENTATION QUEUE (ACTIVE, NOT A COMPLETION CLAIM)
+1. Full checklist and secret scanner/history incident audit; privacy repair.
+2. Shared validated editing settings/motion parity and regression preservation.
+3. Native Song Blueprint integrated into existing clips/creatorSettings, original
+   instrument synthesis, exact-duration render, MIDI/pattern controls, scopes/
+   locks, history/save/reopen, WAV/MIDI/stem export and Vanessa commands.
+4. Authoritative configurable Free/Pro/Nexus policy, atomic four-wallet/allowance/
+   unique-song ledger, pricing quotes, refunds/idempotency, shared budget and
+   privileged server persistence. Emulator first; hosted fail-closed without
+   credentials/configuration. Local cached subscription cannot grant access.
+5. Supported OpenAI model routing after official documentation/project-access
+   checks; replacement-key live test only after incident remediation. No provider
+   name clutter in ordinary UI; retain accurate disclosures/admin diagnostics.
+6. Account-scoped AI Create/history and content-aware entitled AutoCut using
+   shared real tools, actual evidence, cache and compact analysis; no fake vision.
+7. More motion/masking/parallax, stories, DAW capabilities and signature features
+   through the same measurable phase gates. Research/licensing/platform gaps
+   remain explicit. Keep iterating after incremental releases.
+
+
+CONTINUATION17NOVEMBER - CURRENT PROGRESS
+Shared root composition settings and bounded native MIDI import now implemented
+and tested through the actual editor/history/persistence paths. Review fixes
+cover import cancellation, shortened composition quality/sampling and preservation
+of explicit dimensions after first video import.646 unit tests pass. Current MP4
+recording checks fail on baseline and candidate on this host; invalid output is
+rejected. Real WebM output and explicit settings-preserving alternative pass.
+See CONTINUATION-2026-11-17.txt and the owner implementation PDF. Master areas and
+release/security gates remain open; no production promotion or paid calls.
+
+
+18 NOVEMBER - MP4 AND NATIVE STEP SEQUENCER
+Continue same development branch. Replaced false MP4 start readiness/clock with
+actual captured-frame verification, explicit frame requests, no premature/timed
+MP4 fragments and guarded format selection. Added16/32/64-step native source-bar
+drum sequencing with manual/Vanessa parity, real audio/history/save/reopen.
+Current checks, failed diagnostic attempts and scope are recorded in the dated
+continuation report. Prior17November MP4 failures and report remain historical
+evidence, not rewritten as success. No paid AI calls, key use or production
+promotion; credential revocation and hosted financial gates remain outstanding.
+
+18 NOVEMBER - MASKS, ARTICULATIONS AND LOCAL PREFLIGHT
+Independent editable/animated mask transforms preserve paths and projected
+camera alpha. Native flams/rolls are real owned notes with PCM/MIDI/history/save.
+Manual export and Vanessa now share bounded local Production Preflight without
+mutating timeline/history or fabricating an AI result.675 unit tests plus actual
+editor/browser/MP4 regressions; scope and receipts in dated continuation report.
+51 staged actions retained;105 discoverable entries include54 workflows.
+No billable provider operation, Firebase upgrade or production promotion.
+
+19 NOVEMBER - PIANO ROLL, TRIM PATHS, NESTED PCM
+Native interactive source-note gestures and reviewed Vanessa source-note edits
+now render actual PCM with one Undo/save. Animated native stroke trimming
+preserves Bezier/fill and passes actual MP4 decode. Root-only/partial-success
+WAV export replaced with bounded shared nested PCM, stereo metrics and safe
+Stop/account failure handling.695 tests pass; full audit and limits recorded
+in CONTINUATION-2026-11-19.txt. Production/provider/billing gates unchanged.
+
+
+20 NOVEMBER - HARMONY, REPEATERS AND COMPOSITION FADES
+Native fixed chords/inversions and one-shot scale correction share existing
+manual/Vanessa source edits. Transient shape/group repeaters share renderer,
+projected masks and motion.edit. Ancestor fades now survive live preview/WAV/MP4
+and preflight without duplicated gains; unsupported container DSP still refuses.
+Concurrent metadata401/network/timeouts are handled honestly.717 tests pass;
+actual PCM/MP4/browser/history/reopen evidence and limits are in the dated report.
+All40 master parts/1673 raw rows retained. No paid calls or production promotion.
+
+
+22 NOVEMBER - SCALE LOCK, VISUAL LOOPS AND SAFER RECOVERY
+Persistent native pitch-entry locks and typed visual keyframe loops now share
+manual/Vanessa validation/history/save; real PCM/MIDI/MP4 tested. Existing local
+version history fixes false saved receipts, unsaved base projects, stale restores,
+missing sources, storage rollback and pending-autosave loss on cancellation.
+Worker/engine cache versions now coupled; old named shell caches are bounded.
+736 unit tests pass. Current report records actual acceptance/limits; the full
+master remains partial and production/provider/financial gates stay unchanged.
+
+
+25 NOVEMBER - AUDIO CROSSFADES AND LOCAL SOURCE HISTORY
+Native linear crossfade pairs now share manual/Vanessa timing, PCM/WAV/live preview
+and MP4 with safe update/reset/history. Source history reads actual retained media,
+checkpoint observations and explicit parent links; earlier native audio + notes
+restore together after decode/guards and save as one Undo. Actual chat-confirmation
+coverage exposed and repaired the omitted native proposal dispatcher branch.
+773 tests pass; all40 areas/1673 rows preserved, master partial, no paid services
+or production promotion. The dated report records exact limits and rollout gates.
+
+
+26 NOVEMBER — PHASE259: ADSR, PATH MORPH AND SELECTED SAMPLE PEAK
+Native optional per-pattern ADSR uses the existing music.native.edit worker/source
+replacement path and retains original instrument sound when no envelope is set.
+Topology-matched shape/group path channels animate exact native vertices/handles
+through shape.morph and reviewed motion.edit. Review fixed intermediate-area
+render-bound validation and source-duration retiming of main/group morph keys.
+Selected root sample-peak normalization replaces the prior hard-coded volume
+assignment: isolated actual processed PCM, post-DSP native envelope scaling, a
+second render verifying target within0.05dB, then one history/save with rollback.
+ADSR/morph/normalizer share native timeline state; no second editor or media store.
+Music-shell Vanessa mounting regression now uses the real .music-editor-screen
+host while standard workspace and inspector mounts remain covered.
+808/808 unit tests pass,0 failures/skips; the35 added tests cover the new bounded
+features. Actual new ADSR/morph/sample-peak browser proofs include PCM/MIDI/pixels,
+review/cancel/apply, history/storage/reopen,320–1440px layouts and decoded MP4.
+All transport/auth fixtures are explicitly local; no paid/liveAI acceptance.
+Build:173 files,14,440 interface strings/126 sources. Source/credential-shape scan:
+0 blockers/review findings/read errors; external key revocation remains unknown.
+Broader regression/integrity validation and protected deployment receipt remain
+pending root integration. All40 master areas/1,673 raw rows and exact individual
+statuses preserved; overall Partial. No commits, production promotion, live price
+activation, new paid service or Firebase upgrade in this documentation update.
+See CONTINUATION-2026-11-26.txt for exact APIs, limits, gaps and pending receipt.
+
+Phase259 runtime0cdce7695ed7aeaed684adc63ae944e9b3913078 pushed; Vercel success
+6C3ym7fekZRV5rGuXbxaSYzdMx3p. Protected alias remains behind login302; public
+3.47.0/aa2f9e7 unchanged. Draft PR1 updated and remains unmerged. No public
+promotion/paid activation; this receipt is documentation-only.
+
+
+27 NOVEMBER 2026 — PHASE260 IMPLEMENTATION
+Native amplitude LFO now stores optional amplitudeLfo {waveform,clock,rate,depth,phase} on each pattern and shares the existing music.native.edit/worker/source-replacement path. Sine/triangle tremolo attenuates the original mixed source after tanh saturation and before its existing end fade, using a continuous source clock; notes/ADSR/MIDI/timing/mixer stay unchanged. Hz range0.05–20, or periods0.125/0.25/0.5/1/2/4/8/16 quarter-note beats at the source BPM, depth0–1 and phase0≤degrees<360. Reset removes the optional field. Focused units verify exact legacy/reset PCM parity and independent gain/clock behavior. Actual manual and outer reviewed Vanessa, independent PCM/MIDI, saved reopen, reset/locks/crossfade protection and320–1440px dark/light browser checks pass, including decoded MP4. Live-provider/physical-device acceptance is separate; no pitch/filter/LFO matrix, full Instrument Lab or timbre transfer is claimed.
+Native asynchronous source rendering now guards state/project/view, owner/cloudUid/session identity, exact immutable JSON-string Undo/Redo arrays and ordered entries, and source-library array/asset object/id/type/duration/size/url/file identity. Late worker/storage results cannot commit after a changed scope. Unused staged media cleanup retains the captured owner rather than using the next signed-in account. Actual browser worker/session/cloud/source/history rejection checks pass without an authentication fallback.
+Animation copy now accepts up to33 explicit morphs mappings [{sourceGroupId?,targetGroupId?}], with omitted group IDs selecting the main path. Scalar-only copy leaves morphs intact. Requested channels retain literal corresponding vertices/handles/easing and shift by (at or target.start) minus source.start in the target containing composition clock. Keys must fit the target layer; point count and open/closed topology must match. Only mapped target morphs/selected scalar channels are replaced; base geometry/paint/unmapped animation remain editable. Malformed/duplicate mappings, incompatible topology/clocks/locks and whole-project render/animation budgets refuse atomically. Focused units and actual manual/reviewed Vanessa/pixel/MP4/reopen/Undo/storage/stale/lock checks pass in dark/light320–1440px browser layouts. Shared backend proposal validation also passes. No automatic shape matching/resampling, optical interpolation or full AE parity is claimed.
+Native pair crossfades now offer explicit linear or equal-power curves through the same manual/reviewed Vanessa operation and shared preview/offline/export fade gain. Equal-power uses complementary sine/cosine gains with constant squared sum; correlated recordings may still raise combined peaks. Legacy version1/default linear metadata stays readable; version2 owns explicit curve fields and preserves/restores original inner/outer curve state on update/reset. Source timing, outer fades, later clips, caption/key shifting, locks/collisions and one Undo/save remain native. New unit and real browser PCM/Vanessa/manual/MP4 AAC/Undo/reopen proofs pass at320–1440px. This does not add source-handle extension/ripple, automatic correlation correction or full DAW routing/mastering.
+Selected sample-peak normalization no longer deep-clones the current project and reserializes every Undo/Redo checkpoint on each100ms monitor/progress tick. Native history entries are immutable JSON strings: exact stack identity, length, order and values are checked without serializing those strings again. Idle/progress guards use cheap account/session/project/view/selection/source/history checks; full current-project structural checks remain at submission, after source reading and each full render, and immediately before commit. Non-string history refuses rather than weakening guards. Deterministic operation-count tests prove100 idle ticks make0 extra history captures/Undo serializations and2000 progress checks use bounded full captures. Existing actual normalization PCM/outer Vanessa/Stop/stale/storage rollback/Undo/reopen/MP4 regression passes; native decode memory/Stop and sample-peak-only limitations remain.
+844/844 full unit tests pass,0 failures/skips (808 previous +36 new).
+All four new actual feature browser proofs and ten existing serial regressions
+pass, covering actual PCM/MIDI/pixels/decoded MP4/history/reopen/manual+Vanessa,
+scopes/locks/Stop/storage and320–1440px dark/light controls. Integrity477 syntax
+files/341 references; build173 web files/14,536 strings/126 sources. Offline
+source/history/build credential scan0 findings/read errors. Protected release
+receipt follows after actual commit/push and hosting observation.  All40 area statuses and1,673 source rows/text/source hashes
+preserved. Only raw LFO row0389 advances from Unverified to Partial based on
+bounded implemented/units-tested amplitude modulation; no whole-area promotion.
+Production remains3.47.0/aa2f9e7; exposed-key revocation externally unverified.
+No paid services, Firebase upgrade/live charges or£15-ceiling change.
+Historical reports and17November PDF remain dated snapshots. Owner README
+edit remains excluded from this phase. See CONTINUATION-2026-11-27.txt.
+
+Phase260 runtime474e2f73c8444d2842529582da054f7fd4f845a3 pushed; Vercel success
+HA4bA6heUt8VFn5SrG5RRQPBXdkQ. Protected alias returns login302; public production
+remains3.47.0/aa2f9e7. Draft PR1 updated/unmerged. No production promotion,
+billable-provider call, paid-service activation or Firebase upgrade.
+
+Final phase260 review correction: omitted-curve equal-power edits now describe
+the effective validated curve and peak warning in Vanessa review. Actual decline
+case and equal-power PCM/MP4 proof pass;844 units/477syntax/341refs pass. Bridge
+260.1 plus a new named260cache prevents stale installed review code. Cache and
+legacy-crossfade regressions rerun successfully; no DSP or production changes.
+
+Final phase260 runtime1e39896438a8d9b5add280294730199bc3099031 pushed; Vercel
+success52qh3w5yn6fYwEsCuRPHuiErwp1p. Includes preserved-curve review correction
+and bridge260.1/cache refresh. Supersedes initial474e2f7 runtime; draft PR1 stays
+unmerged and public/paid gates stay in place. Following commit is docs only.
+
+
+28 NOVEMBER 2026 — PHASE261 IMPLEMENTATION
+Native tonal pitchVibrato now stores optional {clock,rate,depthCents,phase} and uses music.native.edit with local worker/source/history handling. Sine-only bass/piano/pluck/pad, 0.05–20Hz or the existing eight quarter-note beat periods, depth0–100 cents and phase0≤degrees<360. A six-harmonic integrated frequency-ratio kernel changes carrier phase without moving ADSR/decay/note/MIDI timing or allocating a duration-sized phase table. Unconfigured/zero/reset PCM stays exact; percussion requires removing pitch vibrato first. Ten focused units and actual manual/outer Vanessa/PCM/MIDI/Undo/reopen/locks/scopes/dark-light320–1440px and two MP4 pitch-policy proofs pass. No filter/general modulation matrix, pitch correction, sample/wavetable designer, realistic voice or timbre transfer is claimed.
+Shared Vanessa scope/fingerprint now detects same-length immutable native Undo/Redo string swaps and array replacements, source-library order/identity changes, and asset id/type/duration/size/url/file/mimeType/builtin/sfxId/audioTrackId changes. Compact ephemeral WeakMap observation tokens append at fingerprint slot6 while slots0–5 remain compatible; old history and Blob/data-URL contents are not reserialized into those tokens. Editing/professional requests recheck scope before/after authentication and after the reply; all throwing capture work is inside try/finally so malformed history or identity cannot latch requestActive. Eleven units and an actual15-turn authenticated-fixture browser proof pass, including stale source/history/Stop/session refusals, zero-request authorization swaps, busy recovery, real split/Undo/Redo/device-media reopen and opt-in microphone. These are local consistency guards, not a new authorization provider or content-hash/remote-file attestation.
+Offline PCM now supports covered strictly increasing linear sourceTime keys on leaf audio/video recordings through one continuous native BufferSource and DSP chain. Constant-rate nested containers map the containing clocks; source positions, cropped ranges and mixer/fades remain native. Limits:2–65 keys/layer, at least10ms root knot spans, combined forward rates0.0625–16,2048 rate events/mix and existing duration/source/decode/output/automation budgets. Native128-frame k-rate scheduling plus rate quantization is bounded to5ms source/10ms output; excessive precision cases refuse at the chosen sample rate. Plan now checks native graph clock compatibility before source reads and accounts for remap validation/knot work, including slow-nested derivative mismatch rejection. Holds, nonlinear curves, speed ramps, uncovered windows, playback-rate automation and remapped containers remain unsupported. Thirteen new plus eight legacy focused units pass. Actual manual three-key authoring, reviewed outer Vanessa(two local fixture turns), decline/withhold/confirm, native PCM/WAV/MP4 events, cropped/nested clocks, Undo/Redo/reopen/Stop/refusal and320–1440px export controls pass. Baseline DSP latency is measured separately; these are not sample/pitch-equivalent recordings. This is source-rate playback, not sample-exact or pitch-preserving time stretch.
+Video export now exposes Audio pitch with preserve (legacy Keep source pitch default) or speed (Pitch follows speed), stored as proSettings.exportAudioPitch. setExportAudioPitch uses the supported standard/vendor property, verifies readback and refuses unsupported explicit speed-linked requests; WAV always follows source-rate pitch. Manual export controls and validated existing Vanessa export.prepare audioPitch preparation share the setting, including the local request “Open export with pitch following speed”; opening settings is not a completed export. Three focused units and actual manual/outer preparation, responsive controls, saved reopen and two decoded MP4 proofs pass. Observed preserved up/down464.75/416.5Hz versus speed-linked512.25/457.25Hz and offline512.5/457.25Hz at clip rate1.1. These establish pitch-policy behavior, not sample-exact recorder timing or universal device quality.
+881/881 full-suite unit tests pass,0 failures/skips (844+37). All three new
+actual browser proofs pass: vibrato/twoMP4pitchpolicies and saved setting; shared
+Vanessa15 fixture turns; manual3-key remap/outerVanessa2 fixture turns, actual
+PCM/WAV/MP4markers/Undo/reopen/Stop and correct timeline/nested target selection.
+Remap accepts inert Bezier metadata on linear keys; native planning/clock/budget
+coherence is tested.484syntax/341cache refs pass; cacheURLs exactlymatchHTML/
+worker261 and new integrity guards. Build173files/14608strings/126sources.
+Secret-shape scan0 blockers/review/readerrors; external revocation unverified.
+All thirteen broad regression suites pass, including51 tools and Chromium/WebKit
+Stage2/Vanessa flows. Protected deployment receipt follows below.
+All40 areas/1673 source rows/hashes retained; only0386 advances toPartial.
+No source/README/PDF edits or commits by the documentation task. Protected
+preview remains the release destination; public3.47.0/aa2f9e7 and£15 ceiling,
+Spark/no paid charges, credential/provider/finance/device gates stay unchanged.
+See CONTINUATION-2026-11-28.txt for exact APIs/limits/pending release receipt.
+
+Final local261 integration: Motion Scenes now resolves the actual state.selected layer before its remembered focus fallback, so a later timeline selection edits the intended layer instead of a previously focused recording. Existing nested focus remains supported. Actual timeline clip-selection and nested-focus proof passes. Professional command detection now recognizes source-time/time-remap/keyframe(s)/retime vocabulary and routes the exact reviewed source-time instruction to the real native tool plan rather than a non-editing fallback.
+Explicit speed-linked video-export pitch checks each active non-frozen combined rate against0.0625–16, the supported HTML-media speed range. Unsupported requested rates refuse rather than being silently clamped to a different pitch policy. Legacy preserve-pitch default and unchanged frozen/silent handling remain; WAV source-rate behavior is separate.
+Remap DSP baseline latency0.01201273s measured independently; residuals after
+baseline:manual9.1us,directed9.2us,crop.491ms,nest9.8us,WAV9.3us. Real MP4 raw
+marker errors<40ms,4.4797s duration; notsample/pitch equivalent to PCM.
+
+Final local export-window visual checks: scoped light/dark colors and a full-width
+pitch selector pass actual bounds/control clicks and seven text/control contrast
+targets at least4.5:1 at320/390/768/1440px. This is bounded export-window evidence,
+not whole-app accessibility certification. W3C Web Audio1.1 scheduling reference
+is recorded beside the independent PCM evidence in the phase261 report.
+
+Observed phase261 runtime54fd91a5e952eff9135e0d0e0bc905c5bddc3d29 pushed;
+Vercel success FKPK315BzteFBtcEahghWqBVY4fQ. Protected release metadata302,
+public release metadata200 and unchanged3.47.0/aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb.
+No hosting-protection bypass, signed-in hosted acceptance or public promotion.
+Draft PR1 remains open/draft/unmerged; owner README edit excluded. Receipt commit
+is documentation only; prior runtime1e39896 remains rollback candidate.

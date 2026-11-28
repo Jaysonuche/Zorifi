@@ -1,0 +1,215 @@
+ZORIFI ULTIMATE — PHASE259: ADSR, PATH MORPH AND SELECTED SAMPLE PEAK
+26 November 2026 | Development preview | Master specification still PARTIAL
+
+Continued codex/vanessa-openai-production from the retained phase258 runtime.
+Existing native clips, media,51 staged editing actions, history and device storage
+remain the authority. No project migration or second editor/media store. Owner
+README.md edit and the dated17November PDF remain untouched by this phase report.
+The complete40-area/1,673-row checklist and exact individual statuses are retained.
+No whole-area promotion follows from these bounded additions.
+
+NATIVE ADSR — PART8/10/14/16
+Each native musicPattern can now carry an optional plain envelope object with
+exactly attack,decay,sustain,release. Attack/decay/release are finite0–10 seconds;
+sustain is0–1 (the manual control displays0–100%). Native source-note controls
+and reviewed Vanessa use the existing music.native.edit operation:
+  {edit:{operation:'envelope',envelope:{attack:.01,decay:.15,sustain:.7,release:.08}}}
+Reset uses envelope:null and removes the optional pattern field. Repeating the
+same envelope or resetting an unconfigured pattern refuses as a no-op.
+
+The actual synthesis worker applies ADSR inside every existing note window.
+Attack rises to full level; decay reaches the requested sustain; release fades
+to zero on the note's final sample when release is positive. If attack+decay+
+release exceeds that note's window, all three times compress by the same factor;
+otherwise sustain occupies the remainder. Zero-length stages change instantly.
+The instrument's carrier and natural decay remain; no note/source tail, MIDI
+timing change or extra voice is added. All seven native instruments are supported.
+Patterns without an envelope use the original synthesis arithmetic; independent
+WAV comparison across7 instruments and3 supported sample rates matched all21
+legacy outputs byte for byte.
+
+Saving renders only the selected native source through the existing worker and
+source replacement path, preserving notes, MIDI, clip timing/trims/rate, mixer,
+effects, title and source-parent history. Existing locks/scopes/Stop/persistence
+guards remain in that path. One save is one Undo. Active native crossfade pairs
+must be reset before changing source notes, instruments or envelopes. This is a
+bounded native note-volume envelope, not a complete Instrument Lab, LFO/modulation
+matrix, wavetable/sample designer, SoundPrint, Sound Fusion or timbre transfer.
+
+Vanessa example:
+  Set native ADSR attack 10 ms decay 150 ms sustain 70% release 80 ms
+  Reset native ADSR
+Seconds are also accepted for attack,decay and release.
+
+EDITABLE PATH MORPH — PART25
+The native shape.morph operation stores a version1 channel on motion.pathMorph
+or on the selected motion.groups entry's pathMorph. Each key has time,points,
+closed and optional easing/bezier; groupId targets an existing named path group.
+Manual Motion Scenes controls and the constrained Bezier pen editor share that
+operation with reviewed Vanessa motion.edit/dataJson. No generated raster, media
+replacement or inferred optical geometry is involved.
+
+Source geometry must already be an editable path. Each key retains the exact
+point count, point correspondence/order and open/closed setting. Vertex XY and
+relative incoming/outgoing handles interpolate independently; absent handles are
+zero. Paint, trim, shape groups, masks and ordinary transform channels remain
+separate. A single key holds its path throughout the layer; animation requires
+explicit corresponding endpoint keys. Values hold before the first and after
+the last key. remove:true with a time deletes one key; without time removes the
+channel and restores evaluation of original source vertices.
+
+Key time uses the containing composition clock,0–86400 seconds. Nested source
+rates naturally map that clock. Precompose/duplicate and animation.retime shift
+or scale main/group keys; source.retime now also scales them around clip.start
+when source mode changes duration, alongside scalar/spatial animation. Timeline
+duration mode keeps their composition times. Scalar animation.copy deliberately
+refuses layers with morph channels rather than omitting or flattening the morph.
+
+Limits:1–128 keys/channel,2–2000 points/key,65,536 keyed vertices/project and the
+existing10,000 total animation keys,2,000 layers/24 nesting levels. Coordinates
+and tangent components are within±16,384. Local render extent is≤16,384 pixels
+and the plane is≤16,777,216 pixels. Handle hulls/strokes/repeaters participate in
+local bounds. Review found that individually safe wide/tall keys can create an
+unsafe intermediate area; validation now bounds the maximum product over the
+whole monotone interpolation segment before committing. It checks non-midpoint
+maxima too, while retaining held jumps and safe long-distance path translations.
+
+Supported easing: linear,hold,easy-ease/ease-in-out,ease-in,ease-out and temporal
+Bezier with all four handles in0–1. Overshooting curves, topology conversion,
+automatic shape matching, optical interpolation and arbitrary expression code
+remain unsupported. Full After Effects/plugin/geometry3D/roto parity is not claimed.
+
+SELECTED PROCESSED SAMPLE PEAK — PART20
+Normalize selected sample peak replaces the previous hard-coded volume assignment
+and LUFS badge. Audio controls, the existing context/pro action and reviewed
+Vanessa audio.normalize_peak all call ZorifiSamplePeakNormalize.execute with
+{target:clipId,targetDbfs}. The default is−6dBFS; accepted targets are−24 to−1dBFS.
+The reviewed bridge authorizes and scopes the ordinary existing proposal path.
+
+One selected unlocked root audio/video source is measured in isolation before
+track/master/category levels and other clips. Source trim/rate, source PCM,
+EQ/noise/compression/limiter/pan, native level keys and fades feed an actual stereo
+offline render. Clip and key gain are after the DSP chain, so scaling that native
+envelope does not change its compressor/limiter response. A second render must
+reach the requested maximum stereo sample peak within0.05dB before any snapshot
+or timeline mutation. The saved edit scales base volume and all volume-key values
+by one ratio, preserving key times/easing and all source/timing/FX/mixer fields.
+
+Bounds: selected clip and complete declared source recording≤120s; local original
+≤64MiB encoded;128MiB decoded;48MiB stereo output at48kHz. Decoded memory is checked
+after native decode, so this is not a guarantee about the native decoder's peak
+allocation. Source rate must be constant positive≤16 and remain source-bounded.
+Up to1,000 finite unique in-range volume keys use supported monotone native
+curves; custom/overshooting curves refuse. Base/key levels stay within0–200%.
+Silence, gain beyond200%, failed verification or malformed/unavailable sources
+refuse without changing history. Parents/mattes/expressions, nested containers,
+remaps/speed keys and muted/locked selected clips refuse. Local File/Blob/data
+audio/video originals and supported built-in local sounds are read; remote URLs
+are not fetched for this operation.
+
+Account/session/project/view/selection/source/timeline/history guards run around
+asynchronous work. Stop/closing/hidden workspace discard late results. Native
+decode/render can finish after cancellation; nodes are disconnected and results
+cannot commit. Only after both measurements pass is one Undo/save attempted.
+Failed device-storage verification restores the prior levels and Undo/Redo and
+attempts to persist the restored project. Receipt reports measured before/after
+sample peaks and stereo RMS. This is not LUFS, true-peak, full-mix normalization
+or full mastering; later mixer gains and overlapping sources can still clip.
+
+MUSIC VANESSA MOUNTING REGRESSION
+Actual ADSR chat testing exposed an existing desktop music shell host mismatch:
+mountVanessa looked for the ordinary .workspace or inspector host, while Music
+uses .music-editor-screen. The open conversation now attaches to that actual
+music shell when ordinary hosts are absent. Standard video workspace and inspector
+mounts retain their routes. Enhanced browser assertions exercise the real Music
+Vanessa launcher, review/cancel/apply and responsive host; a direct reviewed
+bridge call alone would not certify this outer UI path.
+
+ACTUAL LOCAL EVIDENCE
+-808/808 unit tests pass,0 failures/skips: prior773 plus35 focused additions
+ (normalizer10,ADSR9,morph13,retime2,backend1). Exact individual checklist
+ acceptance statuses remain unchanged despite these feature-specific proofs.
+-ADSR browser: actual worker PCM and MIDI/timing preservation, manual save/reset,
+ real outer Vanessa review/cancel/apply, one Undo/Redo, local persistence/reopen,
+ locks/Stop/scopes and responsive music conversation hosts; zero browser errors
+ or provider calls. Artifact: artifacts/native-adsr-browser.json.
+-Morph browser: actual corresponding native pixels/handles, reviewed Vanessa,
+ Undo/Redo/persistence, advanced rendering and320–1440px layouts. Actual decoded
+ 320x180 MP4 duration2.5374s. Artifact: artifacts/native-path-morph-browser.json
+ and artifacts/native-path-morph.mp4. Transport/auth use explicit local fixtures.
+-Sample-peak browser: real selected processed stereo PCM reaches−12dBFS within
+ 0.05dB; actual reviewed outer Vanessa reaches−9dBFS. Stop/source/session/selection
+ changes discard late results; false-save failure rolls back. Undo/Redo/reopen
+ and320/390/768/1440px controls pass in both dark and light themes. Actual decoded3s320x180 MP4 AAC remains near
+ −9dBFS (measured−8.40dBFS); encoded AAC is not asserted sample-accurate. Artifact:
+ artifacts/sample-peak-normalize-browser.json.
+-Current build produces173 web files and assets;14,440 interface strings from126
+ sources. Credential-shape/source scan reports0 blockers,0 review findings and0
+ read errors. This cannot verify an external credential's actual revocation.
+
+FINAL REGRESSION AND INTEGRITY
+All eight existing browser regression scripts pass serially, exit0:
+ professional-native-tools-browser: all51 native actions;
+ professional-stage2-browser: Chromium/WebKit,8 authenticated fixture turns each;
+ vanessa-production-browser: Chromium/WebKit,8 fixture turns each;
+ native-scale-lock-browser; native-harmony-browser; asset-lineage-browser;
+ editor-crossfades-browser; project-version-recovery-browser.
+These include actual split/timeline, review/cancel, Pause/Resume/Stop, scope guards,
+ordinary conversation, opt-in microphone, account isolation, saved media/reopen,
+source restore, PCM/MIDI and decoded MP4. On Windows WebKit the existing test uses
+its documented data-URL media fallback; Chromium uses IndexedDB Blob media.
+There are no new provider calls or browser exceptions in the native receipts.
+469 source syntax files and341 browser/cache asset references pass integrity.
+Final build:173 web files plus assets;14,440 approved strings from126 sources.
+Final offline source/history/build credential scan:0 blockers/reviews/read errors.
+This scan cannot establish external secret rotation or credential revocation.
+The normalization form's Audio/Pro/context entry points open the same workflow;
+opening creates no Undo. Dark/light input styling and320–1440px widths verified.
+
+No live OpenAI/Gemini/voice call, licensed paid-model acceptance, physical-device
+certification or subjective creative-quality certification follows from local
+fixtures. Existing full-DAW/Live Session/sends-buses/true-peak/LUFS/offline variable
+rate/time-stretch/advanced optical geometry and broader master gaps remain.
+All prior credential, supported replacement-provider access, hosted financial
+enforcement, approved prices/licensing, device and production-promotion gates
+remain. Firebase stays Spark and the shared£15 monthly AI ceiling is retained.
+Previously exposed-key revocation remains externally unverified; no use is made
+of that credential. Protected development preview is the authorized destination.
+
+Production remains3.47.0 Beta / aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb pending
+the unchanged production gates. A protected-preview receipt follows after actual
+commit/push and deployment observation; no protection bypass is authorized.
+The131-page17November PDF remains a dated historical snapshot; current phase
+reports and the40-area/1,673-row ledger retain later progress and remaining gaps.
+
+ROLLBACK AND COMPATIBILITY
+Retain b54ff4cfbf51770e498f95afe7a6357cad49845e as the prior tested runtime.
+Preserve current device project/media backups before reverting. Older builds do
+not expose ADSR/path-morph controls, cannot guarantee retaining new metadata on
+save and cannot certify rendering keyed paths. Existing rendered native WAV
+sources stay ordinary media, but editing/resynthesis needs the compatible engine.
+No project migration, Firebase update, new dependency or paid operation was added.
+
+CHANGED IMPLEMENTATION PATHS
+zorifi-native-music.js; zorifi-native-music-workspace.js; zorifi-native-music.css;
+zorifi-native-music-worker.js; zorifi-motion-graph.js;
+zorifi-motion-workspace.js/.css; zorifi-advanced-editing.js;
+zorifi-sample-peak-normalize.js/.css; zorifi-editor-audio-workflows.js;
+zorifi-editor-workflow-bridge.js; app.js; zorifi-vanessa-professional-tools.js;
+netlify/functions/_shared/professional-planner.mjs and vanessa-prompts.mjs;
+index.html; sw.js; package.json; generated zorifi-interface-catalog.json.
+New tests: native-adsr.test.cjs/native-adsr-browser.cjs;
+motion-path-morph.test.cjs/motion-path-morph-retime.test.cjs/
+motion-path-morph-browser.cjs; professional-path-morph.test.cjs;
+sample-peak-normalize.test.cjs/sample-peak-normalize-browser.cjs.
+The five current checklist/report files record this phase; the owner README
+change is excluded from staging and the historical PDF remains unchanged.
+
+PROTECTED PREVIEW RECEIPT
+Tested runtime0cdce7695ed7aeaed684adc63ae944e9b3913078 committed and pushed.
+GitHub Vercel status=success; deployment6C3ym7fekZRV5rGuXbxaSYzdMx3p.
+https://zorifi-git-codex-vanessa-openai-production-zorifi.vercel.app
+Unauthenticated release.json returns302 to hosting login. Public release.json
+returns200:3.47.0 Beta / aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb.
+No protection bypass/full signed-in hosted-provider acceptance performed.
+Draft PR1 remains open/unmerged; the following receipt commit changes docs only.

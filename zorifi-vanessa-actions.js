@@ -65,6 +65,7 @@
     action=normalizeAction(action);if(!action)return result(STATUS.FAILED,'Malformed Vanessa action.');
     if(!ACTIONS.has(action.command))return result(STATUS.UNSUPPORTED,`Zorifi does not support “${action.command}”.`,{action});
     const p=action.parameters||{},needsClip=/^(clip|visual|audio|keyframe|effect|animation)\./.test(action.command)||/^(text\.(edit|style|delete))$/.test(action.command)||action.command==='tool.apply';
+    if(action.command==='export.prepare'&&p.audioPitch!==undefined&&!['preserve','speed'].includes(p.audioPitch))return result(STATUS.FAILED,'Choose a supported audio pitch mode.',{action});
     if(action.command==='studio.open'&&!context.capabilities?.deviceWorkspaces?.includes(p.id))return result(STATUS.UNSUPPORTED,'That workspace is unavailable on this device.',{action});
     if(action.command==='tool.create'&&(typeof p.prompt!=='string'||p.prompt.trim().length<3||p.prompt.length>2000))return result(STATUS.FAILED,'Describe the editing tool in 3–2000 characters.',{action});
     if(action.command==='tool.apply'&&!context.capabilities?.editingTools?.some(tool=>tool.id===p.id))return result(STATUS.FAILED,'Choose an available editing tool.',{action});
@@ -165,7 +166,7 @@
     if(/(?:add|create|generate) (?:auto )?captions/.test(text))add('caption.generate');
     if(/\b(?:save)(?: the)? project\b/.test(text))add('project.save');
     const rename=original.match(/rename (?:the )?project (?:to )?["“]?([^"”]+)["”]?$/i);if(rename)add('project.rename',{name:rename[1].trim().slice(0,80)});
-    if(/(?:prepare|open).*(?:export|render)/.test(text))add('export.prepare');
+    if(/(?:prepare|open).*(?:export|render)/.test(text))add('export.prepare',/pitch.*(?:follow|link).*speed|speed[ -]?linked pitch/.test(text)?{audioPitch:'speed'}:/keep (?:source|original) pitch|preserve (?:source )?pitch/.test(text)?{audioPitch:'preserve'}:{});
     if(/(?:favorite|favourite) (?:this |the )?project/.test(text))add('project.favorite',{enabled:!/unfavorite|unfavourite/.test(text)});
     if(/open (?:my )?(?:most )?recent project/.test(text))add('project.open_recent');
     const template=original.match(/(?:create|save|make) (?:this project as |a )?(?:an )?editable template(?: called | named )?["“]?([^"”]+)?/i);if(template)add('template.create',{name:(template[1]||`${context.project.name} template`).trim().slice(0,80)});

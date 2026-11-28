@@ -36,7 +36,7 @@
   }
   function ensure(clip){clip.audioEffects=normalize(clip.audioEffects);return clip.audioEffects;}
   function dbToGain(db){return Math.pow(10,Number(db||0)/20);}
-  function fadeGain(clip,time){const settings=normalize(clip.audioEffects),local=Math.max(0,time-clip.start),remaining=Math.max(0,clip.start+clip.duration-time),fadeIn=Math.max(0,clip.audioFadeIn??settings.fadeIn),fadeOut=Math.max(0,clip.audioFadeOut??settings.fadeOut);return Math.min(fadeIn?clamp(local/fadeIn,0,1):1,fadeOut?clamp(remaining/fadeOut,0,1):1);}
+  function fadeGain(clip,time){const settings=normalize(clip.audioEffects),local=Math.max(0,time-clip.start),remaining=Math.max(0,clip.start+clip.duration-time),fadeIn=Math.max(0,clip.audioFadeIn??settings.fadeIn),fadeOut=Math.max(0,clip.audioFadeOut??settings.fadeOut),shape=(progress,curve)=>curve==='equal-power'?Math.sin(Math.PI*.5*clamp(progress,0,1)):clamp(progress,0,1);return Math.min(fadeIn?shape(local/fadeIn,clip.audioFadeInCurve):1,fadeOut?shape(remaining/fadeOut,clip.audioFadeOutCurve):1);}
   function duckGain(settings,dialogueActive){const audio=normalize(settings);return audio.ducking.enabled&&dialogueActive?1-clamp(audio.ducking.amount,0,100)/100:1;}
   function effectiveGain({clipVolume=100,keyframedVolume=clipVolume,trackVolume=100,masterVolume=100,time=0,clip={start:0,duration:1},dialogueActive=false}){const settings=normalize(clip.audioEffects);if(settings.muted)return 0;return clamp(keyframedVolume,0,200)/100*clamp(trackVolume,0,200)/100*clamp(masterVolume,0,200)/100*fadeGain(clip,time)*duckGain(settings,dialogueActive);}
   function effectivePan(clipPan=0,trackPan=0){return clamp((Number(clipPan)||0)+(Number(trackPan)||0),-100,100)/100;}
