@@ -3,7 +3,7 @@
   "date": "2026-11-28",
   "overall": "Partial",
   "productionVersion": "3.47.0",
-  "candidate": "Development phase261 tonal pitch vibrato, bounded linear offline remaps, guarded Vanessa requests and explicit export pitch verified locally; protected release receipt/public promotion remain gated",
+  "candidate": "Development phase261 tonal pitch vibrato, bounded linear offline remaps, guarded Vanessa requests and explicit export pitch verified locally; runtime54fd91a pushed and protected Vercel status success, public promotion remains gated",
   "baselineTests": 589,
   "areas": [
     {

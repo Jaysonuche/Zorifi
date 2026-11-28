@@ -416,8 +416,9 @@ source/history/Stop/locks/Undo/reopen, correct timeline/nested target selection
 and320–1440px controls.484 syntax files/341 cache refs pass; build173 files and
 14,608 strings/126 sources. Secret-shape scan0 findings/read errors; external
 revocation remains unverified. All thirteen broad regression suites pass,
-including51 tools and Chromium/WebKit Stage2/Vanessa. Protected hosting receipt
-remains pending. Light/dark export text contrast and controls pass at320–1440px.
+including51 tools and Chromium/WebKit Stage2/Vanessa. Runtime54fd91a is pushed
+with protected Vercel status success; public3.47.0/aa2f9e7 remains unchanged.
+Light/dark export text contrast and controls pass at320–1440px.
 Only0386 advances toPartial; all40 area statuses/1673 original source rows and
 hashes remain. Overall master remainsPartial; no provider/physical-device/full-
 master acceptance. See CONTINUATION-2026-11-28.txt and unchanged cost/release gates.
