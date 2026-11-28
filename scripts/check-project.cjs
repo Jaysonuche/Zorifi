@@ -19,6 +19,11 @@ if(!nativeEngine||workerEngine!==nativeEngine)errors.push('Native synthesis work
 const musicWorkspace=fs.readFileSync(path.join(root,'zorifi-native-music-workspace.js'),'utf8');
 const workerUrl=musicWorkspace.match(/new Worker\(new URL\(['"]([^'"]+)['"]/)?.[1];
 if(!workerUrl||!context.self.assets.includes('./'+workerUrl))errors.push('The native synthesis worker URL is missing from the current offline cache.');
+// Critical cached code must use the exact URL requested by the editor, not
+// merely a file with the same path and a stale version query.
+const criticalAssets=['styles.css','app.js','zorifi-vanessa-actions.js','zorifi-vanessa-production.js','zorifi-vanessa-professional.js','zorifi-offline-mix.js','zorifi-audio-engine.js','zorifi-native-music.js','zorifi-native-music-workspace.js','zorifi-native-music.css','zorifi-motion-graph.js','zorifi-motion-renderer.js','zorifi-motion-workspace.js','zorifi-motion-workspace.css','zorifi-editor-audio-workflows.js','zorifi-editor-workflow-bridge.js','zorifi-sample-peak-normalize.js','zorifi-sample-peak-normalize.css'];
+const requestedAssets=[...html.matchAll(/(?:src|href)="([^" ]+)"/g)].map(match=>match[1].replaceAll('&amp;','&')),cachedAssets=new Set(context.self.assets.map(ref=>ref.replace(/^\.\//,'')));
+for(const name of criticalAssets){const requested=requestedAssets.find(ref=>ref.split('?')[0]===name);if(!requested||!cachedAssets.has(requested))errors.push('Critical editor/cache URL versions differ: '+name);}
 for(const name of ['scripts/build-web.cjs','scripts/build-android.cjs','scripts/package-current.cjs','build/zorifi.ico','build/entitlements.mac.plist'])if(!fs.existsSync(path.join(root,name)))errors.push(`Missing build file: ${name}`);
 console.log(`Checked syntax of ${checked} source files and ${refs.length} browser/cache asset references.`);
 if(errors.length){console.error(errors.join('\n'));process.exitCode=1;}else console.log('Project integrity checks passed.');

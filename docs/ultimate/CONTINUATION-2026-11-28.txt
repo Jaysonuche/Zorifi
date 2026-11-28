@@ -1,0 +1,289 @@
+ZORIFI ULTIMATE — PHASE261 IMPLEMENTATION AND RELIABILITY
+28 November 2026 | Protected development candidate | Master remains PARTIAL
+
+Continues codex/vanessa-openai-production from the tested phase260 runtime
+1e39896438a8d9b5add280294730199bc3099031 and documentation61a3c49c7b7.
+Existing editor state, native tools, source files, local project storage and
+Undo/Redo remain the authority. No second editor store or project migration.
+The owner README edit, previous reports and historical PDF are not overwritten.
+
+This report distinguishes actual local verification from pending protected-hosting
+receipts. A pending result is not a successful test. No
+complete-master, live-provider or physical-device claim is made.
+
+TONAL SINE PITCH VIBRATO — PART8/10/14/16
+Optional pattern.pitchVibrato has exactly four fields:
+ {clock:'hz'|'beats',rate,depthCents,phase}
+Free rate:0.05–20Hz. Beat rate is a period of0.125,0.25,0.5,1,2,4,8 or16
+quarter-note beats at the source pattern BPM. Depth is0–100 cents and phase is
+0≤degrees<360. The edit uses existing music.native.edit with:
+ {edit:{operation:'pitchVibrato',pitchVibrato:{clock:'hz',rate:5,
+   depthCents:25,phase:0}}}
+Reset uses pitchVibrato:null and removes the optional pattern field. Identical
+settings, invalid fields/bounds or resetting an unconfigured source refuse as
+no-ops/errors before rendering. Bass, piano, pluck and pad are supported. Remove
+pitch vibrato before selecting percussion; it is not a drum pitch effect.
+
+The instantaneous frequency ratio is2^(depthCents*sin(source-phase)/1200).
+The engine integrates this ratio using a six-harmonic Fourier/Bessel kernel,
+then applies the resulting time only to oscillator carrier phase. It does not
+multiply frequency by elapsed time discontinuously. The source modulation clock
+continues across notes while each note retains its original carrier reset and
+ADSR/decay timing. No duration-sized phase buffer, added voice or note/source
+tail is created. Original source/MIDI timing, notes, amplitude LFO, envelope,
+clip trims/rate, mixer and effects remain independent.
+
+Absent/zero-depth/reset paths retain the original synthesis arithmetic and exact
+PCM. The original source replacement/parent metadata, worker, composition/track
+locks, crossfade source protection, guarded scope and one Undo/save are reused.
+Collapsed manual controls and reviewed Vanessa use the same native edit.
+Example local commands:
+ Set native vibrato 5 Hz depth 25 cents phase 0 degrees
+ Set native vibrato every 1 beat depth 50 cents
+ Reset native vibrato
+
+Ten focused units pass, including independent numerical integration/PCM checks
+at22050/44100/48000Hz, rate/depth extremes, late source clocks, high MIDI pitches,
+zero/reset/legacy hash parity, percussion/lock/no-op refusal and unchanged budgets.
+The actual browser proof passes manual and outer reviewed Vanessa/cancel/withhold,
+worker PCM/MIDI/source-parent history, locks/crossfade/Stop/stale scopes, saved
+reopen and dark/light320–1440px controls. Source audio remains actually modulated
+in decoded MP4 under both export pitch policies. No paid provider calls or browser
+exceptions occurred. Artifact: artifacts/native-vibrato-browser.json.
+
+This is bounded sine vibrato on four native tonal voices. It is not pitch
+correction, filter modulation, a general modulation matrix, realistic vocal
+generation, a sample/wavetable designer, timbre transfer or full Instrument Lab.
+Only raw Advanced modulation row0386 advances to Partial, not a whole master area.
+
+BOUNDED LINEAR SOURCE-TIME AUDIO — PART8/20/25/38
+ZorifiOfflineMix now accepts covered strictly increasing linear sourceTime keys
+on leaf audio/video recordings. Existing native keyframe controls and reviewed
+motion.edit / animation.keyframe remain the authoring APIs. Key time uses the
+containing composition clock; key values are source positions. Constant-rate
+nested containers provide affine child-to-root clock mapping.
+
+The planner schedules one continuous native AudioBufferSource and one existing
+DSP chain per audible source, with piecewise-constant playbackRate events at the
+linear remap knots. It does not restart EQ/compression/limiter state per segment,
+manually interpolate raw PCM or create a second timeline. Source offsets/end,
+cropped ranges, inherited gain/pan/fades and existing output length remain native.
+
+Limits and refusals:
+-2–65 keys per remapped layer; at least10ms between root-clock knots.
+-Strictly increasing source values and linear outgoing easing; no active temporal
+ Bezier interpolation. Inert Bezier metadata authored by the native linear-key UI
+ does not turn a linear key into a curve.
+-Combined forward rate0.0625–16 and local slope≤16.
+-At most2048 remap rate events per mix; lower custom limits remain enforceable.
+-Existing600s output,64 audible sources,64MiB/source and128MiB total encoded,
+ 256MiB decoded,128MiB stereo output and1,200,000 automation-evaluation budgets.
+-Keys must cover the audible exported window. Holds, backward positions,
+ uncovered/extrapolated windows, nonlinear/speed ramps, simultaneous rate keys or
+ timing expressions and remapped nested containers refuse rather than export
+ incomplete audio. Intentionally muted unsupported clocks remain silent; globally
+ invalid graph metadata still refuses.
+
+Native playbackRate is treated as128-frame k-rate scheduling. Event-grid delay
+and float-rate quantization are bounded conservatively to≤5ms source-clock and
+≤10ms output-clock error at the chosen sample rate. Plans exceeding that budget
+refuse and suggest simpler/aligned keys or48kHz. This is bounded native scheduling,
+not sample-exact audio. Supported PCM sample rates remain16000/22050/44100/48000;
+plan defaults48000 and render passes the actual chosen rate to its checks.
+
+Primary scheduling reference, verified28November2026:
+https://www.w3.org/TR/webaudio-1.1/ (22September2026 Working Draft).
+The specification defines buffer-source rate parameters as k-rate, sampled at
+the start of a render quantum, and the default offline quantum as128frames.
+Its buffer-source duration argument measures source-buffer seconds independently
+of playback rate. These definitions inform the bounded scheduler; the independent
+actual browser/PCM measurements below establish this implementation's behavior.
+
+Review found a plan/render mismatch in sufficiently slow nested clocks:10ms root
+knot spacing can become too dense for the native graph's local derivative check.
+The planner now verifies native source clocks/rates at every remap interval before
+opening a decoder or reading media. The renderer skips duplicate remap checks.
+The workload budget includes twice the remap interval count for validation and
+possible new automation samples. Constant-only workload thresholds stay intact.
+An exact slow-nesting reproduction now refuses during planning, and a boundary
+workload test preserves the old constant plan while rejecting excessive new work.
+
+Previously successful constant-rate segment objects and source.start duration
+arithmetic stay unchanged, including floating-point-sensitive source offsets.
+Nonempty speed presets and rates below the native constant clock's0.05 minimum
+now refuse early rather than reaching a later inconsistent render. Source bytes,
+Stop/account/revision checks and existing cleanup/memory bounds remain. Native
+decode/render may finish after Stop; late results are discarded.
+
+Thirteen new remap and eight legacy focused units pass. They cover exact source
+clocks/crops/nesting, source bounds, invalid keys/holds/precision/event/workload
+limits, one continuous source/chain, constant arithmetic and early native-clock
+refusal. Actual browser proof also passes: manual three-key authoring, two outer
+Vanessa fixture turns, decline/withhold/confirm, Undo/Redo/reopen/Stop and real
+PCM/WAV/MP4 source events. It is not inferred from the unit results.
+
+MANUAL/AUTONOMOUS REMAP REPAIRS AND MEASURED EVIDENCE
+The manual linear-key UI stores unused Bezier metadata. Offline planning now
+permits that inert data for linear easing instead of rejecting a real manually
+authored linear remap; active nonlinear/Bezier interpolation remains unsupported.
+The Motion Scenes target resolver now prioritizes actual timeline state.selected
+before remembered focus. A later timeline selection no longer receives edits
+intended for a stale focused layer; nested focus still works. The actual browser
+selects clips on the timeline and checks nested focus rather than mutating only a
+fixture's selected field. Professional source-time/time-remap/keyframes/retime
+vocabulary routes the exact instruction to its native reviewed tool plan.
+
+The shared native DSP chain has an observed unwarped latency0.01201273s. Marker
+residuals below are measured AFTER that independent baseline, not by pretending
+that the DSP itself has zero latency:
+ manual remap max residual9.1microseconds; directed remap9.2microseconds;
+ cropped export0.491ms; nested export9.8microseconds; downloaded WAV9.3microseconds.
+Real default MP4 raw marker error stays below40ms, duration4.4797s for a4.5s
+request. That real-time MediaRecorder/HTML pitch-preserving path is not sample-
+accurate or pitch-equivalent to native rate-changing PCM. The proof establishes
+actual source-event/timeline behavior within the disclosed recorder window.
+Artifact: artifacts/offline-remap-browser.json; fixtures2,live provider calls0.
+
+No pitch-preserving time stretch, optical flow, arbitrary speed curves or full
+container/submix DSP is introduced. Source-rate changes change WAV pitch.
+
+EXPLICIT VIDEO-EXPORT AUDIO PITCH — PART8/20/25
+Investigation separated two existing policies: video export used HTML-media
+pitch preservation while WAV used rate-changing native buffer playback. This
+phase keeps the old MP4 default and makes the choice explicit instead of silently
+changing existing video output.
+
+The Export video controls offer Audio pitch:
+ preserve — Keep source pitch (legacy default)
+ speed — Pitch follows speed (like the WAV policy)
+The selected value is proSettings.exportAudioPitch. Existing export.prepare can
+prepare audioPitch:'preserve'|'speed'; validation rejects other values. The local
+Vanessa command “Open export with pitch following speed” opens the real control
+with the matching choice. Preparing settings is not exporting a file.
+
+setExportAudioPitch uses preservesPitch or the supported moz/webkit property,
+checks the applied readback and fails clearly for unsupported explicit speed-linked
+requests or refused settings. The UI disables the unavailable speed option when
+the browser cannot expose pitch control. A later saved project/reopened dialog
+retains the selected choice. This changes export policy, not the native source,
+MIDI, timeline duration or live-preview default. Active non-frozen speed-linked
+combined rates must be0.0625–16; unsupported requested rates refuse instead of
+silently clamping the chosen pitch policy.
+
+Three focused export-policy units pass. Actual browser manual/Vanessa preparation,
+responsive controls and saved reopen pass. Two real decoded MP4 outputs from the
+same clip at1.1× demonstrate the policy difference:
+ Keep source pitch: observed upward464.75Hz and downward416.5Hz.
+ Pitch follows speed: observed512.25Hz and457.25Hz.
+ Offline PCM: observed512.5Hz and457.25Hz.
+The source vibrato remains audible in both files; speed-linked output follows
+the WAV pitch policy. This does not certify sample-exact MediaRecorder/AAC timing
+or every browser's pitch-correction quality. WAV remains source-rate/pitch-changing.
+
+EXPORT-WINDOW READABILITY AND DEVICE FIT
+Scoped export colors now follow the actual light/dark workspace appearance.
+The title, field labels, hints, inputs, section headings and footer buttons retain
+readable foreground/background pairs. The audio-pitch choice spans the available
+width on small phones. Actual computed contrast checks pass at least4.5:1 for
+seven key text/control targets in both themes at320/390/768/1440px, with bounds
+and real control-click checks. Screenshots were inspected; these measurements
+cover this export window, not a whole-application accessibility certification.
+Artifact: artifacts/native-vibrato-browser.json and export-pitch-light-320.png.
+
+SHARED VANESSA SCOPE/REQUEST RELIABILITY — PART2/8/10/16/38
+The old shared fingerprint used only Undo/Redo lengths and asset id/type/duration.
+It could accept a different same-length history entry/array or changed File/URL
+while confirming a proposal. The fix appends compact ephemeral observation tokens
+at JSON fingerprint slot6 while preserving original slots0–5 and diagnostic slot2.
+
+WeakMap keys observe stack identity/order/exact immutable native checkpoint strings,
+source-library array/order and source asset fields:
+ id,type,duration,size,url,file,mimeType,builtin,sfxId,audioTrackId.
+Old history, Blob contents and data-URL contents are not serialized into the token
+block. Removed keys can be collected; this is guard metadata, not another editor
+or media store. Current ProjectModel history still serializes once per fingerprint
+as before; no claim of eliminating every large-project capture cost is made.
+
+Bare fingerprint callers now detect these swaps, as do scope/check paths with
+the existing actual state/view/account/session ownership checks. Editing and
+professional requests capture and recheck scope before/after authentication and
+after receiving the reply. All newly throwing capture work is inside try/finally,
+so malformed history/authentication cannot latch requestActive and block later
+messages. Ordinary conversation, sequence-conflict retry, Stop and old-request
+cleanup/new-request ordering retain their existing behavior.
+
+Eleven focused units pass. Actual Edge proof uses15 authenticated local fixture
+turns: outer split confirmations reject changed history arrays/entries, File/URL/
+library sources without edits; an authorization-stage source swap sends no backend
+request; late history/source/session/Stop replies discard; malformed capture recovers
+on the next ordinary question. Real split, visible timeline, Undo/Redo, saved device
+photo reopening and opt-in microphone remain. Live provider calls0; exceptions0.
+Artifacts: artifacts/production-bridge-scope-browser.json and corresponding261logs.
+These checks do not cryptographically attest remote URL contents, replace server
+authorization or make a hostile client trustworthy.
+
+ACTUAL LOCAL VERIFICATION / PENDING RELEASE RECEIPT
+881/881 full-suite unit tests pass,0 failures/skips (844 previous +37 new):
+ 10 native vibrato;11 shared bridge scopes;13 remap;3 export pitch.
+All three actual new-feature browser proofs pass:
+ -Native vibrato: independent source PCM/frequency, actual outer Vanessa/manual
+  controls, two decoded MP4 pitch modes, setting preparation and saved reopen,
+  source/MIDI/history/locks/scopes and dark/light320–1440px.
+ -Shared bridge:15 authenticated local fixture turns, source/history/auth/late
+  response/Stop rejection, busy recovery, real split/Undo/Redo/device-media reopen
+  and microphone remains opt-in.
+ -Offline remap: actual UI three-key authoring and timeline/nested focus, outer
+  Vanessa(two local fixture turns), decline/withhold/confirm, actual PCM/WAV/MP4
+  markers, crop/nesting/Stop/unsupported refusal/Undo/Redo/reopen and small screens.
+No live providers or browser exceptions in these receipts. Authentication and
+model transport fixtures are not production-provider/physical-device certification.
+
+Integrity:484 source syntax files and341 browser/cache asset references pass.
+Critical cached script URLs now match actual HTML versions, including normalized
+./prefixes and worker261; scripts/check-project.cjs guards future DSP/editor
+cache coupling. A prior mismatched cache reference was corrected before release.
+Build:173 web files plus assets,14,608 approved strings from126 sources.
+Offline source/history/build credential-shape scan:0 blockers,0 review findings,
+0 read errors. This cannot verify external key revocation.
+
+All thirteen broader regression suites pass: the51 registered tools, professional
+Stage2 and Vanessa production flows in Chromium/WebKit, native scale lock/harmony/
+ADSR/LFO, asset lineage, crossfades, version recovery, named service-worker caches,
+path morph and animation copy. Stage2/Vanessa use authenticated response fixtures;
+live/replay providers are not invoked. Windows WebKit's documented device-media
+data-URL fallback is retained where IndexedDB Blob persistence is unavailable.
+The protected hosting receipt remains pending; source is not observed deployment.
+
+The inventory retains all40 areas and1,673 raw source rows, exact original source
+text and source metadata/hashes. All area and other raw statuses stay unchanged;
+only Advanced modulation0386 advances Unverified→Partial with bounded evidence.
+Speed ramping0604 and reliable exports0608 remain individually unverified for their
+full specified scope; the new bounded source remaps do not certify broad ramps.
+Overall master remains Partial. Prior reports and the131-page17November PDF remain
+dated historical snapshots; the current ledger records subsequent work and gaps.
+
+RELEASE, COST AND ROLLBACK GATES
+Last verified public production:3.47.0 Beta /
+aa2f9e77a2f92cf8298a3b77e05c40b84c53bbcb. Root must re-observe it before claiming
+the final hosting result. Protected development preview is the authorized workflow;
+public promotion remains gated. Previously exposed-key revocation is externally
+unverified. No exposed credential is used by these changes.
+
+No live OpenAI/Gemini/music/voice provider, realistic singing, licensed paid-model
+or physical-device acceptance follows from local authentication/response fixtures.
+No new paid services/live prices/charges or Firebase upgrade are enabled; Spark
+and the shared£15 monthly AI ceiling remain. Hosted privileged finance/all-provider
+reservation enforcement, approved pricing/licensing, replacement model/project
+access, physical-device/high-resolution and broader DAW/Instrument Lab/AE/master
+acceptance remain incomplete. Draft PR1 must remain unmerged/unpromoted.
+
+Prior tested runtime1e39896438a8d9b5add280294730199bc3099031 remains the rollback
+candidate (documentation61a3c49c7b707c6cfe9b0b694f0a43a607f34371). Back up device
+projects/media before reverting: old native engines cannot edit pitchVibrato,
+old offline mixes reject the new remap subset and old video exporters do not
+offer the explicit pitch choice. Existing rendered native WAVs remain ordinary
+media; older builds cannot guarantee retaining unknown edit metadata on save.
+
+PROTECTED RELEASE RECEIPT — PENDING
+The final commit and protected/public hosting state will be recorded only after
+observation. No production promotion or protection bypass is authorized.

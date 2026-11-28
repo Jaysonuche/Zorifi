@@ -1915,3 +1915,22 @@ main.app-shell[data-view="editor"] { height:100vh;height:100dvh;width:100%;min-w
 }
 
 .project-versions-modal{max-height:calc(100dvh - 28px);overflow:auto;overscroll-behavior:contain}.project-version-list article{min-width:0;background:var(--panel-2);border-color:var(--line)}.project-version-list span{min-width:0;overflow-wrap:anywhere;flex:1}.project-version-list small{color:var(--muted)}.project-version-list button{flex:0 0 auto;background:var(--panel-2);color:var(--text);border-color:var(--line)}
+
+/* Video export keeps one readable palette in both workspace appearances. */
+:root .export-modal{--export-surface:#151a25;--export-card:#202838;--export-input:#101620;--export-ink:#f4f6fc;--export-muted:#bec9dc;--export-border:#49566d;color-scheme:dark}
+:root[data-theme="light"] .export-modal{--export-surface:#f7f8fc;--export-card:#fff;--export-input:#f0f3f8;--export-ink:#202632;--export-muted:#526078;--export-border:#c3cddd;color-scheme:light}
+:root .export-modal,:root[data-theme] .export-modal{color:var(--export-ink)!important;background:var(--export-surface)!important;border-color:var(--export-border)!important}
+:root[data-theme] .export-modal :is(.export-modal-head,.export-modal-scroll,.export-modal-footer,.export-section){color:var(--export-ink)!important;background:var(--export-surface)!important;border-color:var(--export-border)!important}
+:root[data-theme] .export-modal :is(.export-tuning-row,.export-settings-grid>.export-field,.export-audio-pitch-field,fieldset){background:var(--export-card)!important;border-color:var(--export-border)!important}
+:root[data-theme] .export-modal :is(h2,h3,b,legend,label){color:var(--export-ink)!important}
+:root[data-theme] .export-modal :is(p,small){color:var(--export-muted)!important;opacity:1}
+:root[data-theme] .export-modal :is(select,input:not([type="range"]):not([type="hidden"])){color:var(--export-ink)!important;background:var(--export-input)!important;border-color:var(--export-border)!important}
+:root[data-theme] .export-modal .primary-btn{color:#fff!important;background:#7045ed!important;border-color:#815df3!important}
+:root[data-theme] .export-modal .secondary-btn{color:var(--export-ink)!important;background:var(--export-card)!important;border-color:var(--export-border)!important}
+:root[data-theme] .export-modal .export-audio-pitch-field{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px;padding:12px;border:1px solid var(--export-border);border-radius:12px;min-width:0}
+:root[data-theme] .export-modal .export-audio-pitch-field>span{display:grid;gap:5px;min-width:0}
+:root[data-theme] .export-modal .export-audio-pitch-field select{box-sizing:border-box;width:100%;max-width:100%;min-width:0}
+
+:root[data-theme] .export-modal label>span{color:var(--export-ink)!important}
+:root[data-theme] .export-modal .export-modal-head>div>span{color:#bfa1ff!important}
+:root[data-theme="light"] .export-modal .export-modal-head>div>span{color:#6532bd!important}

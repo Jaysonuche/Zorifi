@@ -65,9 +65,9 @@
   if(ZorifiProfessionalEngine.delegatedRequest(text))return true;
   if(/^(?:what|who|why|when|where|how|explain|tell me|do you|can you explain)\b/i.test(text))return false;
   if(global.ZorifiStudioDirector?.classifyIntent(text)?.kind==='music')return false;
-  const requested=isDirectVanessaCommand(text)||/^(?:fix|finish|build|arrange|design|rework|improve|strengthen|match|use|synchronize|sync|grade|polish|tighten)\b/i.test(text)||/^I (?:want|need|would like)\b/i.test(text);
+  const requested=isDirectVanessaCommand(text)||/^(?:fix|finish|build|arrange|design|rework|retime|improve|strengthen|match|use|synchronize|sync|grade|polish|tighten)\b/i.test(text)||/^I (?:want|need|would like)\b/i.test(text);
   const correction=/\b(?:fix (?:this|the|that)|mistake|cheap|this is perfect|that was perfect|looks great|remember (?:this|that|it)(?: style)?|don['’]?t (?:use|edit).+again)\b/i.test(text)||/\b(?:don['’]?t like|dislike|hate)\b/i.test(text)&&/\b(?:opening|edit|pacing|transition|effect|sound|sfx|title|caption|audio|colour|color)\b/i.test(text);
-  return correction||requested&&/\b(?:cinematic|commercial|campaign|montage|fashion|documentary|interview|corporate|music video|stronger|professional edit|another version|style from (?:my |the )?previous project|review|evaluate|effect|transition|animation|grade|grading|colour|color|title|typography|keyframe|captions?|subtitles?|caption style|volume|fade|mask|chroma|pan|opacity|position|scale|motion graphics|parallax|morph|shape|circle|rectangle|ellipse|camera|controller|precompose|geometry)\b/i.test(text);
+  return correction||requested&&/\b(?:cinematic|commercial|campaign|montage|fashion|documentary|interview|corporate|music video|stronger|professional edit|another version|style from (?:my |the )?previous project|review|evaluate|effect|transition|animation|grade|grading|colour|color|title|typography|keyframes?|source[ -]time|time[ -]remap(?:ping)?|retim(?:e|ing)|captions?|subtitles?|caption style|volume|fade|mask|chroma|pan|opacity|position|scale|motion graphics|parallax|morph|shape|circle|rectangle|ellipse|camera|controller|precompose|geometry)\b/i.test(text);
  }
 
  async function turn(message,{force=false}={}){

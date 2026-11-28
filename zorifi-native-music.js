@@ -32,6 +32,31 @@
     const attenuation=lfo.waveform==='triangle'?1-Math.abs(cycle*2-1):.5-.5*Math.cos(Math.PI*2*cycle);
     return Math.max(0,Math.min(1,1-lfo.depth*attenuation));
   }
+  function validatePitchVibrato(vibrato){
+    assert(vibrato&&typeof vibrato==='object'&&!Array.isArray(vibrato)&&Object.keys(vibrato).length===4&&Object.keys(vibrato).every(key=>['clock','rate','depthCents','phase'].includes(key)),'Use exactly clock, rate, depthCents and phase for pitch vibrato.');
+    assert(['hz','beats'].includes(vibrato.clock),'Choose Hz or beat clock for pitch vibrato.');
+    assert(finite(vibrato.rate)&&(vibrato.clock==='hz'?vibrato.rate>=.05&&vibrato.rate<=20:LFO_BEATS.includes(vibrato.rate)),'Use 0.05–20 Hz or a supported beat period for pitch vibrato.');
+    assert(finite(vibrato.depthCents)&&vibrato.depthCents>=0&&vibrato.depthCents<=100,'Pitch vibrato depth must be 0–100 cents.');
+    assert(finite(vibrato.phase)&&vibrato.phase>=0&&vibrato.phase<360,'Pitch vibrato phase must be at least 0 and below 360 degrees.');
+    return vibrato;
+  }
+  // Integrate the actual instantaneous frequency ratio exp(beta*sin(theta)).
+  // Its Fourier/Bessel series converges rapidly for this <=100-cent range.
+  // Six harmonics leave <1e-13 seconds integral error at the supported rates;
+  // carriers therefore stay continuous without frequency*time jumps, a large
+  // phase table or any extra source samples/voices. Unconfigured/zero depth
+  // retains the original arithmetic path byte for byte.
+  function vibratoKernel(vibrato,bpm){
+    const beta=Math.LN2*vibrato.depthCents/1200,half=beta/2,omega=Math.PI*2*(vibrato.clock==='beats'?bpm/(60*vibrato.rate):vibrato.rate),bessel=[];
+    for(let n=0;n<=6;n++){let term=1;for(let k=1;k<=n;k++)term*=half/k;let sum=term;for(let m=1;m<=8;m++){term*=half*half/(m*(m+n));sum+=term;}bessel.push(sum);}
+    return {mean:bessel[0],omega,phase:vibrato.phase*Math.PI/180-Math.PI/2,coefficients:bessel.slice(1).map((value,index)=>2*value/((index+1)*omega))};
+  }
+  function vibratoNote(kernel,start){const angle=kernel.omega*start+kernel.phase;return {kernel,startAngle:angle,initial:kernel.coefficients.map((_,index)=>Math.sin((index+1)*angle))};}
+  function vibratoTime(note,time){
+    const {kernel}=note,angle=note.startAngle+kernel.omega*time,sine=Math.sin(angle),cosine=Math.cos(angle);let sn=sine,cn=cosine,value=kernel.mean*time;
+    for(let i=0;i<kernel.coefficients.length;i++){value+=kernel.coefficients[i]*(sn-note.initial[i]);const next=sn*cosine+cn*sine;cn=cn*cosine-sn*sine;sn=next;}
+    return value;
+  }
   // Custom ADSR occupies the existing note window, including release. If the
   // attack+decay+release times exceed that window, compress all three by the same
   // factor. Sustain fills any remaining time and keeps its requested level.
@@ -69,6 +94,7 @@
     assert(INSTRUMENTS.includes(pattern.instrument),'Choose a supported native instrument.');
     if(pattern.envelope!==undefined)validateEnvelope(pattern.envelope);
     if(pattern.amplitudeLfo!==undefined)validateAmplitudeLfo(pattern.amplitudeLfo);
+    if(pattern.pitchVibrato!==undefined){validatePitchVibrato(pattern.pitchVibrato);assert(pitched(pattern),'Pitch vibrato requires bass, piano, pluck or pad. Remove it before choosing percussion.');}
     if(pattern.scaleLock!==undefined){const lock=pattern.scaleLock;assert(lock&&typeof lock==='object'&&!Array.isArray(lock)&&Object.keys(lock).every(k=>['enabled','key','scaleMode'].includes(k))&&typeof lock.enabled==='boolean'&&NOTES.includes(lock.key)&&Object.hasOwn(SCALES,lock.scaleMode),'Use a supported native scale-lock setting.');}
     assert(finite(pattern.duration)&&pattern.duration>=.05&&pattern.duration<=maxDuration,'Pattern duration exceeds the supported range.');
     assert(finite(pattern.bpm)&&pattern.bpm>=40&&pattern.bpm<=200,'Tempo must be 40–200 BPM.');
@@ -179,6 +205,11 @@
       if(edit.amplitudeLfo===null){assert(p.amplitudeLfo!==undefined,'This pattern already has no amplitude LFO. No edit was applied.');delete p.amplitudeLfo;}
       else{const lfo=validateAmplitudeLfo(edit.amplitudeLfo);assert(!p.amplitudeLfo||['waveform','clock','rate','depth','phase'].some(key=>p.amplitudeLfo[key]!==lfo[key]),'Amplitude LFO already has these settings. No edit was applied.');p.amplitudeLfo=clone(lfo);}
     }
+    else if(edit.operation==='pitchVibrato'){
+      assert(Object.keys(edit).length===2&&Object.keys(edit).every(key=>['operation','pitchVibrato'].includes(key)),'Use a supported native pitch vibrato edit.');
+      if(edit.pitchVibrato===null){assert(p.pitchVibrato!==undefined,'This pattern already has no pitch vibrato. No edit was applied.');delete p.pitchVibrato;}
+      else{assert(pitched(p),'Pitch vibrato requires bass, piano, pluck or pad.');const vibrato=validatePitchVibrato(edit.pitchVibrato);assert(!p.pitchVibrato||['clock','rate','depthCents','phase'].some(key=>p.pitchVibrato[key]!==vibrato[key]),'Pitch vibrato already has these settings. No edit was applied.');p.pitchVibrato=clone(vibrato);}
+    }
     else if(edit.operation==='instrument'){assert(INSTRUMENTS.includes(edit.instrument),'Unknown native instrument.');p.instrument=edit.instrument;}
     else if(edit.operation==='chord'){
       assert(Object.keys(edit).every(key=>['operation','root','quality','inversion','start','duration','velocity','idPrefix'].includes(key)),'Unsupported chord property.');
@@ -252,11 +283,11 @@
   function detachDrumStep(pattern,note){const anchorId=note.drumStep?.anchorId||note.id;for(const hit of pattern.notes)if(hit.drumStep?.anchorId===anchorId)delete hit.drumStep;}
   function renderWav(source,{sampleRate=48000}={}){
     const p=validatePattern(source);assert([22050,44100,48000].includes(sampleRate),'Unsupported synthesis sample rate.');
-    const length=Math.round(p.duration*sampleRate),samples=new Float32Array(length),tau=Math.PI*2;
+    const length=Math.round(p.duration*sampleRate),samples=new Float32Array(length),tau=Math.PI*2,vibrato=p.pitchVibrato?.depthCents>0?vibratoKernel(p.pitchVibrato,p.bpm):null;
     for(const note of p.notes){
-      const from=Math.round(note.start*sampleRate),count=Math.min(length-from,Math.round(note.duration*sampleRate)),frequency=440*2**((note.pitch-69)/12),rng=random(p.seed+':'+note.id),attack=p.instrument==='pad'?.08:.003,release=Math.min(p.instrument==='pad'?.18:.055,note.duration*.4),customEnvelope=p.envelope?noteEnvelope(p.envelope,(count-1)/sampleRate):null;
+      const from=Math.round(note.start*sampleRate),count=Math.min(length-from,Math.round(note.duration*sampleRate)),frequency=440*2**((note.pitch-69)/12),rng=random(p.seed+':'+note.id),attack=p.instrument==='pad'?.08:.003,release=Math.min(p.instrument==='pad'?.18:.055,note.duration*.4),customEnvelope=p.envelope?noteEnvelope(p.envelope,(count-1)/sampleRate):null,pitchPhase=vibrato?vibratoNote(vibrato,from/sampleRate):null;
       for(let i=0;i<count;i++){
-        const t=i/sampleRate,end=(count-i)/sampleRate,envelope=customEnvelope?envelopeLevel(customEnvelope,t,(count-1)/sampleRate):Math.min(1,t/attack,end/release),phase=tau*frequency*t;let wave;
+        const t=i/sampleRate,end=(count-i)/sampleRate,envelope=customEnvelope?envelopeLevel(customEnvelope,t,(count-1)/sampleRate):Math.min(1,t/attack,end/release),phase=pitchPhase?tau*frequency*vibratoTime(pitchPhase,t):tau*frequency*t;let wave;
         if(p.instrument==='kick')wave=Math.sin(tau*(47*t+90*.024*(1-Math.exp(-t/.024))))*Math.exp(-t*17);
         else if(p.instrument==='snare')wave=((rng()*2-1)*.8+Math.sin(tau*180*t)*.2)*Math.exp(-t*25);
         else if(p.instrument==='hat')wave=(rng()*2-1)*Math.exp(-t*65)*.45;

@@ -209,3 +209,37 @@ Final phase260 runtime1e39896438a8d9b5add280294730199bc3099031 pushed; Vercel
 success52qh3w5yn6fYwEsCuRPHuiErwp1p. Includes preserved-curve review correction
 and bridge260.1/cache refresh. Supersedes initial474e2f7 runtime; draft PR1 stays
 unmerged and public/paid gates stay in place. Following commit is docs only.
+
+
+28 NOVEMBER 2026 — PHASE261 IMPLEMENTATION
+Native tonal pitchVibrato now stores optional {clock,rate,depthCents,phase} and uses music.native.edit with local worker/source/history handling. Sine-only bass/piano/pluck/pad, 0.05–20Hz or the existing eight quarter-note beat periods, depth0–100 cents and phase0≤degrees<360. A six-harmonic integrated frequency-ratio kernel changes carrier phase without moving ADSR/decay/note/MIDI timing or allocating a duration-sized phase table. Unconfigured/zero/reset PCM stays exact; percussion requires removing pitch vibrato first. Ten focused units and actual manual/outer Vanessa/PCM/MIDI/Undo/reopen/locks/scopes/dark-light320–1440px and two MP4 pitch-policy proofs pass. No filter/general modulation matrix, pitch correction, sample/wavetable designer, realistic voice or timbre transfer is claimed.
+Shared Vanessa scope/fingerprint now detects same-length immutable native Undo/Redo string swaps and array replacements, source-library order/identity changes, and asset id/type/duration/size/url/file/mimeType/builtin/sfxId/audioTrackId changes. Compact ephemeral WeakMap observation tokens append at fingerprint slot6 while slots0–5 remain compatible; old history and Blob/data-URL contents are not reserialized into those tokens. Editing/professional requests recheck scope before/after authentication and after the reply; all throwing capture work is inside try/finally so malformed history or identity cannot latch requestActive. Eleven units and an actual15-turn authenticated-fixture browser proof pass, including stale source/history/Stop/session refusals, zero-request authorization swaps, busy recovery, real split/Undo/Redo/device-media reopen and opt-in microphone. These are local consistency guards, not a new authorization provider or content-hash/remote-file attestation.
+Offline PCM now supports covered strictly increasing linear sourceTime keys on leaf audio/video recordings through one continuous native BufferSource and DSP chain. Constant-rate nested containers map the containing clocks; source positions, cropped ranges and mixer/fades remain native. Limits:2–65 keys/layer, at least10ms root knot spans, combined forward rates0.0625–16,2048 rate events/mix and existing duration/source/decode/output/automation budgets. Native128-frame k-rate scheduling plus rate quantization is bounded to5ms source/10ms output; excessive precision cases refuse at the chosen sample rate. Plan now checks native graph clock compatibility before source reads and accounts for remap validation/knot work, including slow-nested derivative mismatch rejection. Holds, nonlinear curves, speed ramps, uncovered windows, playback-rate automation and remapped containers remain unsupported. Thirteen new plus eight legacy focused units pass. Actual manual three-key authoring, reviewed outer Vanessa(two local fixture turns), decline/withhold/confirm, native PCM/WAV/MP4 events, cropped/nested clocks, Undo/Redo/reopen/Stop/refusal and320–1440px export controls pass. Baseline DSP latency is measured separately; these are not sample/pitch-equivalent recordings. This is source-rate playback, not sample-exact or pitch-preserving time stretch.
+Video export now exposes Audio pitch with preserve (legacy Keep source pitch default) or speed (Pitch follows speed), stored as proSettings.exportAudioPitch. setExportAudioPitch uses the supported standard/vendor property, verifies readback and refuses unsupported explicit speed-linked requests; WAV always follows source-rate pitch. Manual export controls and validated existing Vanessa export.prepare audioPitch preparation share the setting, including the local request “Open export with pitch following speed”; opening settings is not a completed export. Three focused units and actual manual/outer preparation, responsive controls, saved reopen and two decoded MP4 proofs pass. Observed preserved up/down464.75/416.5Hz versus speed-linked512.25/457.25Hz and offline512.5/457.25Hz at clip rate1.1. These establish pitch-policy behavior, not sample-exact recorder timing or universal device quality.
+881/881 full-suite unit tests pass,0 failures/skips (844+37). All three new
+actual browser proofs pass: vibrato/twoMP4pitchpolicies and saved setting; shared
+Vanessa15 fixture turns; manual3-key remap/outerVanessa2 fixture turns, actual
+PCM/WAV/MP4markers/Undo/reopen/Stop and correct timeline/nested target selection.
+Remap accepts inert Bezier metadata on linear keys; native planning/clock/budget
+coherence is tested.484syntax/341cache refs pass; cacheURLs exactlymatchHTML/
+worker261 and new integrity guards. Build173files/14608strings/126sources.
+Secret-shape scan0 blockers/review/readerrors; external revocation unverified.
+All thirteen broad regression suites pass, including51 tools and Chromium/WebKit
+Stage2/Vanessa flows. Protected deployment receipt remains pending.
+All40 areas/1673 source rows/hashes retained; only0386 advances toPartial.
+No source/README/PDF edits or commits by the documentation task. Protected
+preview remains the release destination; public3.47.0/aa2f9e7 and£15 ceiling,
+Spark/no paid charges, credential/provider/finance/device gates stay unchanged.
+See CONTINUATION-2026-11-28.txt for exact APIs/limits/pending release receipt.
+
+Final local261 integration: Motion Scenes now resolves the actual state.selected layer before its remembered focus fallback, so a later timeline selection edits the intended layer instead of a previously focused recording. Existing nested focus remains supported. Actual timeline clip-selection and nested-focus proof passes. Professional command detection now recognizes source-time/time-remap/keyframe(s)/retime vocabulary and routes the exact reviewed source-time instruction to the real native tool plan rather than a non-editing fallback.
+Explicit speed-linked video-export pitch checks each active non-frozen combined rate against0.0625–16, the supported HTML-media speed range. Unsupported requested rates refuse rather than being silently clamped to a different pitch policy. Legacy preserve-pitch default and unchanged frozen/silent handling remain; WAV source-rate behavior is separate.
+Remap DSP baseline latency0.01201273s measured independently; residuals after
+baseline:manual9.1us,directed9.2us,crop.491ms,nest9.8us,WAV9.3us. Real MP4 raw
+marker errors<40ms,4.4797s duration; notsample/pitch equivalent to PCM.
+
+Final local export-window visual checks: scoped light/dark colors and a full-width
+pitch selector pass actual bounds/control clicks and seven text/control contrast
+targets at least4.5:1 at320/390/768/1440px. This is bounded export-window evidence,
+not whole-app accessibility certification. W3C Web Audio1.1 scheduling reference
+is recorded beside the independent PCM evidence in the phase261 report.
